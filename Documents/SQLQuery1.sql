@@ -234,6 +234,6 @@ CREATE TABLE ActivityLogs (
     ActionDescription NVARCHAR(MAX),
     Timestamp DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (UserID) REFERENCES Users(UserID),
-	FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
     FOREIGN KEY (BranchID) REFERENCES Branches(BranchID)
 );
