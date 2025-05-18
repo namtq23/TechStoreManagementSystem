@@ -284,7 +284,7 @@
     <a href="#">Hoạt động nhân viên</a>
   </div>
 
-<button class="nav-btn" id="cai-dat-btn">Đơn hàng</button>
+<a href="/TSMS/admin-products" target="target" style="text-decoration: none"><button class="nav-btn" id="cai-dat-btn">Đơn hàng</button></a>
 
 <button class="nav-btn" id="bao-cao-btn">Nhân viên</button>
 
