@@ -1,0 +1,378 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" version="27.0.6">
+  <diagram name="Trang-1" id="Jpgdxu5JG6J-21FNDAyR">
+    <mxGraphModel dx="7774" dy="4916" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ETT-VNma52d-deBCtx48-47" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.183;exitY=0.12;exitDx=0;exitDy=0;entryX=1;entryY=1;entryDx=0;entryDy=0;exitPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.012;exitY=0.562;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;exitPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-73" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0;entryDx=0;entryDy=0;exitX=0.344;exitY=0.977;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-10">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1279" y="916" as="sourcePoint" />
+            <mxPoint x="-25.93" y="1676" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1097" y="905" />
+              <mxPoint x="1097" y="1676" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-74" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.262;exitY=0.953;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;exitPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1233" y="1781" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-75" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1287" y="919" />
+              <mxPoint x="1287" y="1886" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-76" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8mTHSQbNLBsnqZy6skTA-1" value="&lt;font style=&quot;font-size: 70px;&quot;&gt;TSMS&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+          <mxGeometry x="1077" y="322" width="597" height="597" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.998;exitY=0.601;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-24" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1376" y="-583" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="374" y="-333" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-14" y="-333" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-4" value="" style="swimlane;startSize=0;" vertex="1" parent="1">
+          <mxGeometry x="-491" y="-582" width="477" height="476" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-60" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=0;exitDy=0;entryX=0.065;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-10" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-493" y="886" />
+              <mxPoint x="928" y="886" />
+              <mxPoint x="928" y="770" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-63" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-10" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-387" y="1096" />
+              <mxPoint x="994" y="1096" />
+              <mxPoint x="994" y="832" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-10" value="&lt;font style=&quot;font-size: 72px;&quot;&gt;Cashier&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="-492.5" y="1676" width="420" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-11" value="&lt;font style=&quot;font-size: 72px;&quot;&gt;Super admin&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="2854" y="447" width="480" height="480" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-12" value="&lt;font style=&quot;font-size: 72px;&quot;&gt;Sale staffs&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="2711" y="1352" width="488" height="488" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-15" value="&lt;font style=&quot;font-size: 71px;&quot;&gt;Shop owner&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="-438" y="-397" width="397" height="97" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.462;entryY=0.011;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-28" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-14" y="-510" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="-14" y="-517" />
+              <mxPoint x="1353" y="-517" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0.427;entryY=0.015;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-33" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1.009;exitY=0.386;exitDx=0;exitDy=0;entryX=0.381;entryY=0.03;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-4" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.328;entryY=0.03;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-37" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.864;exitDx=0;exitDy=0;entryX=0.197;entryY=0.099;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-4" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-14" y="-182" />
+              <mxPoint x="1194" y="-182" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-24" value="&lt;span style=&quot;font-size: 44px;&quot;&gt;Account credential&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="341" y="-612" width="398" height="49" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0.083;entryY=0.612;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-4" target="ETT-VNma52d-deBCtx48-24">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="118" y="-582" />
+              <mxPoint x="118" y="-582" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-28" value="&lt;font style=&quot;font-size: 44px;&quot;&gt;Staff Account Management Request&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="253" y="-549" width="708" height="51" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-33" value="&lt;font style=&quot;font-size: 44px;&quot;&gt;Branch Management Request&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="356" y="-482" width="621" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0.047;entryY=0.671;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-4" target="ETT-VNma52d-deBCtx48-33">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="383" y="-463" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-36" value="&lt;font style=&quot;font-size: 44px;&quot;&gt;Product Catalog Update&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="363" y="-427" width="504" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-37" value="&lt;font style=&quot;font-size: 44px;&quot;&gt;Promotion Setup Request&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="351" y="-360" width="536" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-40" value="&lt;font style=&quot;font-size: 44px;&quot;&gt;Purchase Order&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="376" y="-285" width="333" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-42" value="" style="endArrow=none;html=1;rounded=0;exitX=1.004;exitY=0.688;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-4" target="ETT-VNma52d-deBCtx48-40">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="369" y="-206" as="sourcePoint" />
+            <mxPoint x="419" y="-256" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-43" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.27;entryY=0.053;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-40" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-44" value="&lt;font style=&quot;font-size: 44px;&quot;&gt;Inventory Distribution Request&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="296" y="-217" width="618" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-48" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.059;exitY=0.287;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-46" y="-104" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1112" y="482" />
+              <mxPoint x="-46" y="482" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-49" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.005;exitY=0.418;exitDx=0;exitDy=0;entryX=0.862;entryY=0.999;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-51" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.049;exitY=0.716;exitDx=0;exitDy=0;entryX=0.631;entryY=1.003;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-53" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;System Revenue Report&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="328" y="336" width="548" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-54" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Global Inventory Report&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="264" y="442" width="606" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-55" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;&lt;br&gt;System Log Report&lt;br&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="328" y="520" width="466" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-57" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Promotion List&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="389" y="607" width="320" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-58" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Order List&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="410" y="709" width="240" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-62" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-10">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1133" y="800" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-449" y="1676" />
+              <mxPoint x="-449" y="996" />
+              <mxPoint x="962" y="996" />
+              <mxPoint x="962" y="800" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-64" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.178;entryY=0.891;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.423;exitY=0.007;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-10" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-283" y="1670" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="-315" y="1670" />
+              <mxPoint x="-321" y="1670" />
+              <mxPoint x="-321" y="1218" />
+              <mxPoint x="1035" y="1218" />
+              <mxPoint x="1035" y="854" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-66" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.217;entryY=0.914;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-10" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-283" y="1323" />
+              <mxPoint x="1069" y="1323" />
+              <mxPoint x="1069" y="868" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-67" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Stock Receiving Record&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="-33" y="838" width="552" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-68" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Sales Transaction Record&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="-72.5" y="948" width="620" height="53" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-69" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Product Transfer Request&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="-112" y="1055" width="682" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-71" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Complaint Handling Request&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="-81" y="1165" width="620" height="61" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-72" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Inventory Check Report&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="-22" y="1272" width="536" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-77" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Branch Sales Report&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="351" y="1644" width="490" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-78" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Inventory Status Report&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="332" y="1747" width="512" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-79" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Sales Performance Summary&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="271.5" y="1850" width="695" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-81" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Product List per Branch&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1961" width="524" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-82" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.578;entryY=0.996;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-12" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-83" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=0.653;entryY=0.975;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-12" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-84" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.727;entryY=0.948;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-12" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-86" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Product Search Query&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1830" y="1827" width="549" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-87" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Customer Assignment Record&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1820" y="1685" width="675" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-88" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Support Request&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1923" y="1562" width="376" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-90" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.787;exitY=0.919;exitDx=0;exitDy=0;entryX=0;entryY=0.332;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1543" y="871" />
+              <mxPoint x="1543" y="1514" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-91" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Assigned Customer List&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1824" y="1480" width="561" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-92" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2711" y="1455" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1587" y="1455" />
+              <mxPoint x="2711" y="1455" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-93" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Order History&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1965" y="1422" width="307" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-94" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.921;exitY=0.785;exitDx=0;exitDy=0;entryX=0;entryY=0.048;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1627" y="1375" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-95" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Product Information&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1895" y="1341" width="442" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-97" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=0.897;entryY=0.811;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-11" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2225" y="832" />
+              <mxPoint x="2225" y="832" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-99" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.799;entryY=0.91;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-11" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2854" y="913" />
+              <mxPoint x="1554" y="913" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-100" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Account Credentials&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="2014" y="883" width="462" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-101" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Store update settings&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1796" y="798" width="960" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-103" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.963;exitY=0.707;exitDx=0;exitDy=0;entryX=0.006;entryY=0.619;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-104" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1.004;exitY=0.546;exitDx=0;exitDy=0;entryX=-0.001;entryY=0.423;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-105" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.995;exitY=0.368;exitDx=0;exitDy=0;entryX=-0.005;entryY=0.201;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-106" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Shop Owner Account Status Report&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1827" y="712" width="798" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-107" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;User Login Statistics&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1987" y="612" width="456" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-108" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Active Account Summary&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1975" y="506" width="540" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-109" value="&lt;font style=&quot;font-size: 72px;&quot;&gt;Zalo pay&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="2147" y="-1085" width="467" height="164" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-110" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=0.816;entryY=0.113;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ETT-VNma52d-deBCtx48-109" target="8mTHSQbNLBsnqZy6skTA-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-111" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0.402;entryY=0.99;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-109">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1663" y="409" />
+              <mxPoint x="1663" y="-379" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-112" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Payment status&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1674" y="-995" width="359" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-113" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Payment Request&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="-416" width="409" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-114" value="&lt;font style=&quot;font-size: 72px;&quot;&gt;Google service&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="3017" y="-194" width="461" height="158" as="geometry" />
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-117" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=0.963;exitY=0.278;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.016;entryY=0.935;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="8mTHSQbNLBsnqZy6skTA-1" target="ETT-VNma52d-deBCtx48-114">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="2319" y="194" as="sourcePoint" />
+            <mxPoint x="2369" y="144" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ETT-VNma52d-deBCtx48-118" value="&lt;font style=&quot;font-size: 48px;&quot;&gt;Notification&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;rotation=-20;" vertex="1" parent="1">
+          <mxGeometry x="2221" y="138" width="281" height="108.79" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
