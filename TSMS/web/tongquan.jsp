@@ -1,3 +1,6 @@
+
+
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="vi">
@@ -78,11 +81,14 @@
     .main {
       display: flex;
       padding: 20px;
+       max-width: 1200px;
+         margin: 0 auto;
     }
 
     .container {
       flex: 3;
       padding-right: 20px;
+        max-width: 900px; 
     }
 
     .sidebar-right {
@@ -129,13 +135,16 @@
       text-align: center;
     }
 
-    .chart-container {  
-      background-color: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
+.chart-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  max-width: 100%; /* Đảm bảo không vượt quá khung */
+}
+
+
 
     .flex-box {
       display: flex;
@@ -236,9 +245,46 @@
 
 
 
+.menu {
+  list-style: none;
+  display: flex;
+  background: #007bff;
+}
+
+.menu-item {
+  position: relative;
+  padding: 15px;
+  color: white;
+  cursor: pointer;
+}
+
+.submenu {
+  display: none;
+  position: absolute;
+  background: white;
+  top: 100%;
+  left: 0;
+  list-style: none;
+  padding: 10px 0;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  min-width: 150px;
+  z-index: 100;
+}
+
+.menu-item:hover .submenu {
+  display: block;
+}
+
+.submenu li {
+  padding: 10px 20px;
+  color: black;
+  white-space: nowrap;
+}
+
+
     
   </style>
-</head>
+</head>             
 <body>
 
 <!-- Toolbar -->
@@ -266,33 +312,98 @@
 
 <nav>
     
-<!--      
-  <button class="nav-btn">Tổng quan</button>
-    
 
-  <button onclick="toggleDetails1()" class="nav-btn">Hàng hóa</button>-->
 
- 
-
-  <button  class="nav-btn" id="tong-quan-btn">Tổng quan</button>
+  <button onclick="openLinkInNewTab('http://localhost:9999/TSMS/tongquan.jsp')" class="nav-btn" id="tong-quan-btn">Tổng quan</button>
+  
+  
+  
   
   
 <button onclick="toggleDetails1()" class="nav-btn" id="hang-hoa-btn">Hàng Hóa</button>
   <div id="hang-hoa-panel" class="dropdown-panel">
-    <a href="#">Tổng quan chung</a>
-    <a href="#">Hiệu suất bán hàng</a>
-    <a href="#">Hoạt động nhân viên</a>
+    <a href="#">Danh mục</a>
+    <a href="#">Thiết lập giá</a>
+    <a href="#">Phiếu bảo hành</a>
+    <a href="#">Kiểm kho</a>
   </div>
 
+<<<<<<< Updated upstream:TSMS/web/tongquan.jsp
 <button class="nav-btn" id="cai-dat-btn">Đơn hàng</button>
 
 <button class="nav-btn" id="bao-cao-btn">Nhân viên</button>
 
 <button class="nav-btn" id="cai-dat-btn">Phân tích</button>
+=======
+<!--<div class="nav-btn" id="hang-hoa">
+  Hàng Hóa
+  <div id="hang-hoa-panel" class="dropdown-panel" position: absolute;">
+     Nội dung menu con ở đây 
+    <div>Đặt hàng</div>
+    <div>Hóa đơn</div>
+    <div>Vận đơn</div>
+  </div>
+</div>
+-->
 
 
 
-  
+
+<button onclick="toggleDetails2()" class="nav-btn" id="giao-dich-btn">Giao dịch</button>
+  <div id="giao-dich-panel" class="dropdown-panel">
+    <a href="#">Đặt hàng</a>
+    <a href="#">Hóa đơn</a>
+    <a href="#">Vận đơn</a>
+    <a href="#">Trả hàng</a>
+    <a href="#">Trả hàng</a>
+    <a href="#">Yêu cầu sửa chữa</a>
+    <a href="#">Trả hàng nhập</a>
+    <a href="#">Xuất Hủy</a>    
+  </div>
+<button onclick="toggleDetails3()" class="nav-btn" id="doi-tac-btn">Đối tác</button>
+  <div id="doi-tac-panel" class="dropdown-panel">
+    <a href="#">Khách hàng</a>
+    <a href="#">Nhà cung cấp</a>
+    <a href="#">Đối tác giao hàng</a>
+
+  </div>
+
+
+
+<button onclick="toggleDetails4()" class="nav-btn" id="nhan-vien-btn">Nhân viên</button>
+  <div id="nhan-vien-panel" class="dropdown-panel">
+    <a href="#">Nhân viên</a>
+    <a href="#">Lịch làm việc</a>
+    <a href="#">Chấm công</a>
+    <a href="#">Bảng tính lươn</a>
+    <a href="#">Thiết lập hoa hồng</a>
+    <a href="#">Thiết lập nhân viên</a>
+
+  </div>
+
+
+<button onclick="toggleDetails5()" class="nav-btn" id="so-quy-btn">Sổ quỹ</button>
+
+
+
+<button onclick="toggleDetails6()" class="nav-btn" id="bao-cao-btn">Báo cáo</button>
+
+ <div id="bao-cao-panel" class="dropdown-panel" position: absolute;>
+    <a href="#">Cuối ngày</a>
+    <a href="#">Bán hàng</a>
+    <a href="#">Đặt hàng </a>
+    <a href="#">Hàng hóa</a>
+    <a href="#">Khách hàng</a>
+    <a href="#">Nhà cung cấp</a>
+    <a href="#">Nhân viên</a>
+    <a href="#">Kênh bán hàng</a>
+    <a href="#">Tài chính</a>
+
+  </div>
+>>>>>>> Stashed changes:TSMS/web/WEB-INF/jsp/admin/tongquan.jsp
+
+
+
 </nav>
 
 
@@ -437,12 +548,22 @@
 
 
 <!-- Toggle JS -->
+
+
 <script>
   function toggleDetails() {
     const details = document.getElementById('login-details');
     details.style.display = (details.style.display === 'none') ? 'block' : 'none';
   }
 </script>
+
+<script>
+function openLinkInNewTab(url) {
+  window.open(url, '_blank');
+}
+
+</script>
+
 
 
 <script>
@@ -453,13 +574,115 @@
 
   // Ẩn bảng chọn nếu click ra ngoài
   window.addEventListener('click', function(event) {
-    const panel = document.getElementById('hang-hoa-panel');
-    const button = document.querySelector('hang-hoa-btn');
+    const panel = document.getElementById('hang-hoa');
+    const button = document.querySelector('.nav-btn');
     if (!panel.contains(event.target) && event.target !== button) {
       panel.style.display = 'none';
     }
   });
 </script>
+
+
+
+
+<script>
+  function toggleDetails2() {
+    const panel = document.getElementById('giao-dich-panel');
+    panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+  }
+
+  // Ẩn bảng chọn nếu click ra ngoài
+  window.addEventListener('click', function(event) {
+    const panel = document.getElementById('giao-dich');
+    const button = document.querySelector('.nav-btn');
+    if (!panel.contains(event.target) && event.target !== button) {
+      panel.style.display = 'none';
+    }
+  });
+</script>
+
+<script>
+  function toggleDetails3() {
+    const panel = document.getElementById('doi-tac-panel');
+    panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+  }
+
+  // Ẩn bảng chọn nếu click ra ngoài
+  window.addEventListener('click', function(event) {
+    const panel = document.getElementById('doi-tac');
+    const button = document.querySelector('.nav-btn');
+    if (!panel.contains(event.target) && event.target !== button) {
+      panel.style.display = 'none';
+    }
+  });
+</script>
+
+<script>
+  function toggleDetails4() {
+    const panel = document.getElementById('nhan-vien-panel');
+    panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+  }
+
+  // Ẩn bảng chọn nếu click ra ngoài
+  window.addEventListener('click', function(event) {
+    const panel = document.getElementById('doi-tac');
+    const button = document.querySelector('.nav-btn');
+    if (!panel.contains(event.target) && event.target !== button) {
+      panel.style.display = 'none';
+    }
+  });
+</script>
+
+<script>
+  function toggleDetails5() {
+    const panel = document.getElementById('hang-hoa-panel');
+    panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+  }
+
+  // Ẩn bảng chọn nếu click ra ngoài
+  window.addEventListener('click', function(event) {
+    const panel = document.getElementById('hang-hoa-');
+    const button = document.querySelector('.nav-btn');
+    if (!panel.contains(event.target) && event.target !== button) {
+      panel.style.display = 'none';
+    }
+  });
+</script>
+
+<script>
+  function toggleDetails6() {
+    const panel = document.getElementById('bao-cao-panel');
+    panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+  }
+
+  // Ẩn bảng chọn nếu click ra ngoài
+//  window.addEventListener('click', function(event) {
+//    const panel = document.getElementById('bao-cao-');
+//    const button = document.querySelector('.nav-btn');
+////    if (!panel.contains(event.target) && event.target !== button) {
+////      panel.style.display = 'none';
+////    }
+    
+  window.addEventListener('click', function(event) {
+   // const panel = document.getElementById('bao-cao-panel');
+    const button = document.querySelector('.nav-btn');
+
+    // Nếu bảng đang hiển thị
+    if (panel.style.display === 'block') {
+      // Kiểm tra nếu click KHÔNG nằm trong bảng và KHÔNG phải là nút
+      if (!panel.contains(event.target) && !button.contains(event.target)) {
+        panel.style.display = 'none'; // Ẩn bảng
+      }
+    }
+
+
+
+
+  });
+</script>
+
+
+    
 
 
 <!-- Chart.js scripts -->
