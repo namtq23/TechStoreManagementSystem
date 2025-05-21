@@ -4,6 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <title>KiotViet Dashboard</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -235,66 +238,60 @@
 }
 
 
+    .navbar-custom {
+      background-color: #007bff;
+      border: none;
+      border-radius: 0;
+    }
 
-    
+    .navbar-custom .navbar-nav > li > a {
+      color: #fff;
+      font-weight: 600;
+      padding: 14px 20px;
+    }
+
+    .navbar-custom .navbar-nav > li > a:hover,
+    .navbar-custom .navbar-nav > .open > a {
+      background-color: #0056d2;
+      color: white;
+    }
+
+    /* Dropdown menu */
+    .navbar-custom .dropdown-menu {
+      background-color: #0056d2;
+      border-radius: 10px;
+      border: none;
+      padding: 10px 0;
+      margin-top: 10px;
+      min-width: 200px;
+    }
+
+    .navbar-custom .dropdown-menu > li > a {
+      color: white;
+      padding: 10px 20px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .navbar-custom .dropdown-menu > li > a:hover {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .navbar-custom .dropdown-menu > li > a i {
+      width: 20px;
+      text-align: center;
+    }
+
+
   </style>
 </head>
 <body>
 
 <!-- Toolbar -->
-<div class="top-toolbar">
-  <div class="toolbar-left">
-    <strong>SWP391</strong>
-  </div>
-  <div class="toolbar-right">
-<!--    <button>🚚 Giao hàng</button>
-    <button>💰 Vay vốn</button>
-    <button>💳 Thanh toán</button>
-    <button>💡 Nguồn hàng giá tốt</button>
-    <button>🎨 Chủ đề</button>
-    <button>💬 Hỗ trợ</button>
-    <button>📝 Góp ý</button>
-    <button>🖥️ Giao diện cũ</button>-->
-    <button>🇻🇳 Tiếng Việt</button>
-    <button>📧</button>
-    <button>⚙️</button>
-    <button>👤</button>
-  </div>
-</div>
-
-
-
-<nav>
-    
-<!--      
-  <button class="nav-btn">Tổng quan</button>
-    
-
-  <button onclick="toggleDetails1()" class="nav-btn">Hàng hóa</button>-->
-
- 
-
-  <button  class="nav-btn" id="tong-quan-btn">Tổng quan</button>
-  
-  
-<button onclick="toggleDetails1()" class="nav-btn" id="hang-hoa-btn">Hàng Hóa</button>
-  <div id="hang-hoa-panel" class="dropdown-panel">
-    <a href="#">Tổng quan chung</a>
-    <a href="#">Hiệu suất bán hàng</a>
-    <a href="#">Hoạt động nhân viên</a>
-  </div>
-
-<a href="/TSMS/admin-products" target="target" style="text-decoration: none"><button class="nav-btn" id="cai-dat-btn">Đơn hàng</button></a>
-
-<button class="nav-btn" id="bao-cao-btn">Nhân viên</button>
-
-<button class="nav-btn" id="cai-dat-btn">Phân tích</button>
-
-
-
-  
-</nav>
-
+<jsp:include page="header.jsp" />
 
 <!-- Main Content -->
 <div class="main">

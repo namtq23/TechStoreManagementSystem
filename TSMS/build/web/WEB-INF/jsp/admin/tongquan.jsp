@@ -1,9 +1,13 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
   <title>KiotViet Dashboard</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -235,8 +239,54 @@
 }
 
 
+    .navbar-custom {
+      background-color: #007bff;
+      border: none;
+      border-radius: 0;
+    }
 
-    
+    .navbar-custom .navbar-nav > li > a {
+      color: #fff;
+      font-weight: 600;
+      padding: 14px 20px;
+    }
+
+    .navbar-custom .navbar-nav > li > a:hover,
+    .navbar-custom .navbar-nav > .open > a {
+      background-color: #0056d2;
+      color: white;
+    }
+
+    /* Dropdown menu */
+    .navbar-custom .dropdown-menu {
+      background-color: #0056d2;
+      border-radius: 10px;
+      border: none;
+      padding: 10px 0;
+      margin-top: 10px;
+      min-width: 200px;
+    }
+
+    .navbar-custom .dropdown-menu > li > a {
+      color: white;
+      padding: 10px 20px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .navbar-custom .dropdown-menu > li > a:hover {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .navbar-custom .dropdown-menu > li > a i {
+      width: 20px;
+      text-align: center;
+    }
+
+
   </style>
 </head>
 <body>
@@ -264,36 +314,29 @@
 
 
 
-<nav>
-    
-<!--      
-  <button class="nav-btn">Tổng quan</button>
-    
+<nav class="navbar navbar-custom">
+  <div class="container-fluid">
+    <ul class="nav navbar-nav">
+      <li><a href="#">Tổng quan</a></li>
 
-  <button onclick="toggleDetails1()" class="nav-btn">Hàng hóa</button>-->
-
- 
-
-  <button  class="nav-btn" id="tong-quan-btn">Tổng quan</button>
-  
-  
-<button onclick="toggleDetails1()" class="nav-btn" id="hang-hoa-btn">Hàng Hóa</button>
-  <div id="hang-hoa-panel" class="dropdown-panel">
-    <a href="#">Tổng quan chung</a>
-    <a href="#">Hiệu suất bán hàng</a>
-    <a href="#">Hoạt động nhân viên</a>
+      <!-- Dropdown menu -->
+      <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Hàng hóa <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a href="#">Tổng quan chung</a></li>
+          <li><a href="#">Hiệu suất bán hàng</a></li>
+          <li><a href="#">Hoạt động nhân viên</a></li>
+        </ul>
+      </li>
+       <li><a href="#">Kho hàng</a></li>
+      
+      <li><a href="/TSMS/admin-products" target="target">Đơn hàng</a></li>
+      <li><a href="#">Nhân viên</a></li>
+      <li><a href="#">Phân tích</a></li>
+    </ul>
   </div>
-
-<a href="/TSMS/admin-products" target="target" style="text-decoration: none"><button class="nav-btn" id="cai-dat-btn">Đơn hàng</button></a>
-
-<button class="nav-btn" id="bao-cao-btn">Nhân viên</button>
-
-<button class="nav-btn" id="cai-dat-btn">Phân tích</button>
-
-
-
-  
 </nav>
+
 
 
 <!-- Main Content -->
