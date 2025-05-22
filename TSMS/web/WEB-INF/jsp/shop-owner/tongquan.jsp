@@ -291,7 +291,7 @@
 <body>
 
 <!-- Toolbar -->
-<jsp:include page="header.jsp" />
+<jsp:include page="../common/header.jsp" />
 
 <!-- Main Content -->
 <div class="main">
