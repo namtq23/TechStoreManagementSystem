@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/D:/Study/Clone/TSMS/web/css/header.css</file>
+            <file>file:/D:/Study/Clone/TSMS/web/WEB-INF/jsp/shop-owner/products.jsp</file>
+            <file>file:/D:/Study/Clone/TSMS/web/css/khachhang.css</file>
+            <file>file:/D:/Study/Clone/TSMS/web/WEB-INF/jsp/cashier/salepage.jsp</file>
+            <file>file:/D:/Study/Clone/TSMS/web/WEB-INF/jsp/shop-owner/header.jsp</file>
+            <file>file:/D:/Study/Clone/TSMS/web/WEB-INF/jsp/login/homelogin.jsp</file>
+            <file>file:/D:/Study/Clone/TSMS/web/WEB-INF/jsp/shop-owner/hanghoa.jsp</file>
+            <file>file:/D:/Study/Clone/TSMS/web/css/login.css</file>
+            <file>file:/D:/Study/Clone/TSMS/web/WEB-INF/jsp/shop-owner/khachhang.jsp</file>
+            <file>file:/D:/Study/Clone/TSMS/web/WEB-INF/jsp/shop-owner/tongquan.jsp</file>
+            <file>file:/D:/Study/Clone/TSMS/web/css/hanghoa.css</file>
+            <file>file:/D:/Study/Clone/TSMS/src/java/controller/BrandOwnerKhachHangController.java</file>
+            <file>file:/D:/Study/Clone/TSMS/src/java/controller/BrandOwnerTongQuanController.java</file>
+            <file>file:/D:/Study/Clone/TSMS/src/java/controller/SOProductController.java</file>
+        </group>
+    </open-files>
+</project-private>

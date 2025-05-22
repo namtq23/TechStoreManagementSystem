@@ -15,10 +15,10 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  *
- * @author admin
+ * @author TRIEU NAM
  */
-@WebServlet(name="ControllerServlet", urlPatterns={"/ControllerServlet"})
-public class ControllerServlet extends HttpServlet {
+@WebServlet(name="BrandOwnerTongQuanController", urlPatterns={"/BrandOwnerKhachHang"})
+public class BrandOwnerKhachHangController extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -30,22 +30,7 @@ public class ControllerServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-<<<<<<< Updated upstream:TSMS/src/java/controller/ControllerServlet.java
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ControllerServlet</title>");  
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ControllerServlet at " + request.getContextPath () + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-=======
-        request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/tongquan.jsp").forward(request, response);
->>>>>>> Stashed changes:TSMS/src/java/controller/BrandOwnerTongQuanController.java
+        request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/khachhang.jsp").forward(request, response);
     } 
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
