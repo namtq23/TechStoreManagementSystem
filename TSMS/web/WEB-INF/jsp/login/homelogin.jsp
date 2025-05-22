@@ -4,12 +4,12 @@
     <head>
         <meta charset="UTF-8">
         <title>Đăng Nhập</title>
-        <link rel="stylesheet" type="text/css" href="../css/login.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/login.css">
     </head>
     <body>
         <div class="login-container">
             <div class="login-box">
-                <img src="images/logo.png" alt="KiotViet Logo" class="logo-img">
+                <img src="${pageContext.request.contextPath}/image/logo.png" alt="Logo">
                 <h2 class="logo-text">TSMS</h2>
                 <form action="LoginServlet" method="post">
                     <input type="text" name="username" placeholder="Tên đăng nhập" required>
@@ -30,13 +30,31 @@
         <div class="footer">
             <div class="flag-select-container">
                 ☎ Hỗ trợ: 1900 6522 |
-                <img id="flagIcon" src="image/vn-flag.png" alt="vn-flag" class="flag-icon">
+                <img 
+                    id="flagIcon" 
+                    src="${pageContext.request.contextPath}/image/vn-flag.png" 
+                    alt="Flag" 
+                    class="flag-icon">
+
                 <select id="languageSelect" onchange="changeLanguage()">
                     <option value="vi" data-flag="vn-flag.png">Tiếng Việt</option>
                     <option value="en" data-flag="us-flag.png">English</option>
                 </select>
             </div>
         </div>
+        <script>
+            const contextPath = '${pageContext.request.contextPath}';
+            function changeLanguage() {
+                const select = document.getElementById("languageSelect");
+                const selectedOption = select.options[select.selectedIndex];
+                const flagFile = selectedOption.getAttribute("data-flag");
+                const flagIcon = document.getElementById("flagIcon");
+
+// Cập nhật đường dẫn ảnh lá cờ
+                flagIcon.src = contextPath + '/images/' + flagFile;
+            }
+        </script>
+
 
 
     </body>
