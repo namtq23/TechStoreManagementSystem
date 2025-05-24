@@ -291,7 +291,7 @@
 <body>
 
 <!-- Toolbar -->
-<jsp:include page="header.jsp" />
+<jsp:include page="../common/header.jsp" />
 
 <!-- Main Content -->
 <div class="main">
@@ -345,7 +345,7 @@
       <div class="list-box">
         <h3>Top 10 hàng bán chạy</h3>
         <ul>
-          <li>Micro không dây Zenbos MZ-201 - 50.1 triệu</li>
+          <li>Micro có dây Zenbos MZ-201 - 50.1 triệu</li>
           <li>...</li>
         </ul>
       </div>
