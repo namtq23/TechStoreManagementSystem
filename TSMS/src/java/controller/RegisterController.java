@@ -67,7 +67,7 @@ public class RegisterController extends HttpServlet {
             // 1. Tạo bản sao TemplateDB thành ShopDB_{username}
             DatabaseUtils.createDatabaseWithSchema(newDbName);
 
-            // 2. Thêm thông tin ShopOwner vào AdminDB
+            // 2. Thêm thông tin ShopOwner vào SuperAdminDB
             UserDAO.insertShopOwner(newOwner);
 
             // 3. Chuyển hướng sang trang thành công
