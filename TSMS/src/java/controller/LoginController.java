@@ -92,7 +92,7 @@ public class LoginController extends HttpServlet {
                     resp.sendRedirect(redirectURL); 
                 }
             } else {
-                req.setAttribute("error", "Invalid username or password");
+                req.setAttribute("error", "Invalid account");
                 req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
             }
         } catch (ServletException | IOException | SQLException e) {
