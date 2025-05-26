@@ -9,8 +9,11 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import model.ShopOwner;
 import model.User;
+import model.UserDTO;
 
 /**
  *
@@ -102,7 +105,54 @@ public class UserDAO {
         return user;
     }
 
-    // Helper method to extract User from ResultSet
+    public List<UserDTO> getUsers() throws SQLException {
+        List<UserDTO> users = new ArrayList<>();
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("Driver SQL Server không tìm thấy", e);
+        }
+
+        try (Connection conn = DriverManager.getConnection(ADMIN_DB_URL, USER, PASSWORD)) {
+            String sql = "SELECT ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS AccountID, \n"
+                    + "       RoleID, FullName, Email, Password, ShopName, CreatedAt, IsActive\n"
+                    + "FROM (\n"
+                    + "    SELECT RoleID, FullName, Email, Password, ShopName, CreatedAt, IsActive FROM ShopOwner\n"
+                    + "    UNION ALL\n"
+                    + "    SELECT RoleID, FullName, Email, Password, ShopName, CreatedAt, IsActive FROM Staff\n"
+                    + ") AS Combined";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        UserDTO user = extractUserDTOFromResultSet(rs);
+                        users.add(user);
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+        }
+        return users;
+    }
+    
+    public void updateIsActiveByEmail(String email, int newStatus) throws SQLException {
+        String sql = """
+            UPDATE ShopOwner SET IsActive = ? WHERE Email = ?;
+            UPDATE Staff SET IsActive = ? WHERE Email = ?;
+        """;
+
+        try (Connection conn = DriverManager.getConnection(ADMIN_DB_URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, newStatus);
+            stmt.setString(2, email);
+            stmt.setInt(3, newStatus);
+            stmt.setString(4, email);
+
+            stmt.executeUpdate();
+        }
+    }
+
     private User extractUserFromResultSet(ResultSet rs) throws SQLException {
         User user = new User(
                 rs.getInt("AccountID"),
@@ -113,10 +163,26 @@ public class UserDAO {
         );
         return user;
     }
+    
+    private UserDTO extractUserDTOFromResultSet(ResultSet rs) throws SQLException {
+        UserDTO user = new UserDTO(
+                rs.getString("ShopName"),
+                rs.getInt("IsActive"),
+                rs.getDate("CreatedAt"),
+                rs.getInt("AccountID"),
+                rs.getInt("RoleID"),
+                rs.getString("FullName"),
+                rs.getString("Email"),
+                rs.getString("Password")
+                
+        );
+        return user;
+    }
 
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
-        User u = ud.getUserByEmail("ndpp.work@gmail.com");
-        System.out.println(u);
+//        User u = ud.getUserByEmail("ndpp.work@gmail.com");
+        List<UserDTO> users = ud.getUsers();
+        System.out.println(users);
     }
 }
