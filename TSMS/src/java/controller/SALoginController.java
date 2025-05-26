@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-
 package controller;
 
 import dao.AdminDAO;
@@ -20,28 +19,14 @@ import model.Admin;
  *
  * @author admin
  */
-@WebServlet(name="SALoginController", urlPatterns={"/sa-login"})
+@WebServlet(name = "SALoginController", urlPatterns = {"/sa-login"})
 public class SALoginController extends HttpServlet {
-   
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         if (session != null && session.getAttribute("accountId") != null) {
-            
-            switch ((int)session.getAttribute("accountId")) {
-                    case 1:
-                        resp.sendRedirect(req.getContextPath() + "/BrandOwnerTongQuan"); 
-                        break;
-                    case 2: 
-                        resp.sendRedirect(req.getContextPath() + "/..."); 
-                        break;
-                    case 3: 
-                        resp.sendRedirect(req.getContextPath() + "/..."); 
-                        break;
-                    case 4: 
-                        resp.sendRedirect(req.getContextPath() + "/..."); 
-                        break;
-                }
+            resp.sendRedirect(req.getContextPath() + "/sa-home");
             return;
         }
 
@@ -53,7 +38,6 @@ public class SALoginController extends HttpServlet {
         String username = req.getParameter("username");
         String password = req.getParameter("password");
 
-        
         if (username == null || username.trim().isEmpty()
                 || password == null || password.trim().isEmpty()) {
 
@@ -74,7 +58,7 @@ public class SALoginController extends HttpServlet {
                 System.out.println("Session created: " + session.getId());
                 System.out.println("adminId set: " + session.getAttribute("adminId"));
 
-                session.setMaxInactiveInterval(1000 * 60 * 60 * 24); 
+                session.setMaxInactiveInterval(1000 * 60 * 60 * 24);
 
                 String redirectURL = req.getContextPath() + "/sa-home";
 
@@ -83,7 +67,7 @@ public class SALoginController extends HttpServlet {
                     session.removeAttribute("requestedURL");
                     resp.sendRedirect(requestedURL);
                 } else {
-                    resp.sendRedirect(redirectURL); 
+                    resp.sendRedirect(redirectURL);
                 }
             } else {
                 req.setAttribute("error", "Invalid account");
@@ -94,6 +78,5 @@ public class SALoginController extends HttpServlet {
             req.getRequestDispatcher("/WEB-INF/jsp/admin/sa-login.jsp").forward(req, resp);
         }
     }
-
 
 }
