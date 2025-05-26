@@ -9,7 +9,8 @@ package model;
  * @author admin
  */
 public class User {
-
+    
+    private int accountId;
     private int role;
     private String fullName;
     private String email;
@@ -19,11 +20,20 @@ public class User {
     public User() {
     }
 
-    public User(int role, String fullName, String email, String password) {
+    public User(int accountId, int role, String fullName, String email, String password) {
+        this.accountId = accountId;
         this.role = role;
         this.fullName = fullName;
         this.email = email;
         this.password = password;
+    }
+
+    public int getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(int accountId) {
+        this.accountId = accountId;
     }
 
     public int getRole() {
@@ -60,8 +70,10 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" + "role=" + role + ", fullName=" + fullName + ", email=" + email + ", password=" + password + '}';
+        return "User{" + "accountId=" + accountId + ", role=" + role + ", fullName=" + fullName + ", email=" + email + ", password=" + password + '}';
     }
+
+    
     
     
 
