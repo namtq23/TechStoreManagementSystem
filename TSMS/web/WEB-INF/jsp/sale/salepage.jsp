@@ -16,7 +16,7 @@
     <body>
         <div class="header-bar">
             <div class="top-bar">
-                <span class="logo-small">SWP391</span>
+                <span class="logo-small">TSMS</span>
                 <div class="header-icons">
                     <select class="lang-select">
                         <option>🌐 Tiếng Việt</option>
