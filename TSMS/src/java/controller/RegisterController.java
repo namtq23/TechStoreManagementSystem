@@ -12,8 +12,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import model.ShopOwner;
 import util.DatabaseUtils;
 import util.Validate;
@@ -59,7 +57,7 @@ public class RegisterController extends HttpServlet {
             return;
         }
         
-        if (!Validate.isValidName(email)){
+        if (!Validate.isValidEmail(email)){
             req.setAttribute("error", "Invalid email");
             req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
             return;

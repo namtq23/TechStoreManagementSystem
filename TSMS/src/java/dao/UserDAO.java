@@ -75,13 +75,17 @@ public class UserDAO {
         }
 
         try (Connection conn = DriverManager.getConnection(ADMIN_DB_URL, USER, PASSWORD)) {
-            String sql = "SELECT RoleID, FullName, Email, Password\n"
-                    + "FROM ShopOwner\n"
-                    + "WHERE Email = ?\n"
-                    + "UNION ALL\n"
-                    + "SELECT RoleID, FullName, Email, Password\n"
-                    + "FROM Staff\n"
-                    + "WHERE Email = ?";
+            String sql = "SELECT \n"
+                    + "    ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS AccountID,\n"
+                    + "    RoleID,\n"
+                    + "    FullName,\n"
+                    + "    Email,\n"
+                    + "    Password\n"
+                    + "FROM (\n"
+                    + "    SELECT RoleID, FullName, Email, Password FROM ShopOwner WHERE Email = ?\n"
+                    + "    UNION ALL\n"
+                    + "    SELECT RoleID, FullName, Email, Password FROM Staff WHERE Email = ?\n"
+                    + ") AS Combined";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, email);
                 stmt.setString(2, email);
@@ -101,6 +105,7 @@ public class UserDAO {
     // Helper method to extract User from ResultSet
     private User extractUserFromResultSet(ResultSet rs) throws SQLException {
         User user = new User(
+                rs.getInt("AccountID"),
                 rs.getInt("RoleID"),
                 rs.getString("FullName"),
                 rs.getString("Email"),
@@ -108,7 +113,7 @@ public class UserDAO {
         );
         return user;
     }
-    
+
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
         User u = ud.getUserByEmail("ndpp.work@gmail.com");

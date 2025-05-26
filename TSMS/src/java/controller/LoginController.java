@@ -25,8 +25,22 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        if (session != null && session.getAttribute("userId") != null) {
-            resp.sendRedirect(req.getContextPath() + "/home");
+        if (session != null && session.getAttribute("accountId") != null) {
+            
+            switch ((int)session.getAttribute("accountId")) {
+                    case 1:
+                        resp.sendRedirect(req.getContextPath() + "/BrandOwnerTongQuan"); 
+                        break;
+                    case 2: 
+                        resp.sendRedirect(req.getContextPath() + "/..."); 
+                        break;
+                    case 3: 
+                        resp.sendRedirect(req.getContextPath() + "/..."); 
+                        break;
+                    case 4: 
+                        resp.sendRedirect(req.getContextPath() + "/..."); 
+                        break;
+                }
             return;
         }
 
@@ -55,9 +69,9 @@ public class LoginController extends HttpServlet {
             if (user != null && user.getPassword().equals(password)) {
                 HttpSession session = req.getSession(true);
                 System.out.println(user.getEmail());
-                session.setAttribute("userEmail", user.getEmail());
+                session.setAttribute("accountId", user.getAccountId());
                 System.out.println("Session created: " + session.getId());
-                System.out.println("userEmail set: " + session.getAttribute("userEmail"));
+                System.out.println("accountId set: " + session.getAttribute("accountId"));
 
                 session.setMaxInactiveInterval(1000 * 60 * 60 * 24); 
 
@@ -75,7 +89,11 @@ public class LoginController extends HttpServlet {
                         break;
                     case 3: 
                         session.setAttribute("role", "Sale");
-                        redirectURL = req.getContextPath() + "/...";
+                        redirectURL = req.getContextPath() + "/salepage";
+                        break;
+                    case 4: 
+                        session.setAttribute("role", "Warehouse Manger");
+                        redirectURL = req.getContextPath() + "/quanlykhotong";
                         break;
                     default:
                         session.setAttribute("role", "Invalid");
