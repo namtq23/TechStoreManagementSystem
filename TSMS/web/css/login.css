@@ -94,7 +94,6 @@ input[type="password"]::placeholder {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 10px 0;
     font-size: 14px;
 }
 
@@ -194,6 +193,18 @@ input[type="checkbox"] {
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2);
+}
+
+.error-message{
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.error-message span{
+    margin-left: 5px;
+    padding-bottom: 3px;
+    color: red
 }
 
 /* Responsive Design */

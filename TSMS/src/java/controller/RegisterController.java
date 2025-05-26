@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.ShopOwner;
 import util.DatabaseUtils;
+import util.Validate;
 
 /**
  *
@@ -31,7 +32,7 @@ public class RegisterController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setCharacterEncoding("UTF-8"); // Đảm bảo đọc dữ liệu Unicode
+        req.setCharacterEncoding("UTF-8"); 
 
         String fullName = req.getParameter("fullname");
         String shopName = req.getParameter("shopname");
@@ -51,8 +52,19 @@ public class RegisterController extends HttpServlet {
             req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
             return;
         }
+        
+        if (!Validate.isValidName(fullName)){
+            req.setAttribute("error", "Invalid name");
+            req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
+            return;
+        }
+        
+        if (!Validate.isValidName(email)){
+            req.setAttribute("error", "Invalid email");
+            req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
+            return;
+        }
 
-        // Tạo tên database riêng cho Shop Owner mới
         String newDbName = "Store_" + shopName;
         try {
 
