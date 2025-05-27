@@ -28,7 +28,8 @@
             <div class="sidebar">
                 <button class="sidebar-item active">Quản lý người dùng</button>
                 <button class="sidebar-item">Thông kê người dùng</button>
-                <button class="sidebar-item">Đăng xuất</button>
+                <a href="sa-logout" style="text-decoration: none"><button class="sidebar-item" style="color: red">Đăng xuất</button></a>
+
             </div>
 
             <!-- Main Content -->
@@ -62,7 +63,7 @@
                                 <th 
                                     class="id-column" style="
                                     padding-left: 24px;"
-                                >ID
+                                    >ID
                                 </th>
                                 <th class="name-column">Họ tên</th>
                                 <th class="role-column">Vai trò</th>
@@ -99,7 +100,7 @@
                                 <td class="role-column"><%= roleName %></td>
                                 <td class="shop-column"><%= user.getShopName() %></td>
                                 <td class="status-column">
-                                     <span class="<%= statusClass %>"><%= statusText %></span>
+                                    <span class="<%= statusClass %>"><%= statusText %></span>
                                 </td>
                                 <td class="action-column">
                                     <form action="toggleUserStatus" method="post" style="display:inline;">
