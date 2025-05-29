@@ -13,7 +13,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
+import model.ShopOwner;
 import model.User;
+import util.DBUtil;
+import util.Validate;
 
 /**
  *
@@ -22,25 +25,31 @@ import model.User;
 @WebServlet(name = "LoginController", urlPatterns = {"/login"})
 public class LoginController extends HttpServlet {
 
+    UserDAO userDAO = new UserDAO();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        if (session != null && session.getAttribute("accountId") != null) {
-            
-            switch ((int)session.getAttribute("accountId")) {
-                    case 1:
-                        resp.sendRedirect(req.getContextPath() + "/BrandOwnerTongQuan"); 
-                        break;
-                    case 2: 
-                        resp.sendRedirect(req.getContextPath() + "/..."); 
-                        break;
-                    case 3: 
-                        resp.sendRedirect(req.getContextPath() + "/..."); 
-                        break;
-                    case 4: 
-                        resp.sendRedirect(req.getContextPath() + "/..."); 
-                        break;
-                }
+        int role;
+        if (session != null && (session.getAttribute("staffId") != null || session.getAttribute("ownerId") != null)) {
+            // Nếu đã đăng nhập, chuyển hướng đến trang chính
+            role = Integer.parseInt((String) session.getAttribute("roleId"));
+            switch (role) {
+                case 0:
+                    resp.sendRedirect(req.getContextPath() + "/BrandOwnerTongQuan");
+                    break;
+                case 1:
+                    resp.sendRedirect(req.getContextPath() + "/...");
+                    break;
+                case 2:
+                    resp.sendRedirect(req.getContextPath() + "/...");
+                    break;
+                case 3:
+                    resp.sendRedirect(req.getContextPath() + "/...");
+                    break;
+                default:
+                    throw new AssertionError();
+            }
             return;
         }
 
@@ -49,73 +58,123 @@ public class LoginController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String username = req.getParameter("username");
+        String username = req.getParameter("email");
         String password = req.getParameter("password");
+        String role = req.getParameter("role");
+        String shopName = req.getParameter("shopname");
 
-        
-        if (username == null || username.trim().isEmpty()
-                || password == null || password.trim().isEmpty()) {
+        System.out.println(username + password);
 
-            req.setAttribute("error", "Username and password are required");
+        if (username == null || password == null) {
+            req.setAttribute("error", "Email hoặc mật khẩu không được để trống");
+            req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
+            return;
+        }
+
+        if (role == null || role.trim().isEmpty()) {
+            req.setAttribute("error", "Vai trò không được để trống");
+            req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
+            return;
+        }
+
+        if (shopName == null || shopName.trim().isEmpty()) {
+            req.setAttribute("error", "Tên shop không được để trống");
             req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
             return;
         }
 
         try {
-            UserDAO userDAO = new UserDAO();
+            switch (role) {
+                case "so":
+                    // Xác thực người dùng
+                    ShopOwner shopOwner;
+                    shopOwner = UserDAO.getShopOwnwerByEmail(username);
+                    if (shopOwner != null && shopOwner.getPassword().equals(password)) {
+                        HttpSession session = req.getSession(true);
+                        System.out.println(shopOwner.getEmail());
+                        session.setAttribute("ownerId", shopOwner.getOwnerId());
+                        session.setAttribute("roleId", "0");
+                        System.out.println("Session created: " + session.getId());
+                        System.out.println("ownerId set: " + session.getAttribute("ownerId"));
+                        System.out.println("roleId set: " + session.getAttribute("roleId"));
 
-            // Xác thực người dùng
-            User user = userDAO.getUserByEmail(username);
-            if (user != null && user.getPassword().equals(password)) {
-                HttpSession session = req.getSession(true);
-                System.out.println(user.getEmail());
-                session.setAttribute("accountId", user.getAccountId());
-                System.out.println("Session created: " + session.getId());
-                System.out.println("accountId set: " + session.getAttribute("accountId"));
+                        session.setMaxInactiveInterval(1000 * 60 * 60 * 24);
 
-                session.setMaxInactiveInterval(1000 * 60 * 60 * 24); 
+                        String redirectURL = req.getContextPath() + "/BrandOwnerTongQuan";
 
-                String redirectURL;
-                
-                
-                switch (user.getRole()) {
-                    case 1: 
-                        session.setAttribute("role", "Shop Owner");
-                        redirectURL = req.getContextPath() + "/BrandOwnerTongQuan";
-                        break;
-                    case 2: 
-                        session.setAttribute("role", "Branch Manager");
-                        redirectURL = req.getContextPath() + "/...";
-                        break;
-                    case 3: 
-                        session.setAttribute("role", "Sale");
-                        redirectURL = req.getContextPath() + "/salepage";
-                        break;
-                    case 4: 
-                        session.setAttribute("role", "Warehouse Manger");
-                        redirectURL = req.getContextPath() + "/quanlykhotong";
-                        break;
-                    default:
-                        session.setAttribute("role", "Invalid");
-                        req.setAttribute("error", "Invalid role. Please contact administrator.");
+                        String requestedURL = (String) session.getAttribute("requestedURL");
+                        if (requestedURL != null) {
+                            session.removeAttribute("requestedURL");
+                            resp.sendRedirect(requestedURL);
+                        } else {
+                            DBUtil.getConnectionTo(shopOwner.getDatabaseName());
+                            resp.sendRedirect(redirectURL);
+                        }
+                    } else {
+                        req.setAttribute("error", "Tài khoản không hợp lệ");
                         req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
-                        return;
-                }
+                    }
+                    break;
+                case "staff":
+                    String dbName = Validate.shopNameConverter(shopName);
+                    User user = userDAO.getUserByEmail(username, dbName);
+                    if (user != null && user.getPassword().equals(password)) {
+                        HttpSession session = req.getSession(true);
+                        System.out.println(user.getEmail());
+                        session.setAttribute("staffId", user.getUserID());
+                        session.setAttribute("roleId", user.getRoleId());
+                        System.out.println("Session created: " + session.getId());
+                        System.out.println("staffId set: " + session.getAttribute("staffId"));
+                        System.out.println("roleId set: " + session.getAttribute("roleId"));
 
-                String requestedURL = (String) session.getAttribute("requestedURL");
-                if (requestedURL != null) {
-                    session.removeAttribute("requestedURL");
-                    resp.sendRedirect(requestedURL);
-                } else {
-                    resp.sendRedirect(redirectURL); 
-                }
-            } else {
-                req.setAttribute("error", "Invalid account");
-                req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
+                        session.setMaxInactiveInterval(1000 * 60 * 60 * 24);
+
+                        String redirectURL;
+
+                        switch (user.getRoleId()) {
+                            case 1:
+                                session.setAttribute("role", "Branch Manager");
+                                redirectURL = req.getContextPath() + "/...";
+                                break;
+                            case 2:
+                                session.setAttribute("role", "Sale");
+                                redirectURL = req.getContextPath() + "/salepage";
+                                break;
+                            case 3:
+                                session.setAttribute("role", "Warehouse Manger");
+                                redirectURL = req.getContextPath() + "/quanlykhotong";
+                                break;
+                            default:
+                                session.setAttribute("role", "Invalid");
+                                req.setAttribute("error", "Invalid role. Please contact administrator.");
+                                req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
+                                return;
+                        }
+
+                        String requestedURL = (String) session.getAttribute("requestedURL");
+                        if (requestedURL != null) {
+                            session.removeAttribute("requestedURL");
+                            resp.sendRedirect(requestedURL);
+                        } else {
+                            DBUtil.getConnectionTo(dbName);
+                            resp.sendRedirect(redirectURL);
+                        }
+                    } else {
+                        req.setAttribute("error", "Tài khoản không hợp lệ");
+                        req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
+                    }
+                    break;
+                default:
+                    throw new AssertionError();
             }
+
         } catch (ServletException | IOException | SQLException e) {
-            req.setAttribute("error", "An error occurred: " + e.getMessage());
-            req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
+            if (!resp.isCommitted()) {
+                req.setAttribute("error", "An error occurred: " + e.getMessage());
+                req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
+            } else {
+                e.printStackTrace();
+            }
         }
     }
 

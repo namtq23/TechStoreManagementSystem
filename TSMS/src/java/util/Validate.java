@@ -8,8 +8,6 @@ package util;
  *
  * @author admin
  */
-
-
 public class Validate {
 
     public static boolean isValidName(String name) {
@@ -47,4 +45,36 @@ public class Validate {
         return password != null && password.length() >= 8;
     }
 
+    public static String shopNameConverter(String input) {
+        // Kiểm tra chuỗi rỗng hoặc null
+        if (input == null || input.trim().isEmpty()) {
+            return "DTB_";
+        }
+
+        // Loại bỏ dấu tiếng Việt và chuyển thành chữ thường
+        String normalized = java.text.Normalizer.normalize(input, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase();
+
+        // Tách chuỗi thành mảng các từ
+        String[] words = normalized.split("\\s+");
+
+        // Chuyển đổi mỗi từ: viết hoa chữ cái đầu
+        StringBuilder result = new StringBuilder("DTB_");
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                result.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1));
+            }
+        }
+
+        return result.toString();
+    }
+
+    public static void main(String[] args) {
+        // Test hàm với đầu vào mới
+        String input = "hanh tinh xanh";
+        System.out.println("Input: " + input + " -> Output: " + shopNameConverter(input));
+    }
+    
 }
