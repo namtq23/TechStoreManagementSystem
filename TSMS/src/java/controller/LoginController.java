@@ -33,10 +33,10 @@ public class LoginController extends HttpServlet {
         int role;
         if (session != null && (session.getAttribute("staffId") != null || session.getAttribute("ownerId") != null)) {
             // Nếu đã đăng nhập, chuyển hướng đến trang chính
-            role = (int) session.getAttribute("roleId");
+            role = Integer.parseInt((String) session.getAttribute("roleId"));
             switch (role) {
                 case 0:
-                    resp.sendRedirect(req.getContextPath() + "/...");
+                    resp.sendRedirect(req.getContextPath() + "/BrandOwnerTongQuan");
                     break;
                 case 1:
                     resp.sendRedirect(req.getContextPath() + "/...");
@@ -50,6 +50,7 @@ public class LoginController extends HttpServlet {
                 default:
                     throw new AssertionError();
             }
+            return;
         }
 
         req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
