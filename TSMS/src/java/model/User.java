@@ -9,39 +9,47 @@ package model;
  * @author admin
  */
 public class User {
-    
-    private int accountId;
-    private int role;
+
+    private int userID;
+    private String password;
     private String fullName;
     private String email;
-    private String password;
+    private String phone;
+    private String branchId;
+    private String warehouseId;
+    private int roleId;
+    private int isActive;
 
     // Constructors
     public User() {
     }
 
-    public User(int accountId, int role, String fullName, String email, String password) {
-        this.accountId = accountId;
-        this.role = role;
+    public User(int userID, String password, String fullName, String email, String phone, String branchId, String warehouseId, int roleId, int isActive) {
+        this.userID = userID;
+        this.password = password;
         this.fullName = fullName;
         this.email = email;
+        this.phone = phone;
+        this.branchId = branchId;
+        this.warehouseId = warehouseId;
+        this.roleId = roleId;
+        this.isActive = isActive;
+    }
+
+    public int getUserID() {
+        return userID;
+    }
+
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
         this.password = password;
-    }
-
-    public int getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(int accountId) {
-        this.accountId = accountId;
-    }
-
-    public int getRole() {
-        return role;
-    }
-
-    public void setRole(int role) {
-        this.role = role;
     }
 
     public String getFullName() {
@@ -60,21 +68,51 @@ public class User {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getBranchId() {
+        return branchId;
+    }
+
+    public void setBranchId(String branchId) {
+        this.branchId = branchId;
+    }
+
+    public String getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(String warehouseId) {
+        this.warehouseId = warehouseId;
+    }
+
+    public int getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(int roleId) {
+        this.roleId = roleId;
+    }
+
+    public int getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(int isActive) {
+        this.isActive = isActive;
     }
 
     @Override
     public String toString() {
-        return "User{" + "accountId=" + accountId + ", role=" + role + ", fullName=" + fullName + ", email=" + email + ", password=" + password + '}';
+        return "User{" + "userID=" + userID + ", password=" + password + ", fullName=" + fullName + ", email=" + email + ", phone=" + phone + ", branchId=" + branchId + ", warehouseId=" + warehouseId + ", roleId=" + roleId + ", isActive=" + isActive + '}';
     }
 
-    
-    
     
 
 }

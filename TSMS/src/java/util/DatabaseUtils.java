@@ -8,42 +8,21 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DatabaseUtils {
-    private static final String SERVER = "ND2P"; // tên máy
-    private static final String INSTANCE = "PHUONG"; // tên instance
-    private static final String PORT = "1433";
-    private static final String USER = "sa"; 
-    private static final String PASSWORD = "123"; // đổi mật khẩu
-    private static final String SCHEMA_PATH = "D:/FPT/2025.SU5/SWP391/template.sql"; // Đường dẫn đến file schema
+    private static final String SCHEMA_PATH = "D:/FPT/2025.SU5/SWP391/template.sql";
 
     public static void createDatabaseWithSchema(String newDbName) throws SQLException {
-        try {
-            // Load driver nếu cần
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("SQL Server JDBC Driver not found", e);
-        }
-
-        // Kết nối tới SQL Server (không chọn database cụ thể)
-        String url = "jdbc:sqlserver://" + SERVER + ":" + PORT +
-                     ";instanceName=" + INSTANCE + ";encrypt=false";
-
-        try (Connection conn = DriverManager.getConnection(url, USER, PASSWORD);
+        try (Connection conn = DBUtil.getServerConnection();
              Statement stmt = conn.createStatement()) {
 
-            // 1. Tạo database mới rỗng
             stmt.executeUpdate("CREATE DATABASE " + newDbName);
             System.out.println("Database created: " + newDbName);
         }
 
-        // 2. Nạp schema vào database vừa tạo
         loadSchemaIntoDatabase(newDbName);
     }
 
     private static void loadSchemaIntoDatabase(String dbName) throws SQLException {
-        String dbUrl = "jdbc:sqlserver://" + SERVER + ":" + PORT +
-                       ";instanceName=" + INSTANCE + ";databaseName=" + dbName + ";encrypt=false";
-
-        try (Connection conn = DriverManager.getConnection(dbUrl, USER, PASSWORD);
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
              Statement stmt = conn.createStatement()) {
 
             String sql = Files.readString(Paths.get(SCHEMA_PATH));
@@ -59,3 +38,4 @@ public class DatabaseUtils {
         }
     }
 }
+

@@ -17,22 +17,25 @@ public class ShopOwner {
     private String shopName;
     private String databaseName;
     private String email;
+    private String identificationID;
+    private String gender;      
+    private String address;
 
+    public ShopOwner() {
+    }
 
-    // Constructors
-    public ShopOwner() {}
-
-    public ShopOwner(int ownerId, String password, String fullName,
-                     String shopName, String databaseName, String email) {
+    public ShopOwner(int ownerId, String password, String fullName, String shopName, String databaseName, String email, String identificationID, String gender, String address) {
         this.ownerId = ownerId;
         this.password = password;
         this.fullName = fullName;
         this.shopName = shopName;
         this.databaseName = databaseName;
         this.email = email;
+        this.identificationID = identificationID;
+        this.gender = gender;
+        this.address = address;
     }
 
-    // Getters and Setters
     public int getOwnerId() {
         return ownerId;
     }
@@ -81,16 +84,35 @@ public class ShopOwner {
         this.email = email;
     }
 
+    public String getIdentificationID() {
+        return identificationID;
+    }
+
+    public void setIdentificationID(String identificationID) {
+        this.identificationID = identificationID;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     @Override
     public String toString() {
-        return "ShopOwner{" +
-                "ownerId=" + ownerId +
-                ", password='" + password + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", shopName='" + shopName + '\'' +
-                ", databaseName='" + databaseName + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+        return "ShopOwner{" + "ownerId=" + ownerId + ", password=" + password + ", fullName=" + fullName + ", shopName=" + shopName + ", databaseName=" + databaseName + ", email=" + email + ", identificationID=" + identificationID + ", gender=" + gender + ", address=" + address + '}';
     }
+
+
+    
 }

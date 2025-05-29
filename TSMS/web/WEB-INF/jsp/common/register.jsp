@@ -4,38 +4,109 @@
     Author     : admin
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
 <!DOCTYPE html>
-<html>
+<html lang="vi">
     <head>
         <meta charset="UTF-8">
-        <title>Đăng Ký</title>
-        <link rel="stylesheet" type="text/css" href="css/register.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TSMS - Đăng ký Cửa Hàng</title>
+        <link rel="stylesheet" href="css/register.css"/>
     </head>
     <body>
-        <div class="register-container">
-            <div class="register-box">
-                <h2 class="logo-text">TSMS</h2>
-                <p class="subtitle">Tạo Cửa Hàng</p>
-                <form action="register" method="post">
-                    <div class="form-row">
-                        <input type="text" name="fullname" placeholder="Họ và tên" required>
+        <!-- Left Column - Welcome Section -->
+        <div class="welcome-section slide-in-left">
+            <div class="welcome-content">
+                <h1 class="welcome-title">Chào mừng đến với TSMS!</h1>
+                <p class="welcome-description">
+                    Đăng ký để truy cập vào hệ thống quản lý bán hàng thông minh TSMS và tối ưu hóa kinh doanh của bạn.
+                </p>
+
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <span class="icon-trending"></span>
+                        </div>
+                        <div class="feature-content">
+                            <h3>Báo cáo thời gian thực</h3>
+                            <p>Theo dõi doanh thu và hiệu suất kinh doanh mọi lúc mọi nơi với dashboard trực quan</p>
+                        </div>
                     </div>
 
-                    <div class="form-row">
-                        <input type="text" name="shopname" placeholder="Tên cửa hàng" required>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <span class="icon-smartphone"></span>
+                        </div>
+                        <div class="feature-content">
+                            <h3>Truy cập đa nền tảng</h3>
+                            <p>Sử dụng TSMS trên máy tính, tablet và điện thoại di động một cách liền mạch</p>
+                        </div>
                     </div>
 
-                    <div class="form-row">
-                        <input type="email" name="email" placeholder="Email" required>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <span class="icon-shield"></span>
+                        </div>
+                        <div class="feature-content">
+                            <h3>Bảo mật tuyệt đối</h3>
+                            <p>Dữ liệu của bạn được bảo vệ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Registration Form -->
+        <div class="form-section">
+            <div class="form-container fade-in">
+                <!-- Header -->
+                <div class="form-header">
+                    <div class="logo">
+                        <a href="starting" class="logo">
+                            <div class="logo-icon">T</div>
+                            <span class="logo-text">TSMS</span>
+                        </a>
+                    </div>
+                    <h2 class="form-title">Đăng ký Cửa Hàng</h2>
+                    <p class="form-subtitle">Nhập thông tin để tạo tài khoản mới cho cửa hàng của bạn</p>
+                </div>
+
+                <!-- Registration Form -->
+                <form class="form" action="register" method="post" id="registerForm">
+                    <div class="form-group">
+                        <label for="fullName" class="form-label">Họ và tên *</label>
+                        <input type="text" id="fullName" name="fullName" class="form-input" placeholder="Nhập họ và tên đầy đủ" required>
                     </div>
 
-                    <div class="form-row">
-                        <input type="password" name="password" placeholder="Mật khẩu" required>
+                    <div class="form-group">
+                        <label for="storeName" class="form-label">Tên cửa hàng *</label>
+                        <input type="text" id="storeName" name="shopName" class="form-input" placeholder="Nhập tên cửa hàng của bạn" required>
                     </div>
 
-                    <div class="form-row">
-                        <input type="password" name="confirmpassword" placeholder="Xác nhận mật khẩu" required>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email *</label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="Nhập địa chỉ email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Mật khẩu *</label>
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">Xác nhận mật khẩu *</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" placeholder="Nhập lại mật khẩu" required>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms" name="terms" class="checkbox" required>
+                        <label for="terms" class="checkbox-label">
+                            Tôi đồng ý với 
+                            <a href="#" onclick="return false;">Điều khoản dịch vụ</a> 
+                            và 
+                            <a href="#" onclick="return false;">Chính sách bảo mật</a> của TSMS
+                        </label>
                     </div>
 
                     <% if(request.getAttribute("error") != null) { %>
@@ -44,57 +115,45 @@
                         <span><%= request.getAttribute("error") %></span>
                     </div>
                     <% } %>
-
-                    <div class="checkbox-container">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="agree" required>
-                            <span class="checkmark"></span>
-                            Tôi đồng ý với <a href="#" class="terms-link">Điều khoản dịch vụ</a> và <a href="#" class="terms-link">Chính sách bảo mật</a>
-                        </label>
-                    </div>
-
-                    <div class="buttons">
-                        <button type="submit" class="btn-register">Tạo Cửa Hàng</button>
-                        <div class="login-link">
-                            Đã có cửa hàng? <a href="login">Đăng nhập</a>
-                        </div>
-                    </div>
+                    
+                    <button type="submit" class="submit-button" id="submitBtn">
+                        Tạo Cửa Hàng
+                    </button>
                 </form>
+
+                <!-- Login Link -->
+                <div class="login-link">
+                    <p>Đã có tài khoản? <a href="login">Đăng nhập ngay</a></p>
+                </div>
             </div>
         </div>
 
         <script>
-            // Password confirmation validation
-            document.querySelector('form').addEventListener('submit', function (e) {
-                const password = document.querySelector('input[name="password"]').value;
-                const confirmPassword = document.querySelector('input[name="confirmpassword"]').value;
-
-                if (password !== confirmPassword) {
-                    e.preventDefault();
-                    alert('Passwords do not match!');
-                    return false;
+            document.getElementById('confirmPassword').addEventListener('input', function () {
+                const password = document.getElementById('password').value;
+                if (this.value && this.value !== password) {
+                    showError(this, 'Mật khẩu xác nhận không khớp');
+                } else {
+                    this.classList.remove('error');
+                    this.closest('.form-group').classList.remove('show-error');
                 }
             });
 
-            // Real-time password match indicator
-            const passwordInput = document.querySelector('input[name="password"]');
-            const confirmPasswordInput = document.querySelector('input[name="confirmpassword"]');
+            // Animation on load
+            document.addEventListener('DOMContentLoaded', function () {
+                // Add staggered animation to form elements
+                const formElements = document.querySelectorAll('.form-group, .checkbox-group, .submit-button, .login-link');
+                formElements.forEach((element, index) => {
+                    element.style.opacity = '0';
+                    element.style.transform = 'translateY(20px)';
+                    element.style.transition = 'all 0.3s ease';
 
-            function checkPasswordMatch() {
-                if (confirmPasswordInput.value === '') {
-                    confirmPasswordInput.style.borderColor = '#e1e8ed';
-                    return;
-                }
-
-                if (passwordInput.value === confirmPasswordInput.value) {
-                    confirmPasswordInput.style.borderColor = '#28a745';
-                } else {
-                    confirmPasswordInput.style.borderColor = '#dc3545';
-                }
-            }
-
-            confirmPasswordInput.addEventListener('input', checkPasswordMatch);
-            passwordInput.addEventListener('input', checkPasswordMatch);
+                    setTimeout(() => {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                    }, 100 + index * 100);
+                });
+            });
         </script>
     </body>
 </html>
