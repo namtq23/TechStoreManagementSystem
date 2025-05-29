@@ -9,11 +9,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import model.ShopOwner;
 import java.util.List;
 import model.ShopOwner;
 import model.User;
 import util.DBUtil;
+
 /**
  *
  * @author admin
@@ -106,6 +106,7 @@ public class UserDAO {
         return user;
     }
 
+
     public List<User> getUsers() throws SQLException {
         List<User> users = new ArrayList<>();
 
@@ -131,14 +132,13 @@ public class UserDAO {
     }
 
 
+
     public void updateIsActiveByEmail(String email, int newStatus) throws SQLException {
         String sql = """
             UPDATE ShopOwner SET IsActive = ? WHERE Email = ?;
             UPDATE Staff SET IsActive = ? WHERE Email = ?;
         """;
-
         try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setInt(1, newStatus);
             stmt.setString(2, email);
             stmt.setInt(3, newStatus);
@@ -147,6 +147,7 @@ public class UserDAO {
             stmt.executeUpdate();
         }
     }
+
 
     private static ShopOwner extractShopOwnerFromResultSet(ResultSet rs) throws SQLException {
         ShopOwner shopOwner = new ShopOwner(
@@ -178,6 +179,8 @@ public class UserDAO {
 
         return user;
     }
+    
+
 
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
