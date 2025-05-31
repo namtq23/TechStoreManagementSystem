@@ -35,16 +35,16 @@ public class LoginController extends HttpServlet {
             // Nếu đã đăng nhập, chuyển hướng đến trang chính
             role = Integer.parseInt((String) session.getAttribute("roleId"));
             switch (role) {
-                case 0:
+                case 0: 
                     resp.sendRedirect(req.getContextPath() + "/BrandOwnerTongQuan");
                     break;
-                case 1:
+                case 1: 
                     resp.sendRedirect(req.getContextPath() + "/...");
                     break;
-                case 2:
+                case 2: 
                     resp.sendRedirect(req.getContextPath() + "/...");
                     break;
-                case 3:
+                case 3: 
                     resp.sendRedirect(req.getContextPath() + "/...");
                     break;
                 default:
@@ -101,9 +101,11 @@ public class LoginController extends HttpServlet {
                         System.out.println(shopOwner.getEmail());
                         session.setAttribute("ownerId", shopOwner.getOwnerId());
                         session.setAttribute("roleId", "0");
+                        session.setAttribute("dbName", dbName);
                         System.out.println("Session created: " + session.getId());
                         System.out.println("ownerId set: " + session.getAttribute("ownerId"));
                         System.out.println("roleId set: " + session.getAttribute("roleId"));
+                        System.out.println("dbName set: " + session.getAttribute("dbName"));
 
                         session.setMaxInactiveInterval(1000 * 60 * 60 * 24);
 
@@ -130,14 +132,16 @@ public class LoginController extends HttpServlet {
                         System.out.println(user.getEmail());
                         session.setAttribute("staffId", user.getUserID());
                         session.setAttribute("roleId", user.getRoleId());
+                        session.setAttribute("dbName",dbNameStaff);
                         System.out.println("Session created: " + session.getId());
                         System.out.println("staffId set: " + session.getAttribute("staffId"));
                         System.out.println("roleId set: " + session.getAttribute("roleId"));
+                        System.out.println("dbName set: " + session.getAttribute("dbName"));
 
                         session.setMaxInactiveInterval(1000 * 60 * 60 * 24);
 
                         String redirectURL;
-
+                        
                         switch (user.getRoleId()) {
                             case 1:
                                 session.setAttribute("role", "Branch Manager");

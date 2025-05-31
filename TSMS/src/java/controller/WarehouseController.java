@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author phungpdhe189026
  */
-@WebServlet(name="Quanlykhotong", urlPatterns={"/quanlykhotong"})
+@WebServlet(name="Quanlykhotong", urlPatterns={"/quanlykhotong"}) //wh-products
 public class WarehouseController extends HttpServlet {
    
     /** 
