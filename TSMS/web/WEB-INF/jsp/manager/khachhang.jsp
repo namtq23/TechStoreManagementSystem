@@ -12,9 +12,6 @@
         Author     : Kawaii
     --%>
     <html>
-
-
-
     <head>
         <title>Quản lý khách hàng</title>
 
@@ -22,91 +19,201 @@
     
     
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>JSP Page</title><!--
--->
-<!--   Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  
+  
+  
+  <style>
+      
+/* Header Styles */
+.headertop {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
 
-<!--   Font Awesome 
---> 
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2196F3;
+    font-weight: bold;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+}
+
+.nav-item {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* Form Styles */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+
+.form-group label.required::after {
+    content: " *";
+    color: #dc2626;
+}
+
+.form-control.full-width {
+    grid-column: 1 / -1;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .main-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .nav-menu {
+        display: none;
+    }
+}
 
 
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<!--   Custom CSS -->
-  <link rel="stylesheet" href="css/header.css">
-</head><!--
---><body>
-
-
-
-<!--   Top toolbar -->
-  <div class=" top-toolbar d-flex justify-content-between align-items-center px-4 py-2 bg-dark text-white">
-    <div class="toolbar-left">
-      <strong>SWP391</strong>
-    </div>
-    <div class="toolbar-right">
-      <button class="btn btn-sm btn-outline-light me-2">🇻🇳 Tiếng Việt</button>
-      <button class="btn btn-sm btn-outline-light me-2">📧</button>
-      <button class="btn btn-sm btn-outline-light me-2">⚙️</button>
-      <button class="btn btn-sm btn-outline-light">👤</button>
-    </div>
-  </div>
-<!--
-   Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid px-4">
-<!--       Logo -->
-      <a class="navbar-brand fw-bold" href="#"><i class="fas fa-store"></i> Tên Shop</a>
-
-<!--       Toggle button for mobile -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-<!--
-       Navbar links -->
-      <div class="collapse navbar-collapse" id="mainNavbar">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#">Tổng quan</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" id="hangHoaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Hàng hóa
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="hangHoaDropdown">
-              <li><a class="dropdown-item" href="#">Tổng quan chung</a></li>
-              <li><a class="dropdown-item" href="#">Hiệu suất bán hàng</a></li>
-              <li><a class="dropdown-item" href="#">Hoạt động nhân viên</a></li>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="/TSMS/brandOwnerHangHoa">Hàng Hóa</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="/TSMS/admin-products" target="target">Đơn hàng</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#">Nhân viên</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#">Phân tích</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+  </style>
+  
+  <title>JSP Page</title>
+    <header class="headertop">
+        <div class="header-content">
+            <div style="display: flex; align-items: center; gap: 2rem;">
+                <div class="logo">
+                    <div class="logo-icon">S</div>
+                    <span>SWP391</span>
+                </div>
+                
+                <nav>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <i class="fas fa-home"></i>
+                            <span>Tên Shop</span>
+                        </li>
+                        <li class="nav-item">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Tổng quan</span>
+                        </li>
+                        <li class="nav-item">
+                            <i class="fas fa-box"></i>
+                            <span>Hàng hóa</span>
+                        </li>
+                        <li class="nav-item">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Đơn hàng</span>
+                        </li>
+                        <li class="nav-item">
+                            <i class="fas fa-users"></i>
+                            <span>Nhân viên</span>
+                        </li>
+                        <li class="nav-item">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Phân tích</span>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="user-section">
+                <button class="btn-outline" style="background: rgba(255,255,255,0.1); border: none; color: white;">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <button class="btn-outline" style="background: rgba(255,255,255,0.1); border: none; color: white;">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <span>🇻🇳 Tiếng Việt</span>
+                <div class="user-avatar">A</div>
+            </div>
+        </div>
+    </header>
+  
+  
+  
+  
+  
+    </head>
+    <body>
+        
+        
+        
+    
+  
+    <div class="main";
 
 
-
-    <div class="main"  background-color: #f5f6fa !important;
-
->
         <!-- Sidebar trái -->
         <div class="sidebar">
                             <h2>Khách hàng</h2>
@@ -252,120 +359,6 @@
     </div>
         
 
-  
-<!-- <div id="customerModal" class="modal d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 justify-content-center align-items-center" style="z-index: 1050">
-  <div class="modal-dialog modal-xl bg-white p-4 rounded">
-    <div class="modal-header">
-      <h5 class="modal-title">Thêm khách hàng</h5>
-      <button type="button" class="btn-close" aria-label="Close" onclick="closeModal()"></button>
-    </div>
-    <div class="modal-body">
-      <form>
-        <div class="row">
-          <div class="col-md-3 text-center">
-            <div class="mb-3">
-              <div class="border mb-2" style="height: 150px; border-style: dashed;"></div>
-              <button type="button" class="btn btn-success btn-sm">Chọn ảnh</button>
-            </div>
-          </div>
-
-          <div class="col-md-9">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Mã khách hàng</label>
-                <input type="text" class="form-control" placeholder="Mã mặc định" disabled>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Loại khách</label><br>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="loaiKhach" checked>
-                  <label class="form-check-label">Cá nhân</label>
-                </div>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="loaiKhach">
-                  <label class="form-check-label">Công ty</label>
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Tên khách hàng</label>
-                <input type="text" class="form-control">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Mã số thuế</label>
-                <input type="text" class="form-control">
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Điện thoại</label>
-                <input type="text" class="form-control">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Số CMND/CCCD</label>
-                <input type="text" class="form-control">
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Ngày sinh</label>
-                <input type="date" class="form-control">
-              </div>
-              <div class="col-md-6 d-flex align-items-end">
-                <div class="form-check me-3">
-                  <input class="form-check-input" type="radio" name="gender" checked>
-                  <label class="form-check-label">Nam</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" name="gender">
-                  <label class="form-check-label">Nữ</label>
-                </div>
-              </div>
-
-              <div class="col-md-12">
-                <label class="form-label">Địa chỉ</label>
-                <input type="text" class="form-control">
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Khu vực</label>
-                <select class="form-select">
-                  <option selected>Chọn Tỉnh/TP - Quận/Huyện</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Phường xã</label>
-                <select class="form-select">
-                  <option selected>Chọn Phường/Xã</option>
-                </select>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Email</label>
-                <input type="email" class="form-control">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Facebook</label>
-                <input type="text" class="form-control">
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Nhóm</label>
-                <input type="text" class="form-control">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Ghi chú</label>
-                <input type="text" class="form-control">
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-success">Lưu (F9)</button>
-      <button type="button" class="btn btn-secondary" onclick="closeModal()">Bỏ qua</button>
-    </div>
-  </div>
-</div>-->
  
  <div class="modal fade" id="customerModal" tabindex="-1" aria-labelledby="customerModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="max-width: 800px;">
@@ -479,9 +472,8 @@
 </div>
 
   
-  
-        
-    </body>
+  </body>
+
     
 <style>
   .modal.d-none {
