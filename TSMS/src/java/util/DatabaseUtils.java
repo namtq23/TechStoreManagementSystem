@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DatabaseUtils {
-    private static final String SCHEMA_PATH = "D:/FPT/2025.SU5/SWP391/template.sql";
+    private static final String SCHEMA_PATH = "D:/template.sql";
 
     public static void createDatabaseWithSchema(String newDbName) throws SQLException {
         try (Connection conn = DBUtil.getServerConnection();
