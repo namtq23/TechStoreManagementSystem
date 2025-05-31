@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author phungpdhe189026
  */
-@WebServlet(name="Salepage", urlPatterns={"/salepage"})
+@WebServlet(name="Salepage", urlPatterns={"/salepage"}) //sale-products
 public class SalepageController extends HttpServlet {
    
     /** 

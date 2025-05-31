@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author TRIEU NAM
  */
-@WebServlet(name="BrandOwnerHangHoaController", urlPatterns={"/brandOwnerHangHoa"})
+@WebServlet(name="BrandOwnerHangHoaController", urlPatterns={"/brandOwnerHangHoa"}) //so-products
 public class SOProductController extends HttpServlet {
    
     /** 

@@ -21,9 +21,32 @@ public class DBUtil {
         try {
             dataSource = new BasicDataSource();
             dataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+            //Phuong
             dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
             dataSource.setUsername("sa");
             dataSource.setPassword("123");
+            
+            //Nam
+//            dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
+//            dataSource.setUsername("sa");
+//            dataSource.setPassword("123");
+            
+            //Kien
+//            dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
+//            dataSource.setUsername("sa");
+//            dataSource.setPassword("123");
+            
+            //Phung
+//            dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
+//            dataSource.setUsername("sa");
+//            dataSource.setPassword("123");
+            
+            //Dat
+//            dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
+//            dataSource.setUsername("sa");
+//            dataSource.setPassword("123");
+
             dataSource.setInitialSize(5);
             dataSource.setMaxTotal(10);
             dataSource.setMaxIdle(5);
@@ -32,6 +55,7 @@ public class DBUtil {
             e.printStackTrace();
         }
     }
+
 
     // Mặc định: kết nối tới SuperAdminDB
     public static Connection getConnection() throws SQLException {
@@ -45,9 +69,23 @@ public class DBUtil {
         } catch (ClassNotFoundException e) {
             throw new SQLException("SQL Server JDBC Driver not found", e);
         }
+
         
+        //Phuong
         String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;encrypt=false";
         return DriverManager.getConnection(url, "sa", "123");
+        //Nam
+//        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;encrypt=false";
+//        return DriverManager.getConnection(url, "sa", "123");
+        //Kien
+//        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;encrypt=false";
+//        return DriverManager.getConnection(url, "sa", "123");
+        //Phung
+//        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;encrypt=false";
+//        return DriverManager.getConnection(url, "sa", "123");
+        //Dat
+//        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;encrypt=false";
+//        return DriverManager.getConnection(url, "sa", "123");
     }
 
     // Kết nối tới một database cụ thể (dùng để nạp schema vào DB mới tạo)
@@ -58,8 +96,22 @@ public class DBUtil {
             throw new SQLException("SQL Server JDBC Driver not found", e);
         }
 
+        //Phuong
         String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=" + dbName + ";encrypt=false";
         return DriverManager.getConnection(url, "sa", "123");
+        //Nam
+//        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=" + dbName + ";encrypt=false";
+//        return DriverManager.getConnection(url, "sa", "123");
+        //Kien
+//        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=" + dbName + ";encrypt=false";
+//        return DriverManager.getConnection(url, "sa", "123");
+        //Phung
+//        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=" + dbName + ";encrypt=false";
+//        return DriverManager.getConnection(url, "sa", "123");
+        //Dat
+//        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=" + dbName + ";encrypt=false";
+//        return DriverManager.getConnection(url, "sa", "123");
+
     }
 
     public static void closeConnection(Connection connection) {

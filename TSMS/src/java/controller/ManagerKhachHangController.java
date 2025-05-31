@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author TRIEU NAM
  */
-@WebServlet(name="ManagerKhachHangController", urlPatterns={"/ManagerKhachHangController"})
+@WebServlet(name="ManagerKhachHangController", urlPatterns={"/ManagerKhachHangController"}) //bm-customers
 public class ManagerKhachHangController extends HttpServlet {
    
     /** 

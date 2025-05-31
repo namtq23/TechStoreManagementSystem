@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author phungpdhe189026
  */
-@WebServlet(name="Trangbanhang", urlPatterns={"/trangbanhang"})
+@WebServlet(name="Trangbanhang", urlPatterns={"/trangbanhang"}) //cashpage
 public class TrangbanhangController extends HttpServlet {
    
     /** 
