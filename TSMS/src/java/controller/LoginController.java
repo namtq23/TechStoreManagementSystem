@@ -86,9 +86,16 @@ public class LoginController extends HttpServlet {
         try {
             switch (role) {
                 case "so":
-                    // Xác thực người dùng
+                    String dbName = Validate.shopNameConverter(shopName);
                     ShopOwner shopOwner;
                     shopOwner = UserDAO.getShopOwnwerByEmail(username);
+                    
+                    if (!shopOwner.getDatabaseName().equals(dbName)){
+                        req.setAttribute("error", "Các thông tin đăng nhập không chính xác!");
+                        req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
+                        return;
+                    }
+                    
                     if (shopOwner != null && shopOwner.getPassword().equals(password)) {
                         HttpSession session = req.getSession(true);
                         System.out.println(shopOwner.getEmail());
@@ -111,13 +118,13 @@ public class LoginController extends HttpServlet {
                             resp.sendRedirect(redirectURL);
                         }
                     } else {
-                        req.setAttribute("error", "Tài khoản không hợp lệ");
+                        req.setAttribute("error", "Các thông tin đăng nhập không chính xác!");
                         req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
                     }
                     break;
                 case "staff":
-                    String dbName = Validate.shopNameConverter(shopName);
-                    User user = userDAO.getUserByEmail(username, dbName);
+                    String dbNameStaff = Validate.shopNameConverter(shopName);
+                    User user = userDAO.getUserByEmail(username, dbNameStaff);
                     if (user != null && user.getPassword().equals(password)) {
                         HttpSession session = req.getSession(true);
                         System.out.println(user.getEmail());
@@ -156,11 +163,11 @@ public class LoginController extends HttpServlet {
                             session.removeAttribute("requestedURL");
                             resp.sendRedirect(requestedURL);
                         } else {
-                            DBUtil.getConnectionTo(dbName);
+                            DBUtil.getConnectionTo(dbNameStaff);
                             resp.sendRedirect(redirectURL);
                         }
                     } else {
-                        req.setAttribute("error", "Tài khoản không hợp lệ");
+                        req.setAttribute("error", "Các thông tin đăng nhập không chính xác!");
                         req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
                     }
                     break;

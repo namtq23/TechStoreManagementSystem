@@ -49,6 +49,7 @@ public class RegisterController extends HttpServlet {
         String newDbName = Validate.shopNameConverter(shopName);
         try {
             if (ShopDAO.isShopTaken(newDbName)){
+                System.out.println("11111");
                 req.setAttribute("error", "Tên shop đã tồn tại!");
                 req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
                 return;
@@ -56,6 +57,8 @@ public class RegisterController extends HttpServlet {
         } catch (SQLException ex) {
             Logger.getLogger(RegisterController.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        System.out.println("2222");
         
         if (fullName == null || password == null || confirmedPassword == null
                 || shopName.isEmpty() || password.isEmpty() || email.isEmpty()) {
