@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.User;
+import model.ShopOwner;
 
 /**
  *
@@ -29,9 +29,9 @@ public class SAHomeController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             UserDAO userDAO = new UserDAO();
-            List<User> users = userDAO.getUsers();
+            List<ShopOwner> shopOwners = userDAO.getShopOwners();
             
-            req.setAttribute("users", users);
+            req.setAttribute("shopOwners", shopOwners);
             req.getRequestDispatcher("/WEB-INF/jsp/admin/sa-home.jsp").forward(req, resp);
         } catch (SQLException ex) {
             Logger.getLogger(SAHomeController.class.getName()).log(Level.SEVERE, null, ex);

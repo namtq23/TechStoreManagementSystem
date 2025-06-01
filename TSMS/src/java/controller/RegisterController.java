@@ -93,7 +93,7 @@ public class RegisterController extends HttpServlet {
                 return;
             }
             // Tạo đối tượng ShopOwner để lưu vào AdminDB
-            ShopOwner newOwner = new ShopOwner(0, password, fullName, shopName, newDbName, email, null, null, null);
+            ShopOwner newOwner = new ShopOwner(0, password, fullName, shopName, newDbName, email, null, null, null, 1);
 
             // 1. Tạo bản sao TemplateDB thành ShopDB_{username}
             DatabaseUtils.createDatabaseWithSchema(newDbName);

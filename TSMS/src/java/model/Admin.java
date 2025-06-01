@@ -13,13 +13,13 @@ public class Admin {
     private int adminId;
     private String password;
     private String fullName;
-    private String email;
+    private String userName;
 
-    public Admin(int adminId, String fullName, String email, String password) {
+    public Admin(int adminId, String fullName, String userName, String password) {
         this.adminId = adminId;
         this.password = password;
         this.fullName = fullName;
-        this.email = email;
+        this.userName = userName;
     }
 
     public int getAdminId() {
@@ -46,17 +46,17 @@ public class Admin {
         this.fullName = fullName;
     }
 
-    public String getEmail() {
-        return email;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     @Override
     public String toString() {
-        return "Admin{" + "adminId=" + adminId + ", password=" + password + ", fullName=" + fullName + ", email=" + email + '}';
+        return "Admin{" + "adminId=" + adminId + ", password=" + password + ", fullName=" + fullName + ", userName=" + userName + '}';
     }
 
 }
