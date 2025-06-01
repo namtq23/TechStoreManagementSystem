@@ -1,79 +1,66 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
 <!DOCTYPE html>
 <html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>JSP Page</title>
+    <head>
+        <title>Header</title>
+        <link rel="stylesheet" href="css/header.css"/>
+    </head>
+    <body>
+        <header class="header">
+            <div class="header-container">
+                <div class="logo">
+                    <a href="#" class="logo">
+                        <div class="logo-icon">T</div>
+                        <span class="logo-text">TSMS</span>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        Tổng quan
+                    </a>
+                    <a href="#" class="nav-item active">
+                        <i class="fas fa-box"></i>
+                        Hàng hóa
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        Giao dịch
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-handshake"></i>
+                        Đối tác
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-users"></i>
+                        Nhân viên
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-wallet"></i>
+                        Sổ quỹ
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-chart-bar"></i>
+                        Báo cáo
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-shopping-cart"></i>
+                        Bán Online
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-cash-register"></i>
+                        Bán hàng
+                    </a>
+                </nav>
 
-  <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/header.css">
-</head>
-<body>
-
-  <!-- Top toolbar -->
-  <div class="top-toolbar d-flex justify-content-between align-items-center px-4 py-2 bg-dark text-white">
-    <div class="toolbar-left">
-      <strong>SWP391</strong>
-    </div>
-    <div class="toolbar-right">
-      <button class="btn btn-sm btn-outline-light me-2">🇻🇳 Tiếng Việt</button>
-      <button class="btn btn-sm btn-outline-light me-2">📧</button>
-      <button class="btn btn-sm btn-outline-light me-2">⚙️</button>
-      <button class="btn btn-sm btn-outline-light">👤</button>
-    </div>
-  </div>
-
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid px-4">
-      <!-- Logo -->
-      <a class="navbar-brand fw-bold" href="#"><i class="fas fa-store"></i> Tên Shop</a>
-
-      <!-- Toggle button for mobile -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <!-- Navbar links -->
-      <div class="collapse navbar-collapse" id="mainNavbar">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#">Tổng quan</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" id="hangHoaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Hàng hóa
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="hangHoaDropdown">
-              <li><a class="dropdown-item" href="#">Tổng quan chung</a></li>
-              <li><a class="dropdown-item" href="#">Hiệu suất bán hàng</a></li>
-              <li><a class="dropdown-item" href="#">Hoạt động nhân viên</a></li>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="/TSMS/brandOwnerHangHoa">Hàng Hóa</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="/TSMS/admin-products" target="target">Đơn hàng</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#">Nhân viên</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="#">Phân tích</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Bootstrap Script -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+                <div class="header-right">
+                    <a href="profile" class="user-icon gradient">
+                        <i class="fas fa-user-circle fa-2x"></i>
+                    </a>
+                </div>       
+            </div>
+        </header>
+    </body>
 </html>
+
