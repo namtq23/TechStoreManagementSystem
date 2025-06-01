@@ -12,22 +12,10 @@
         <title>Thông tin cá nhân - Sale</title>
         <link rel="stylesheet" href="<%= request.getContextPath() %>/css/sale.css">
 
-            <div class="top-bar">
-                <div class="header-icons">
-                    <select class="lang-select">
-                        <option>🌐 Tiếng Việt</option>
-                        <option>English</option>
-                    </select>
-                    <span class="icon">🔔</span>
-                    <span class="icon">👤</span>
-                </div>
-            </div>
-            <div class="nav-bar">
-                <span class="shop-name">🛒 Tên Shop</span>
-                <a href="#">Thông tin cá nhân</a>
-                <a href="#">Hàng hóa</a>
-                <a href="#">Đơn hàng</a>
-            </div>
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Thông tin cá nhân</h1>
+            <button class="edit-btn">Chỉnh sửa</button>
         </div>
 
         <div class="profile-container">
