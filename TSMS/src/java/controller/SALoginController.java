@@ -25,7 +25,7 @@ public class SALoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        if (session != null && session.getAttribute("accountId") != null) {
+        if (session != null && session.getAttribute("adminId") != null) {
             resp.sendRedirect(req.getContextPath() + "/sa-home");
             return;
         }
@@ -38,10 +38,9 @@ public class SALoginController extends HttpServlet {
         String username = req.getParameter("username");
         String password = req.getParameter("password");
 
-        if (username == null || username.trim().isEmpty()
-                || password == null || password.trim().isEmpty()) {
+        if (username == null ||  password == null) {
 
-            req.setAttribute("error", "Username and password are required");
+            req.setAttribute("error", "Hãy nhập đầy đủ thông tin!");
             req.getRequestDispatcher("/WEB-INF/jsp/admin/sa-login.jsp").forward(req, resp);
             return;
         }
@@ -53,7 +52,7 @@ public class SALoginController extends HttpServlet {
             Admin admin = adminDAO.getAdmin(username);
             if (admin != null && admin.getPassword().equals(password)) {
                 HttpSession session = req.getSession(true);
-                System.out.println(admin.getEmail());
+                System.out.println(admin.getUserName());
                 session.setAttribute("adminId", admin.getAdminId());
                 System.out.println("Session created: " + session.getId());
                 System.out.println("adminId set: " + session.getAttribute("adminId"));
@@ -70,11 +69,11 @@ public class SALoginController extends HttpServlet {
                     resp.sendRedirect(redirectURL);
                 }
             } else {
-                req.setAttribute("error", "Invalid account");
+                req.setAttribute("error", "Tài khoản admin không hợp lệ!");
                 req.getRequestDispatcher("/WEB-INF/jsp/admin/sa-login.jsp").forward(req, resp);
             }
         } catch (ServletException | IOException | SQLException e) {
-            req.setAttribute("error", "An error occurred: " + e.getMessage());
+            req.setAttribute("error", "Có lỗi trong quá trình đăng nhập: " + e.getMessage());
             req.getRequestDispatcher("/WEB-INF/jsp/admin/sa-login.jsp").forward(req, resp);
         }
     }

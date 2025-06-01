@@ -20,11 +20,12 @@ public class ShopOwner {
     private String identificationID;
     private String gender;      
     private String address;
+    private int isActive;
 
     public ShopOwner() {
     }
 
-    public ShopOwner(int ownerId, String password, String fullName, String shopName, String databaseName, String email, String identificationID, String gender, String address) {
+    public ShopOwner(int ownerId, String password, String fullName, String shopName, String databaseName, String email, String identificationID, String gender, String address, int isActive) {
         this.ownerId = ownerId;
         this.password = password;
         this.fullName = fullName;
@@ -34,6 +35,7 @@ public class ShopOwner {
         this.identificationID = identificationID;
         this.gender = gender;
         this.address = address;
+        this.isActive = isActive;
     }
 
     public int getOwnerId() {
@@ -108,10 +110,20 @@ public class ShopOwner {
         this.address = address;
     }
 
+    public int getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(int isActive) {
+        this.isActive = isActive;
+    }
+
     @Override
     public String toString() {
-        return "ShopOwner{" + "ownerId=" + ownerId + ", password=" + password + ", fullName=" + fullName + ", shopName=" + shopName + ", databaseName=" + databaseName + ", email=" + email + ", identificationID=" + identificationID + ", gender=" + gender + ", address=" + address + '}';
+        return "ShopOwner{" + "ownerId=" + ownerId + ", password=" + password + ", fullName=" + fullName + ", shopName=" + shopName + ", databaseName=" + databaseName + ", email=" + email + ", identificationID=" + identificationID + ", gender=" + gender + ", address=" + address + ", isActive=" + isActive + '}';
     }
+
+    
 
 
     

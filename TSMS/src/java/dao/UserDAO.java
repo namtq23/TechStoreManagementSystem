@@ -107,28 +107,22 @@ public class UserDAO {
     }
 
 
-    public List<User> getUsers() throws SQLException {
-        List<User> users = new ArrayList<>();
+    public List<ShopOwner> getShopOwners() throws SQLException {
+        List<ShopOwner> shopOwners = new ArrayList<>();
 
         String sql = """
-            SELECT ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS AccountID, 
-                   RoleID, FullName, Email, Password, ShopName, CreatedAt, IsActive
-            FROM (
-                SELECT RoleID, FullName, Email, Password, ShopName, CreatedAt, IsActive FROM ShopOwner
-                UNION ALL
-                SELECT RoleID, FullName, Email, Password, ShopName, CreatedAt, IsActive FROM Staff
-            ) AS Combined
+            select * from ShopOwner
         """;
 
         try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                User user = extractUserFromResultSet(rs);
-                users.add(user);
+                ShopOwner shopOwner = extractShopOwnerFromResultSet(rs);
+                shopOwners.add(shopOwner);
             }
         }
 
-        return users;
+        return shopOwners;
     }
 
 
@@ -159,7 +153,8 @@ public class UserDAO {
                 rs.getString("Email"),
                 rs.getString("IdentificationID"),
                 rs.getString("Gender"),
-                rs.getString("Address")
+                rs.getString("Address"),
+                rs.getInt("IsActive")
         );
         return shopOwner;
     }
@@ -184,7 +179,7 @@ public class UserDAO {
 
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
-        User u = ud.getUserByEmail("ndpp.work@gmail.com", "");
-        System.out.println(u);
+        List<ShopOwner> shopOwners = ud.getShopOwners();
+        System.out.println(shopOwners);
     }
 }

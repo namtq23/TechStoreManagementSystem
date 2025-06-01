@@ -5,11 +5,11 @@
 package dao;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import model.Admin;
+import util.DBUtil;
 
 /**
  *
@@ -17,36 +17,23 @@ import model.Admin;
  */
 public class AdminDAO {
 
-    private static final String ADMIN_DB_URL
-            = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=SuperAdminDB;encrypt=false"; //Đổi port ở đây -> sqlserver:... instanceName=...
-    private static final String USER = "sa";
-    private static final String PASSWORD = "123"; // hãy dùng mật khẩu thật
-
     public Admin getAdmin(String username) throws SQLException {
         Admin admin = null;
-        try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("Driver SQL Server không tìm thấy", e);
-        }
-
-        try (Connection conn = DriverManager.getConnection(ADMIN_DB_URL, USER, PASSWORD)) {
-            String sql = "SELECT \n"
+        String sql = "SELECT \n"
                     + "    AdminID,\n"
                     + "    FullName,\n"
-                    + "    Email,\n"
+                    + "    UserName,\n"
                     + "    Password\n"
-                    + "FROM SuperAdmin WHERE Email = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    + "FROM SuperAdmin WHERE UserName = ?";
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
                 stmt.setString(1, username);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         admin = extractUserFromResultSet(rs);
                     }
                 }
-            }
-
-        } catch (SQLException e) {
+            } catch (SQLException e) {
             e.printStackTrace();
         }
         return admin;
@@ -57,7 +44,7 @@ public class AdminDAO {
         Admin admin = new Admin(
                 rs.getInt("AdminID"),
                 rs.getString("FullName"),
-                rs.getString("Email"),
+                rs.getString("UserName"),
                 rs.getString("Password")
         );
         return admin;
