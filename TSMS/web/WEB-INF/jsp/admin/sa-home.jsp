@@ -9,6 +9,18 @@
         <title>Trang Admin - TSMS</title>
         <link rel="stylesheet" type="text/css" href="css/sa-home.css">
     </head>
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
     <body>
         <div class="container">
             <!-- Header -->
@@ -48,11 +60,10 @@
                                 <th 
                                     class="id-column" style="
                                     padding-left: 24px;"
-                                >
+                                    >
                                     ID
                                 </th>
                                 <th class="name-column">Họ tên</th>
-                                <th class="dtb-column">Tên Database</th>
                                 <th class="shop-column">Cửa hàng</th>
                                 <th class="status-column">Trạng thái</th>
                                 <th class="action-column">Hành động</th>
@@ -70,13 +81,12 @@
                             <tr>
                                 <td class="id-column"><%= shopOwner.getOwnerId() %></td>
                                 <td class="name-column"><%= shopOwner.getFullName() %></td>
-                                <td class="dtb-column"><%= shopOwner.getDatabaseName() %></td>
                                 <td class="shop-column"><%= shopOwner.getShopName() %></td>
                                 <td class="status-column">
                                     <span class="<%= statusClass %>"><%= statusText %></span>
                                 </td>
                                 <td class="action-column">
-                                    <a href="so-details?id=<%= shopOwner.getOwnerId() %>">
+                                    <a href="sa-sodetails?id=<%= shopOwner.getOwnerId() %>">
                                         <button class="details-btn">Xem chi tiết</button>
                                     </a>
                                 </td>
