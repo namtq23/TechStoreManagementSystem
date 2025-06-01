@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import model.ShopOwner;
+import model.ShopOwnerDTO;
 import model.User;
 import util.DBUtil;
 
@@ -87,6 +88,30 @@ public class UserDAO {
         return shopOwner;
     }
 
+    public static ShopOwnerDTO getShopOwnerById(int id) throws SQLException {
+        ShopOwnerDTO shopOwner = null;
+
+        String sql = "SELECT * \n"
+                + "FROM ShopOwner \n"
+                + "JOIN UserServiceMethod \n"
+                + "ON ShopOwner.OwnerID = UserServiceMethod.OwnerID\n"
+                + "WHERE ShopOwner.OwnerID = ?;\n"
+                + "";
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    shopOwner = extractShopOwnerDTOFromResultSet(rs);
+                }
+            }
+        }
+
+        return shopOwner;
+    }
+
     public User getUserByEmail(String email, String dbName) throws SQLException {
         User user = null;
 
@@ -106,7 +131,6 @@ public class UserDAO {
         return user;
     }
 
-
     public List<ShopOwner> getShopOwners() throws SQLException {
         List<ShopOwner> shopOwners = new ArrayList<>();
 
@@ -125,8 +149,6 @@ public class UserDAO {
         return shopOwners;
     }
 
-
-
     public void updateIsActiveByEmail(String email, int newStatus) throws SQLException {
         String sql = """
             UPDATE ShopOwner SET IsActive = ? WHERE Email = ?;
@@ -142,7 +164,6 @@ public class UserDAO {
         }
     }
 
-
     private static ShopOwner extractShopOwnerFromResultSet(ResultSet rs) throws SQLException {
         ShopOwner shopOwner = new ShopOwner(
                 rs.getInt("OwnerID"),
@@ -154,9 +175,34 @@ public class UserDAO {
                 rs.getString("IdentificationID"),
                 rs.getString("Gender"),
                 rs.getString("Address"),
-                rs.getInt("IsActive")
+                rs.getString("Phone"),
+                rs.getInt("IsActive"),
+                rs.getDate("CreatedAt")
         );
         return shopOwner;
+    }
+
+    private static ShopOwnerDTO extractShopOwnerDTOFromResultSet(ResultSet rs) throws SQLException {
+        ShopOwnerDTO shopOwnerDTO = new ShopOwnerDTO(
+                rs.getDate("TrialStartDate"),
+                rs.getString("TrialStatus"),
+                rs.getString("SubscriptionMonths"),
+                rs.getDate("SubscriptionStart"),
+                rs.getDate("SubscriptionEnd"),
+                rs.getInt("OwnerID"),
+                rs.getString("Password"),
+                rs.getString("FullName"),
+                rs.getString("ShopName"),
+                rs.getString("DatabaseName"),
+                rs.getString("Email"),
+                rs.getString("IdentificationID"),
+                rs.getString("Gender"),
+                rs.getString("Address"),
+                rs.getString("Phone"),
+                rs.getInt("IsActive"),
+                rs.getDate("CreatedAt")
+        );
+        return shopOwnerDTO;
     }
 
     private static User extractUserFromResultSet(ResultSet rs) throws SQLException {
@@ -174,12 +220,11 @@ public class UserDAO {
 
         return user;
     }
-    
-
 
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
-        List<ShopOwner> shopOwners = ud.getShopOwners();
-        System.out.println(shopOwners);
+//        List<ShopOwner> shopOwners = ud.getShopOwners();  
+        ShopOwner o = ud.getShopOwnerById(1);
+        System.out.println(o);
     }
 }

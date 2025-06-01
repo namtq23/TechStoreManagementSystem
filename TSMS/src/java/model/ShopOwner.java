@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Date;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
@@ -20,12 +22,14 @@ public class ShopOwner {
     private String identificationID;
     private String gender;      
     private String address;
+    private String phone;
     private int isActive;
+    private Date createdAt; 
 
     public ShopOwner() {
     }
 
-    public ShopOwner(int ownerId, String password, String fullName, String shopName, String databaseName, String email, String identificationID, String gender, String address, int isActive) {
+    public ShopOwner(int ownerId, String password, String fullName, String shopName, String databaseName, String email, String identificationID, String gender, String address, String phone, int isActive, Date createdAt) {
         this.ownerId = ownerId;
         this.password = password;
         this.fullName = fullName;
@@ -35,7 +39,40 @@ public class ShopOwner {
         this.identificationID = identificationID;
         this.gender = gender;
         this.address = address;
+        this.phone = phone;
         this.isActive = isActive;
+        this.createdAt = createdAt;
+    }
+
+    public ShopOwner(int ownerId, String password, String fullName, String shopName, String databaseName, String email, String identificationID, String gender, String address, String phone, int isActive) {
+        this.ownerId = ownerId;
+        this.password = password;
+        this.fullName = fullName;
+        this.shopName = shopName;
+        this.databaseName = databaseName;
+        this.email = email;
+        this.identificationID = identificationID;
+        this.gender = gender;
+        this.address = address;
+        this.phone = phone;
+        this.isActive = isActive;
+    }
+    
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createAt) {
+        this.createdAt = createAt;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public int getOwnerId() {

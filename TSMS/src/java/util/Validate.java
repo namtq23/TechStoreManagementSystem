@@ -4,6 +4,9 @@
  */
 package util;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  *
  * @author admin
@@ -69,6 +72,14 @@ public class Validate {
         }
 
         return result.toString();
+    }
+    
+    public static String formatDateTime(Date date) {
+        if (date == null) {
+            return "Chưa cập nhật";
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        return sdf.format(date);
     }
 
     public static void main(String[] args) {
