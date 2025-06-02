@@ -20,7 +20,7 @@
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
-                    <a href="#" class="nav-item active">
+                    <a href="so-products" class="nav-item">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
