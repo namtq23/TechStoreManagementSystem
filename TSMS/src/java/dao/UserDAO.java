@@ -224,7 +224,7 @@ public class UserDAO {
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
 //        List<ShopOwner> shopOwners = ud.getShopOwners();  
-        ShopOwner o = ud.getShopOwnerById(1);
+        User o = ud.getUserByEmail("an.nguyen@email.com", "DTB_StoreTemp");
         System.out.println(o);
     }
 }
