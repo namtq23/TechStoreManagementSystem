@@ -583,4 +583,16 @@ body {
         gap: 10px;
     }
 }
-  
+  .chart-container {
+    width: 100%;
+    height: 400px; /* tăng chiều cao tại đây nếu muốn biểu đồ cao hơn */
+    position: relative;
+    padding: 0;
+    margin: 0 auto;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
