@@ -4,8 +4,10 @@
  */
 package util;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  *
@@ -73,7 +75,7 @@ public class Validate {
 
         return result.toString();
     }
-    
+
     public static String formatDateTime(Date date) {
         if (date == null) {
             return "Chưa cập nhật";
@@ -82,10 +84,27 @@ public class Validate {
         return sdf.format(date);
     }
 
+    public static String formatCostPriceToVND(String costPriceStr) {
+        if (costPriceStr == null || costPriceStr.equalsIgnoreCase("NULL")) {
+            return "NULL";
+        }
+
+        try {
+            Double costPrice = Double.valueOf(costPriceStr);
+
+            NumberFormat vndFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+            String formattedAmount = vndFormat.format(costPrice).replace("₫", "VND");
+
+            return formattedAmount;
+        } catch (NumberFormatException e) {
+            return "NULL";
+        }
+    }
+
     public static void main(String[] args) {
         // Test hàm với đầu vào mới
         String input = "hanh tinh xanh";
         System.out.println("Input: " + input + " -> Output: " + shopNameConverter(input));
     }
-    
+
 }

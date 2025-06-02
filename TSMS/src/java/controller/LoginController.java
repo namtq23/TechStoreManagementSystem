@@ -133,6 +133,7 @@ public class LoginController extends HttpServlet {
                         session.setAttribute("staffId", user.getUserID());
                         session.setAttribute("roleId", user.getRoleId());
                         session.setAttribute("dbName",dbNameStaff);
+                        session.setAttribute("branchId",user.getBranchId());
                         System.out.println("Session created: " + session.getId());
                         System.out.println("staffId set: " + session.getAttribute("staffId"));
                         System.out.println("roleId set: " + session.getAttribute("roleId"));
@@ -145,7 +146,7 @@ public class LoginController extends HttpServlet {
                         switch (user.getRoleId()) {
                             case 1:
                                 session.setAttribute("role", "Branch Manager");
-                                redirectURL = req.getContextPath() + "/...";
+                                redirectURL = req.getContextPath() + "/bm-overview";
                                 break;
                             case 2:
                                 session.setAttribute("role", "Sale");

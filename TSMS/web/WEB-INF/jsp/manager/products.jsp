@@ -5,23 +5,25 @@
 --%>
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.*, model.ProductDTO" %>
+<%@ page import="util.Validate" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KiotViet - Hàng hóa</title>
+    <title>TSMS - Hàng hóa</title>
     <link rel="stylesheet" href="css/bm-products.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <!-- Header -->
-    <jsp:include page="../common/header.jsp" />
+    <jsp:include page="../common/header-bm.jsp" />
 
     <div class="main-container">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <!-- Product Type Filter -->
+<!--             Product Type Filter 
             <div class="filter-section">
                 <div class="filter-header">
                     <h3>Loại hàng</h3>
@@ -49,7 +51,7 @@
                         Combo - Đóng gói
                     </label>
                 </div>
-            </div>
+            </div>-->
 
             <!-- Product Group Filter -->
             <div class="filter-section">
@@ -167,161 +169,34 @@
                 <table class="products-table">
                     <thead>
                         <tr>
-                            <th class="checkbox-col">
+<!--                            <th class="checkbox-col">
                                 <input type="checkbox">
-                            </th>
-                            <th class="favorite-col">
-                                <i class="far fa-star"></i>
-                            </th>
+                            </th>-->
                             <th class="image-col"></th>
                             <th>Mã hàng</th>
                             <th>Tên hàng</th>
                             <th>Giá bán</th>
                             <th>Giá vốn</th>
                             <th>Tồn kho</th>
-                            <th>Khách đặt</th>
                             <th>Thời gian tạo</th>
-                            <th>Dự kiến hết hàng</th>
+                            <th>Trạng thái</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="summary-row">
-                            <td colspan="7"></td>
-                            <td class="summary-cell">184</td>
-                            <td class="summary-cell">0</td>
-                            <td class="summary-cell">---</td>
-                            <td class="summary-cell">---</td>
-                        </tr>
-                        <tr>
+                        <% List<ProductDTO> products = (List<ProductDTO>) request.getAttribute("products");
+                            for (ProductDTO product : products) { %>
+                        <tr class="">
                             <td><input type="checkbox"></td>
-                            <td><i class="far fa-star"></i></td>
                             <td><div class="product-image phone"></div></td>
-                            <td>TB000014</td>
-                            <td>Samsung Galaxy Tab S9 5G 128GB</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>01/06/2025 21:29</td>
-                            <td>---</td>
+                            <td><%= product.getProductDetailId() %></td>
+                            <td><%= product.getProductName() %></td>
+                            <td><%= Validate.formatCostPriceToVND(product.getRetailPrice())%></td>
+                            <td><%= Validate.formatCostPriceToVND(product.getCostPrice())%></td>
+                            <td><%= product.getQuantity() %></td>
+                            <td><%= Validate.formatDateTime(product.getCreatedAt()) %></td>
+                            <td><%= product.getIsActive() %></td>
                         </tr>
-                        <tr class="highlighted">
-                            <td><input type="checkbox"></td>
-                            <td><i class="far fa-star"></i></td>
-                            <td><div class="product-image phone"></div></td>
-                            <td>TB000013</td>
-                            <td>Samsung Galaxy Tab S9 5G 128GB</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>01/06/2025 21:29</td>
-                            <td>---</td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox"></td>
-                            <td><i class="far fa-star"></i></td>
-                            <td><div class="product-image tablet"></div></td>
-                            <td>TB000012</td>
-                            <td>iPad Air 6 M2 11" 5G 128GB</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>01/06/2025 21:29</td>
-                            <td>---</td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox"></td>
-                            <td><i class="far fa-star"></i></td>
-                            <td><div class="product-image tablet"></div></td>
-                            <td>TB000011</td>
-                            <td>iPad Air 6 M2 11" 5G 128GB</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>01/06/2025 21:29</td>
-                            <td>---</td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox"></td>
-                            <td><i class="far fa-star"></i></td>
-                            <td><div class="product-image accessory"></div></td>
-                            <td>PK000020</td>
-                            <td>Giá đỡ Laptop/Macbook hợp kim nhôm</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>01/06/2025 21:29</td>
-                            <td>---</td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox"></td>
-                            <td><i class="far fa-star"></i></td>
-                            <td><div class="product-image accessory"></div></td>
-                            <td>PK000019</td>
-                            <td>Miếng dán kính cường lực iPhone 15 Pro Jincase</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>01/06/2025 21:29</td>
-                            <td>---</td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox"></td>
-                            <td><i class="far fa-star"></i></td>
-                            <td><div class="product-image accessory"></div></td>
-                            <td>PK000018</td>
-                            <td>Cáp Baseus Crystal Shine Type-C to Lightning 2M</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>01/06/2025 21:29</td>
-                            <td>---</td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox"></td>
-                            <td><i class="far fa-star"></i></td>
-                            <td><div class="product-image accessory"></div></td>
-                            <td>PK000017</td>
-                            <td>Ốp lưng iPhone 15 Pro Max Nhua dẻo TPU UNIQ HYBRID Air Fender ID</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>92</td>
-                            <td>0</td>
-                            <td>01/06/2025 21:29</td>
-                            <td>---</td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox"></td>
-                            <td><i class="far fa-star"></i></td>
-                            <td><div class="product-image accessory"></div></td>
-                            <td>PK000016</td>
-                            <td>Chuột không dây Logitech M331</td>
-                            <td>349,000</td>
-                            <td>0</td>
-                            <td>92</td>
-                            <td>0</td>
-                            <td>01/06/2025 21:29</td>
-                            <td>---</td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox"></td>
-                            <td><i class="far fa-star"></i></td>
-                            <td><div class="product-image accessory"></div></td>
-                            <td>PK000015</td>
-                            <td>Chuột không dây Logitech M331</td>
-                            <td>349,000</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>01/06/2025 21:29</td>
-                            <td>---</td>
-                        </tr>
+                        <%}%>
                     </tbody>
                 </table>
             </div>
@@ -354,7 +229,7 @@
     <!-- Support Chat Button -->
     <div class="support-chat">
         <i class="fas fa-headset"></i>
-        <span>Hỗ trợ:1900 6522</span>
+        <span>Hỗ trợ:1900 9999</span>
     </div>
 </body>
 </html>
