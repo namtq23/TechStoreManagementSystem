@@ -169,9 +169,9 @@
                 <table class="products-table">
                     <thead>
                         <tr>
-<!--                            <th class="checkbox-col">
+                            <th class="checkbox-col">
                                 <input type="checkbox">
-                            </th>-->
+                            </th>
                             <th class="image-col"></th>
                             <th>Mã hàng</th>
                             <th>Tên hàng</th>

@@ -19,7 +19,7 @@ import util.DBUtil;
  */
 public class ProductDAO {
 
-    public List<ProductDTO> getInventoryProductList(String dbName, int branchId) throws SQLException {
+    public List<ProductDTO> getInventoryProductListByBranchId(String dbName, int branchId) throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
 
         String sql = """
@@ -91,7 +91,7 @@ public class ProductDAO {
 
     public static void main(String[] args) throws SQLException {
         ProductDAO p = new ProductDAO();
-        List<ProductDTO> products = p.getInventoryProductList("DTB_StoreTemp", 1);
+        List<ProductDTO> products = p.getInventoryProductListByBranchId("DTB_StoreTemp", 1);
         for (ProductDTO product : products) {
             System.out.println(product);
         }
