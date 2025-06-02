@@ -1,4 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+
+
 <!DOCTYPE html>
 <html lang="vi">
     
@@ -11,6 +14,7 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="css/so-overall.css">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
 
     
     <!-- Toolbar -->
@@ -86,13 +90,13 @@
                             <i class="fas fa-dollar-sign"></i>
                         </div>
                         <div class="metric-content">
-                            <div class="metric-label">1 Hóa đơn</div>
-                            <div class="metric-value">4,886,000</div>
+                            <div class="metric-label">${totalInvoice} Hóa đơn</div>
+                            <div class="metric-value">${incomeTotal}</div>
                             <div class="metric-subtitle">Doanh thu</div>
                         </div>
                     </div>
                     
-                    <div class="metric-card orders">
+<!--                    <div class="metric-card orders">
                         <div class="metric-icon">
                             <i class="fas fa-shopping-bag"></i>
                         </div>
@@ -101,7 +105,7 @@
                             <div class="metric-value">0</div>
                             <div class="metric-subtitle">Đặt hàng</div>
                         </div>
-                    </div>
+                    </div>-->
                     
                     <div class="metric-card growth-1">
                         <div class="metric-icon">
@@ -144,8 +148,7 @@
                 
                 <div class="chart-container">
                     <div class="no-data">
-                        <i class="fas fa-chart-line"></i>
-                        <p>Không có dữ liệu</p>
+                           <canvas id="revenueChart" style="width:100%; height: 100%;display: block"></canvas>
                     </div>
                 </div>
             </section>
@@ -264,4 +267,32 @@
         <span>Hỗ trợ:1900 6522</span>
     </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ["Italy", "France", "Spain", "USA", "Argentina"],
+            datasets: [{
+                label: "Doanh thu (triệu VND)",
+                data: [55, 49, 44, 24, 15],
+                backgroundColor: ["red", "green", "blue", "orange", "brown"]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Biểu đồ Doanh Thu (Demo)'
+                }
+            }
+        }
+    });
+</script>
+
 </html>

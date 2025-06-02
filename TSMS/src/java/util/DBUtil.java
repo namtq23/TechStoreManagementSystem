@@ -23,14 +23,14 @@ public class DBUtil {
             dataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
             //Phuong
-            dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
-            dataSource.setUsername("sa");
-            dataSource.setPassword("123");
-            
-            //Nam
 //            dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
 //            dataSource.setUsername("sa");
 //            dataSource.setPassword("123");
+            
+            //Nam
+            dataSource.setUrl("jdbc:sqlserver://MAYTINHCUANAM\\TRNAM:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
+            dataSource.setUsername("sa");
+            dataSource.setPassword("123456");
             
             //Kien
 //            dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
@@ -72,11 +72,13 @@ public class DBUtil {
 
         
         //Phuong
-        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;encrypt=false";
-        return DriverManager.getConnection(url, "sa", "123");
-        //Nam
 //        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;encrypt=false";
 //        return DriverManager.getConnection(url, "sa", "123");
+        //Nam
+        String url = "jdbc:sqlserver://MAYTINHCUANAM:1433;instanceName=TRNAM;encrypt=false";
+        return DriverManager.getConnection(url, "sa", "123456");
+
+
         //Kien
 //        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;encrypt=false";
 //        return DriverManager.getConnection(url, "sa", "123");
@@ -97,11 +99,11 @@ public class DBUtil {
         }
 
         //Phuong
-        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=" + dbName + ";encrypt=false";
-        return DriverManager.getConnection(url, "sa", "123");
-        //Nam
 //        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=" + dbName + ";encrypt=false";
 //        return DriverManager.getConnection(url, "sa", "123");
+        //Nam
+        String url = "jdbc:sqlserver://MAYTINHCUANAM:1433;instanceName=TRNAM;databaseName=" + dbName + ";encrypt=false";
+         return DriverManager.getConnection(url, "sa", "123456");
         //Kien
 //        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=" + dbName + ";encrypt=false";
 //        return DriverManager.getConnection(url, "sa", "123");
