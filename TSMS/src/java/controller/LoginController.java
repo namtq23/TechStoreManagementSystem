@@ -36,13 +36,13 @@ public class LoginController extends HttpServlet {
             role = Integer.parseInt((String) session.getAttribute("roleId"));
             switch (role) {
                 case 0: 
-                    resp.sendRedirect(req.getContextPath() + "/BrandOwnerTongQuan");
+                    resp.sendRedirect(req.getContextPath() + "/so-overview");
                     break;
                 case 1: 
-                    resp.sendRedirect(req.getContextPath() + "/...");
+                    resp.sendRedirect(req.getContextPath() + "/bm-overview");
                     break;
                 case 2: 
-                    resp.sendRedirect(req.getContextPath() + "/...");
+                    resp.sendRedirect(req.getContextPath() + "/sale-product");
                     break;
                 case 3: 
                     resp.sendRedirect(req.getContextPath() + "/...");
@@ -109,7 +109,7 @@ public class LoginController extends HttpServlet {
 
                         session.setMaxInactiveInterval(1000 * 60 * 60 * 24);
 
-                        String redirectURL = req.getContextPath() + "/BrandOwnerTongQuan";
+                        String redirectURL = req.getContextPath() + "/so-overview";
 
                         String requestedURL = (String) session.getAttribute("requestedURL");
                         if (requestedURL != null) {

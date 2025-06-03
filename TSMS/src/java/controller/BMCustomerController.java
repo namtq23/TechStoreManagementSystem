@@ -17,8 +17,8 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author TRIEU NAM
  */
-@WebServlet(name="ManagerKhachHangController", urlPatterns={"/ManagerKhachHangController"}) //bm-customers
-public class ManagerKhachHangController extends HttpServlet {
+@WebServlet(name="BMCustomerController", urlPatterns={"/bm-customer"}) //bm-customers
+public class BMCustomerController extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -30,7 +30,7 @@ public class ManagerKhachHangController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        request.getRequestDispatcher("/WEB-INF/jsp/manager/khachhang.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/manager/customer.jsp").forward(request, response);
     } 
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

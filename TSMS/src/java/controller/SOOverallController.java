@@ -19,7 +19,7 @@ import java.sql.SQLException;
  *
  * @author TRIEU NAM
  */
-@WebServlet(name = "BrandOwnerTongQuanController", urlPatterns = {"/BrandOwnerTongQuan"}) //so-overview
+@WebServlet(name = "BrandOwnerTongQuanController", urlPatterns = {"/so-overview"}) 
 public class SOOverallController extends HttpServlet {
 
     /**
