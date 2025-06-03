@@ -13,12 +13,66 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TSMS - Nhân Viên</title>
-        <link rel="stylesheet" href="css/bm-products.css">
+        <link rel="stylesheet" href="css/bm-staff.css">
+        <link rel="stylesheet" href="css/header.css"/>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     </head>
     <body>
         <!-- Header -->
-        <jsp:include page="../common/header-bm.jsp" />
+        <header class="header">
+            <div class="header-container">
+                <div class="logo">
+                    <a href="#" class="logo">
+                        <div class="logo-icon">T</div>
+                        <span class="logo-text">TSMS</span>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="bm-overview" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        Tổng quan
+                    </a>
+                    <a href="bm-products" class="nav-item">
+                        <i class="fas fa-box"></i>
+                        Hàng hóa
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        Giao dịch
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-handshake"></i>
+                        Đối tác
+                    </a>
+                    <a href="bm-staff" class="nav-item active">
+                        <i class="fas fa-users"></i>
+                        Nhân viên
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-wallet"></i>
+                        Sổ quỹ
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-chart-bar"></i>
+                        Báo cáo
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-shopping-cart"></i>
+                        Bán Online
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-cash-register"></i>
+                        Bán hàng
+                    </a>
+                </nav>
+
+                <div class="header-right">
+                    <a href="profile" class="user-icon gradient">
+                        <i class="fas fa-user-circle fa-2x"></i>
+                    </a>
+                </div>       
+            </div>
+        </header>
 
         <div class="main-container">
             <!-- Sidebar -->

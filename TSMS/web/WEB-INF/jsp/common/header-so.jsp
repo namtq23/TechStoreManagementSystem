@@ -10,13 +10,13 @@
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="#" class="logo">
+                    <a href="so-overview"" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="#" class="nav-item">
+                    <a href="so-overview"" class="nav-item">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
@@ -24,7 +24,7 @@
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="so-orders" class="nav-item">
                         <i class="fas fa-exchange-alt"></i>
                         Giao dịch
                     </a>

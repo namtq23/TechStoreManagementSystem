@@ -45,6 +45,7 @@ public class BMProductController extends HttpServlet {
             ProductDAO p = new ProductDAO();
             List<ProductDTO> products = p.getInventoryProductListByBranchId(dbName, branchId);
             req.setAttribute("products", products);
+            req.setAttribute("service", "active");
             req.getRequestDispatcher("/WEB-INF/jsp/manager/products.jsp").forward(req, resp);
         } catch (ServletException | IOException | NumberFormatException | SQLException e) {
             System.out.println(e);
