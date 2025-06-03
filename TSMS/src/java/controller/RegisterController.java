@@ -101,6 +101,7 @@ public class RegisterController extends HttpServlet {
             // 2. Thêm thông tin ShopOwner vào SuperAdminDB
             UserDAO.insertShopOwner(newOwner);
             UserDAO.insertUserMethod(email);
+            UserDAO.insertShopOwnerToUserTable(email, newDbName);
 
             // 3. Chuyển hướng sang trang thành công
             resp.sendRedirect(req.getContextPath() + "/login");

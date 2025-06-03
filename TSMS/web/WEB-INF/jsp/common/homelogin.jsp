@@ -96,18 +96,6 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="role">Vai trò</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-user input-icon"></i>
-                                <select name="role" class="form-control" required>
-                                    <option value="" disabled selected>Chọn vai trò</option>
-                                    <option value="so">Chủ chuỗi cửa hàng</option>
-                                    <option value="staff">Nhân viên</option>
-                                </select>
-                            </div>
-                        </div>
-
                         <div class="form-options">
                             <div class="remember-me">
                                 <input type="checkbox" id="remember" name="remember">

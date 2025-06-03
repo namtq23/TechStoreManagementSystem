@@ -44,7 +44,6 @@ public class UserDAO {
         }
     }
 
-    
     //SO
     public static void insertUserMethod(String email) throws SQLException {
         ShopOwner shopOwnwer = getShopOwnwerByEmail(email);
@@ -60,7 +59,6 @@ public class UserDAO {
         }
     }
 
-    
     //SO
     public static boolean isAccountTaken(String email) throws SQLException {
         String sql = "SELECT COUNT(*) FROM ShopOwner WHERE Email = ?";
@@ -74,7 +72,6 @@ public class UserDAO {
         }
     }
 
-    
     //SO
     public static ShopOwner getShopOwnwerByEmail(String email) throws SQLException {
         ShopOwner shopOwner = null;
@@ -95,7 +92,6 @@ public class UserDAO {
         return shopOwner;
     }
 
-    
     //SO
     public static ShopOwnerDTO getShopOwnerById(int id) throws SQLException {
         ShopOwnerDTO shopOwner = null;
@@ -121,7 +117,6 @@ public class UserDAO {
         return shopOwner;
     }
 
-    
     //User
     public User getUserByEmail(String email, String dbName) throws SQLException {
         User user = null;
@@ -142,7 +137,6 @@ public class UserDAO {
         return user;
     }
 
-    
     //SO
     public List<ShopOwner> getShopOwners() throws SQLException {
         List<ShopOwner> shopOwners = new ArrayList<>();
@@ -177,7 +171,7 @@ public class UserDAO {
             stmt.executeUpdate();
         }
     }
-    
+
     //User
     public List<User> getStaffsByBranchID(int branchId, String dbName) throws SQLException {
         List<User> staffs = new ArrayList<>();
@@ -197,8 +191,23 @@ public class UserDAO {
 
         return staffs;
     }
-    
-    
+
+    //SO
+    public static void insertShopOwnerToUserTable(String email, String dbName) throws SQLException {
+        ShopOwner shopOwnwer = getShopOwnwerByEmail(email);
+        String sql = """
+        INSERT INTO Users (PasswordHash, FullName, Email, Phone, BranchID, WarehouseID, RoleID, IsActive) VALUES
+        (?, ?, ?, ?, NULL, NULL, 0, 1);
+    """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, shopOwnwer.getPassword());
+            stmt.setString(2, shopOwnwer.getFullName());
+            stmt.setString(3, shopOwnwer.getEmail());
+            stmt.setString(4, shopOwnwer.getPhone());
+            stmt.executeUpdate();
+        }
+    }
 
     private static ShopOwner extractShopOwnerFromResultSet(ResultSet rs) throws SQLException {
         ShopOwner shopOwner = new ShopOwner(
@@ -260,7 +269,7 @@ public class UserDAO {
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
 //        List<ShopOwner> shopOwners = ud.getShopOwners();  
-        List<User> users = ud.getStaffsByBranchID(1,"DTB_StoreTemp");  
+        List<User> users = ud.getStaffsByBranchID(1, "DTB_StoreTemp");
 //        User o = ud.getUserByEmail("an.nguyen@email.com", "DTB_StoreTemp");
         System.out.println(users);
     }
