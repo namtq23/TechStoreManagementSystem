@@ -19,7 +19,7 @@ import util.DBUtil;
  */
 public class ProductDAO {
 
-    public List<ProductDTO> getInventoryProductList(String dbName, int branchId) throws SQLException {
+    public List<ProductDTO> getInventoryProductListByBranchId(String dbName, int branchId) throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
 
         String sql = """

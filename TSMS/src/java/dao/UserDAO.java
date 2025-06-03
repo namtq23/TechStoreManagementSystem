@@ -21,6 +21,7 @@ import util.DBUtil;
  */
 public class UserDAO {
 
+    //SO
     public static void insertShopOwner(ShopOwner owner) throws SQLException {
         String sql = """
         INSERT INTO ShopOwner (AdminID, Password, FullName, ShopName, DatabaseName, Email, IdentificationID, Gender, Address, IsActive, CreatedAt)
@@ -43,6 +44,8 @@ public class UserDAO {
         }
     }
 
+    
+    //SO
     public static void insertUserMethod(String email) throws SQLException {
         ShopOwner shopOwnwer = getShopOwnwerByEmail(email);
         int ownerId = shopOwnwer.getOwnerId();
@@ -57,6 +60,8 @@ public class UserDAO {
         }
     }
 
+    
+    //SO
     public static boolean isAccountTaken(String email) throws SQLException {
         String sql = "SELECT COUNT(*) FROM ShopOwner WHERE Email = ?";
 
@@ -69,6 +74,8 @@ public class UserDAO {
         }
     }
 
+    
+    //SO
     public static ShopOwner getShopOwnwerByEmail(String email) throws SQLException {
         ShopOwner shopOwner = null;
 
@@ -88,6 +95,8 @@ public class UserDAO {
         return shopOwner;
     }
 
+    
+    //SO
     public static ShopOwnerDTO getShopOwnerById(int id) throws SQLException {
         ShopOwnerDTO shopOwner = null;
 
@@ -112,6 +121,8 @@ public class UserDAO {
         return shopOwner;
     }
 
+    
+    //User
     public User getUserByEmail(String email, String dbName) throws SQLException {
         User user = null;
 
@@ -131,6 +142,8 @@ public class UserDAO {
         return user;
     }
 
+    
+    //SO
     public List<ShopOwner> getShopOwners() throws SQLException {
         List<ShopOwner> shopOwners = new ArrayList<>();
 
@@ -149,6 +162,7 @@ public class UserDAO {
         return shopOwners;
     }
 
+    //SO
     public void updateIsActiveByEmail(String email, int newStatus) throws SQLException {
         String sql = """
             UPDATE ShopOwner SET IsActive = ? WHERE Email = ?;
@@ -163,6 +177,28 @@ public class UserDAO {
             stmt.executeUpdate();
         }
     }
+    
+    //User
+    public List<User> getStaffsByBranchID(int branchId, String dbName) throws SQLException {
+        List<User> staffs = new ArrayList<>();
+
+        String sql = """
+            select * from Users where RoleID = '2' and BranchID = ?
+        """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, branchId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                User staff = extractUserFromResultSet(rs);
+                staffs.add(staff);
+            }
+        }
+
+        return staffs;
+    }
+    
+    
 
     private static ShopOwner extractShopOwnerFromResultSet(ResultSet rs) throws SQLException {
         ShopOwner shopOwner = new ShopOwner(
@@ -224,7 +260,8 @@ public class UserDAO {
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
 //        List<ShopOwner> shopOwners = ud.getShopOwners();  
-        User o = ud.getUserByEmail("an.nguyen@email.com", "DTB_StoreTemp");
-        System.out.println(o);
+        List<User> users = ud.getStaffsByBranchID(1,"DTB_StoreTemp");  
+//        User o = ud.getUserByEmail("an.nguyen@email.com", "DTB_StoreTemp");
+        System.out.println(users);
     }
 }
