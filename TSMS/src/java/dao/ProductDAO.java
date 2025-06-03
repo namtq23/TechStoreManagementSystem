@@ -67,6 +67,75 @@ public class ProductDAO {
 
         return products;
     }
+    
+//    lay danh sach hang hoa 
+    public List<ProductDTO> getWarehouseProductList(String dbName, int warehouseId) throws SQLException {
+    List<ProductDTO> products = new ArrayList<>();
+
+    String sql = """
+        SELECT 
+            wp.WarehouseID,
+            p.ProductID,
+            pd.ProductDetailID,
+            wp.Quantity AS InventoryQuantity,
+            p.ProductName,
+            b.BrandName,
+            c.CategoryName,
+            s.SupplierName,
+            p.CostPrice,
+            p.RetailPrice,
+            p.ImageURL,
+            CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status,
+            pd.Description,
+            pd.SerialNumber,
+            pd.WarrantyPeriod,
+            p.CreatedAt
+        FROM 
+            WarehouseProducts wp
+            LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
+            LEFT JOIN Products p ON pd.ProductID = p.ProductID
+            LEFT JOIN Brands b ON p.BrandID = b.BrandID
+            LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+            LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+        WHERE 
+            wp.WarehouseID = ?
+    """;
+
+    try (
+        Connection conn = DBUtil.getConnectionTo(dbName);
+        PreparedStatement statement = conn.prepareStatement(sql)
+    ) {
+        statement.setInt(1, warehouseId);
+
+        ResultSet rs = statement.executeQuery();
+        while (rs.next()) {
+            ProductDTO product = new ProductDTO(
+                rs.getInt("ProductDetailId"),
+                rs.getInt("InventoryQuantity"),
+                rs.getString("Description"),
+                rs.getString("SerialNumber"),
+                rs.getString("WarrantyPeriod"),
+                rs.getInt("ProductID"),
+                rs.getString("ProductName"),
+                rs.getString("BrandName"),
+                rs.getString("CategoryName"),
+                rs.getString("SupplierName"),
+                rs.getString("CostPrice"),
+                rs.getString("RetailPrice"),
+                rs.getString("ImageURL"),
+                rs.getDate("CreatedAt"),
+                rs.getString("Status")
+            );
+
+            products.add(product);
+        }
+
+    } catch (Exception e) {
+        System.out.println("Error loading warehouse products: " + e.getMessage());
+    }
+
+    return products;
+}
 
     private static ProductDTO extractProductDTOFromResultSet(ResultSet rs) throws SQLException {
         ProductDTO productDTO = new ProductDTO(
@@ -88,10 +157,11 @@ public class ProductDAO {
         );
         return productDTO;
     }
+    
 
     public static void main(String[] args) throws SQLException {
         ProductDAO p = new ProductDAO();
-        List<ProductDTO> products = p.getInventoryProductListByBranchId("DTB_StoreTemp", 1);
+        List<ProductDTO> products = p.getWarehouseProductList("DTB_DatTech", 1);
         for (ProductDTO product : products) {
             System.out.println(product);
         }
