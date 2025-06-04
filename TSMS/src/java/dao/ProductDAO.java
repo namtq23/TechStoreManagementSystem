@@ -58,7 +58,6 @@ public class ProductDAO {
                          ip.ProductDetailID 
                      OFFSET ? ROWS
                      FETCH NEXT ? ROWS ONLY;
-                     
                      """;
         try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, branchId);
