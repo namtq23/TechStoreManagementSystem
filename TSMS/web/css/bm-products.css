@@ -361,6 +361,8 @@ body {
 }
 
 .page-btn {
+    text-decoration: none;
+    color: black;   
     width: 32px;
     height: 32px;
     border: 1px solid #ddd;
@@ -384,10 +386,13 @@ body {
     border-color: #4caf50;
 }
 
-.page-btn:disabled {
-    opacity: 0.5;
+.disabled {
+    pointer-events: none;
+    color: #aaa;
     cursor: not-allowed;
+    text-decoration: none;
 }
+
 
 /* Support Chat Button */
 .support-chat {

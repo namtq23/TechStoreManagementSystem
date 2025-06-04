@@ -32,7 +32,7 @@
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
-                    <a href="bm-products" class="nav-item">
+                    <a href="bm-products?page=1" class="nav-item">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
