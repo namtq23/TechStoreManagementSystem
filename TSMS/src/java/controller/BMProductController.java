@@ -27,28 +27,42 @@ public class BMProductController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             HttpSession session = req.getSession(true);
-            Object staffIdObj = session.getAttribute("staffId");
+            Object userIdObj = session.getAttribute("userId");
             Object roleIdObj = session.getAttribute("roleId");
             Object dbNameObj = session.getAttribute("dbName");
             Object branchIdObj = session.getAttribute("branchId");
 
-            if (staffIdObj == null || roleIdObj == null || dbNameObj == null) {
+            if (userIdObj == null || roleIdObj == null || dbNameObj == null) {
                 resp.sendRedirect("login");
                 return;
             }
 
-            int staffId = Integer.parseInt(staffIdObj.toString());
+            int userId = Integer.parseInt(userIdObj.toString());
             int roleId = Integer.parseInt(roleIdObj.toString());
             String dbName = dbNameObj.toString();
             int branchId = Integer.parseInt(branchIdObj.toString());
+            int page = 1;
+            int pageSize = 10;
+
+            if (req.getParameter("page") != null) {
+                page = Integer.parseInt(req.getParameter("page"));
+            }
+            int offset = (page - 1) * pageSize;
 
             ProductDAO p = new ProductDAO();
-            List<ProductDTO> products = p.getInventoryProductListByBranchId(dbName, branchId);
+            List<ProductDTO> products = p.getInventoryProductListByPageByBranchId(dbName, branchId, offset, pageSize);
+            int totalProducts = p.countProductsByBranchId(dbName, branchId);
+            int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
+
+            req.setAttribute("currentPage", page);
+            req.setAttribute("totalPages", totalPages);
+            req.setAttribute("totalProducts", totalProducts);
+            req.setAttribute("startProduct", offset + 1);
+            req.setAttribute("endProduct", Math.min(offset + pageSize, totalProducts));
             req.setAttribute("products", products);
-            req.setAttribute("service", "active");
             req.getRequestDispatcher("/WEB-INF/jsp/manager/products.jsp").forward(req, resp);
-        } catch (ServletException | IOException | NumberFormatException | SQLException e) {
-            System.out.println(e);
+        } catch (ServletException | IOException | NumberFormatException e) {
+            System.out.println(e.getMessage());
         }
     }
 

@@ -32,7 +32,7 @@ public class LoginController extends HttpServlet {
         int role;
         if (session != null && (session.getAttribute("staffId") != null || session.getAttribute("ownerId") != null)) {
             // Nếu đã đăng nhập, chuyển hướng đến trang chính
-            role = Integer.parseInt((String) session.getAttribute("roleId"));
+            role = (Integer) session.getAttribute("roleId");
             switch (role) {
                 case 0:
                     resp.sendRedirect(req.getContextPath() + "/so-overview");
@@ -81,13 +81,13 @@ public class LoginController extends HttpServlet {
             if (user != null && user.getPassword().equals(password)) {
                 HttpSession session = req.getSession(true);
                 System.out.println(user.getEmail());
-                session.setAttribute("staffId", user.getUserID());
+                session.setAttribute("userId", user.getUserID());
                 session.setAttribute("roleId", user.getRoleId());
                 session.setAttribute("dbName", dbNameStaff);
                 session.setAttribute("branchId", user.getBranchId());
                 session.setAttribute("warehouseId", user.getWarehouseId());
                 System.out.println("Session created: " + session.getId());
-                System.out.println("staffId set: " + session.getAttribute("staffId"));
+                System.out.println("userId set: " + session.getAttribute("userId"));
                 System.out.println("roleId set: " + session.getAttribute("roleId"));
                 System.out.println("dbName set: " + session.getAttribute("dbName"));
 
