@@ -100,11 +100,18 @@ public class Validate {
             return "NULL";
         }
     }
-
+    public static String formatCostPriceToVND(double costPrice) {
+        try {
+            NumberFormat vndFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
+            return vndFormat.format(costPrice) + " ₫";
+        } catch (Exception e) {
+            return "0 ₫";
+        }
+    }
     public static void main(String[] args) {
         // Test hàm với đầu vào mới
         String input = "hanh tinh xanh";
         System.out.println("Input: " + input + " -> Output: " + shopNameConverter(input));
     }
-
+ 
 }

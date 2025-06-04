@@ -36,8 +36,6 @@ public class ProductDTO extends Product{
         this.warrantyPeriod = warrantyPeriod;
     }
 
-    
-    
     public int getProductDetailId() {
         return productDetailId;
     }
@@ -77,7 +75,7 @@ public class ProductDTO extends Product{
     public void setWarrantyPeriod(String warrantyPeriod) {
         this.warrantyPeriod = warrantyPeriod;
     }
-
+  
     @Override
     public String toString() {
         return "ProductDTO{" + "productDetailId=" + productDetailId + ", quantity=" + quantity + ", description=" + description + ", serialNum=" + serialNum + ", warrantyPeriod=" + warrantyPeriod + '}';
