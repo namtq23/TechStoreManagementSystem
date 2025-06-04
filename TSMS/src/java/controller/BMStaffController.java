@@ -28,17 +28,17 @@ public class BMStaffController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             HttpSession session = req.getSession(true);
-            Object staffIdObj = session.getAttribute("staffId");
+            Object userIdObj = session.getAttribute("userId");
             Object roleIdObj = session.getAttribute("roleId");
             Object dbNameObj = session.getAttribute("dbName");
             Object branchIdObj = session.getAttribute("branchId");
 
-            if (staffIdObj == null || roleIdObj == null || dbNameObj == null) {
+            if (userIdObj == null || roleIdObj == null || dbNameObj == null) {
                 resp.sendRedirect("login");
                 return;
             }
 
-            int staffId = Integer.parseInt(staffIdObj.toString());
+            int userId = Integer.parseInt(userIdObj.toString());
             int roleId = Integer.parseInt(roleIdObj.toString());
             String dbName = dbNameObj.toString();
             int branchId = Integer.parseInt(branchIdObj.toString());
