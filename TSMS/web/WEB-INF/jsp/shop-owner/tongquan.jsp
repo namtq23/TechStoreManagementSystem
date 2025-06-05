@@ -24,7 +24,7 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="so-overview"" class="nav-item active">
+                    <a href="so-overview"" class="nav-item">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
@@ -40,7 +40,7 @@
                         <i class="fas fa-handshake"></i>
                         Đối tác
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="so-staff" class="nav-item">
                         <i class="fas fa-users"></i>
                         Nhân viên
                     </a>
@@ -52,23 +52,21 @@
                         <i class="fas fa-chart-bar"></i>
                         Báo cáo
                     </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-shopping-cart"></i>
-                        Bán Online
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-cash-register"></i>
-                        Bán hàng
-                    </a>
                 </nav>
 
                 <div class="header-right">
-                    <a href="profile" class="user-icon gradient">
-                        <i class="fas fa-user-circle fa-2x"></i>
-                    </a>
-                </div>       
+                    <div class="user-dropdown">
+                        <a href="#" class="user-icon gradient" id="dropdownToggle">
+                            <i class="fas fa-user-circle fa-2x"></i>
+                        </a>
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="logout" class="dropdown-item">Đăng xuất</a>
+                        </div>
+                    </div>
+                </div>        
             </div>
-        </header>
+        </header>F
 
         <div class="main-container">
             <!-- Main Content -->
@@ -141,14 +139,15 @@
                             </select>
                         </div>
                     </div>
-                    <form>
+                    <form action="/so-overview" method="GET">
                         <div class="chart-filters">
-                            <button type="submit" class="filter-btn active" onclick="sendFilter('day')">Theo ngày</button>
-                        <button type="submit"  class="filter-btn" onclick="sendFilter('hour')">Theo giờ</button>
-                        <button type="submit"  class="filter-btn" onclick="sendFilter('weekday')">Theo thứ</button>
-                    </div>
+                            <button type="submit" name="filterType" value="day" class="filter-btn">Theo ngày</button>
+                            <button type="submit" name="filterType" value="hour" class="filter-btn">Theo giờ</button>
+                            <button type="submit" name="filterType" value="weekday" class="filter-btn">Theo thứ</button>
+                        </div>
                     </form>
-                    
+
+
 
 
                     <div class="chart-container">
@@ -311,6 +310,23 @@
                         }
                     }
                 }
+            }
+        });
+    </script>
+
+    <script>
+        const toggle = document.getElementById("dropdownToggle");
+        const menu = document.getElementById("dropdownMenu");
+
+        toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        });
+
+        // Đóng dropdown nếu click ra ngoài
+        document.addEventListener("click", function (e) {
+            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                menu.style.display = "none";
             }
         });
     </script>

@@ -23,7 +23,7 @@ import util.Validate;
  *
  * @author TRIEU NAM
  */
-@WebServlet(name = "BrandOwnerTongQuanController", urlPatterns = {"/so-overview"}) 
+@WebServlet(name = "BrandOwnerTongQuanController", urlPatterns = {"/so-overview"})
 public class SOOverallController extends HttpServlet {
 
     /**
@@ -38,39 +38,40 @@ public class SOOverallController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        String filterType = request.getParameter("filterType");
+
+        if ("day".equals(filterType)) {
+            // xử lý theo ngày
+        } else if ("hour".equals(filterType)) {
+            // xử lý theo giờ
+        } else if ("weekday".equals(filterType)) {
+            // xử lý theo thứ
+        }
 
         try {
+
             // Lấy tên CSDL từ session
             String dbName = (String) request.getSession().getAttribute("dbName");
 
             // Gọi DAO để lấy tổng thu nhập hôm nay
             CashFlowDAO cashFlowDAO = new CashFlowDAO();
-            
+
             BigDecimal incomeTotalToDay = cashFlowDAO.getTodayIncome(dbName);
-            
-            
+
             Map<String, Object> MonthlyRevenueByDay = cashFlowDAO.getMonthlyRevenueByDay(dbName);
-            
-            
-            
-            
-            
+
             int invoiceToDay = cashFlowDAO.getTodayInvoiceCount(dbName);
-            
+
             BigDecimal yesterdayIncome = cashFlowDAO.getYesterdayIncome(dbName);
-   
+
             LocalDate sameDayLastMonth = Validate.getSameDayPreviousMonthSafe(1); // hôm nay của tháng trước
-            
-            BigDecimal sameDayLastMonthIncome = cashFlowDAO.getSameDayLastMonthIncome(dbName,sameDayLastMonth);
-            
-            
-            
-            
+
+            BigDecimal sameDayLastMonthIncome = cashFlowDAO.getSameDayLastMonthIncome(dbName, sameDayLastMonth);
+
             double percentageChange = Validate.calculatePercentageChange(incomeTotalToDay, yesterdayIncome);
             double monthlyChange = Validate.calculatePercentageChange(incomeTotalToDay, sameDayLastMonthIncome);
             // Đặt vào request để render ra JSP
-            
-            
+
             request.setAttribute("revenueData", MonthlyRevenueByDay);
             request.setAttribute("percentageChange", percentageChange);
             request.setAttribute("invoiceToDay", invoiceToDay);
@@ -85,9 +86,6 @@ public class SOOverallController extends HttpServlet {
         // Forward sang JSP
         request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/tongquan.jsp").forward(request, response);
     }
-    
-    
-    
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
