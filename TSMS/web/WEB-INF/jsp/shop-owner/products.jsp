@@ -145,13 +145,12 @@
                     </div><button class="btn btn-success">
                         Tìm Kiếm
                     </button>
-                    <form action="so-products" method="get" style="display: inline;">
+
                         <input type="hidden" name="action" value="showCreateForm">
                         <button type="submit" class="btn btn-success">
                             <i class="fas fa-plus"></i>
                             Thêm mới
                         </button>
-                    </form>
                     <button class="btn btn-success">
                         <i class="fas fa-download"></i>
                         Import

@@ -280,6 +280,10 @@ public class ProductDAO {
     }
 
 
+
+
+
+
     private static ProductDTO extractProductDTOFromResultSet(ResultSet rs) throws SQLException {
         ProductDTO productDTO = new ProductDTO(
                   rs.getInt("ProductDetailId"),
