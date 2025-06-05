@@ -98,7 +98,7 @@ public class Validate {
             Double costPrice = Double.valueOf(costPriceStr);
 
             NumberFormat vndFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-            String formattedAmount = vndFormat.format(costPrice).replace("₫", "VND");
+            String formattedAmount = vndFormat.format(costPrice).replace("₫", "₫");
 
             return formattedAmount;
         } catch (NumberFormatException e) {
