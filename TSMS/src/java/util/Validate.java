@@ -4,8 +4,13 @@
  */
 package util;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Locale;
 
@@ -99,6 +104,39 @@ public class Validate {
         } catch (NumberFormatException e) {
             return "NULL";
         }
+    }
+
+    public static String formatCurrency(BigDecimal amount) {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("vi", "VN"));
+        symbols.setGroupingSeparator('.');
+        DecimalFormat formatter = new DecimalFormat("#,###", symbols);
+        return formatter.format(amount);  // trả về chuỗi như "5.000.000"
+    }
+
+    public static double calculatePercentageChange(BigDecimal today, BigDecimal yesterday) {
+        if (yesterday.compareTo(BigDecimal.ZERO) == 0) {
+            if (today.compareTo(BigDecimal.ZERO) == 0) {
+                return 0.0;
+            } else {
+                return 100.0;
+            }
+        }
+        return today.subtract(yesterday)
+                .divide(yesterday, 2, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .doubleValue();
+    }
+
+    public static LocalDate getSameDayPreviousMonthSafe(int monthsAgo) {
+        LocalDate today = LocalDate.now();
+        // Lùi lại 'monthsAgo' tháng
+        LocalDate previousMonth = today.minusMonths(monthsAgo);
+
+        // Xử lý nếu ngày hiện tại không tồn tại trong tháng trước (vd: 31 → 30 hoặc 28/29)
+        int lastDayOfMonth = previousMonth.lengthOfMonth();
+        int day = Math.min(today.getDayOfMonth(), lastDayOfMonth);
+
+        return LocalDate.of(previousMonth.getYear(), previousMonth.getMonth(), day);
     }
 
     public static void main(String[] args) {
