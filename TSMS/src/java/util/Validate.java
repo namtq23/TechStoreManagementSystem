@@ -140,6 +140,7 @@ public class Validate {
         return LocalDate.of(previousMonth.getYear(), previousMonth.getMonth(), day);
     }
 
+
     public static String formatCostPriceToVND(double costPrice) {
         try {
             NumberFormat vndFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
