@@ -154,7 +154,8 @@ body {
 }
 
 .invoice-table td {
-    padding: 16px;
+    justify-content: center;
+    padding: 10px;
     border-bottom: 1px solid #f1f5f9;
     font-size: 14px;
 }

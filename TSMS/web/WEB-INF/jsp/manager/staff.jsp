@@ -40,7 +40,7 @@
                         <i class="fas fa-exchange-alt"></i>
                         Giao dịch
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="bm-customer" class="nav-item">
                         <i class="fas fa-handshake"></i>
                         Đối tác
                     </a>

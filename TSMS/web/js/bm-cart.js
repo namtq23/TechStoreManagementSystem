@@ -17,7 +17,7 @@ class TSMSCashier {
 
     async fetchProducts() {
         try {
-            const response = await fetch('/TSMS/products-json'); 
+            const response = await fetch('/TSMS/products-json');
             if (!response.ok)
                 throw new Error("Lỗi khi fecth");
 
@@ -132,7 +132,7 @@ class TSMSCashier {
         }
 
         this.updateSummary();
-        this.showNotification(`Đã thêm ${product.name} vào hóa đơn`);
+        this.showNotification(`Đã thêm ${product.description} vào hóa đơn`);
     }
 
     addNewInvoiceRow(product) {
@@ -142,7 +142,7 @@ class TSMSCashier {
         const row = document.createElement('tr');
         row.className = 'item-row';
         row.innerHTML = `
-            <td>${rowCount + 1}</td>
+            <td style="justify-content: center; display: flex;">${rowCount + 1}</td>
             <td>${product.serialNum}</td>
             <td>${product.description}</td>
             <td>
