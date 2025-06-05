@@ -105,7 +105,7 @@ public class Validate {
             return "NULL";
         }
     }
-<<<<<<< namtq-SO-overview-page
+
 
     public static String formatCurrency(BigDecimal amount) {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("vi", "VN"));
@@ -139,6 +139,7 @@ public class Validate {
 
         return LocalDate.of(previousMonth.getYear(), previousMonth.getMonth(), day);
     }
+
 
 
     public static String formatCostPriceToVND(double costPrice) {
