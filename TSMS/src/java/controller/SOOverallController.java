@@ -13,7 +13,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.Map;
+import util.Validate;
 
 /**
  *
@@ -41,13 +45,37 @@ public class SOOverallController extends HttpServlet {
 
             // Gọi DAO để lấy tổng thu nhập hôm nay
             CashFlowDAO cashFlowDAO = new CashFlowDAO();
-            BigDecimal incomeTotal = cashFlowDAO.getTodayIncome(dbName);
-            int totalInvoice = cashFlowDAO.getTodayInvoiceCount(dbName);
+            
+            BigDecimal incomeTotalToDay = cashFlowDAO.getTodayIncome(dbName);
             
             
+            Map<String, Object> MonthlyRevenueByDay = cashFlowDAO.getMonthlyRevenueByDay(dbName);
+            
+            
+            
+            
+            
+            int invoiceToDay = cashFlowDAO.getTodayInvoiceCount(dbName);
+            
+            BigDecimal yesterdayIncome = cashFlowDAO.getYesterdayIncome(dbName);
+   
+            LocalDate sameDayLastMonth = Validate.getSameDayPreviousMonthSafe(1); // hôm nay của tháng trước
+            
+            BigDecimal sameDayLastMonthIncome = cashFlowDAO.getSameDayLastMonthIncome(dbName,sameDayLastMonth);
+            
+            
+            
+            
+            double percentageChange = Validate.calculatePercentageChange(incomeTotalToDay, yesterdayIncome);
+            double monthlyChange = Validate.calculatePercentageChange(incomeTotalToDay, sameDayLastMonthIncome);
             // Đặt vào request để render ra JSP
-            request.setAttribute("totalInvoice", totalInvoice);
-            request.setAttribute("incomeTotal", incomeTotal);
+            
+            
+            request.setAttribute("revenueData", MonthlyRevenueByDay);
+            request.setAttribute("percentageChange", percentageChange);
+            request.setAttribute("invoiceToDay", invoiceToDay);
+            request.setAttribute("incomeTotal", Validate.formatCurrency(incomeTotalToDay));
+            request.setAttribute("monthlyChange", monthlyChange);
 
         } catch (SQLException e) {
             e.printStackTrace(); // Log lỗi
@@ -57,6 +85,9 @@ public class SOOverallController extends HttpServlet {
         // Forward sang JSP
         request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/tongquan.jsp").forward(request, response);
     }
+    
+    
+    
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**

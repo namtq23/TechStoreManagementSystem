@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
@@ -81,7 +82,7 @@
                                 <i class="fas fa-dollar-sign"></i>
                             </div>
                             <div class="metric-content">
-                                <div class="metric-label">${totalInvoice} Hóa đơn</div>
+                                <div class="metric-label">${invoiceToDay} Hóa đơn</div>
                                 <div class="metric-value">${incomeTotal}</div>
                                 <div class="metric-subtitle">Doanh thu</div>
                             </div>
@@ -98,22 +99,31 @@
                                                 </div>
                                             </div>-->
 
-                        <div class="metric-card growth-1">
-                            <div class="metric-icon">
-                                <i class="fas fa-arrow-up"></i>
+                        <c:set var="bgColor" value="${percentageChange lt 0 ? '#f24444a1' : '#e8f5e8'}" />
+                        <c:set var="iconClass" value="${percentageChange lt 0 ? 'fa-arrow-down' : 'fa-arrow-up'}"/>
+                        <c:set var="iconBg" value="${percentageChange lt 0 ? 'red' : '#4caf50'}"/>
+
+                        <c:set var="bgColorMonth" value="${monthlyChange lt 0 ? '#f24444a1' : '#e8f5e8'}" />
+                        <c:set var="iconClassMonth" value="${monthlyChange lt 0 ? 'fa-arrow-down' : 'fa-arrow-up'}"/>
+                        <c:set var="iconBgMonth" value="${monthlyChange lt 0 ? 'red' : '#4caf50'}"/>
+
+
+                        <div class="metric-card growth-1" style="background: ${bgColor};">
+                            <div class="metric-icon" style="background:${iconBg}">
+                                <i class="fas ${iconClass}"></i>
                             </div>
                             <div class="metric-content">
-                                <div class="metric-value">250.00%</div>
+                                <div class="metric-value">${percentageChange}%</div>
                                 <div class="metric-subtitle">So với hôm qua</div>
                             </div>
                         </div>
 
-                        <div class="metric-card growth-2">
-                            <div class="metric-icon">
-                                <i class="fas fa-arrow-up"></i>
+                        <div class="metric-card growth-2" style="background: ${bgColorMonth};">
+                            <div class="metric-icon" style="background: ${iconBgMonth}";>
+                                <i class="fas ${iconClassMonth}"></i>
                             </div>
-                            <div class="metric-content">
-                                <div class="metric-value">133.33%</div>
+                            <div class="metric-content" >
+                                <div class="metric-value">${monthlyChange}%</div>
                                 <div class="metric-subtitle">So với cùng kỳ tháng trước</div>
                             </div>
                         </div>
@@ -127,19 +137,26 @@
                         <div class="chart-controls">
                             <select class="period-select">
                                 <option>Tháng này</option>
+                                <option>7 ngày qua</option>
                             </select>
                         </div>
                     </div>
-
-                    <div class="chart-filters">
-                        <button class="filter-btn active">Theo ngày</button>
-                        <button class="filter-btn">Theo giờ</button>
-                        <button class="filter-btn">Theo thứ</button>
+                    <form>
+                        <div class="chart-filters">
+                            <button type="submit" class="filter-btn active" onclick="sendFilter('day')">Theo ngày</button>
+                        <button type="submit"  class="filter-btn" onclick="sendFilter('hour')">Theo giờ</button>
+                        <button type="submit"  class="filter-btn" onclick="sendFilter('weekday')">Theo thứ</button>
                     </div>
+                    </form>
+                    
+
 
                     <div class="chart-container">
                         <div class="no-data">
-                            <canvas id="revenueChart" style="width:100%; height: 100%;display: block"></canvas>
+                            <canvas id="monthlyRevenueByDayChart"></canvas>
+                                <c:set var="labels" value="${revenueData.labels}" />
+                                <c:set var="data" value="${revenueData.data}" />
+                                <c:set var="chartTitle" value="${revenueData.chartTitle}" />
                         </div>
                     </div>
                 </section>
@@ -154,6 +171,7 @@
                             </select>
                             <select class="period-select">
                                 <option>Tháng này</option>
+                                <option>7 ngày qua</option>
                             </select>
                         </div>
                     </div>
@@ -258,28 +276,39 @@
             <span>Hỗ trợ:1900 6522</span>
         </div>
     </body>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const ctx = document.getElementById('monthlyRevenueByDayChart').getContext('2d');
+        const labels = ${labels};
+        const data = ${data};
+
         const revenueChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ["Italy", "France", "Spain", "USA", "Argentina"],
+                labels: labels,
                 datasets: [{
-                        label: "Doanh thu (triệu VND)",
-                        data: [55, 49, 44, 24, 15],
-                        backgroundColor: ["red", "green", "blue", "orange", "brown"]
+                        label: "Doanh thu (VND)",
+                        data: data,
+                        backgroundColor: "#338DF6"
                     }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: {display: false},
                     title: {
                         display: true,
-                        text: 'Biểu đồ Doanh Thu (Demo)'
+                        text: "${chartTitle}"
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString('vi-VN') + ' đ';
+                            }
+                        }
                     }
                 }
             }
