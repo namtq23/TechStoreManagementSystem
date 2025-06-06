@@ -162,14 +162,29 @@
                     </form>
 
 
+                  <c:set var="hasData" value="false"/>
+                    <c:forEach var="data" items="${revenueData.data}">
+                        <c:if test="${data gt 0}">
+                            <c:set var="hasData" value="true"/>
+                        </c:if>
+
+                    </c:forEach>
 
 
                     <div class="chart-container">
                         <div class="no-data">
-                            <canvas id="monthlyRevenueByDayChart"></canvas>
-                                <c:set var="labels" value="${revenueData.labels}" />
-                                <c:set var="data" value="${revenueData.data}" />
-                                <c:set var="chartTitle" value="${revenueData.chartTitle}" />
+                        <c:if test="${not hasData}">
+                                <div class="no-data">
+                                    <i class="fas fa-box"></i>
+                                    <p>Không có dữ liệu</p>
+                                </div>
+                            </c:if>
+                            <c:if test="${hasData}">
+                                <canvas id="monthlyRevenueByDayChart"></canvas>
+                                    <c:set var="labels" value="${revenueData.labels}" />
+                                    <c:set var="data" value="${revenueData.data}" />
+                                    <c:set var="chartTitle" value="${revenueData.chartTitle}" />
+                                </c:if>
                         </div>
                     </div>
                 </section>
@@ -292,52 +307,52 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-    const ctx = document.getElementById('monthlyRevenueByDayChart').getContext('2d');
-    
-    // Convert BigDecimal to proper JavaScript numbers
-    const labels = [
+        const ctx = document.getElementById('monthlyRevenueByDayChart').getContext('2d');
+
+        // Convert BigDecimal to proper JavaScript numbers
+        const labels = [
         <c:forEach var="label" items="${revenueData.labels}" varStatus="status">
-            "${label}"<c:if test="${!status.last}">,</c:if>
+        "${label}"<c:if test="${!status.last}">,</c:if>
         </c:forEach>
-    ];
-    
-    const data = [
+        ];
+
+        const data = [
         <c:forEach var="amount" items="${revenueData.data}" varStatus="status">
             ${amount}<c:if test="${!status.last}">,</c:if>
         </c:forEach>
-    ];
+        ];
 
-    const revenueChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Doanh thu (VND)",
-                data: data,
-                backgroundColor: "#338DF6"
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {display: false},
-                title: {
-                    display: true,
-                    text: "${revenueData.chartTitle}"
-                }
+        const revenueChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                        label: "Doanh thu (VND)",
+                        data: data,
+                        backgroundColor: "#338DF6"
+                    }]
             },
-            scales: {
-                y: {
-                    ticks: {
-                        callback: function (value) {
-                            return value.toLocaleString('vi-VN') + ' đ';
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {display: false},
+                    title: {
+                        display: true,
+                        text: "${revenueData.chartTitle}"
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString('vi-VN') + ' đ';
+                            }
                         }
                     }
                 }
             }
-        }
-    });
-</script>
+        });
+    </script>
 
     <script>
         const toggle = document.getElementById("dropdownToggle");
