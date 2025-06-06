@@ -139,11 +139,25 @@
                             </select>
                         </div>
                     </div>
-                    <form action="/so-overview" method="GET">
+                    <form action="so-overview" method="GET">
                         <div class="chart-filters">
-                            <button type="submit" name="filterType" value="day" class="filter-btn">Theo ngày</button>
-                            <button type="submit" name="filterType" value="hour" class="filter-btn">Theo giờ</button>
-                            <button type="submit" name="filterType" value="weekday" class="filter-btn">Theo thứ</button>
+                            <c:set var="currentFilter" value="${filterType}" />
+
+                            <button type="submit" name="filterType" value="day"
+                                    class="filter-btn ${currentFilter == 'day' ? 'active' : ''}">
+                                Theo ngày
+                            </button>
+
+                            <button type="submit" name="filterType" value="hour"
+                                    class="filter-btn ${currentFilter == 'hour' ? 'active' : ''}">
+                                Theo giờ
+                            </button>
+
+                            <button type="submit" name="filterType" value="weekday"
+                                    class="filter-btn ${currentFilter == 'weekday' ? 'active' : ''}">
+                                Theo thứ
+                            </button>
+
                         </div>
                     </form>
 
@@ -278,41 +292,52 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const ctx = document.getElementById('monthlyRevenueByDayChart').getContext('2d');
-        const labels = ${labels};
-        const data = ${data};
+    const ctx = document.getElementById('monthlyRevenueByDayChart').getContext('2d');
+    
+    // Convert BigDecimal to proper JavaScript numbers
+    const labels = [
+        <c:forEach var="label" items="${revenueData.labels}" varStatus="status">
+            "${label}"<c:if test="${!status.last}">,</c:if>
+        </c:forEach>
+    ];
+    
+    const data = [
+        <c:forEach var="amount" items="${revenueData.data}" varStatus="status">
+            ${amount}<c:if test="${!status.last}">,</c:if>
+        </c:forEach>
+    ];
 
-        const revenueChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                        label: "Doanh thu (VND)",
-                        data: data,
-                        backgroundColor: "#338DF6"
-                    }]
+    const revenueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Doanh thu (VND)",
+                data: data,
+                backgroundColor: "#338DF6"
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {display: false},
+                title: {
+                    display: true,
+                    text: "${revenueData.chartTitle}"
+                }
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {display: false},
-                    title: {
-                        display: true,
-                        text: "${chartTitle}"
-                    }
-                },
-                scales: {
-                    y: {
-                        ticks: {
-                            callback: function (value) {
-                                return value.toLocaleString('vi-VN') + ' đ';
-                            }
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function (value) {
+                            return value.toLocaleString('vi-VN') + ' đ';
                         }
                     }
                 }
             }
-        });
-    </script>
+        }
+    });
+</script>
 
     <script>
         const toggle = document.getElementById("dropdownToggle");
