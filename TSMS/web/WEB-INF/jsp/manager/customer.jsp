@@ -88,6 +88,7 @@
                             <label class="checkbox-item">
                                 <input type="radio" id="active" name="employeeStatus" value="active" checked="">
                                 <span for="active">Tổng hợp</span><br>
+                                
                             </label>
                             <label class="checkbox-item">
                                 <input type="radio" id="inactive" name="employeeStatus" value="inactive">
@@ -103,11 +104,16 @@
                 <div class="page-header">
                     <h1>Khách hàng</h1>
                     <div class="header-actions">
-                        <div class="search-container">
-                            <i class="fas fa-search"></i>
-                            <input type="text" placeholder="Theo mã, tên hàng" class="search-input">
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
+
+<form action="bm-customer" method="get" class="search-container">
+    <i class="fas fa-search"></i>
+    <input type="text" name="keyword" placeholder="Theo mã, tên khách hàng" class="search-input"
+           value="${param.keyword != null ? param.keyword : ''}" />
+    <button type="submit" style="border: none; background: none;">
+        <i class="fas fa-chevron-down"></i>
+    </button>
+</form>
+
                         <button class="btn btn-success">
                             <i class="fas fa-plus"></i>
                             Thêm mới
@@ -146,6 +152,8 @@
     <td><%= customer.getUpdatedAt() != null ? Validate.formatDateTime(customer.getUpdatedAt()) : "" %></td>
 </tr>
 <% } %>
+
+
 
 
                         </tbody>

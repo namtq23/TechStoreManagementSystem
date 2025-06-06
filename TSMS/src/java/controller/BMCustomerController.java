@@ -38,11 +38,20 @@ public class BMCustomerController extends HttpServlet {
         try {
             int staffId = Integer.parseInt(staffIdObj.toString());
             int roleId = Integer.parseInt(roleIdObj.toString());
+            
             String dbName = dbNameObj.toString();
+            String keyword = req.getParameter("keyword");
 
             CustomerDAO customerDAO = new CustomerDAO();
-            List<Customer> customers = customerDAO.getAllCustomers(dbName);
+            List<Customer> customers ;
+//= customerDAO.getAllCustomers(dbName)
+if (keyword != null && !keyword.trim().isEmpty()) {
+    customers = customerDAO.searchCustomersByName(dbName, keyword.trim());
+} else {
+    customers = customerDAO.getAllCustomers(dbName);
+}
 
+            
             req.setAttribute("customers", customers);
             req.setAttribute("service", "active"); // nếu cần highlight menu hay tương tự
 
