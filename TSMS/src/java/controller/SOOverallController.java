@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 import util.Validate;
 
@@ -26,27 +27,15 @@ import util.Validate;
 @WebServlet(name = "BrandOwnerTongQuanController", urlPatterns = {"/so-overview"})
 public class SOOverallController extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        String filterType = request.getParameter("filterType");
 
-        if ("day".equals(filterType)) {
-            // xử lý theo ngày
-        } else if ("hour".equals(filterType)) {
-            // xử lý theo giờ
-        } else if ("weekday".equals(filterType)) {
-            // xử lý theo thứ
+        String filterType = request.getParameter("filterType");
+        if (filterType == null || filterType.isEmpty()) {
+            filterType = "day";
         }
+        Map<String, Object> Revenue = new HashMap<>();
 
         try {
 
@@ -58,7 +47,29 @@ public class SOOverallController extends HttpServlet {
 
             BigDecimal incomeTotalToDay = cashFlowDAO.getTodayIncome(dbName);
 
-            Map<String, Object> MonthlyRevenueByDay = cashFlowDAO.getMonthlyRevenueByDay(dbName);
+            // CHỈ GỌI 1 LẦN theo filterType
+            switch (filterType) {
+                case "day":
+                    Revenue = cashFlowDAO.getMonthlyRevenueByDay(dbName);
+                    break;
+                case "weekday":
+                    Revenue = cashFlowDAO.getMonthlyRevenueByWeekday(dbName);
+                    break;
+                case "hour":
+                    Revenue = cashFlowDAO.getMonthlyRevenueByHour(dbName);
+                    break;
+                default:
+                    Revenue = cashFlowDAO.getMonthlyRevenueByDay(dbName);
+                    break;
+            }
+
+            // XÓA DÒNG NÀY - Đây là nguyên nhân gọi 2 lần:
+            // Revenue = cashFlowDAO.getMonthlyRevenueByWeekday(dbName);
+            // Debug dữ liệu trước khi gửi tới JSP
+            System.out.println("Final Revenue Data:");
+            System.out.println("Labels: " + Revenue.get("labels"));
+            System.out.println("Data: " + Revenue.get("data"));
+            System.out.println("Chart Title: " + Revenue.get("chartTitle"));
 
             int invoiceToDay = cashFlowDAO.getTodayInvoiceCount(dbName);
 
@@ -71,8 +82,8 @@ public class SOOverallController extends HttpServlet {
             double percentageChange = Validate.calculatePercentageChange(incomeTotalToDay, yesterdayIncome);
             double monthlyChange = Validate.calculatePercentageChange(incomeTotalToDay, sameDayLastMonthIncome);
             // Đặt vào request để render ra JSP
-
-            request.setAttribute("revenueData", MonthlyRevenueByDay);
+            request.setAttribute("filterType", filterType);
+            request.setAttribute("revenueData", Revenue);
             request.setAttribute("percentageChange", percentageChange);
             request.setAttribute("invoiceToDay", invoiceToDay);
             request.setAttribute("incomeTotal", Validate.formatCurrency(incomeTotalToDay));
