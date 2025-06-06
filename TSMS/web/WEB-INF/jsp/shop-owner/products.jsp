@@ -142,13 +142,15 @@
                     <div class="search-container">
                         <i class="fas fa-search"></i>
                         <input type="text" placeholder="Theo mã, tên hàng" class="search-input">
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <button class="btn btn-success">
-                        <i class="fas fa-plus"></i>
-                        Thêm mới
-                        <i class="fas fa-chevron-down"></i>
+                    </div><button class="btn btn-success">
+                        Tìm Kiếm
                     </button>
+
+                        <input type="hidden" name="action" value="showCreateForm">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-plus"></i>
+                            Thêm mới
+                        </button>
                     <button class="btn btn-success">
                         <i class="fas fa-download"></i>
                         Import
@@ -169,10 +171,10 @@
                 <table class="products-table">
                     <thead>
                         <tr>
-<!--                            <th class="checkbox-col">
-                                <input type="checkbox">
-                            </th>-->
-                            <th class="image-col"></th>
+                            <th class="checkbox-col">
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                            <th></th>
                             <th>Mã hàng</th>
                             <th>Tên hàng</th>
                             <th>Giá bán</th>
@@ -180,51 +182,73 @@
                             <th>Tồn kho</th>
                             <th>Thời gian tạo</th>
                             <th>Trạng thái</th>
+                            <th style="justify-content: center;text-align: center">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% List<ProductDTO> products = (List<ProductDTO>) request.getAttribute("products");
                             for (ProductDTO product : products) { %>
-                        <tr class="">
-                            <td><input type="checkbox"></td>
+                        <tr>
+                            <td><input type="checkbox" class="product-checkbox"></td>
                             <td><div class="product-image phone"></div></td>
                             <td><%= product.getProductDetailId() %></td>
                             <td><%= product.getProductName() %></td>
-                            <td><%= Validate.formatCostPriceToVND(product.getRetailPrice())%></td>
-                            <td><%= Validate.formatCostPriceToVND(product.getCostPrice())%></td>
+                            <td><%= Validate.formatCostPriceToVND(product.getRetailPrice()) %></td>
+                            <td><%= Validate.formatCostPriceToVND(product.getCostPrice()) %></td>
                             <td><%= product.getQuantity() %></td>
                             <td><%= Validate.formatDateTime(product.getCreatedAt()) %></td>
                             <td><%= product.getIsActive() %></td>
+                            <td style="justify-content: center;align-content: center; display: flex;gap: 5px">
+                                <!-- Nút Chi Tiết -->
+                                <a href="./so-products?action=view&productDetailId=<%= product.getProductDetailId() %>" 
+                                   class="btn btn-success" 
+                                   style="text-decoration: none; width: 79px;background:#2196F3">Chi tiết</a>
+    
+                           
+                                <!-- Nút Xoá -->
+                                <a href="./so-products?action=delete&productDetailId=<%= product.getProductDetailId() %>" 
+                                   class="btn btn-success" style="text-decoration: none;background: #f44336;" onclick="return confirm('Bạn có chắc chắn muốn xoá sản phẩm này không?');">Xoá</a>
+                                   
+                            </td>
                         </tr>
-                        <%}%>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
 
             <!-- Pagination -->
-            <div class="pagination-container">
-                <div class="pagination-info">
-                    Hiển thị 1 - 15 / Tổng số 30 hàng hóa
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        Hiển thị ${startProduct} - ${endProduct} / Tổng số ${totalProducts} hàng hóa
+                    </div>
+                    <div class="pagination">
+                        <a href="so-products?page=1" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="so-products?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <a href="so-products?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                        </c:forEach>
+
+                        <a href="so-products?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="so-products?page=${totalPages}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </div>
                 </div>
-                <div class="pagination">
-                    <button class="page-btn" disabled>
-                        <i class="fas fa-angle-double-left"></i>
-                    </button>
-                    <button class="page-btn" disabled>
-                        <i class="fas fa-angle-left"></i>
-                    </button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">
-                        <i class="fas fa-angle-right"></i>
-                    </button>
-                    <button class="page-btn">
-                        <i class="fas fa-angle-double-right"></i>
-                    </button>
-                </div>
-            </div>
+
         </main>
     </div>
+                    <script>
+                document.getElementById('selectAll').addEventListener('change', function () {
+                const checkboxes = document.querySelectorAll('.product-checkbox');
+                checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+                    </script>
 
     <!-- Support Chat Button -->
     <div class="support-chat">
