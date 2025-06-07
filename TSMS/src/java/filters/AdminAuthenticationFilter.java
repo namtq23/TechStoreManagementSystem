@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @WebFilter(filterName = "AuthenticationFilter", urlPatterns = {"/sa-home"})
-public class AuthenticationFilter implements Filter {
+public class AdminAuthenticationFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -32,6 +32,8 @@ public class AuthenticationFilter implements Filter {
         } else {
             chain.doFilter(request, response); 
         }
+        
+        
     }
 
     @Override

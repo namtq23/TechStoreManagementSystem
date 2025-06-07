@@ -32,7 +32,7 @@
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
-                    <a href="bm-products" class="nav-item">
+                    <a href="bm-products?page=1" class="nav-item">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
@@ -44,7 +44,7 @@
                         <i class="fas fa-handshake"></i>
                         Đối tác
                     </a>
-                    <a href="bm-staff" class="nav-item ">
+                    <a href="bm-staff" class="nav-item">
                         <i class="fas fa-users"></i>
                         Nhân viên
                     </a>
@@ -56,22 +56,23 @@
                         <i class="fas fa-chart-bar"></i>
                         Báo cáo
                     </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-shopping-cart"></i>
-                        Bán Online
-                    </a>
-                    <a href="#" class="nav-item">
+                    <a href="bm-cart" class="nav-item">
                         <i class="fas fa-cash-register"></i>
                         Bán hàng
                     </a>
                 </nav>
 
                 <div class="header-right">
-                    <a href="profile" class="user-icon gradient">
-                        <i class="fas fa-user-circle fa-2x"></i>
-                    </a>
-                </div>       
-            </div>
+                    <div class="user-dropdown">
+                        <a href="#" class="user-icon gradient" id="dropdownToggle">
+                            <i class="fas fa-user-circle fa-2x"></i>
+                        </a>
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="logout" class="dropdown-item">Đăng xuất</a>
+                        </div>
+                    </div>      
+                </div>
         </header>
 
         <div class="main-container">
@@ -132,26 +133,26 @@
                                 <th>Số Điện Thoại</th>
                                 <th>Gmail</th>
                                 <th>Địa Chỉ</th>
-                                  <th>Ngày tạo thông tin</th>
-                                    <th>cập nhật thông tin</th>
+                                <th>Ngày tạo thông tin</th>
+                                <th>cập nhật thông tin</th>
                             </tr>
                         </thead>
                         <tbody>
-<% 
-    List<Customer> customers = (List<Customer>) request.getAttribute("customers");
-    for (Customer customer : customers) { 
-%>
-<tr>
-   
-    <td><%= customer.getCustomerId() %></td>
-    <td><%= customer.getFullName() %></td>
-    <td><%= customer.getPhoneNumber() %></td>
-    <td><%= customer.getEmail() != null ? customer.getEmail() : "" %></td>
-    <td><%= customer.getAddress() != null ? customer.getAddress() : "" %></td>
-    <td><%= Validate.formatDateTime(customer.getCreatedAt()) %></td>
-    <td><%= customer.getUpdatedAt() != null ? Validate.formatDateTime(customer.getUpdatedAt()) : "" %></td>
-</tr>
-<% } %>
+                            <% 
+                                List<Customer> customers = (List<Customer>) request.getAttribute("customers");
+                                for (Customer customer : customers) { 
+                            %>
+                            <tr>
+
+                                <td><%= customer.getCustomerId() %></td>
+                                <td><%= customer.getFullName() %></td>
+                                <td><%= customer.getPhoneNumber() %></td>
+                                <td><%= customer.getEmail() != null ? customer.getEmail() : "" %></td>
+                                <td><%= customer.getAddress() != null ? customer.getAddress() : "" %></td>
+                                <td><%= Validate.formatDateTime(customer.getCreatedAt()) %></td>
+                                <td><%= customer.getUpdatedAt() != null ? Validate.formatDateTime(customer.getUpdatedAt()) : "" %></td>
+                            </tr>
+                            <% } %>
 
 
 

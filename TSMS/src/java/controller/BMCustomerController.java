@@ -17,30 +17,24 @@ public class BMCustomerController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Lấy session hiện tại, không tạo mới nếu không tồn tại
         HttpSession session = req.getSession(false);
-        if (session == null) {
-            resp.sendRedirect("login");
-            return;
-        }
-
-        // Lấy các tham số session cần thiết
-        Object staffIdObj = session.getAttribute("staffId");
+        Object userIdObj = session.getAttribute("userId");
         Object roleIdObj = session.getAttribute("roleId");
         Object dbNameObj = session.getAttribute("dbName");
+        Object branchIdObj = session.getAttribute("branchId");
 
-        // Kiểm tra các tham số bắt buộc
-        if (staffIdObj == null || roleIdObj == null || dbNameObj == null) {
+        if (userIdObj == null || roleIdObj == null || dbNameObj == null) {
             resp.sendRedirect("login");
             return;
         }
 
         try {
-            int staffId = Integer.parseInt(staffIdObj.toString());
+            int userId = Integer.parseInt(userIdObj.toString());
             int roleId = Integer.parseInt(roleIdObj.toString());
             
             String dbName = dbNameObj.toString();
             String keyword = req.getParameter("keyword");
+
 
             CustomerDAO customerDAO = new CustomerDAO();
             List<Customer> customers ;

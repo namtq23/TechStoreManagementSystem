@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.sql.SQLException;
 import java.util.List;
 import model.ProductDTO;
 
@@ -20,8 +19,8 @@ import model.ProductDTO;
  *
  * @author admin
  */
-@WebServlet(name = "BMProductController", urlPatterns = {"/bm-products"})
-public class BMProductController extends HttpServlet {
+@WebServlet(name = "BMSellInStoreController", urlPatterns = {"/bm-cart"})
+public class BMSellInStoreController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -60,7 +59,8 @@ public class BMProductController extends HttpServlet {
             req.setAttribute("startProduct", offset + 1);
             req.setAttribute("endProduct", Math.min(offset + pageSize, totalProducts));
             req.setAttribute("products", products);
-            req.getRequestDispatcher("/WEB-INF/jsp/manager/products.jsp").forward(req, resp);
+
+            req.getRequestDispatcher("/WEB-INF/jsp/manager/sell-in-store.jsp").forward(req, resp);
         } catch (ServletException | IOException | NumberFormatException e) {
             System.out.println(e.getMessage());
         }

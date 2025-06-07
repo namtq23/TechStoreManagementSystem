@@ -584,7 +584,7 @@ body {
     }
 }
   .chart-container {
-    width: 100%;
+    width: 95%;
     height: 400px; /* tăng chiều cao tại đây nếu muốn biểu đồ cao hơn */
     position: relative;
     padding: 0;
@@ -595,4 +595,5 @@ body {
     width: 100% !important;
     height: 100% !important;
     display: block;
+
 }

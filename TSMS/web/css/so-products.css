@@ -223,6 +223,7 @@ body {
     font-size: 14px;
     font-weight: 500;
     transition: all 0.3s;
+    justify-content: center;
 }
 
 .btn-success {
@@ -232,6 +233,19 @@ body {
 
 .btn-success:hover {
     background: #45a049;
+}
+.btn-danger-custom {
+    background-color: #f44336; /* đỏ tươi */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-danger-custom:hover {
+    background-color: #d32f2f; /* đỏ đậm khi hover */
 }
 
 .btn-menu {
@@ -361,8 +375,6 @@ body {
 }
 
 .page-btn {
-    text-decoration: none;
-    color: black;   
     width: 32px;
     height: 32px;
     border: 1px solid #ddd;
@@ -386,13 +398,10 @@ body {
     border-color: #4caf50;
 }
 
-.disabled {
-    pointer-events: none;
-    color: #aaa;
+.page-btn:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
-    text-decoration: none;
 }
-
 
 /* Support Chat Button */
 .support-chat {
@@ -472,4 +481,89 @@ body {
         gap: 15px;
         text-align: center;
     }
+    .hidden-detail-row {
+            display: none; /* Initially hidden */
+        }
+
+        .hidden-detail-row.active {
+            display: table-row; /* Show as a table row when active */
+        }
+
+        /* Style for the detail container */
+        .detail-container {
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Style for the product images section */
+        .product-images {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .product-image-main {
+            width: 150px;
+            height: 150px;
+            background-color: #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .product-image-thumb {
+            width: 50px;
+            height: 50px;
+            background-color: #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Style for the product info section */
+        .product-info {
+            flex: 1;
+        }
+
+        .product-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        /* Style for the status badge */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .status-active {
+            background-color: #e0f7e9;
+            color: #28a745;
+        }
+
+        .status-inactive {
+            background-color: #ffe5e5;
+            color: #dc3545;
+        }
+
+        /* Ensure the product row has a pointer cursor */
+        .product-row {
+            cursor: pointer;
+        }
+        
 }

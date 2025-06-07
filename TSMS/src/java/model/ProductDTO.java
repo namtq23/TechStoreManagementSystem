@@ -18,6 +18,11 @@ public class ProductDTO extends Product{
     private String serialNum;
     private String warrantyPeriod;
 
+    public ProductDTO() {
+    }
+    
+    
+
     public ProductDTO(int productDetailId, int quantity, String description, String serialNum, String warrantyPeriod, int productId, String productName, String brand, String category, String supplier, String costPrice, String retailPrice, String imgUrl, String isActive) {
         super(productId, productName, brand, category, supplier, costPrice, retailPrice, imgUrl, isActive);
         this.productDetailId = productDetailId;
@@ -36,8 +41,6 @@ public class ProductDTO extends Product{
         this.warrantyPeriod = warrantyPeriod;
     }
 
-    
-    
     public int getProductDetailId() {
         return productDetailId;
     }
@@ -77,7 +80,7 @@ public class ProductDTO extends Product{
     public void setWarrantyPeriod(String warrantyPeriod) {
         this.warrantyPeriod = warrantyPeriod;
     }
-
+  
     @Override
     public String toString() {
         return "ProductDTO{" + "productDetailId=" + productDetailId + ", quantity=" + quantity + ", description=" + description + ", serialNum=" + serialNum + ", warrantyPeriod=" + warrantyPeriod + '}';

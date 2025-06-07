@@ -5,6 +5,7 @@
 --%>
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="java.util.*, model.ProductDTO" %>
 <%@ page import="util.Validate" %>
 <!DOCTYPE html>
@@ -32,7 +33,7 @@
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
-                    <a href="bm-products" class="nav-item active">
+                    <a href="bm-products?page=1" class="nav-item active">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
@@ -40,7 +41,7 @@
                         <i class="fas fa-exchange-alt"></i>
                         Giao dịch
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="bm-customer" class="nav-item">
                         <i class="fas fa-handshake"></i>
                         Đối tác
                     </a>
@@ -56,11 +57,7 @@
                         <i class="fas fa-chart-bar"></i>
                         Báo cáo
                     </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-shopping-cart"></i>
-                        Bán Online
-                    </a>
-                    <a href="#" class="nav-item">
+                    <a href="bm-cart" class="nav-item">
                         <i class="fas fa-cash-register"></i>
                         Bán hàng
                     </a>
@@ -264,25 +261,29 @@
                 <!-- Pagination -->
                 <div class="pagination-container">
                     <div class="pagination-info">
-                        Hiển thị 1 - 15 / Tổng số 30 hàng hóa
+                        Hiển thị ${startProduct} - ${endProduct} / Tổng số ${totalProducts} hàng hóa
                     </div>
                     <div class="pagination">
-                        <button class="page-btn" disabled>
+                        <a href="bm-products?page=1" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
                             <i class="fas fa-angle-double-left"></i>
-                        </button>
-                        <button class="page-btn" disabled>
+                        </a>
+                        <a href="bm-products?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
                             <i class="fas fa-angle-left"></i>
-                        </button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">
+                        </a>
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <a href="bm-products?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                        </c:forEach>
+
+                        <a href="bm-products?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
                             <i class="fas fa-angle-right"></i>
-                        </button>
-                        <button class="page-btn">
+                        </a>
+                        <a href="bm-products?page=${totalPages}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
                             <i class="fas fa-angle-double-right"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
+
+
             </main>
         </div>
 

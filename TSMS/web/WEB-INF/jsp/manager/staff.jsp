@@ -32,7 +32,7 @@
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
-                    <a href="bm-products" class="nav-item">
+                    <a href="bm-products?page=1" class="nav-item">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
@@ -40,7 +40,7 @@
                         <i class="fas fa-exchange-alt"></i>
                         Giao dịch
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="bm-customer" class="nav-item">
                         <i class="fas fa-handshake"></i>
                         Đối tác
                     </a>
@@ -56,21 +56,23 @@
                         <i class="fas fa-chart-bar"></i>
                         Báo cáo
                     </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-shopping-cart"></i>
-                        Bán Online
-                    </a>
-                    <a href="#" class="nav-item">
+                    <a href="bm-cart" class="nav-item">
                         <i class="fas fa-cash-register"></i>
                         Bán hàng
                     </a>
                 </nav>
 
                 <div class="header-right">
-                    <a href="profile" class="user-icon gradient">
-                        <i class="fas fa-user-circle fa-2x"></i>
-                    </a>
-                </div>       
+                    <div class="user-dropdown">
+                        <a href="" class="user-icon gradient" id="dropdownToggle">
+                            <i class="fas fa-user-circle fa-2x"></i>
+                        </a>
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="logout" class="dropdown-item">Đăng xuất</a>
+                        </div>
+                    </div>
+                </div>         
             </div>
         </header>
 
@@ -175,5 +177,21 @@
             <span>Hỗ trợ:1900 9999</span>
         </div>
     </body>
+    <script>
+        const toggle = document.getElementById("dropdownToggle");
+        const menu = document.getElementById("dropdownMenu");
+
+        toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        });
+
+        // Đóng dropdown nếu click ra ngoài
+        document.addEventListener("click", function (e) {
+            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                menu.style.display = "none";
+            }
+        });
+    </script>
 </html>
 
