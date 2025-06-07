@@ -1,7 +1,7 @@
 <%-- 
-    Document   : sell-in-store
-    Created on : Jun 4, 2025, 2:39:25 PM
-    Author     : admin
+Document   : sell-in-store
+Created on : Jun 4, 2025, 2:39:25 PM
+Author     : admin
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -88,10 +88,10 @@
                             <i class="fas fa-plus"></i>
                             Tạo mới
                         </button>
-                        <button class="btn-secondary">
-                            <i class="fas fa-save"></i>
-                            Lưu tạm
-                        </button>
+                        <!--                        <button class="btn-secondary">
+                                                    <i class="fas fa-save"></i>
+                                                    Lưu tạm
+                                                </button>-->
                     </div>
                 </div>
 
@@ -143,12 +143,12 @@
                 <div class="payment-section">
                     <button class="btn-primary complete-btn">
                         <i class="fas fa-check"></i>
-                        Thanh toán
+                        Tiến hành thanh toán
                     </button>
-                    <button class="btn-secondary">
-                        <i class="fas fa-print"></i>
-                        In hóa đơn
-                    </button>
+                    <!--                    <button class="btn-secondary">
+                                            <i class="fas fa-print"></i>
+                                            In hóa đơn
+                                        </button>-->
                 </div>
             </div>
 
@@ -166,16 +166,16 @@
                     </div>
                 </div>
 
-                <div class="customer-section">
-                    <div class="search-container">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Tìm kiếm khách hàng (F4)" class="customer-input">
-                    </div>
-                    <button class="btn-secondary">
-                        <i class="fas fa-user-plus"></i>
-                        Thêm KH
-                    </button>
-                </div>
+                <!--                <div class="customer-section">
+                                    <div class="search-container">
+                                        <i class="fas fa-search"></i>
+                                        <input type="text" placeholder="Tìm kiếm khách hàng (F4)" class="customer-input">
+                                    </div>
+                                    <button class="btn-secondary">
+                                        <i class="fas fa-user-plus"></i>
+                                        Thêm KH
+                                    </button>
+                                </div>-->
 
 
                 <div class="product-grid">
@@ -186,9 +186,37 @@
                             <img src="<%= product.getImgUrl()%>" alt="<%= product.getProductName()%>">
                         </div>
                         <div class="product-info">
-                            <h4><%= product.getDescription()%></h4>
-                            <div class="product-price"><%= Validate.formatCostPriceToVND(product.getRetailPrice())%></div>
-                            <div class="product-stock">Còn: <%= product.getQuantity()%></div>
+                            <h3><%= product.getDescription() %></h3>
+                            <%
+                                String retailPriceStr = product.getRetailPrice();
+                                Double discountPercent = product.getDiscountPercent();
+                                double retailPrice = 0;
+                                double discountedPrice = 0;
+    
+
+                                    if (retailPriceStr != null) {
+                                        retailPrice = Double.parseDouble(retailPriceStr.trim());
+            
+                                        if (discountPercent != null && discountPercent > 0) {
+                                            discountedPrice = retailPrice * (1 - discountPercent / 100.0);
+                            %>
+                            <div class="discount">Giảm <%= String.format("%.1f", discountPercent) %>%</div>
+                            <div class="product-price original-price"><%= Validate.formatCostPriceToVND((int)retailPrice) %></div>
+                            <div class="product-price discounted-price"><%= Validate.formatCostPriceToVND((int)discountedPrice) %></div>
+                            <%
+                                        } else {
+                            %>
+                            <div class="product-price"><%= Validate.formatCostPriceToVND((int)retailPrice) %></div>
+                            <%
+                                        }
+                                    } else {
+                            %>
+                            <div class="product-price">Giá không khả dụng</div>
+                            <%
+                                    }
+                            %>
+
+                            <div class="product-stock">Còn: <%= product.getQuantity() %></div>
                         </div>
                         <button class="add-to-cart">
                             <i class="fas fa-plus"></i>
@@ -198,6 +226,89 @@
                 </div>
             </div>
         </div>
+
+        <!-- Overlay làm mờ nền -->
+        <div id="overlay" class="overlay hidden"></div>
+
+        <!-- Form chi tiết đơn hàng -->
+        <div class="order-detail hidden">
+            <h2>Chi tiết đơn hàng</h2>
+
+            <!-- Form nhập thông tin khách hàng -->
+            <form class="customer-info-form">
+                <div class="form-row">
+                    <label>Họ tên:</label>
+                    <input type="text" name="fullName" required>
+                </div>
+                <div class="form-row">
+                    <label>Số điện thoại:</label>
+                    <input type="text" name="phone" required>
+                </div>
+                <div class="form-row">
+                    <label>Giới tính:</label>
+                    <select name="gender">
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Địa chỉ:</label>
+                    <input type="text" name="address">
+                </div>
+                <div class="form-row">
+                    <label>Email:</label>
+                    <input type="email" name="email">
+                </div>
+                <div class="form-row">
+                    <label>Ngày sinh:</label>
+                    <input type="date" name="dob">
+                </div>
+            </form>
+
+            <hr>
+
+            <!-- Tổng tiền và giảm giá -->
+            <div class="payment-summary">
+                <div class="form-row">
+                    <label>Tổng tiền hàng:</label>
+                    <span id="totalAmount">0₫</span>
+                </div>
+                <div class="form-row">
+                    <label>Giảm giá (%):</label>
+                    <input type="number" id="discountPercent" value="0" min="0" max="100">
+                </div>
+                <div class="form-row">
+                    <label>Khách cần trả:</label>
+                    <span id="amountDue">0₫</span>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Tiền khách đưa và tiền thừa -->
+            <div class="payment-input">
+                <div class="form-row">
+                    <label>Tiền khách đưa:</label>
+                    <input type="number" id="cashGiven" min="0">
+                </div>
+                <div class="form-row">
+                    <label>Tiền thừa trả lại:</label>
+                    <span id="changeDue">0₫</span>
+                </div>
+            </div>
+
+            <!-- Nút thanh toán và đóng -->
+            <div class="form-actions">
+                <button id="processPayment" class="btn-primary">
+                    <i class="fas fa-credit-card"></i> Thanh toán
+                </button>
+                <button id="closeOrderDetail" class="btn-secondary">
+                    <i class="fas fa-times"></i> Đóng
+                </button>
+            </div>
+        </div>
+
 
         <script>
             const toggle = document.getElementById("dropdownToggle");
@@ -214,7 +325,28 @@
                     menu.style.display = "none";
                 }
             });
+
+            document.querySelector('.complete-btn').addEventListener('click', () => {
+                const tbody = document.querySelector('.invoice-table tbody');
+                if (tbody.children.length > 0) {
+                    document.querySelector('.order-detail').classList.remove('hidden');
+                    document.querySelector('#overlay').classList.remove('hidden');
+                } else {
+
+                }
+            });
+
+            document.querySelector('#closeOrderDetail').addEventListener('click', () => {
+                document.querySelector('.order-detail').classList.add('hidden');
+                document.querySelector('#overlay').classList.add('hidden');
+            });
+
+
+            document.querySelector(".overlay").addEventListener("click", () => {
+                document.querySelector(".order-detail").classList.add("hidden");
+                document.querySelector(".overlay").classList.add("hidden");
+            });
         </script>
-        <<script src="js/bm-cart.js"></script>
+        <script src="js/bm-cart.js"></script>
     </body>
 </html>

@@ -39,11 +39,25 @@ public class ProductDAO {
                          p.CostPrice,
                          p.RetailPrice,
                          p.ImageURL,
-                         CASE WHEN p.IsActive = 1 THEN N'\u0110ang kinh doanh' ELSE N'Kh\u00f4ng kinh doanh' END AS Status,
+                         CASE 
+                             WHEN p.IsActive = 1 THEN N'Đang kinh doanh' 
+                             ELSE N'Không kinh doanh' 
+                         END AS Status,
                          pd.Description,
                          pd.SerialNumber,
                          pd.WarrantyPeriod,
-                         p.CreatedAt
+                         p.CreatedAt,
+                     
+                         -- Thông tin khuyến mãi hiện tại
+                         pr.PromotionID,
+                         pr.PromoName,
+                         pr.DiscountPercent,
+                         pr.StartDate,
+                         pr.EndDate,
+                         
+                         -- Thêm BranchID từ PromotionBranches
+                         pb.BranchID
+                     
                      FROM 
                          Inventory i
                          LEFT JOIN InventoryProducts ip ON i.InventoryID = ip.InventoryID
@@ -52,6 +66,16 @@ public class ProductDAO {
                          LEFT JOIN Brands b ON p.BrandID = b.BrandID
                          LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
                          LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                     
+                         -- JOIN với bảng khuyến mãi
+                         LEFT JOIN PromotionProducts pp ON pd.ProductDetailID = pp.ProductDetailID
+                         LEFT JOIN Promotions pr ON pp.PromotionID = pr.PromotionID
+                             AND (pr.StartDate IS NULL OR pr.StartDate <= GETDATE())
+                             AND (pr.EndDate IS NULL OR pr.EndDate >= GETDATE())
+                         
+                         -- JOIN với PromotionBranches để lấy BranchID
+                         LEFT JOIN PromotionBranches pb ON pr.PromotionID = pb.PromotionID
+                     
                      WHERE 
                          i.InventoryID = ?
                      ORDER BY
@@ -132,27 +156,31 @@ public class ProductDAO {
             wp.WarehouseID = ?
     """;
         try (
-                  Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement statement = conn.prepareStatement(sql)) {
+                Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setInt(1, warehouseId);
 
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 ProductDTO product = new ProductDTO(
-                          rs.getInt("ProductDetailId"),
-                          rs.getInt("InventoryQuantity"),
-                          rs.getString("Description"),
-                          rs.getString("SerialNumber"),
-                          rs.getString("WarrantyPeriod"),
-                          rs.getInt("ProductID"),
-                          rs.getString("ProductName"),
-                          rs.getString("BrandName"),
-                          rs.getString("CategoryName"),
-                          rs.getString("SupplierName"),
-                          rs.getString("CostPrice"),
-                          rs.getString("RetailPrice"),
-                          rs.getString("ImageURL"),
-                          rs.getDate("CreatedAt"),
-                          rs.getString("Status")
+                        rs.getInt("ProductDetailId"),
+                        rs.getInt("InventoryQuantity"),
+                        rs.getString("Description"),
+                        rs.getString("SerialNumber"),
+                        rs.getString("WarrantyPeriod"),
+                        rs.getString("PromoName"),
+                        rs.getDouble("DiscountPercent"),
+                        rs.getDate("StartDate"),
+                        rs.getDate("EndDate"),
+                        rs.getInt("ProductID"),
+                        rs.getString("ProductName"),
+                        rs.getString("BrandName"),
+                        rs.getString("CategoryName"),
+                        rs.getString("SupplierName"),
+                        rs.getString("CostPrice"),
+                        rs.getString("RetailPrice"),
+                        rs.getString("ImageURL"),
+                        rs.getDate("CreatedAt"),
+                        rs.getString("Status")
                 );
 
                 products.add(product);
@@ -167,24 +195,29 @@ public class ProductDAO {
 
     private static ProductDTO extractProductDTOFromResultSet(ResultSet rs) throws SQLException {
         ProductDTO productDTO = new ProductDTO(
-                  rs.getInt("ProductDetailId"),
-                  rs.getInt("InventoryQuantity"),
-                  rs.getString("Description"),
-                  rs.getString("SerialNumber"),
-                  rs.getString("WarrantyPeriod"),
-                  rs.getInt("ProductID"),
-                  rs.getString("ProductName"),
-                  rs.getString("BrandName"),
-                  rs.getString("CategoryName"),
-                  rs.getString("SupplierName"),
-                  rs.getString("CostPrice"),
-                  rs.getString("RetailPrice"),
-                  rs.getString("ImageURL"),
-                  rs.getDate("CreatedAt"),
-                  rs.getString("Status")
+                rs.getInt("ProductDetailId"),
+                rs.getInt("InventoryQuantity"),
+                rs.getString("Description"),
+                rs.getString("SerialNumber"),
+                rs.getString("WarrantyPeriod"),
+                rs.getString("PromoName"),
+                rs.getDouble("DiscountPercent"),
+                rs.getDate("StartDate"),
+                rs.getDate("EndDate"),
+                rs.getInt("ProductID"),
+                rs.getString("ProductName"),
+                rs.getString("BrandName"),
+                rs.getString("CategoryName"),
+                rs.getString("SupplierName"),
+                rs.getString("CostPrice"),
+                rs.getString("RetailPrice"),
+                rs.getString("ImageURL"),
+                rs.getDate("CreatedAt"),
+                rs.getString("Status")
         );
         return productDTO;
     }
+
     /*
       Lấy thống kê bán hàng của nhân viên trong tháng hiện tại
      */
@@ -205,21 +238,20 @@ public class ProductDAO {
             WHERE u.UserID = ? AND u.RoleID = 2
             GROUP BY u.UserID, u.FullName
         """;
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, userId);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return new SalesStatisticsDTO(
-                        rs.getInt("UserID"),
-                        rs.getString("FullName"),
-                        rs.getBigDecimal("CurrentMonthSales"),
-                        rs.getBigDecimal("SalesTarget"),
-                        rs.getInt("OrdersCount"),
-                        rs.getInt("CustomersServed")
+                            rs.getInt("UserID"),
+                            rs.getString("FullName"),
+                            rs.getBigDecimal("CurrentMonthSales"),
+                            rs.getBigDecimal("SalesTarget"),
+                            rs.getInt("OrdersCount"),
+                            rs.getInt("CustomersServed")
                     );
                 }
             }
@@ -229,13 +261,13 @@ public class ProductDAO {
         }
         return null;
     }
-    
+
     /*
       Lấy danh sách giao dịch của nhân viên
      */
     public List<SalesTransactionDTO> getTransactionsByUser(String dbName, int userId) throws SQLException {
         List<SalesTransactionDTO> transactions = new ArrayList<>();
-        
+
         String sql = """
             SELECT 
                 o.OrderID,
@@ -257,23 +289,22 @@ public class ProductDAO {
                      o.CreatedAt, o.OrderStatus, o.PaymentMethod, o.Notes
             ORDER BY o.CreatedAt DESC
         """;
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, userId);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     SalesTransactionDTO transaction = new SalesTransactionDTO(
-                        rs.getInt("OrderID"),
-                        rs.getString("CustomerName"),
-                        rs.getString("CustomerPhone"),
-                        rs.getString("ProductNames"),
-                        rs.getBigDecimal("GrandTotal"),
-                        rs.getTimestamp("CreatedAt"),
-                        rs.getString("OrderStatus"),
-                        rs.getString("PaymentMethod")
+                            rs.getInt("OrderID"),
+                            rs.getString("CustomerName"),
+                            rs.getString("CustomerPhone"),
+                            rs.getString("ProductNames"),
+                            rs.getBigDecimal("GrandTotal"),
+                            rs.getTimestamp("CreatedAt"),
+                            rs.getString("OrderStatus"),
+                            rs.getString("PaymentMethod")
                     );
                     transaction.setNotes(rs.getString("Notes"));
                     transactions.add(transaction);
@@ -283,16 +314,16 @@ public class ProductDAO {
             System.out.println("Error in getTransactionsByUser: " + e.getMessage());
             throw e;
         }
-        
+
         return transactions;
     }
-    
+
     /*
       Tìm kiếm giao dịch theo từ khóa
      */
     public List<SalesTransactionDTO> searchTransactionsByUser(String dbName, int userId, String keyword) throws SQLException {
         List<SalesTransactionDTO> transactions = new ArrayList<>();
-        
+
         String sql = """
             SELECT 
                 o.OrderID,
@@ -315,27 +346,26 @@ public class ProductDAO {
                      o.CreatedAt, o.OrderStatus, o.PaymentMethod, o.Notes
             ORDER BY o.CreatedAt DESC
         """;
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             String searchPattern = "%" + keyword + "%";
             stmt.setInt(1, userId);
             stmt.setString(2, searchPattern);
             stmt.setString(3, searchPattern);
             stmt.setString(4, searchPattern);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     SalesTransactionDTO transaction = new SalesTransactionDTO(
-                        rs.getInt("OrderID"),
-                        rs.getString("CustomerName"),
-                        rs.getString("CustomerPhone"),
-                        rs.getString("ProductNames"),
-                        rs.getBigDecimal("GrandTotal"),
-                        rs.getTimestamp("CreatedAt"),
-                        rs.getString("OrderStatus"),
-                        rs.getString("PaymentMethod")
+                            rs.getInt("OrderID"),
+                            rs.getString("CustomerName"),
+                            rs.getString("CustomerPhone"),
+                            rs.getString("ProductNames"),
+                            rs.getBigDecimal("GrandTotal"),
+                            rs.getTimestamp("CreatedAt"),
+                            rs.getString("OrderStatus"),
+                            rs.getString("PaymentMethod")
                     );
                     transaction.setNotes(rs.getString("Notes"));
                     transactions.add(transaction);
@@ -345,16 +375,16 @@ public class ProductDAO {
             System.out.println("Error in searchTransactionsByUser: " + e.getMessage());
             throw e;
         }
-        
+
         return transactions;
     }
-    
+
     /*
       Lấy danh sách khuyến mãi đang áp dụng cho chi nhánh
      */
     public List<PromotionDTO> getActivePromotionsByBranch(String dbName, int branchId) throws SQLException {
         List<PromotionDTO> promotions = new ArrayList<>();
-        
+
         String sql = """
             SELECT DISTINCT
                 p.PromotionID,
@@ -369,21 +399,20 @@ public class ProductDAO {
                 AND GETDATE() BETWEEN p.StartDate AND p.EndDate
             ORDER BY p.StartDate DESC
         """;
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, branchId);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     PromotionDTO promotion = new PromotionDTO(
-                        rs.getInt("PromotionID"),
-                        rs.getString("PromoName"),
-                        rs.getBigDecimal("DiscountPercent"),
-                        rs.getDate("StartDate"),
-                        rs.getDate("EndDate"),
-                        rs.getBoolean("ApplyToAllBranches")
+                            rs.getInt("PromotionID"),
+                            rs.getString("PromoName"),
+                            rs.getBigDecimal("DiscountPercent"),
+                            rs.getDate("StartDate"),
+                            rs.getDate("EndDate"),
+                            rs.getBoolean("ApplyToAllBranches")
                     );
                     promotions.add(promotion);
                 }
@@ -392,7 +421,7 @@ public class ProductDAO {
             System.out.println("Error in getActivePromotionsByBranch: " + e.getMessage());
             throw e;
         }
-        
+
         return promotions;
     }
 
@@ -401,7 +430,7 @@ public class ProductDAO {
      */
     public List<PromotionDTO> getAllPromotionsByBranch(String dbName, int branchId) throws SQLException {
         List<PromotionDTO> promotions = new ArrayList<>();
-        
+
         String sql = """
             SELECT DISTINCT
                 p.PromotionID,
@@ -415,21 +444,20 @@ public class ProductDAO {
             WHERE (p.ApplyToAllBranches = 1 OR pb.BranchID = ?)
             ORDER BY p.StartDate DESC
         """;
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, branchId);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     PromotionDTO promotion = new PromotionDTO(
-                        rs.getInt("PromotionID"),
-                        rs.getString("PromoName"),
-                        rs.getBigDecimal("DiscountPercent"),
-                        rs.getDate("StartDate"),
-                        rs.getDate("EndDate"),
-                        rs.getBoolean("ApplyToAllBranches")
+                            rs.getInt("PromotionID"),
+                            rs.getString("PromoName"),
+                            rs.getBigDecimal("DiscountPercent"),
+                            rs.getDate("StartDate"),
+                            rs.getDate("EndDate"),
+                            rs.getBoolean("ApplyToAllBranches")
                     );
                     promotions.add(promotion);
                 }
@@ -438,16 +466,16 @@ public class ProductDAO {
             System.out.println("Error in getAllPromotionsByBranch: " + e.getMessage());
             throw e;
         }
-        
+
         return promotions;
     }
-    
+
     /*
       Lấy khuyến mãi áp dụng cho sản phẩm cụ thể
      */
     public List<PromotionDTO> getPromotionsByProduct(String dbName, int productId, int branchId) throws SQLException {
         List<PromotionDTO> promotions = new ArrayList<>();
-        
+
         String sql = """
             SELECT DISTINCT
                 p.PromotionID,
@@ -464,22 +492,21 @@ public class ProductDAO {
                 AND GETDATE() BETWEEN p.StartDate AND p.EndDate
             ORDER BY p.DiscountPercent DESC
         """;
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, branchId);
             stmt.setInt(2, productId);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     PromotionDTO promotion = new PromotionDTO(
-                        rs.getInt("PromotionID"),
-                        rs.getString("PromoName"),
-                        rs.getBigDecimal("DiscountPercent"),
-                        rs.getDate("StartDate"),
-                        rs.getDate("EndDate"),
-                        rs.getBoolean("ApplyToAllBranches")
+                            rs.getInt("PromotionID"),
+                            rs.getString("PromoName"),
+                            rs.getBigDecimal("DiscountPercent"),
+                            rs.getDate("StartDate"),
+                            rs.getDate("EndDate"),
+                            rs.getBoolean("ApplyToAllBranches")
                     );
                     promotions.add(promotion);
                 }
@@ -488,7 +515,7 @@ public class ProductDAO {
             System.out.println("Error in getPromotionsByProduct: " + e.getMessage());
             throw e;
         }
-        
+
         return promotions;
     }
 
@@ -521,12 +548,11 @@ public class ProductDAO {
             LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
             WHERE p.ProductID = ?
         """;
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, productId);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return extractProductDTOFromResultSet(rs);
@@ -536,7 +562,7 @@ public class ProductDAO {
             System.out.println("Error in getProductById: " + e.getMessage());
             throw e;
         }
-        
+
         return null;
     }
 
@@ -545,7 +571,7 @@ public class ProductDAO {
      */
     public List<ProductDTO> searchProducts(String dbName, int branchId, String keyword) throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
-        
+
         String sql = """
             SELECT 
                 i.InventoryID,
@@ -577,15 +603,14 @@ public class ProductDAO {
                 AND (p.ProductName LIKE ? OR CAST(p.ProductID as NVARCHAR) LIKE ?)
             ORDER BY p.ProductName
         """;
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             String searchPattern = "%" + keyword + "%";
             stmt.setInt(1, branchId);
             stmt.setString(2, searchPattern);
             stmt.setString(3, searchPattern);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     ProductDTO product = extractProductDTOFromResultSet(rs);
@@ -596,7 +621,7 @@ public class ProductDAO {
             System.out.println("Error in searchProducts: " + e.getMessage());
             throw e;
         }
-        
+
         return products;
     }
 
@@ -605,7 +630,7 @@ public class ProductDAO {
      */
     public List<ProductDTO> getProductsByCategory(String dbName, int branchId, String categoryName) throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
-        
+
         String sql = """
             SELECT 
                 i.InventoryID,
@@ -637,13 +662,12 @@ public class ProductDAO {
                 AND c.CategoryName LIKE ?
             ORDER BY p.ProductName
         """;
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, branchId);
             stmt.setString(2, "%" + categoryName + "%");
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     ProductDTO product = extractProductDTOFromResultSet(rs);
@@ -654,7 +678,7 @@ public class ProductDAO {
             System.out.println("Error in getProductsByCategory: " + e.getMessage());
             throw e;
         }
-        
+
         return products;
     }
 
@@ -663,7 +687,7 @@ public class ProductDAO {
      */
     public List<ProductDTO> getProductsByStockStatus(String dbName, int branchId, String stockStatus) throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
-        
+
         String sql = """
             SELECT 
                 i.InventoryID,
@@ -693,7 +717,7 @@ public class ProductDAO {
             WHERE 
                 i.InventoryID = ?
         """;
-        
+
         // Thêm điều kiện WHERE dựa trên stockStatus
         switch (stockStatus.toLowerCase()) {
             case "below":
@@ -712,14 +736,13 @@ public class ProductDAO {
                 // "all" - không thêm điều kiện
                 break;
         }
-        
+
         sql += " ORDER BY p.ProductName";
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, branchId);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     ProductDTO product = extractProductDTOFromResultSet(rs);
@@ -730,7 +753,7 @@ public class ProductDAO {
             System.out.println("Error in getProductsByStockStatus: " + e.getMessage());
             throw e;
         }
-        
+
         return products;
     }
 
@@ -754,21 +777,20 @@ public class ProductDAO {
             WHERE 
                 i.InventoryID = ?
         """;
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, branchId);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return new ProductStatsDTO(
-                        rs.getInt("TotalProducts"),
-                        rs.getInt("InStockProducts"),
-                        rs.getInt("OutOfStockProducts"),
-                        rs.getInt("LowStockProducts"),
-                        rs.getInt("TotalQuantity"),
-                        rs.getBigDecimal("TotalValue")
+                            rs.getInt("TotalProducts"),
+                            rs.getInt("InStockProducts"),
+                            rs.getInt("OutOfStockProducts"),
+                            rs.getInt("LowStockProducts"),
+                            rs.getInt("TotalQuantity"),
+                            rs.getBigDecimal("TotalValue")
                     );
                 }
             }
@@ -776,15 +798,14 @@ public class ProductDAO {
             System.out.println("Error in getProductStats: " + e.getMessage());
             throw e;
         }
-        
+
         return null;
     }
 
-
-    
     public static void main(String[] args) throws SQLException {
         ProductDAO p = new ProductDAO();
-        List<ProductDTO> products = p.getWarehouseProductList("DTB_DatTech", 1);
+//        List<ProductDTO> products = p.getWarehouseProductList("DTB_DatTech", 1);
+        List<ProductDTO> products = p.getInventoryProductListByPageByBranchId("DTB_Tech", 1, 0, 100);
         for (ProductDTO product : products) {
             System.out.println(product);
         }

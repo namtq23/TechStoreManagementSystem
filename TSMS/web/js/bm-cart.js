@@ -17,7 +17,7 @@ class TSMSCashier {
 
     async fetchProducts() {
         try {
-            const response = await fetch('/TSMS/products-json'); 
+            const response = await fetch('/TSMS/products-json');
             if (!response.ok)
                 throw new Error("Lỗi khi fecth");
 
@@ -138,28 +138,73 @@ class TSMSCashier {
     addNewInvoiceRow(product) {
         const tbody = document.querySelector('.invoice-table tbody');
         const rowCount = tbody.children.length;
-
         const row = document.createElement('tr');
         row.className = 'item-row';
+
+        // Calculate the final price (discounted or original)
+        let finalPrice = 0;
+        let priceDisplay = '';
+
+        try {
+            const retailPriceStr = product.retailPrice;
+            const discountPercent = product.discountPercent;
+
+            // Handle both String and numeric retailPrice
+            if (retailPriceStr !== null && retailPriceStr !== undefined &&
+                    String(retailPriceStr).trim() !== '') {
+
+                let retailPrice = parseFloat(String(retailPriceStr).trim());
+
+                if (isNaN(retailPrice)) {
+                    throw new Error('Invalid price format');
+                }
+
+                // Check if discount is valid and greater than 0
+                if (discountPercent !== null && discountPercent !== undefined && discountPercent > 0) {
+                    finalPrice = retailPrice * (1 - discountPercent / 100.0);
+                    priceDisplay = `
+                    <div class="original-price" style="text-decoration: line-through; font-size: 0.9em; color: #999;">
+                        ${this.formatCurrency(retailPrice)}
+                    </div>
+                    <div class="discounted-price">
+                        ${this.formatCurrency(finalPrice)} (-${discountPercent.toFixed(1)}%)
+                    </div>
+                `;
+                } else {
+                    finalPrice = retailPrice;
+                    priceDisplay = this.formatCurrency(finalPrice);
+                }
+            } else {
+                finalPrice = 0;
+                priceDisplay = 'N/A';
+            }
+        } catch (error) {
+            finalPrice = 0;
+            priceDisplay = 'Error';
+        }
+
         row.innerHTML = `
-            <td>${rowCount + 1}</td>
-            <td>${product.serialNum}</td>
-            <td>${product.description}</td>
-            <td>
-                <div class="quantity-controls">
-                    <button class="qty-btn">-</button>
-                    <span class="quantity">1</span>
-                    <button class="qty-btn">+</button>
-                </div>
-            </td>
-            <td class="price">${this.formatCurrency(product.retailPrice)}</td>
-            <td class="total">${this.formatCurrency(product.retailPrice)}</td>
-            <td>
-                <button class="delete-btn">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        `;
+        <td>${rowCount + 1}</td>
+        <td>${product.serialNum || 'N/A'}</td>
+        <td>${product.description || 'N/A'}</td>
+        <td>
+            <div class="quantity-controls">
+                <button class="qty-btn" onclick="this.changeQuantity(this, -1)">-</button>
+                <span class="quantity">1</span>
+                <button class="qty-btn" onclick="this.changeQuantity(this, 1)">+</button>
+            </div>
+        </td>
+        <td class="price">${priceDisplay}</td>
+        <td class="total" style="font-weight: bold;">${this.formatCurrency(finalPrice)}</td>
+        <td>
+            <button class="delete-btn" onclick="this.removeRow(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
+
+        // Store the final price in the row for calculations
+        row.dataset.unitPrice = finalPrice;
 
         tbody.appendChild(row);
     }
@@ -202,7 +247,7 @@ class TSMSCashier {
         const productCards = document.querySelectorAll('.product-card');
 
         productCards.forEach(card => {
-            const productName = card.querySelector('h4').textContent.toLowerCase();
+            const productName = card.querySelector('h3').textContent.toLowerCase();
             const isVisible = productName.includes(query.toLowerCase());
             card.style.display = isVisible ? 'block' : 'none';
         });
@@ -217,13 +262,9 @@ class TSMSCashier {
     completeTransaction() {
         const rows = document.querySelectorAll('.item-row');
         if (rows.length === 0) {
-            this.showNotification('Chưa có sản phẩm nào trong hóa đơn!', 'error');
+            this.showNotification('Vui lòng thêm ít nhất một sản phẩm vào hóa đơn trước khi thanh toán!', 'error');
             return;
         }
-
-        const total = this.parseCurrency(document.querySelector('.total-row .summary-value').textContent);
-
-        this.showPaymentModal(total);
     }
 
     showPaymentModal(total) {
