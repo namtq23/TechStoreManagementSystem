@@ -23,6 +23,10 @@ public class Product {
     private Date CreatedAt;
     private String isActive;
 
+    public Product() {
+    }
+    
+
     public Product(int productId, String productName, String brand, String category, String supplier, String costPrice, String retailPrice, String imgUrl, String isActive) {
         this.productId = productId;
         this.productName = productName;

@@ -132,7 +132,7 @@ class TSMSCashier {
         }
 
         this.updateSummary();
-        this.showNotification(`Đã thêm ${product.name} vào hóa đơn`);
+        this.showNotification(`Đã thêm ${product.description} vào hóa đơn`);
     }
 
     addNewInvoiceRow(product) {
@@ -205,7 +205,6 @@ class TSMSCashier {
 
         // Store the final price in the row for calculations
         row.dataset.unitPrice = finalPrice;
-
         tbody.appendChild(row);
     }
 

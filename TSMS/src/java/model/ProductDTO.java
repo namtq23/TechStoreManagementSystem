@@ -22,6 +22,7 @@ public class ProductDTO extends Product {
     private Date startDate;
     private Date endDate;
 
+
     public ProductDTO(int productDetailId, int quantity, String description, String serialNum, String warrantyPeriod, String promoName, double discountPercent, Date startDate, Date endDate, int productId, String productName, String brand, String category, String supplier, String costPrice, String retailPrice, String imgUrl, String isActive) {
         super(productId, productName, brand, category, supplier, costPrice, retailPrice, imgUrl, isActive);
         this.productDetailId = productDetailId;

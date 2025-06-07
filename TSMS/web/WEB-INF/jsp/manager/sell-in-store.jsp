@@ -41,7 +41,7 @@ Author     : admin
                         <i class="fas fa-exchange-alt"></i>
                         Giao dịch
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="bm-customer" class="nav-item">
                         <i class="fas fa-handshake"></i>
                         Đối tác
                     </a>
@@ -124,19 +124,19 @@ Author     : admin
                 <div class="invoice-summary">
                     <div class="summary-row">
                         <span>Tổng số lượng:</span>
-                        <span class="summary-value">4 sản phẩm</span>
+                        <span class="summary-value"></span>
                     </div>
                     <div class="summary-row">
                         <span>Tạm tính:</span>
-                        <span class="summary-value">47,680,000 ₫</span>
+                        <span class="summary-value"></span>
                     </div>
                     <div class="summary-row">
                         <span>Giảm giá:</span>
-                        <span class="summary-value">0 ₫</span>
+                        <span class="summary-value"></span>
                     </div>
                     <div class="summary-row total-row">
                         <span>Tổng cộng:</span>
-                        <span class="summary-value">47,680,000 ₫</span>
+                        <span class="summary-value"></span>
                     </div>
                 </div>
 

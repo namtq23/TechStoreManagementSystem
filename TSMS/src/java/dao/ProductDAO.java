@@ -3,13 +3,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package dao;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import model.Product;
 import model.ProductDTO;
 import model.ProductStatsDTO;
 import model.PromotionDTO;
@@ -193,6 +194,123 @@ public class ProductDAO {
         return products;
     }
 
+
+ public Product addProduct(String dbName, Product product) {
+        System.out.println("Adding product to database: " + product.toString());
+        
+        // Sửa lại SQL query để khớp với tên bảng trong database
+        String sql = """
+            INSERT INTO Products (ProductName, BrandID, CategoryID, SupplierID, CostPrice, RetailPrice, ImageURL, IsActive)
+            VALUES (?, 1, 1, 1, ?, ?, ?, ?)
+        """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
+            statement.setString(1, product.getProductName());
+            // Tạm thời sử dụng ID = 1 cho Brand, Category, Supplier
+            // Bạn cần tạo logic để lấy ID thực tế từ tên
+            statement.setString(2, product.getCostPrice());
+            statement.setString(3, product.getRetailPrice());
+            statement.setString(4, product.getImgUrl());
+            statement.setString(5, product.getIsActive());
+
+            System.out.println("Executing SQL: " + sql);
+            System.out.println("Parameters: " + product.getProductName() + ", " + 
+                             product.getCostPrice() + ", " + product.getRetailPrice());
+
+            int rowsAffected = statement.executeUpdate();
+            System.out.println("Rows affected: " + rowsAffected);
+
+            // Lấy ProductID mới nếu có
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int newId = generatedKeys.getInt(1);
+                        product.setProductId(newId);
+                        System.out.println("Generated ProductID: " + newId);
+                        return product;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error in addProduct: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public ProductDTO addProductDetail(String dbName, ProductDTO dto) {
+        System.out.println("Adding product detail to database: " + dto.toString());
+        
+        // Sửa lại SQL query để khớp với tên bảng trong database
+        String sql = """
+            INSERT INTO ProductDetails (ProductID, Description, SerialNumber, WarrantyPeriod)
+            VALUES (?, ?, ?, ?)
+        """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
+            statement.setInt(1, dto.getProductId());
+            statement.setString(2, dto.getDescription());
+            statement.setString(3, dto.getSerialNum());
+            statement.setString(4, dto.getWarrantyPeriod());
+
+            System.out.println("Executing SQL: " + sql);
+            System.out.println("Parameters: " + dto.getProductId() + ", " + 
+                             dto.getDescription() + ", " + dto.getSerialNum());
+
+            int rowsAffected = statement.executeUpdate();
+            System.out.println("Rows affected: " + rowsAffected);
+
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int newId = generatedKeys.getInt(1);
+                        dto.setProductDetailId(newId);
+                        System.out.println("Generated ProductDetailID: " + newId);
+                        
+                        // Thêm vào WarehouseProducts
+                        addToWarehouse(dbName, newId, dto.getQuantity());
+                        
+                        return dto;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error in addProductDetail: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void addToWarehouse(String dbName, int productDetailId, int quantity) {
+        String sql = """
+            INSERT INTO WarehouseProducts (WarehouseID, ProductDetailID, Quantity)
+            VALUES (1, ?, ?)
+        """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement statement = conn.prepareStatement(sql)) {
+            
+            statement.setInt(1, productDetailId);
+            statement.setInt(2, quantity);
+
+            int rowsAffected = statement.executeUpdate();
+            System.out.println("Added to warehouse, rows affected: " + rowsAffected);
+
+        } catch (Exception e) {
+            System.out.println("Error adding to warehouse: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+
+
     private static ProductDTO extractProductDTOFromResultSet(ResultSet rs) throws SQLException {
         ProductDTO productDTO = new ProductDTO(
                 rs.getInt("ProductDetailId"),
@@ -217,6 +335,77 @@ public class ProductDAO {
         );
         return productDTO;
     }
+
+    public boolean deleteProduct(String dbName, int productDetailId) throws SQLException {
+    String checkDependenciesSQL = """
+        SELECT 
+            (SELECT COUNT(*) FROM WarehouseProducts WHERE ProductDetailID = ?) +
+            (SELECT COUNT(*) FROM InventoryProducts WHERE ProductDetailID = ?) +
+            (SELECT COUNT(*) FROM StockMovementDetail WHERE ProductDetailID = ?) +
+            (SELECT COUNT(*) FROM OrderDetails WHERE ProductID = 
+                (SELECT ProductID FROM ProductDetails WHERE ProductDetailID = ?)) +
+            (SELECT COUNT(*) FROM PromotionProducts WHERE ProductID = 
+                (SELECT ProductID FROM ProductDetails WHERE ProductDetailID = ?)) AS dependency_count
+    """;
+    String getProductIdSQL = """
+        SELECT ProductID 
+        FROM ProductDetails 
+        WHERE ProductDetailID = ?
+    """;
+    String deleteProductDetailsSQL = """
+        DELETE FROM ProductDetails 
+        WHERE ProductDetailID = ?
+    """;
+    String deleteProductSQL = """
+        DELETE FROM Products 
+        WHERE ProductID = ?
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName)) {
+        // Check for dependencies
+        try (PreparedStatement stmt = conn.prepareStatement(checkDependenciesSQL)) {
+            stmt.setInt(1, productDetailId);
+            stmt.setInt(2, productDetailId);
+            stmt.setInt(3, productDetailId);
+            stmt.setInt(4, productDetailId);
+            stmt.setInt(5, productDetailId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next() && rs.getInt("dependency_count") > 0) {
+                    return false; // Dependencies exist, cannot delete
+                }
+            }
+        }
+
+        // Get ProductID
+        int productId;
+        try (PreparedStatement stmt = conn.prepareStatement(getProductIdSQL)) {
+            stmt.setInt(1, productDetailId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    return false; // ProductDetailID not found
+                }
+                productId = rs.getInt("ProductID");
+            }
+        }
+
+        // Delete from ProductDetails
+        try (PreparedStatement stmt = conn.prepareStatement(deleteProductDetailsSQL)) {
+            stmt.setInt(1, productDetailId);
+            stmt.executeUpdate();
+        }
+
+        // Delete from Products
+        try (PreparedStatement stmt = conn.prepareStatement(deleteProductSQL)) {
+            stmt.setInt(1, productId);
+            stmt.executeUpdate();
+        }
+
+        return true;
+    } catch (SQLException e) {
+        System.out.println("Error in deleteProduct: " + e.getMessage());
+        throw e;
+    }
+}
 
     /*
       Lấy thống kê bán hàng của nhân viên trong tháng hiện tại
@@ -681,6 +870,91 @@ public class ProductDAO {
 
         return products;
     }
+    public int countProductsByWarehouseId(String dbName, int warehouseId) {
+    int count = 0;
+    String sql = """
+        SELECT 
+            WarehouseID,
+            COUNT(DISTINCT ProductDetailID) AS ProductCount
+        FROM 
+            WarehouseProducts
+        WHERE 
+            WarehouseID = ?
+        GROUP BY 
+            WarehouseID;
+    """;
+
+    try (Connection con = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        
+        ps.setInt(1, warehouseId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            count = rs.getInt("ProductCount");
+        }
+    } catch (Exception e) {
+        System.out.println("Error in countProductsByWarehouseId: " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    return count;
+}
+
+    public List<ProductDTO> getWarehouseProductListByPage(String dbName, int warehouseId, int page, int pageSize) {
+    List<ProductDTO> list = new ArrayList<>();
+
+    String sql = """
+        SELECT 
+            pd.ProductDetailID,
+            wp.Quantity AS InventoryQuantity,
+            pd.Description,
+            pd.SerialNumber,
+            pd.WarrantyPeriod,
+            p.ProductID,
+            p.ProductName,
+            b.BrandName,
+            c.CategoryName,
+            s.SupplierName,
+            p.CostPrice,
+            p.RetailPrice,
+            p.ImageURL,
+            p.CreatedAt,
+            CASE WHEN p.IsActive = 1 THEN 'Kinh doanh' ELSE 'Ngừng' END AS Status
+        FROM WarehouseProducts wp
+        JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
+        JOIN Products p ON pd.ProductID = p.ProductID
+        JOIN Brands b ON p.BrandID = b.BrandID
+        JOIN Categories c ON p.CategoryID = c.CategoryID
+        JOIN Suppliers s ON p.SupplierID = s.SupplierID
+        WHERE wp.WarehouseID = ?
+        ORDER BY p.ProductID DESC
+        OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+    """;
+
+    int offset = (page - 1) * pageSize;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setInt(1, warehouseId);
+        stmt.setInt(2, offset);
+        stmt.setInt(3, pageSize);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                ProductDTO dto = extractProductDTOFromResultSet(rs);
+                list.add(dto);
+            }
+        }
+
+    } catch (Exception e) {
+        System.out.println("Error in getWarehouseProductListByPage: " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    return list;
+}
+
 
     /*
       Lấy sản phẩm theo trạng thái tồn kho
@@ -801,13 +1075,11 @@ public class ProductDAO {
 
         return null;
     }
-
-    public static void main(String[] args) throws SQLException {
-        ProductDAO p = new ProductDAO();
-//        List<ProductDTO> products = p.getWarehouseProductList("DTB_DatTech", 1);
-        List<ProductDTO> products = p.getInventoryProductListByPageByBranchId("DTB_Tech", 1, 0, 100);
-        for (ProductDTO product : products) {
-            System.out.println(product);
-        }
+    
+    public static void main(String[] args) {
+        ProductDAO dao = new ProductDAO();
+        Product p = new Product(0, "kk", "ll", "kk", "ll", "kk", "k", "ll", "kk");
+        dao.addProduct("DTB_Dattx", p);
     }
+
 }
