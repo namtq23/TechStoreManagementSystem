@@ -10,35 +10,43 @@ import java.util.Date;
  *
  * @author admin
  */
-public class ProductDTO extends Product{
-    
+public class ProductDTO extends Product {
+
     private int productDetailId;
     private int quantity;
     private String description;
     private String serialNum;
     private String warrantyPeriod;
+    private String promoName;
+    private double discountPercent;
+    private Date startDate;
+    private Date endDate;
 
-    public ProductDTO() {
-    }
-    
-    
 
-    public ProductDTO(int productDetailId, int quantity, String description, String serialNum, String warrantyPeriod, int productId, String productName, String brand, String category, String supplier, String costPrice, String retailPrice, String imgUrl, String isActive) {
+    public ProductDTO(int productDetailId, int quantity, String description, String serialNum, String warrantyPeriod, String promoName, double discountPercent, Date startDate, Date endDate, int productId, String productName, String brand, String category, String supplier, String costPrice, String retailPrice, String imgUrl, String isActive) {
         super(productId, productName, brand, category, supplier, costPrice, retailPrice, imgUrl, isActive);
         this.productDetailId = productDetailId;
         this.quantity = quantity;
         this.description = description;
         this.serialNum = serialNum;
         this.warrantyPeriod = warrantyPeriod;
+        this.promoName = promoName;
+        this.discountPercent = discountPercent;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
-    public ProductDTO(int productDetailId, int quantity, String description, String serialNum, String warrantyPeriod, int productId, String productName, String brand, String category, String supplier, String costPrice, String retailPrice, String imgUrl, Date CreatedAt, String isActive) {
+    public ProductDTO(int productDetailId, int quantity, String description, String serialNum, String warrantyPeriod, String promoName, double discountPercent, Date startDate, Date endDate, int productId, String productName, String brand, String category, String supplier, String costPrice, String retailPrice, String imgUrl, Date CreatedAt, String isActive) {
         super(productId, productName, brand, category, supplier, costPrice, retailPrice, imgUrl, CreatedAt, isActive);
         this.productDetailId = productDetailId;
         this.quantity = quantity;
         this.description = description;
         this.serialNum = serialNum;
         this.warrantyPeriod = warrantyPeriod;
+        this.promoName = promoName;
+        this.discountPercent = discountPercent;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     public int getProductDetailId() {
@@ -80,11 +88,43 @@ public class ProductDTO extends Product{
     public void setWarrantyPeriod(String warrantyPeriod) {
         this.warrantyPeriod = warrantyPeriod;
     }
-  
+
+    public String getPromoName() {
+        return promoName;
+    }
+
+    public void setPromoName(String promoName) {
+        this.promoName = promoName;
+    }
+
+    public double getDiscountPercent() {
+        return discountPercent;
+    }
+
+    public void setDiscountPercent(double discountPercent) {
+        this.discountPercent = discountPercent;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
     @Override
     public String toString() {
-        return "ProductDTO{" + "productDetailId=" + productDetailId + ", quantity=" + quantity + ", description=" + description + ", serialNum=" + serialNum + ", warrantyPeriod=" + warrantyPeriod + '}';
+        return "ProductDTO{" + "productDetailId=" + productDetailId + ", quantity=" + quantity + ", description=" + description + ", serialNum=" + serialNum + ", warrantyPeriod=" + warrantyPeriod + ", promoName=" + promoName + ", discountPercent=" + discountPercent + ", startDate=" + startDate + ", endDate=" + endDate + '}';
     }
- 
+
     
 }
