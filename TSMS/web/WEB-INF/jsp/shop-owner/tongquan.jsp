@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
@@ -23,7 +24,7 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="so-overview"" class="nav-item active">
+                    <a href="so-overview"" class="nav-item">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
@@ -39,7 +40,7 @@
                         <i class="fas fa-handshake"></i>
                         Đối tác
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="so-staff" class="nav-item">
                         <i class="fas fa-users"></i>
                         Nhân viên
                     </a>
@@ -51,23 +52,21 @@
                         <i class="fas fa-chart-bar"></i>
                         Báo cáo
                     </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-shopping-cart"></i>
-                        Bán Online
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-cash-register"></i>
-                        Bán hàng
-                    </a>
                 </nav>
 
                 <div class="header-right">
-                    <a href="profile" class="user-icon gradient">
-                        <i class="fas fa-user-circle fa-2x"></i>
-                    </a>
-                </div>       
+                    <div class="user-dropdown">
+                        <a href="#" class="user-icon gradient" id="dropdownToggle">
+                            <i class="fas fa-user-circle fa-2x"></i>
+                        </a>
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="logout" class="dropdown-item">Đăng xuất</a>
+                        </div>
+                    </div>
+                </div>        
             </div>
-        </header>
+        </header>F
 
         <div class="main-container">
             <!-- Main Content -->
@@ -81,7 +80,7 @@
                                 <i class="fas fa-dollar-sign"></i>
                             </div>
                             <div class="metric-content">
-                                <div class="metric-label">${totalInvoice} Hóa đơn</div>
+                                <div class="metric-label">${invoiceToDay} Hóa đơn</div>
                                 <div class="metric-value">${incomeTotal}</div>
                                 <div class="metric-subtitle">Doanh thu</div>
                             </div>
@@ -98,22 +97,31 @@
                                                 </div>
                                             </div>-->
 
-                        <div class="metric-card growth-1">
-                            <div class="metric-icon">
-                                <i class="fas fa-arrow-up"></i>
+                        <c:set var="bgColor" value="${percentageChange lt 0 ? '#f24444a1' : '#e8f5e8'}" />
+                        <c:set var="iconClass" value="${percentageChange lt 0 ? 'fa-arrow-down' : 'fa-arrow-up'}"/>
+                        <c:set var="iconBg" value="${percentageChange lt 0 ? 'red' : '#4caf50'}"/>
+
+                        <c:set var="bgColorMonth" value="${monthlyChange lt 0 ? '#f24444a1' : '#e8f5e8'}" />
+                        <c:set var="iconClassMonth" value="${monthlyChange lt 0 ? 'fa-arrow-down' : 'fa-arrow-up'}"/>
+                        <c:set var="iconBgMonth" value="${monthlyChange lt 0 ? 'red' : '#4caf50'}"/>
+
+
+                        <div class="metric-card growth-1" style="background: ${bgColor};">
+                            <div class="metric-icon" style="background:${iconBg}">
+                                <i class="fas ${iconClass}"></i>
                             </div>
                             <div class="metric-content">
-                                <div class="metric-value">250.00%</div>
+                                <div class="metric-value">${percentageChange}%</div>
                                 <div class="metric-subtitle">So với hôm qua</div>
                             </div>
                         </div>
 
-                        <div class="metric-card growth-2">
-                            <div class="metric-icon">
-                                <i class="fas fa-arrow-up"></i>
+                        <div class="metric-card growth-2" style="background: ${bgColorMonth};">
+                            <div class="metric-icon" style="background: ${iconBgMonth}";>
+                                <i class="fas ${iconClassMonth}"></i>
                             </div>
-                            <div class="metric-content">
-                                <div class="metric-value">133.33%</div>
+                            <div class="metric-content" >
+                                <div class="metric-value">${monthlyChange}%</div>
                                 <div class="metric-subtitle">So với cùng kỳ tháng trước</div>
                             </div>
                         </div>
@@ -127,19 +135,56 @@
                         <div class="chart-controls">
                             <select class="period-select">
                                 <option>Tháng này</option>
+                                <option>7 ngày qua</option>
                             </select>
                         </div>
                     </div>
+                    <form action="so-overview" method="GET">
+                        <div class="chart-filters">
+                            <c:set var="currentFilter" value="${filterType}" />
 
-                    <div class="chart-filters">
-                        <button class="filter-btn active">Theo ngày</button>
-                        <button class="filter-btn">Theo giờ</button>
-                        <button class="filter-btn">Theo thứ</button>
-                    </div>
+                            <button type="submit" name="filterType" value="day"
+                                    class="filter-btn ${currentFilter == 'day' ? 'active' : ''}">
+                                Theo ngày
+                            </button>
+
+                            <button type="submit" name="filterType" value="hour"
+                                    class="filter-btn ${currentFilter == 'hour' ? 'active' : ''}">
+                                Theo giờ
+                            </button>
+
+                            <button type="submit" name="filterType" value="weekday"
+                                    class="filter-btn ${currentFilter == 'weekday' ? 'active' : ''}">
+                                Theo thứ
+                            </button>
+
+                        </div>
+                    </form>
+
+
+                  <c:set var="hasData" value="false"/>
+                    <c:forEach var="data" items="${revenueData.data}">
+                        <c:if test="${data gt 0}">
+                            <c:set var="hasData" value="true"/>
+                        </c:if>
+
+                    </c:forEach>
+
 
                     <div class="chart-container">
                         <div class="no-data">
-                            <canvas id="revenueChart" style="width:100%; height: 100%;display: block"></canvas>
+                        <c:if test="${not hasData}">
+                                <div class="no-data">
+                                    <i class="fas fa-box"></i>
+                                    <p>Không có dữ liệu</p>
+                                </div>
+                            </c:if>
+                            <c:if test="${hasData}">
+                                <canvas id="monthlyRevenueByDayChart"></canvas>
+                                    <c:set var="labels" value="${revenueData.labels}" />
+                                    <c:set var="data" value="${revenueData.data}" />
+                                    <c:set var="chartTitle" value="${revenueData.chartTitle}" />
+                                </c:if>
                         </div>
                     </div>
                 </section>
@@ -154,6 +199,7 @@
                             </select>
                             <select class="period-select">
                                 <option>Tháng này</option>
+                                <option>7 ngày qua</option>
                             </select>
                         </div>
                     </div>
@@ -258,30 +304,69 @@
             <span>Hỗ trợ:1900 6522</span>
         </div>
     </body>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const ctx = document.getElementById('monthlyRevenueByDayChart').getContext('2d');
+
+        // Convert BigDecimal to proper JavaScript numbers
+        const labels = [
+        <c:forEach var="label" items="${revenueData.labels}" varStatus="status">
+        "${label}"<c:if test="${!status.last}">,</c:if>
+        </c:forEach>
+        ];
+
+        const data = [
+        <c:forEach var="amount" items="${revenueData.data}" varStatus="status">
+            ${amount}<c:if test="${!status.last}">,</c:if>
+        </c:forEach>
+        ];
+
         const revenueChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ["Italy", "France", "Spain", "USA", "Argentina"],
+                labels: labels,
                 datasets: [{
-                        label: "Doanh thu (triệu VND)",
-                        data: [55, 49, 44, 24, 15],
-                        backgroundColor: ["red", "green", "blue", "orange", "brown"]
+                        label: "Doanh thu (VND)",
+                        data: data,
+                        backgroundColor: "#338DF6"
                     }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: {display: false},
                     title: {
                         display: true,
-                        text: 'Biểu đồ Doanh Thu (Demo)'
+                        text: "${revenueData.chartTitle}"
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString('vi-VN') + ' đ';
+                            }
+                        }
                     }
                 }
+            }
+        });
+    </script>
+
+    <script>
+        const toggle = document.getElementById("dropdownToggle");
+        const menu = document.getElementById("dropdownMenu");
+
+        toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        });
+
+        // Đóng dropdown nếu click ra ngoài
+        document.addEventListener("click", function (e) {
+            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                menu.style.display = "none";
             }
         });
     </script>

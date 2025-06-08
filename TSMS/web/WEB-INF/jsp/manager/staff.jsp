@@ -40,7 +40,7 @@
                         <i class="fas fa-exchange-alt"></i>
                         Giao dịch
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="bm-customer" class="nav-item">
                         <i class="fas fa-handshake"></i>
                         Đối tác
                     </a>
@@ -56,11 +56,7 @@
                         <i class="fas fa-chart-bar"></i>
                         Báo cáo
                     </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-shopping-cart"></i>
-                        Bán Online
-                    </a>
-                    <a href="#" class="nav-item">
+                    <a href="bm-cart" class="nav-item">
                         <i class="fas fa-cash-register"></i>
                         Bán hàng
                     </a>
