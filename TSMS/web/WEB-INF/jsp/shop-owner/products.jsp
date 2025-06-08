@@ -13,7 +13,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TSMS - Hàng hóa</title>
-        <link rel="stylesheet" href="css/bm-products.css">
+        <link rel="stylesheet" href="css/so-products.css">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     </head>
     <body>
@@ -139,20 +139,22 @@
                 <div class="page-header">
                     <h1>Hàng hóa</h1>
                     <div class="header-actions">
-                        <div class="search-container">
-                            <i class="fas fa-search"></i>
-                            <input type="text" placeholder="Theo tên hàng" class="search-input">
-                        </div> 
-                        <button class="btn btn-success">
-                            Tìm Kiếm
-                        </button>
-                        <form action="so-products" method="post" style="display: inline;">
+                        <form action="so-products" method="get" class="search-form" style="display: flex; align-items: center; gap: 8px;">
+                            <div style="position: relative; flex: 1;">
+                                <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
+                                <input type="text" name="search" placeholder="Theo tên hàng" value="${param.search}"
+                                       style="padding: 10px 10px 10px 60px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
+                            </div>
+                            <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
+                        </form>
+
+                        <form action="so-products" method="post" class="add-form">
                             <input type="hidden" name="action" value="showCreateForm">
                             <button type="submit" class="btn btn-success">
-                                <i class="fas fa-plus"></i>
-                                Thêm mới
+                                <i class="fas fa-plus"></i> Thêm mới
                             </button>
                         </form>
+
                         <button class="btn btn-menu">
                             <i class="fas fa-bars"></i>
                             <i class="fas fa-chevron-down"></i>

@@ -40,6 +40,10 @@ public class SOProductController extends HttpServlet {
             if (req.getParameter("page") != null) {
                 page = Integer.parseInt(req.getParameter("page"));
             }
+            String search = req.getParameter("search");
+            if (search == null) {
+                search = "";
+            }
 
             // Kiểm tra action để hiển thị form thêm sản phẩm
             String action = req.getParameter("action");
@@ -65,8 +69,8 @@ public class SOProductController extends HttpServlet {
             // Hiển thị danh sách sản phẩm
             ProductDAO p = new ProductDAO();
 //            List<ProductDTO> products = p.getWarehouseProductList(dbName, 1);
-            List<ProductDTO> products = p.getWarehouseProductListByPage(dbName, 1, page, pageSize);
-            int totalProducts = p.countProductsByWarehouseId(dbName, 1);
+            List<ProductDTO> products = p.getWarehouseProductListByPage(dbName, 1, page, pageSize,search);
+            int totalProducts = p.countProductsByWarehouseId(dbName, 1,search);
             int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
             int startProduct = (page - 1) * pageSize + 1;
             int endProduct = Math.min(page * pageSize, totalProducts);

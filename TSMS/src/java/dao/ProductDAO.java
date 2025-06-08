@@ -801,80 +801,83 @@ public class ProductDAO {
         return products;
     }
 
-    public int countProductsByWarehouseId(String dbName, int warehouseId) {
+    public List<ProductDTO> getWarehouseProductListByPage(String dbName, int warehouseId, int page, int pageSize, String search) {
+        List<ProductDTO> products = new ArrayList<>();
+        int offset = (page - 1) * pageSize;
+        String sql = """
+                     SELECT 
+                         wp.WarehouseID,
+                         p.ProductID,
+                         pd.ProductDetailID,
+                         wp.Quantity AS InventoryQuantity,
+                         p.ProductName,
+                         b.BrandName,
+                         c.CategoryName,
+                         s.SupplierName,
+                         p.CostPrice,
+                         p.RetailPrice,
+                         p.ImageURL,
+                         CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status,
+                         pd.Description,
+                         pd.SerialNumber,
+                         pd.WarrantyPeriod,
+                         p.CreatedAt
+                     FROM 
+                         WarehouseProducts wp
+                         LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
+                         LEFT JOIN Products p ON pd.ProductID = p.ProductID
+                         LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                         LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                         LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                     WHERE 
+                         wp.WarehouseID = ?
+                         AND p.ProductName LIKE ?
+                     ORDER BY 
+                         pd.ProductDetailID
+                     OFFSET ? ROWS
+                     FETCH NEXT ? ROWS ONLY
+                     """;
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement statement = conn.prepareStatement(sql)) {
+            statement.setInt(1, warehouseId);
+            statement.setString(2, "%" + search + "%");
+            statement.setInt(3, offset);
+            statement.setInt(4, pageSize);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                ProductDTO product = extractProductDTOFromResultSet(rs);
+                products.add(product);
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading warehouse products: " + e.getMessage());
+        }
+        return products;
+    }
+
+    // Modified to include search functionality
+    public int countProductsByWarehouseId(String dbName, int warehouseId, String search) {
         int count = 0;
         String sql = """
-        SELECT 
-            WarehouseID,
-            COUNT(DISTINCT ProductDetailID) AS ProductCount
-        FROM 
-            WarehouseProducts
-        WHERE 
-            WarehouseID = ?
-        GROUP BY 
-            WarehouseID;
-    """;
-
+                     SELECT 
+                         COUNT(DISTINCT wp.ProductDetailID) AS ProductCount
+                     FROM 
+                         WarehouseProducts wp
+                         LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
+                         LEFT JOIN Products p ON pd.ProductID = p.ProductID
+                     WHERE 
+                         wp.WarehouseID = ?
+                         AND p.ProductName LIKE ?
+                     """;
         try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql)) {
-
             ps.setInt(1, warehouseId);
+            ps.setString(2, "%" + search + "%");
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 count = rs.getInt("ProductCount");
             }
         } catch (Exception e) {
-            System.out.println("Error in countProductsByWarehouseId: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
-
         return count;
-    }
-
-    public List<ProductDTO> getWarehouseProductListByPage(String dbName, int warehouseId, int page, int pageSize) {
-        List<ProductDTO> list = new ArrayList<>();
-        String sql = """
-    SELECT 
-        pd.ProductDetailID,
-        wp.Quantity AS InventoryQuantity,
-        pd.Description,
-        pd.SerialNumber,
-        pd.WarrantyPeriod,
-        p.ProductID,
-        p.ProductName,
-        b.BrandName,
-        c.CategoryName,
-        s.SupplierName,
-        p.CostPrice,
-        p.RetailPrice,
-        p.ImageURL,
-        p.CreatedAt,
-        CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status
-    FROM WarehouseProducts wp
-    JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
-    JOIN Products p ON pd.ProductID = p.ProductID
-    JOIN Brands b ON p.BrandID = b.BrandID
-    JOIN Categories c ON p.CategoryID = c.CategoryID
-    JOIN Suppliers s ON p.SupplierID = s.SupplierID
-    WHERE wp.WarehouseID = ?
-    ORDER BY p.ProductID ASC
-    OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
-    """;
-        int offset = (page - 1) * pageSize;
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, warehouseId);
-            stmt.setInt(2, offset);
-            stmt.setInt(3, pageSize);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    ProductDTO dto = extractProductDTOFromResultSet(rs);
-                    list.add(dto);
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Error in getWarehouseProductListByPage: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return list;
     }
 
     /*      Lấy sản phẩm theo trạng thái tồn kho
