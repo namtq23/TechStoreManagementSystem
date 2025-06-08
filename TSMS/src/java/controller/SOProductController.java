@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.util.List;
+import model.Category;
 import model.Product;
 import model.ProductDTO;
 
@@ -44,7 +45,22 @@ public class SOProductController extends HttpServlet {
             if (search == null) {
                 search = "";
             }
-
+            Integer categoryId = null;
+            if (req.getParameter("categoryId") != null && !req.getParameter("categoryId").isEmpty()) {
+                try {
+                    categoryId = Integer.parseInt(req.getParameter("categoryId"));
+                    System.out.println("Nhận được CategoryID: " + categoryId); // Log để kiểm tra
+                } catch (NumberFormatException e) {
+                    categoryId = null;
+                    System.out.println("CategoryID không hợp lệ: " + req.getParameter("categoryId"));
+                }
+            } else {
+                System.out.println("Không nhận được tham số categoryId");
+            }
+            String inventory = req.getParameter("inventory");
+            if (inventory == null) {
+                inventory = "all"; // Mặc định là "all"
+            }
             // Kiểm tra action để hiển thị form thêm sản phẩm
             String action = req.getParameter("action");
             if ("showCreateForm".equals(action)) {
@@ -67,19 +83,24 @@ public class SOProductController extends HttpServlet {
             }
 
             // Hiển thị danh sách sản phẩm
+            
             ProductDAO p = new ProductDAO();
 //            List<ProductDTO> products = p.getWarehouseProductList(dbName, 1);
-            List<ProductDTO> products = p.getWarehouseProductListByPage(dbName, 1, page, pageSize,search);
-            int totalProducts = p.countProductsByWarehouseId(dbName, 1,search);
+            List<ProductDTO> products = p.getWarehouseProductListByPageAndCategory(dbName, 1, page, pageSize,search,categoryId,inventory);
+            int totalProducts = p.countProductsByWarehouseIdAndCategory(dbName, 1,search,categoryId,inventory);
             int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
             int startProduct = (page - 1) * pageSize + 1;
             int endProduct = Math.min(page * pageSize, totalProducts);
+            List<Category> categories = p.getAllCategories(dbName);
             req.setAttribute("currentPage", page);
             req.setAttribute("totalPages", totalPages);
             req.setAttribute("totalProducts", totalProducts);
             req.setAttribute("startProduct", startProduct);
             req.setAttribute("endProduct", endProduct);
             req.setAttribute("products", products);
+            req.setAttribute("categories", categories);
+            req.setAttribute("selectedCategoryId", categoryId);
+            req.setAttribute("selectedInventory", inventory);
             req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/products.jsp").forward(req, resp);
         } catch (ServletException | IOException | NumberFormatException e) {
             System.out.println("Error in doGet: " + e.getMessage());
@@ -136,17 +157,24 @@ public class SOProductController extends HttpServlet {
         }
     }
 
-    public static void main(String[] args) {
-        String dbName = "DTB_Kien"; // Tên database của bạn
-        int productDetailId = 18; // Thay bằng ProductDetailId bạn muốn test
-
-        ProductDAO dao = new ProductDAO();
-        try {
-            dao.deleteProductAndDetail(dbName, productDetailId);
-            System.out.println("Xóa thành công productDetailId: " + productDetailId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Lỗi khi xóa productDetailId: " + productDetailId);
-        }
-    }
+//    public static void main(String[] args) {
+//        String dbName = "DTB_Kien"; // Tên database của bạn
+//        Integer categoryId = 1; // Thay bằng categoryId bạn muốn test
+//        
+//        ProductDAO dao = new ProductDAO();
+//
+//        try {
+//            List<ProductDTO> products = dao.getWarehouseProductListByPageAndCategory(dbName, 1, 1, 10, "", categoryId,inventory);
+//            System.out.println("Kết quả lọc với categoryId: " + categoryId);
+//            for (ProductDTO product : products) {
+//                System.out.println("ProductDetailID: " + product.getProductDetailId() + ", Name: " + product.getProductName());
+//            }
+//            if (products.isEmpty()) {
+//                System.out.println("Không tìm thấy sản phẩm nào với categoryId: " + categoryId);
+//            }
+//        } catch (Exception e) {
+//            System.out.println("Lỗi khi lọc: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
 }

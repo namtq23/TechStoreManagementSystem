@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import model.Category;
 import model.Product;
 import model.ProductDTO;
 import model.ProductStatsDTO;
@@ -800,82 +801,124 @@ public class ProductDAO {
 
         return products;
     }
-
-    public List<ProductDTO> getWarehouseProductListByPage(String dbName, int warehouseId, int page, int pageSize, String search) {
-        List<ProductDTO> products = new ArrayList<>();
-        int offset = (page - 1) * pageSize;
-        String sql = """
-                     SELECT 
-                         wp.WarehouseID,
-                         p.ProductID,
-                         pd.ProductDetailID,
-                         wp.Quantity AS InventoryQuantity,
-                         p.ProductName,
-                         b.BrandName,
-                         c.CategoryName,
-                         s.SupplierName,
-                         p.CostPrice,
-                         p.RetailPrice,
-                         p.ImageURL,
-                         CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status,
-                         pd.Description,
-                         pd.SerialNumber,
-                         pd.WarrantyPeriod,
-                         p.CreatedAt
-                     FROM 
-                         WarehouseProducts wp
-                         LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
-                         LEFT JOIN Products p ON pd.ProductID = p.ProductID
-                         LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                         LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                         LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                     WHERE 
-                         wp.WarehouseID = ?
-                         AND p.ProductName LIKE ?
-                     ORDER BY 
-                         pd.ProductDetailID
-                     OFFSET ? ROWS
-                     FETCH NEXT ? ROWS ONLY
-                     """;
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setInt(1, warehouseId);
-            statement.setString(2, "%" + search + "%");
-            statement.setInt(3, offset);
-            statement.setInt(4, pageSize);
-            ResultSet rs = statement.executeQuery();
+    public List<Category> getAllCategories(String dbName) {
+        List<Category> categories = new ArrayList<>();
+        String query = "SELECT CategoryID, CategoryName FROM Categories";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); 
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                ProductDTO product = extractProductDTOFromResultSet(rs);
-                products.add(product);
+                Category category = new Category();
+                category.setCategoryID(rs.getInt("CategoryID"));
+                category.setCategoryName(rs.getString("CategoryName"));
+                categories.add(category);
             }
         } catch (Exception e) {
-            System.out.println("Error loading warehouse products: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return categories;
+    }
+
+    public List<ProductDTO> getWarehouseProductListByPageAndCategory(String dbName, int warehouseId, int page, int pageSize, String search, Integer categoryId, String inventory) {
+        List<ProductDTO> products = new ArrayList<>();
+        StringBuilder query = new StringBuilder("""
+                 SELECT 
+                     wp.WarehouseID,
+                     p.ProductID,
+                     pd.ProductDetailID,
+                     wp.Quantity AS InventoryQuantity,
+                     p.ProductName,
+                     b.BrandName,
+                     c.CategoryName,
+                     s.SupplierName,
+                     p.CostPrice,
+                     p.RetailPrice,
+                     p.ImageURL,
+                     CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status,
+                     pd.Description,
+                     pd.SerialNumber,
+                     pd.WarrantyPeriod,
+                     p.CreatedAt
+                 FROM 
+                     WarehouseProducts wp
+                     LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
+                     LEFT JOIN Products p ON pd.ProductID = p.ProductID
+                     LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                     LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                     LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                 WHERE 
+                     wp.WarehouseID = ?
+                     AND p.ProductName LIKE ?
+    """);
+
+        if (categoryId != null) {
+            query.append(" AND p.CategoryID = ?");
+        }
+        if ("in-stock".equals(inventory)) {
+            query.append(" AND wp.Quantity > 0");
+        } else if ("out-stock".equals(inventory)) {
+            query.append(" AND wp.Quantity = 0");
+        }
+        query.append(" ORDER BY p.ProductID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); 
+             PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+            stmt.setInt(1, warehouseId);
+            stmt.setString(2, "%" + search + "%");
+            int paramIndex = 3;
+            if (categoryId != null) {
+                stmt.setInt(paramIndex++, categoryId);
+            }
+            stmt.setInt(paramIndex++, (page - 1) * pageSize);
+            stmt.setInt(paramIndex, pageSize);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+            ProductDTO product = extractProductDTOFromResultSet(rs);
+            products.add(product);
+        }
+
+
+            System.out.println("Sản phẩm lọc theo inventory: " + products.size() + " cho inventory: " + inventory);
+        } catch (Exception e) {
+            System.err.println("Lỗi trong getWarehouseProductListByPageAndCategory: " + e.getMessage());
+            e.printStackTrace();
         }
         return products;
     }
 
-    // Modified to include search functionality
-    public int countProductsByWarehouseId(String dbName, int warehouseId, String search) {
+    public int countProductsByWarehouseIdAndCategory(String dbName, int warehouseId, String search, Integer categoryId, String inventory) {
         int count = 0;
-        String sql = """
-                     SELECT 
-                         COUNT(DISTINCT wp.ProductDetailID) AS ProductCount
-                     FROM 
-                         WarehouseProducts wp
-                         LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
-                         LEFT JOIN Products p ON pd.ProductID = p.ProductID
-                     WHERE 
-                         wp.WarehouseID = ?
-                         AND p.ProductName LIKE ?
-                     """;
-        try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, warehouseId);
-            ps.setString(2, "%" + search + "%");
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                count = rs.getInt("ProductCount");
+        StringBuilder query = new StringBuilder(
+            "SELECT COUNT(*) " +
+            "FROM Products p " +
+            "JOIN ProductDetails pd ON p.ProductID = pd.ProductID " +
+            "JOIN WarehouseProducts wp ON pd.ProductDetailID = wp.ProductDetailID " +
+            "WHERE wp.WarehouseID = ? AND p.ProductName LIKE ?"
+        );
+        if (categoryId != null) {
+            query.append(" AND p.CategoryID = ?");
+        }
+        if ("in-stock".equals(inventory)) {
+            query.append(" AND wp.Quantity > 0");
+        } else if ("out-stock".equals(inventory)) {
+            query.append(" AND wp.Quantity = 0");
+        }
+        try (Connection conn = DBUtil.getConnectionTo(dbName); 
+             PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+            stmt.setInt(1, warehouseId);
+            stmt.setString(2, "%" + search + "%");
+            int paramIndex = 3;
+            if (categoryId != null) {
+                stmt.setInt(paramIndex++, categoryId);
             }
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+            System.out.println("Tổng sản phẩm theo inventory: " + count + " cho inventory: " + inventory);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println("Lỗi trong countProductsByWarehouseIdAndCategory: " + e.getMessage());
+            e.printStackTrace();
         }
         return count;
     }

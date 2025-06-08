@@ -607,6 +607,26 @@ body {
 .add-form button {
     white-space: nowrap;
 }
+.category-item {
+                padding: 8px 16px;
+                cursor: pointer;
+                transition: background-color 0.2s;
+                border-radius: 4px;
+                margin: 2px 0;
+            }
+            .category-item:hover {
+                background-color: #f0f0f0;
+            }
+            .category-item.active {
+                background-color: #2196F3;
+                color: white;
+            }
+            .category-item a {
+                text-decoration: none;
+                color: inherit;
+                display: block;
+                width: 100%;
+            }
 
         
 }

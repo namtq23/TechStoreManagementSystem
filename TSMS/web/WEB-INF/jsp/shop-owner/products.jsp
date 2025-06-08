@@ -53,7 +53,7 @@
                                 </div>
                             </div>-->
 
-                <!-- Product Group Filter -->
+                <!-- Category Filter -->
                 <div class="filter-section">
                     <div class="filter-header">
                         <h3>Nhóm hàng</h3>
@@ -63,32 +63,18 @@
                     <div class="filter-content">
                         <div class="search-box">
                             <i class="fas fa-search"></i>
-                            <input type="text" placeholder="Tìm kiếm nhóm hàng">
+                            <input type="text" id="searchInput" placeholder="Tìm kiếm nhóm hàng" value="${param.search}">
                         </div>
                         <div class="category-tree">
-                            <div class="category-item">
-                                <span class="category-label">Tất cả</span>
+                            <div class="category-item ${selectedCategoryId == null ? 'selected' : ''}">
+                                <span class="category-label" onclick="filterProducts(null)">Tất cả</span>
                             </div>
-                            <div class="category-item expandable">
-                                <i class="fas fa-plus"></i>
-                                <span class="category-label">Điện thoại</span>
-                            </div>
-                            <div class="category-item expandable">
-                                <i class="fas fa-plus"></i>
-                                <span class="category-label">Đồng hồ thông minh</span>
-                            </div>
-                            <div class="category-item expandable">
-                                <i class="fas fa-plus"></i>
-                                <span class="category-label">Laptop</span>
-                            </div>
-                            <div class="category-item expandable">
-                                <i class="fas fa-plus"></i>
-                                <span class="category-label">Máy tính bảng</span>
-                            </div>
-                            <div class="category-item expandable">
-                                <i class="fas fa-plus"></i>
-                                <span class="category-label">Phụ kiện</span>
-                            </div>
+                            <c:forEach var="category" items="${categories}">
+                                <div class="category-item expandable ${selectedCategoryId == category.categoryID ? 'selected' : ''}">
+                                    <i class="fas fa-plus"></i>
+                                    <span class="category-label" onclick="filterProducts(${category.categoryID})">${category.categoryName}</span>
+                                </div>
+                            </c:forEach>
                         </div>
                     </div>
                 </div>
@@ -101,31 +87,19 @@
                     </div>
                     <div class="filter-content">
                         <label class="radio-item">
-                            <input type="radio" name="inventory" value="all" checked>
+                            <input type="radio" name="inventory" value="all" ${selectedInventory == 'all' ? 'checked' : ''} onchange="filterProducts()">
                             <span class="radio-mark"></span>
                             <span class="status-indicator all"></span>
                             Tất cả
-                        </label>
+                        </label>                        
                         <label class="radio-item">
-                            <input type="radio" name="inventory" value="below">
-                            <span class="radio-mark"></span>
-                            <span class="status-indicator below"></span>
-                            Dưới định mức tồn
-                        </label>
-                        <label class="radio-item">
-                            <input type="radio" name="inventory" value="above">
-                            <span class="radio-mark"></span>
-                            <span class="status-indicator above"></span>
-                            Vượt định mức tồn
-                        </label>
-                        <label class="radio-item">
-                            <input type="radio" name="inventory" value="in-stock">
+                            <input type="radio" name="inventory" value="in-stock" ${selectedInventory == 'in-stock' ? 'checked' : ''} onchange="filterProducts()">
                             <span class="radio-mark"></span>
                             <span class="status-indicator in-stock"></span>
                             Còn hàng trong kho
                         </label>
                         <label class="radio-item">
-                            <input type="radio" name="inventory" value="out-stock">
+                            <input type="radio" name="inventory" value="out-stock" ${selectedInventory == 'out-stock' ? 'checked' : ''} onchange="filterProducts()">
                             <span class="radio-mark"></span>
                             <span class="status-indicator out-stock"></span>
                             Hết hàng trong kho
@@ -247,6 +221,28 @@
                 const checkboxes = document.querySelectorAll('.product-checkbox');
                 checkboxes.forEach(cb => cb.checked = this.checked);
             });
+            function filterProducts(categoryId) {
+            const search = document.getElementById('searchInput').value;
+            let url = 'so-products?page=1&search=' + encodeURIComponent(search);
+
+            // Lấy categoryId từ tham số nếu không được truyền trực tiếp
+            if (categoryId === undefined) {
+                const selectedCategory = document.querySelector('.category-item.selected .category-label');
+                categoryId = selectedCategory ? selectedCategory.getAttribute('onclick').match(/\d+/) : null;
+                if (categoryId) {
+                    url += '&categoryId=' + encodeURIComponent(categoryId[0]);
+                }
+            } else if (categoryId !== null && categoryId !== undefined) {
+                url += '&categoryId=' + encodeURIComponent(categoryId);
+            }
+
+            // Lấy inventory từ radio button
+            const inventory = document.querySelector('input[name="inventory"]:checked') ? document.querySelector('input[name="inventory"]:checked').value : 'all';
+            url += '&inventory=' + encodeURIComponent(inventory);
+
+            console.log('Chuyển hướng đến URL: ' + url);
+            window.location.href = url;
+        }
         </script>
 
     </body>
