@@ -8,7 +8,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import model.Category;
@@ -126,29 +125,7 @@ public class ProductDAO {
         return count;
     }
 
-
-
-    private static ProductDTO extractProductDTOFromResultSet(ResultSet rs) throws SQLException {
-        ProductDTO productDTO = new ProductDTO(
-                rs.getInt("ProductDetailId"),
-                rs.getInt("InventoryQuantity"),
-                rs.getString("Description"),
-                rs.getString("SerialNumber"),
-                rs.getString("WarrantyPeriod"),
-                rs.getInt("ProductID"),
-                rs.getString("ProductName"),
-                rs.getString("BrandName"),
-                rs.getString("CategoryName"),
-                rs.getString("SupplierName"),
-                rs.getString("CostPrice"),
-                rs.getString("RetailPrice"),
-                rs.getString("ImageURL"),
-                rs.getDate("CreatedAt"),
-                rs.getString("Status")
-        );
-        return productDTO;
-    }
-
+    //Dat
     public void deleteProductAndDetail(String dbName, int productDetailId) throws SQLException {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -216,7 +193,6 @@ public class ProductDAO {
             pstmt.executeUpdate();
             pstmt.close();
 
-
             // 8. Delete from Products if no ProductDetail exists for that ProductID
             String sql6 = "DELETE FROM " + dbName + ".dbo.Products "
                     + "WHERE ProductID = ? AND NOT EXISTS (SELECT 1 FROM " + dbName + ".dbo.ProductDetails WHERE ProductID = ?)";
@@ -225,7 +201,7 @@ public class ProductDAO {
             pstmt.setInt(2, productId);
             pstmt.executeUpdate();
             pstmt.close();
-          
+
             conn.commit(); // Commit transaction if all successful
         } catch (SQLException e) {
             if (conn != null) {
@@ -246,32 +222,8 @@ public class ProductDAO {
             }
         }
     }
-  
-    private static ProductDTO extractProductDTOFromResultSet(ResultSet rs) throws SQLException {
-        ProductDTO productDTO = new ProductDTO(
-                rs.getInt("ProductDetailId"),
-                rs.getInt("InventoryQuantity"),
-                rs.getString("Description"),
-                rs.getString("SerialNumber"),
-                rs.getString("WarrantyPeriod"),
-                rs.getString("PromoName"),
-                rs.getDouble("DiscountPercent"),
-                rs.getDate("StartDate"),
-                rs.getDate("EndDate"),
-                rs.getInt("ProductID"),
-                rs.getString("ProductName"),
-                rs.getString("BrandName"),
-                rs.getString("CategoryName"),
-                rs.getString("SupplierName"),
-                rs.getString("CostPrice"),
-                rs.getString("RetailPrice"),
-                rs.getString("ImageURL"),
-                rs.getDate("CreatedAt"),
-                rs.getString("Status")
-        );
-        return productDTO;
-    }
 
+    //Dat
     public ProductDTO getProductByDetailId(String dbName, int productDetailId) throws SQLException {
         String query = "SELECT pd.ProductDetailID, p.ProductID, p.ProductName, b.BrandName, c.CategoryName, "
                 + "s.SupplierName, p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive, "
@@ -286,27 +238,14 @@ public class ProductDAO {
             ps.setInt(1, productDetailId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                ProductDTO dto = new ProductDTO();
-                dto.setProductDetailId(rs.getInt("ProductDetailID"));
-                dto.setProductId(rs.getInt("ProductID"));
-                dto.setProductName(rs.getString("ProductName"));
-                dto.setBrand(rs.getString("BrandName"));
-                dto.setCategory(rs.getString("CategoryName"));
-                dto.setSupplier(rs.getString("SupplierName"));
-                dto.setCostPrice(rs.getString("CostPrice"));
-                dto.setRetailPrice(rs.getString("RetailPrice"));
-                dto.setImgUrl(rs.getString("ImageURL"));
-                dto.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                dto.setIsActive(rs.getString("IsActive"));
-                dto.setDescription(rs.getString("Description"));
-                dto.setSerialNum(rs.getString("SerialNumber"));
-                dto.setWarrantyPeriod(rs.getString("WarrantyPeriod"));
+                ProductDTO dto = extractProductDTOFromResultSet(rs);
                 return dto;
             }
         }
         return null;
     }
 
+    //Dat
     public void updateProductInfo(String dbName, int productDetailId, String productName, String costPrice, String retailPrice, String isActive) throws SQLException {
         String query = "UPDATE p "
                 + "SET p.ProductName = ?, p.CostPrice = ?, p.RetailPrice = ?, p.IsActive = ? "
@@ -323,306 +262,6 @@ public class ProductDAO {
         }
     }
 
-    /*
-      Lấy thống kê bán hàng của nhân viên trong tháng hiện tại
-     */
-    public SalesStatisticsDTO getSalesStatisticsByUser(String dbName, int userId) throws SQLException {
-        String sql = """
-            SELECT 
-                u.UserID,
-                u.FullName,
-                ISNULL(SUM(o.GrandTotal), 0) as CurrentMonthSales,
-                200000000 as SalesTarget,
-                COUNT(DISTINCT o.OrderID) as OrdersCount,
-                COUNT(DISTINCT o.CustomerID) as CustomersServed
-            FROM Users u
-            LEFT JOIN Orders o ON u.UserID = o.CreatedBy 
-                AND MONTH(o.CreatedAt) = MONTH(GETDATE()) 
-                AND YEAR(o.CreatedAt) = YEAR(GETDATE())
-                AND o.OrderStatus = 'Completed'
-            WHERE u.UserID = ? AND u.RoleID = 2
-            GROUP BY u.UserID, u.FullName
-        """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, userId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new SalesStatisticsDTO(
-                            rs.getInt("UserID"),
-                            rs.getString("FullName"),
-                            rs.getBigDecimal("CurrentMonthSales"),
-                            rs.getBigDecimal("SalesTarget"),
-                            rs.getInt("OrdersCount"),
-                            rs.getInt("CustomersServed")
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in getSalesStatisticsByUser: " + e.getMessage());
-            throw e;
-        }
-        return null;
-    }
-
-    /*
-      Lấy danh sách giao dịch của nhân viên
-     */
-    public List<SalesTransactionDTO> getTransactionsByUser(String dbName, int userId) throws SQLException {
-        List<SalesTransactionDTO> transactions = new ArrayList<>();
-
-        String sql = """
-            SELECT 
-                o.OrderID,
-                c.FullName as CustomerName,
-                c.PhoneNumber as CustomerPhone,
-                STRING_AGG(p.ProductName, ', ') as ProductNames,
-                o.GrandTotal,
-                o.CreatedAt,
-                o.OrderStatus,
-                o.PaymentMethod,
-                o.Notes
-            FROM Orders o
-            LEFT JOIN Customers c ON o.CustomerID = c.CustomerID
-            LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID
-            LEFT JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID
-            LEFT JOIN Products p ON pd.ProductID = p.ProductID
-            WHERE o.CreatedBy = ?
-            GROUP BY o.OrderID, c.FullName, c.PhoneNumber, o.GrandTotal, 
-                     o.CreatedAt, o.OrderStatus, o.PaymentMethod, o.Notes
-            ORDER BY o.CreatedAt DESC
-        """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, userId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    SalesTransactionDTO transaction = new SalesTransactionDTO(
-                            rs.getInt("OrderID"),
-                            rs.getString("CustomerName"),
-                            rs.getString("CustomerPhone"),
-                            rs.getString("ProductNames"),
-                            rs.getBigDecimal("GrandTotal"),
-                            rs.getTimestamp("CreatedAt"),
-                            rs.getString("OrderStatus"),
-                            rs.getString("PaymentMethod")
-                    );
-                    transaction.setNotes(rs.getString("Notes"));
-                    transactions.add(transaction);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in getTransactionsByUser: " + e.getMessage());
-            throw e;
-        }
-
-        return transactions;
-    }
-
-    /*
-      Tìm kiếm giao dịch theo từ khóa
-     */
-    public List<SalesTransactionDTO> searchTransactionsByUser(String dbName, int userId, String keyword) throws SQLException {
-        List<SalesTransactionDTO> transactions = new ArrayList<>();
-
-        String sql = """
-            SELECT 
-                o.OrderID,
-                c.FullName as CustomerName,
-                c.PhoneNumber as CustomerPhone,
-                STRING_AGG(p.ProductName, ', ') as ProductNames,
-                o.GrandTotal,
-                o.CreatedAt,
-                o.OrderStatus,
-                o.PaymentMethod,
-                o.Notes
-            FROM Orders o
-            LEFT JOIN Customers c ON o.CustomerID = c.CustomerID
-            LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID
-            LEFT JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID
-            LEFT JOIN Products p ON pd.ProductID = p.ProductID
-            WHERE o.CreatedBy = ? 
-                AND (c.FullName LIKE ? OR c.PhoneNumber LIKE ? OR CAST(o.OrderID as NVARCHAR) LIKE ?)
-            GROUP BY o.OrderID, c.FullName, c.PhoneNumber, o.GrandTotal, 
-                     o.CreatedAt, o.OrderStatus, o.PaymentMethod, o.Notes
-            ORDER BY o.CreatedAt DESC
-        """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            String searchPattern = "%" + keyword + "%";
-            stmt.setInt(1, userId);
-            stmt.setString(2, searchPattern);
-            stmt.setString(3, searchPattern);
-            stmt.setString(4, searchPattern);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    SalesTransactionDTO transaction = new SalesTransactionDTO(
-                            rs.getInt("OrderID"),
-                            rs.getString("CustomerName"),
-                            rs.getString("CustomerPhone"),
-                            rs.getString("ProductNames"),
-                            rs.getBigDecimal("GrandTotal"),
-                            rs.getTimestamp("CreatedAt"),
-                            rs.getString("OrderStatus"),
-                            rs.getString("PaymentMethod")
-                    );
-                    transaction.setNotes(rs.getString("Notes"));
-                    transactions.add(transaction);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in searchTransactionsByUser: " + e.getMessage());
-            throw e;
-        }
-
-        return transactions;
-    }
-
-    /*
-      Lấy danh sách khuyến mãi đang áp dụng cho chi nhánh
-     */
-    public List<PromotionDTO> getActivePromotionsByBranch(String dbName, int branchId) throws SQLException {
-        List<PromotionDTO> promotions = new ArrayList<>();
-
-        String sql = """
-            SELECT DISTINCT
-                p.PromotionID,
-                p.PromoName,
-                p.DiscountPercent,
-                p.StartDate,
-                p.EndDate,
-                p.ApplyToAllBranches
-            FROM Promotions p
-            LEFT JOIN PromotionBranches pb ON p.PromotionID = pb.PromotionID
-            WHERE (p.ApplyToAllBranches = 1 OR pb.BranchID = ?)
-                AND GETDATE() BETWEEN p.StartDate AND p.EndDate
-            ORDER BY p.StartDate DESC
-        """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, branchId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    PromotionDTO promotion = new PromotionDTO(
-                            rs.getInt("PromotionID"),
-                            rs.getString("PromoName"),
-                            rs.getBigDecimal("DiscountPercent"),
-                            rs.getDate("StartDate"),
-                            rs.getDate("EndDate"),
-                            rs.getBoolean("ApplyToAllBranches")
-                    );
-                    promotions.add(promotion);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in getActivePromotionsByBranch: " + e.getMessage());
-            throw e;
-        }
-
-        return promotions;
-    }
-
-    /*
-      Lấy tất cả khuyến mãi cho chi nhánh (bao gồm cả hết hạn và chưa áp dụng)
-     */
-    public List<PromotionDTO> getAllPromotionsByBranch(String dbName, int branchId) throws SQLException {
-        List<PromotionDTO> promotions = new ArrayList<>();
-
-        String sql = """
-            SELECT DISTINCT
-                p.PromotionID,
-                p.PromoName,
-                p.DiscountPercent,
-                p.StartDate,
-                p.EndDate,
-                p.ApplyToAllBranches
-            FROM Promotions p
-            LEFT JOIN PromotionBranches pb ON p.PromotionID = pb.PromotionID
-            WHERE (p.ApplyToAllBranches = 1 OR pb.BranchID = ?)
-            ORDER BY p.StartDate DESC
-        """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, branchId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    PromotionDTO promotion = new PromotionDTO(
-                            rs.getInt("PromotionID"),
-                            rs.getString("PromoName"),
-                            rs.getBigDecimal("DiscountPercent"),
-                            rs.getDate("StartDate"),
-                            rs.getDate("EndDate"),
-                            rs.getBoolean("ApplyToAllBranches")
-                    );
-                    promotions.add(promotion);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in getAllPromotionsByBranch: " + e.getMessage());
-            throw e;
-        }
-
-        return promotions;
-    }
-
-    /*
-      Lấy khuyến mãi áp dụng cho sản phẩm cụ thể
-     */
-    public List<PromotionDTO> getPromotionsByProduct(String dbName, int productId, int branchId) throws SQLException {
-        List<PromotionDTO> promotions = new ArrayList<>();
-
-        String sql = """
-            SELECT DISTINCT
-                p.PromotionID,
-                p.PromoName,
-                p.DiscountPercent,
-                p.StartDate,
-                p.EndDate,
-                p.ApplyToAllBranches
-            FROM Promotions p
-            LEFT JOIN PromotionBranches pb ON p.PromotionID = pb.PromotionID
-            LEFT JOIN PromotionProducts pp ON p.PromotionID = pp.PromotionID
-            WHERE (p.ApplyToAllBranches = 1 OR pb.BranchID = ?)
-                AND pp.ProductID = ?
-                AND GETDATE() BETWEEN p.StartDate AND p.EndDate
-            ORDER BY p.DiscountPercent DESC
-        """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, branchId);
-            stmt.setInt(2, productId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    PromotionDTO promotion = new PromotionDTO(
-                            rs.getInt("PromotionID"),
-                            rs.getString("PromoName"),
-                            rs.getBigDecimal("DiscountPercent"),
-                            rs.getDate("StartDate"),
-                            rs.getDate("EndDate"),
-                            rs.getBoolean("ApplyToAllBranches")
-                    );
-                    promotions.add(promotion);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in getPromotionsByProduct: " + e.getMessage());
-            throw e;
-        }
-
-        return promotions;
-    }
 
     /*
       Lấy sản phẩm theo ID
@@ -786,11 +425,11 @@ public class ProductDAO {
 
         return products;
     }
+
     public List<Category> getAllCategories(String dbName) {
         List<Category> categories = new ArrayList<>();
         String query = "SELECT CategoryID, CategoryName FROM Categories";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); 
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Category category = new Category();
@@ -846,8 +485,7 @@ public class ProductDAO {
         }
         query.append(" ORDER BY p.ProductID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName); 
-             PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             stmt.setInt(1, warehouseId);
             stmt.setString(2, "%" + search + "%");
             int paramIndex = 3;
@@ -858,10 +496,9 @@ public class ProductDAO {
             stmt.setInt(paramIndex, pageSize);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-            ProductDTO product = extractProductDTOFromResultSet(rs);
-            products.add(product);
-        }
-
+                ProductDTO product = extractProductDTOFromResultSet(rs);
+                products.add(product);
+            }
 
             System.out.println("Sản phẩm lọc theo inventory: " + products.size() + " cho inventory: " + inventory);
         } catch (Exception e) {
@@ -874,11 +511,11 @@ public class ProductDAO {
     public int countProductsByWarehouseIdAndCategory(String dbName, int warehouseId, String search, Integer categoryId, String inventory) {
         int count = 0;
         StringBuilder query = new StringBuilder(
-            "SELECT COUNT(*) " +
-            "FROM Products p " +
-            "JOIN ProductDetails pd ON p.ProductID = pd.ProductID " +
-            "JOIN WarehouseProducts wp ON pd.ProductDetailID = wp.ProductDetailID " +
-            "WHERE wp.WarehouseID = ? AND p.ProductName LIKE ?"
+                "SELECT COUNT(*) "
+                + "FROM Products p "
+                + "JOIN ProductDetails pd ON p.ProductID = pd.ProductID "
+                + "JOIN WarehouseProducts wp ON pd.ProductDetailID = wp.ProductDetailID "
+                + "WHERE wp.WarehouseID = ? AND p.ProductName LIKE ?"
         );
         if (categoryId != null) {
             query.append(" AND p.CategoryID = ?");
@@ -888,8 +525,7 @@ public class ProductDAO {
         } else if ("out-stock".equals(inventory)) {
             query.append(" AND wp.Quantity = 0");
         }
-        try (Connection conn = DBUtil.getConnectionTo(dbName); 
-             PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             stmt.setInt(1, warehouseId);
             stmt.setString(2, "%" + search + "%");
             int paramIndex = 3;
@@ -1025,6 +661,32 @@ public class ProductDAO {
         }
 
         return null;
+    }
+
+    //KO DONG VAO
+    private static ProductDTO extractProductDTOFromResultSet(ResultSet rs) throws SQLException {
+        ProductDTO productDTO = new ProductDTO(
+                rs.getInt("ProductDetailId"),
+                rs.getInt("InventoryQuantity"),
+                rs.getString("Description"),
+                rs.getString("SerialNumber"),
+                rs.getString("WarrantyPeriod"),
+                rs.getString("PromoName"),
+                rs.getDouble("DiscountPercent"),
+                rs.getDate("StartDate"),
+                rs.getDate("EndDate"),
+                rs.getInt("ProductID"),
+                rs.getString("ProductName"),
+                rs.getString("BrandName"),
+                rs.getString("CategoryName"),
+                rs.getString("SupplierName"),
+                rs.getString("CostPrice"),
+                rs.getString("RetailPrice"),
+                rs.getString("ImageURL"),
+                rs.getDate("CreatedAt"),
+                rs.getString("Status")
+        );
+        return productDTO;
     }
 
     public static void main(String[] args) {
