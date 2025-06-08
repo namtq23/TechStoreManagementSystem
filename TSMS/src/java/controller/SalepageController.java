@@ -1,11 +1,7 @@
 package controller;
 
 import dao.ProductDAO;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import dao.SalesDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -17,94 +13,148 @@ import model.SalesStatisticsDTO;
 import model.SalesTransactionDTO;
 import model.PromotionDTO;
 
-@WebServlet(name="Salepage", urlPatterns={"/salepage"})
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+@WebServlet(name = "SalepageController", urlPatterns = {"/salepage"})
 public class SalepageController extends HttpServlet {
-   
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        
+
+    private static final Logger LOGGER = Logger.getLogger(SalepageController.class.getName());
+    private final ProductDAO productDAO = new ProductDAO();
+    private final SalesDAO salesDAO = new SalesDAO();
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         try {
-            // Lấy thông tin session
-            HttpSession session = request.getSession();
+            HttpSession session = request.getSession(false);
+            if (session == null || session.getAttribute("userId") == null) {
+                response.sendRedirect("login");
+                return;
+            }
+
+            // Validate and convert userId
+            Integer userId = parseUserId(session.getAttribute("userId"));
+            if (userId == null) {
+                throw new SQLException("Invalid or null userId");
+            }
+
+            // Get database name and branch ID
             String dbName = (String) session.getAttribute("dbName");
             Integer branchId = (Integer) session.getAttribute("branchId");
-            Integer userId = (Integer) session.getAttribute("userId");
-            
-            // Giá trị mặc định cho test
-            if (dbName == null) dbName = "DTB_ShopTemp";
-            if (branchId == null) branchId = 1;
-            if (userId == null) userId = 1; // Giả sử user có ID = 1 là nhân viên bán hàng
-            
-            // Lấy section từ parameter
+            dbName = (dbName != null) ? dbName : "DTB_ShopTemp";
+            branchId = (branchId != null) ? branchId : 1;
+
+            // Get section parameter
             String section = request.getParameter("section");
-            if (section == null) section = "products";
-            
-            // Tạo DAO instance duy nhất
-            ProductDAO productDAO = new ProductDAO();
-            
-            // Xử lý theo section - GỌI TRỰC TIẾP CÁC METHOD MỚI
+            if (section == null || section.isEmpty()) {
+                section = "products";
+            }
+            request.setAttribute("curentSection", section);
+
+            // Fetch sales statistics for header
+            SalesStatisticsDTO stats = salesDAO.getSalesStatistics(dbName, userId);
+            request.setAttribute("salesStats", stats);
+
+            // Handle different sections
             switch (section) {
                 case "products":
-                    // Sử dụng method hiện có
-                    List<ProductDTO> products = productDAO.getInventoryProductListByPageByBranchId(dbName, branchId, 0, 10);
-                    request.setAttribute("products", products);
+                    handleProductsSection(request, dbName, branchId);
                     break;
-                    
                 case "transactions":
-                    // Sử dụng methods mới
-                    String searchKeyword = request.getParameter("search");
-                    List<SalesTransactionDTO> transactions;
-                    
-                    if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-                        transactions = productDAO.searchTransactionsByUser(dbName, userId, searchKeyword);
-                    } else {
-                        transactions = productDAO.getTransactionsByUser(dbName, userId);
-                    }
-                    request.setAttribute("transactions", transactions);
+                    handleTransactionsSection(request, dbName, userId);
                     break;
-                    
                 case "promotions":
-                    // Sử dụng method mới
-                    List<PromotionDTO> promotions = productDAO.getActivePromotionsByBranch(dbName, branchId);
-                    request.setAttribute("promotions", promotions);
+                    handlePromotionsSection(request, dbName, branchId);
                     break;
-                    
                 case "stats":
-                    // Sử dụng method mới cho thống kê chi tiết
-                    SalesStatisticsDTO detailedStats = productDAO.getSalesStatisticsByUser(dbName, userId);
-                    request.setAttribute("detailedStats", detailedStats);
+                    // Stats are already fetched above
                     break;
+                default:
+                    throw new ServletException("Invalid section: " + section);
             }
-            
-            // LUÔN lấy thống kê dashboard cho header
-            SalesStatisticsDTO stats = productDAO.getSalesStatisticsByUser(dbName, userId);
-            request.setAttribute("salesStats", stats);
-            
-            // Forward đến JSP
+
             request.getRequestDispatcher("/WEB-INF/jsp/sale/salepage.jsp").forward(request, response);
-            
-        } catch (SQLException ex) {
-            Logger.getLogger(SalepageController.class.getName()).log(Level.SEVERE, null, ex);
+
+        } catch (SQLException | ServletException ex) {
+            LOGGER.log(Level.SEVERE, "Error processing request", ex);
             request.setAttribute("error", "Không thể tải dữ liệu: " + ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/jsp/sale/salepage.jsp").forward(request, response);
         }
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        processRequest(request, response);
-    } 
+    private Integer parseUserId(Object userIdObj) throws SQLException {
+        if (userIdObj instanceof String) {
+            try {
+                return Integer.valueOf((String) userIdObj);
+            } catch (NumberFormatException e) {
+                throw new SQLException("Invalid userId format: " + userIdObj);
+            }
+        } else if (userIdObj instanceof Integer) {
+            return (Integer) userIdObj;
+        }
+        throw new SQLException("Unsupported userId type: " + (userIdObj != null ? userIdObj.getClass().getName() : "null"));
+    }
+
+    private void handleProductsSection(HttpServletRequest request, String dbName, int branchId) throws SQLException {
+        String category = request.getParameter("category");
+        String stockStatus = request.getParameter("stockStatus");
+        String search = request.getParameter("search");
+        int page = parseIntParameter(request.getParameter("page"), 1);
+        int pageSize = 10;
+
+        List<ProductDTO> products;
+        if (search != null && !search.trim().isEmpty()) {
+            products = productDAO.searchProducts(dbName, branchId, search);
+        } else if (category != null && !category.trim().isEmpty()) {
+            products = productDAO.getProductsByCategory(dbName, branchId, category);
+        } else if (stockStatus != null && !stockStatus.trim().isEmpty()) {
+            products = productDAO.getProductsByStockStatus(dbName, branchId, stockStatus);
+        } else {
+            products = productDAO.getInventoryProductListByPageByBranchId(dbName, branchId, (page - 1) * pageSize, pageSize);
+        }
+
+        request.setAttribute("products", products);
+        request.setAttribute("totalProducts", productDAO.countProductsByBranchId(dbName, branchId));
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", pageSize);
+    }
+
+    private void handleTransactionsSection(HttpServletRequest request, String dbName, int userId) throws SQLException {
+        String search = request.getParameter("search");
+        List<SalesTransactionDTO> transactions;
+        if (search != null && !search.trim().isEmpty()) {
+            transactions = salesDAO.searchTransactions(dbName, userId, search);
+        } else {
+            transactions = salesDAO.getTransactionsBySalesperson(dbName, userId);
+        }
+        request.setAttribute("transactions", transactions);
+    }
+
+    private void handlePromotionsSection(HttpServletRequest request, String dbName, int branchId) throws SQLException {
+        List<PromotionDTO> promotions = salesDAO.getActivePromotions(dbName, branchId);
+        request.setAttribute("promotions", promotions);
+    }
+
+    private int parseIntParameter(String param, int defaultValue) {
+        try {
+            return Integer.parseInt(param);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        processRequest(request, response);
+            throws ServletException, IOException {
+        response.sendRedirect(request.getContextPath() + "/salepage");
     }
 
     @Override
     public String getServletInfo() {
-        return "Sales Page Controller - Simple DAO Version";
+        return "Controller for sales staff to view products, transactions, promotions, and statistics.";
     }
 }

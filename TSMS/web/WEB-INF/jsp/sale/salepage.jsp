@@ -24,19 +24,19 @@
                 </a>
             </div>
             <nav class="main-nav">
-                <a href="#" class="nav-item ${param.section == null || param.section == 'products' ? 'active' : ''}" data-section="products">
+                <a href="#" class="nav-item ${curentSection == null || param.section == 'products' ? 'active' : ''}" data-section="products">
                     <i class="fas fa-box"></i>
                     <span>Hàng hóa</span>
                 </a>
-                <a href="#" class="nav-item ${param.section == 'transactions' ? 'active' : ''}" data-section="transactions">
+                <a href="#" class="nav-item ${curentSection == 'transactions' ? 'active' : ''}" data-section="transactions">
                     <i class="fas fa-exchange-alt"></i>
                     <span>Giao dịch</span>
                 </a>
-                <a href="#" class="nav-item ${param.section == 'promotions' ? 'active' : ''}" data-section="promotions">
+                <a href="#" class="nav-item ${curentSection == 'promotions' ? 'active' : ''}" data-section="promotions">
                     <i class="fas fa-tags"></i>
                     <span>Khuyến mãi</span>
                 </a>
-                <a href="#" class="nav-item ${param.section == 'stats' ? 'active' : ''}" data-section="stats">
+                <a href="#" class="nav-item ${curentSection == 'stats' ? 'active' : ''}" data-section="stats">
                     <i class="fas fa-chart-bar"></i>
                     <span>Thống kê</span>
                 </a>
@@ -218,7 +218,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <!-- Products Section -->
-            <div id="products-section" class="content-section" style="display: ${param.section == null || param.section == 'products' ? 'block' : 'none'};">
+            <div id="products-section" class="content-section" style="display: ${curentSection == null || param.section == 'products' ? 'block' : 'none'};">
                 <div class="page-header">
                     <h1>Hàng hóa</h1>
                     <div class="header-actions">
@@ -326,7 +326,7 @@
             </div>
 
             <!-- Transactions Section - Sử dụng dữ liệu thực -->
-            <div id="transactions-section" class="content-section" style="display: ${param.section == 'transactions' ? 'block' : 'none'};">
+            <div id="transactions-section" class="content-section" style="display: ${curentSection == 'transactions' ? 'block' : 'none'};">
                 <div class="page-header">
                     <h1>Giao dịch của tôi</h1>
                     <div class="header-actions">
@@ -468,7 +468,7 @@
             </div>
 
             <!-- Promotions Section - Sử dụng dữ liệu thực -->
-            <div id="promotions-section" class="content-section" style="display: ${param.section == 'promotions' ? 'block' : 'none'};">
+            <div id="promotions-section" class="content-section" style="display: ${curentSection == 'promotions' ? 'block' : 'none'};">
     <div class="page-header">
         <h1>Chương trình khuyến mãi</h1>
         <p class="page-description">Thông tin các chương trình khuyến mãi hiện tại để tư vấn khách hàng</p>
@@ -519,7 +519,7 @@
 </div>
 
             <!-- Stats Section - Thống kê chi tiết -->
-            <div id="stats-section" class="content-section" style="display: ${param.section == 'stats' ? 'block' : 'none'};">
+            <div id="stats-section" class="content-section" style="display: ${curentSection == 'stats' ? 'block' : 'none'};">
                 <div class="page-header">
                     <h1>Thống kê hiệu suất cá nhân</h1>
                     <p class="page-description">Báo cáo chi tiết về hiệu suất bán hàng của bạn</p>
