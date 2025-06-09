@@ -101,6 +101,15 @@ public class BMSellInStoreController extends HttpServlet {
         String customerAddress = req.getParameter("address");
         String customerMail = req.getParameter("email");
         String dobStr = req.getParameter("dob");
+        boolean gender = true;
+        switch (customerGender) {
+            case "1":
+                gender = true;
+                break;
+            case "0":
+                gender = false;
+                break;
+        }
         Date customerDob;
         if (dobStr == null || dobStr.isEmpty()) {
             customerDob = null;
@@ -128,7 +137,7 @@ public class BMSellInStoreController extends HttpServlet {
             int customerId = CustomerDAO.getCustomerId(dbName, customerPhone);
             order = new Order(0, branchId, userId, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven, changeDue);
         } else {
-            customer = new Customer(0, customerName, customerPhone, customerMail, customerAddress, customerGender, customerDob, null, null);
+            customer = new Customer(0, customerName, customerPhone, customerMail, customerAddress, gender, customerDob, null, null);
             CustomerDAO.insertCustomer(dbName, customer);
             int customerId = CustomerDAO.getCustomerId(dbName, customerPhone);
             order = new Order(0, branchId, userId, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven, changeDue);

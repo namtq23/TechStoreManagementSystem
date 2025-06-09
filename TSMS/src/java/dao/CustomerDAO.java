@@ -208,7 +208,7 @@ public class CustomerDAO {
             stmt.setString(2, customer.getPhoneNumber());
             stmt.setString(3, customer.getEmail());
             stmt.setString(4, customer.getAddress());
-            stmt.setString(5, customer.isGender());
+            stmt.setBoolean(5, customer.getGender());
             stmt.setDate(6, (java.sql.Date) customer.getDateOfBirth());
 
             int rowsInserted = stmt.executeUpdate();
