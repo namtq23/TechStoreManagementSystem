@@ -5,9 +5,9 @@
 package controller;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import dao.ProductDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -40,16 +40,17 @@ public class BMCartJson extends HttpServlet {
             int branchId = Integer.parseInt(branchIdObj.toString());
 
             ProductDAO p = new ProductDAO();
-            
+
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
-            
+
             List<ProductDTO> products = p.getInventoryProductListByPageByBranchId(dbName, branchId, 0, p.countProductsByBranchId(dbName, branchId));
 
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+            
             String json = gson.toJson(products);
             resp.getWriter().write(json);
-            
+
         } catch (IOException | NumberFormatException e) {
             System.out.println(e.getMessage());
         }

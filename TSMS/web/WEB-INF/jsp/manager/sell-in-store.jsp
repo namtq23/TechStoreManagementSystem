@@ -130,10 +130,6 @@ Author     : admin
                         <span>Tạm tính:</span>
                         <span class="summary-value"></span>
                     </div>
-                    <div class="summary-row">
-                        <span>Giảm giá:</span>
-                        <span class="summary-value"></span>
-                    </div>
                     <div class="summary-row total-row">
                         <span>Tổng cộng:</span>
                         <span class="summary-value"></span>
@@ -234,79 +230,91 @@ Author     : admin
         <div class="order-detail hidden">
             <h2>Chi tiết đơn hàng</h2>
 
-            <!-- Form nhập thông tin khách hàng -->
-            <form class="customer-info-form">
-                <div class="form-row">
-                    <label>Họ tên:</label>
-                    <input type="text" name="fullName" required>
+            <form id="checkoutForm" action="bm-cart" method="post">
+                <!-- Form nhập thông tin khách hàng -->
+                <div class="customer-info-form">
+                    <div class="form-row">
+                        <label>Họ tên:</label>
+                        <input type="text" name="fullName">
+                    </div>
+                    <div class="form-row">
+                        <label>Số điện thoại:</label>
+                        <input type="text" name="phone">
+                    </div>
+                    <div class="form-row">
+                        <label>Giới tính:</label>
+                        <select name="gender">
+                            <option value="men">Nam</option>
+                            <option value="women">Nữ</option>
+                            <option value="other">Khác</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Địa chỉ:</label>
+                        <input type="text" name="address">
+                    </div>
+                    <div class="form-row">
+                        <label>Email:</label>
+                        <input type="email" name="email">
+                    </div>
+                    <div class="form-row">
+                        <label>Ngày sinh:</label>
+                        <input type="date" name="dob">
+                    </div>
                 </div>
-                <div class="form-row">
-                    <label>Số điện thoại:</label>
-                    <input type="text" name="phone" required>
+
+                <hr>
+
+                <!-- Tổng tiền và giảm giá -->
+                <div class="payment-summary">
+                    <div class="form-row">
+                        <label>Tổng tiền hàng:</label>
+                        <input type="text" name="totalAmount" id="totalAmount" value="0đ" readonly="">
+                    </div>
+                    <div class="form-row">
+                        <label>Phương thức thanh toán:</label>
+                        <select name="paymentMethod">
+                            <option value="cash">Tiền mặt</option>
+                            <option value="banking">Chuyển khoản</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Giảm giá (%):</label>
+                        <input type="number" id="discountPercent" value="0" min="0" max="100">
+                    </div>
+                    <div class="form-row">
+                        <label>Khách cần trả:</label>
+                        <input type="text" name="amountDue" id="amountDue" value="0đ" readonly="">
+                    </div>
                 </div>
-                <div class="form-row">
-                    <label>Giới tính:</label>
-                    <select name="gender">
-                        <option value="Nam">Nam</option>
-                        <option value="Nữ">Nữ</option>
-                        <option value="Khác">Khác</option>
-                    </select>
+
+                <hr>
+
+                <!-- Tiền khách đưa và tiền thừa -->
+                <div class="payment-input">
+                    <div class="form-row">
+                        <label>Tiền khách đưa:</label>
+                        <input type="number" id="cashGiven" min="0">
+                    </div>
+                    <div class="form-row">
+                        <label>Tiền thừa trả lại:</label>
+                        <input type="text" name="changeDue" id="changeDue" value="0đ" readonly="">
+                    </div>
                 </div>
-                <div class="form-row">
-                    <label>Địa chỉ:</label>
-                    <input type="text" name="address">
+
+                <!-- Nút thanh toán và đóng -->
+                <div class="form-actions">
+                    <button type="submit" id="processPayment" class="btn-primary">
+                        <i class="fas fa-credit-card"></i> Thanh toán
+                    </button>
+                        <button type="button" id="closeOrderDetail" class="btn-secondary">
+                        <i class="fas fa-times"></i> Đóng
+                    </button>
                 </div>
-                <div class="form-row">
-                    <label>Email:</label>
-                    <input type="email" name="email">
-                </div>
-                <div class="form-row">
-                    <label>Ngày sinh:</label>
-                    <input type="date" name="dob">
-                </div>
+                
+                <input type="hidden" name="cartData" id="cartDataInput">
             </form>
 
-            <hr>
-
-            <!-- Tổng tiền và giảm giá -->
-            <div class="payment-summary">
-                <div class="form-row">
-                    <label>Tổng tiền hàng:</label>
-                    <span id="totalAmount">0₫</span>
-                </div>
-                <div class="form-row">
-                    <label>Giảm giá (%):</label>
-                    <input type="number" id="discountPercent" value="0" min="0" max="100">
-                </div>
-                <div class="form-row">
-                    <label>Khách cần trả:</label>
-                    <span id="amountDue">0₫</span>
-                </div>
-            </div>
-
-            <hr>
-
-            <!-- Tiền khách đưa và tiền thừa -->
-            <div class="payment-input">
-                <div class="form-row">
-                    <label>Tiền khách đưa:</label>
-                    <input type="number" id="cashGiven" min="0">
-                </div>
-                <div class="form-row">
-                    <label>Tiền thừa trả lại:</label>
-                    <span id="changeDue">0₫</span>
-                </div>
-            </div>
-
-            <!-- Nút thanh toán và đóng -->
-            <div class="form-actions">
-                <button id="processPayment" class="btn-primary">
-                    <i class="fas fa-credit-card"></i> Thanh toán
-                </button>
-                <button id="closeOrderDetail" class="btn-secondary">
-                    <i class="fas fa-times"></i> Đóng
-                </button>
-            </div>
         </div>
 
 
