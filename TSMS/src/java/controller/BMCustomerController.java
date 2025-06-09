@@ -29,6 +29,7 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
     try {
         String dbName = dbNameObj.toString();
         String keyword = req.getParameter("keyword");
+         String genderFilter = req.getParameter("gender"); // "male", "female", "all", hoặc null
         int page = 1;
         int pageSize = 10;
 
@@ -52,14 +53,14 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             // Trường hợp tìm kiếm: không phân trang
-            customers = customerDAO.searchCustomersByName(dbName, keyword.trim());
+            customers = customerDAO.searchCustomersByName(dbName, keyword.trim() ,genderFilter );
             
             totalCustomers = customers.size();
             totalPages = 1; // Vì hiển thị tất cả
             page = 1; // reset về trang đầu
         } else {
             // Trường hợp hiển thị tất cả: có phân trang
-            totalCustomers = customerDAO.countCustomers(dbName);
+            totalCustomers = customerDAO.countCustomers(dbName, genderFilter);
             totalPages = (int) Math.ceil((double) totalCustomers / pageSize);
             
             // Nếu page > totalPages thì set về cuối cùng
@@ -68,7 +69,7 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
                 offset = (page - 1) * pageSize;
             }
 
-            customers = customerDAO.getCustomerListByPage(dbName, offset, pageSize);
+            customers = customerDAO.getCustomerListByPage(dbName, offset, pageSize, genderFilter);
         }
 
         req.setAttribute("customers", customers);
@@ -78,6 +79,7 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
         req.setAttribute("startCustomer", keyword != null && !keyword.trim().isEmpty() ? 1 : offset + 1);
         req.setAttribute("endCustomer", keyword != null && !keyword.trim().isEmpty()
                 ? totalCustomers : Math.min(offset + pageSize, totalCustomers));
+        req.setAttribute("genderFilter", genderFilter);
         req.setAttribute("keyword", keyword);
         req.setAttribute("service", "active");
 

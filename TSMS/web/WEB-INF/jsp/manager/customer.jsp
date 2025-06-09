@@ -99,6 +99,36 @@
                         </form>
                     </div>
                 </div>
+                                <div class="filter-section">
+                    <div class="filter-header">
+                        <h3>Giới tính khách hàng</h3>
+                        <i class="fas fa-chevron-up"></i>
+                    </div>
+<div class="filter-content">
+    <form action="bm-customer" method="get">
+        <label class="checkbox-item">
+            <input type="radio" id="gender-all" name="gender" value="all"
+                   <%= request.getParameter("gender") == null || "all".equals(request.getParameter("gender")) ? "checked" : "" %>>
+            <span for="gender-all">Tổng hợp</span><br>
+        </label>
+
+        <label class="checkbox-item">
+            <input type="radio" id="gender-male" name="gender" value="male"
+                   <%= "male".equals(request.getParameter("gender")) ? "checked" : "" %>>
+            <span for="gender-male">Nam</span><br>
+        </label>
+
+        <label class="checkbox-item">
+            <input type="radio" id="gender-female" name="gender" value="female"
+                   <%= "female".equals(request.getParameter("gender")) ? "checked" : "" %>>
+            <span for="gender-female">Nữ</span><br>
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
+    </form>
+</div>
+
+                </div>
             </aside>
 
             <!-- Main Content -->
@@ -151,9 +181,13 @@
                                 <td><%= customer.getPhoneNumber() %></td>
                                 <td><%= customer.getEmail() != null ? customer.getEmail() : "" %></td>
                                 <td><%= customer.getAddress() != null ? customer.getAddress() : "" %></td>
-                                <td>
-  <%= customer.getGender() != null ? (customer.getGender() ? "Nam" : "Nữ") : "" %>
-</td>
+                                <%
+                                String genderStr = "";
+                                if (customer.getGender() != null) {
+                                genderStr = customer.getGender() ? "Nam" : "Nữ";
+                                }
+                                %>
+                                <td><%= genderStr %></td>
                                 <td><%= Validate.formatDateTime(customer.getCreatedAt()) %></td>
                                 <td><%= customer.getUpdatedAt() != null ? Validate.formatDateTime(customer.getUpdatedAt()) : "" %></td>
                             </tr>
