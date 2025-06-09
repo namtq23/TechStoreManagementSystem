@@ -1,3 +1,5 @@
+/* global cart */
+
 // TSMS Cashier POS System JavaScript
 
 class TSMSCashier {
@@ -31,7 +33,6 @@ class TSMSCashier {
     }
 
     bindEvents() {
-        // Product card click events
         document.addEventListener('click', (e) => {
             if (e.target.closest('.add-to-cart')) {
                 e.preventDefault();
@@ -42,7 +43,6 @@ class TSMSCashier {
             }
         });
 
-        // Quantity control events
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('qty-btn')) {
                 const isIncrement = e.target.textContent === '+';
@@ -107,6 +107,26 @@ class TSMSCashier {
                 document.querySelector('.customer-input')?.focus();
             }
         });
+
+        const discountInput = document.querySelector('#discountPercent');
+        if (discountInput) {
+            discountInput.addEventListener('input', () => {
+                this.updateSummary();
+            });
+        }
+
+        const cashGiven = document.querySelector('#cashGiven');
+        if (cashGiven) {
+            cashGiven.addEventListener('input', () => {
+                this.updateSummary();
+            });
+        }
+
+
+        document.querySelector("#processPayment").addEventListener("click", (e) => {
+            const hiddenInput = document.getElementById("cartDataInput");
+            hiddenInput.value = JSON.stringify(this.cart);
+        });
     }
 
     addToCart(productId) {
@@ -121,13 +141,11 @@ class TSMSCashier {
         });
 
         if (existingRow) {
-            // Increase quantity
             const quantitySpan = existingRow.querySelector('.quantity');
             const currentQty = parseInt(quantitySpan.textContent);
             quantitySpan.textContent = currentQty + 1;
             this.updateRowTotal(existingRow);
         } else {
-            // Add new row
             this.addNewInvoiceRow(product);
         }
 
@@ -136,6 +154,7 @@ class TSMSCashier {
     }
 
     addNewInvoiceRow(product) {
+        this.cart.push(product);
         const tbody = document.querySelector('.invoice-table tbody');
         const rowCount = tbody.children.length;
         const row = document.createElement('tr');
@@ -172,7 +191,9 @@ class TSMSCashier {
                 `;
                 } else {
                     finalPrice = retailPrice;
-                    priceDisplay = this.formatCurrency(finalPrice);
+                    priceDisplay = `<div class="discounted-price">
+                        ${this.formatCurrency(finalPrice)}
+                    </div>`;
                 }
             } else {
                 finalPrice = 0;
@@ -189,31 +210,28 @@ class TSMSCashier {
         <td>${product.description || 'N/A'}</td>
         <td>
             <div class="quantity-controls">
-                <button class="qty-btn" onclick="this.changeQuantity(this, -1)">-</button>
+                <button class="qty-btn"">-</button>
                 <span class="quantity">1</span>
-                <button class="qty-btn" onclick="this.changeQuantity(this, 1)">+</button>
+                <button class="qty-btn"">+</button>
             </div>
         </td>
         <td class="price">${priceDisplay}</td>
         <td class="total" style="font-weight: bold;">${this.formatCurrency(finalPrice)}</td>
         <td>
-            <button class="delete-btn" onclick="this.removeRow(this)">
+            <button class="delete-btn">
                 <i class="fas fa-trash"></i>
             </button>
         </td>
     `;
 
-        // Store the final price in the row for calculations
-        row.dataset.unitPrice = finalPrice;
         tbody.appendChild(row);
     }
 
     updateRowTotal(row) {
         const quantity = parseInt(row.querySelector('.quantity').textContent);
-        const priceText = row.querySelector('.price').textContent;
+        const priceText = row.querySelector('.discounted-price').textContent;
         const price = this.parseCurrency(priceText);
         const total = quantity * price;
-
         row.querySelector('.total').textContent = this.formatCurrency(total);
     }
 
@@ -224,10 +242,20 @@ class TSMSCashier {
         document.querySelectorAll('.item-row').forEach(row => {
             const quantity = parseInt(row.querySelector('.quantity').textContent);
             const total = this.parseCurrency(row.querySelector('.total').textContent);
-
             totalQuantity += quantity;
-            subtotal += total;
+            subtotal = subtotal + total;
         });
+
+        const discountInput = document.querySelector('#discountPercent');
+        const discountPercent = parseFloat(discountInput.value) || 0;
+        const discountTotal = subtotal * (1 - discountPercent / 100);
+
+        const cashGiven = parseFloat(document.querySelector('#cashGiven').value || 0);
+        let changeDue = 0;
+        if (cashGiven > discountTotal) {
+            changeDue = cashGiven - discountTotal;
+        }
+
 
         // Update summary display
         const summaryRows = document.querySelectorAll('.summary-row');
@@ -240,6 +268,10 @@ class TSMSCashier {
         if (summaryRows[3]) {
             summaryRows[3].querySelector('.summary-value').textContent = this.formatCurrency(subtotal);
         }
+
+        document.querySelector('#totalAmount').value = this.formatCurrency(subtotal);
+        document.querySelector('#amountDue').value = this.formatCurrency(discountTotal);
+        document.querySelector('#changeDue').value = this.formatCurrency(changeDue);
     }
 
     searchProducts(query) {
@@ -330,13 +362,13 @@ class TSMSCashier {
     }
 
     parseCurrency(currencyText) {
-        return parseInt(currencyText.replace(/[^\d]/g, '')) || 0;
+        let priceStr = currencyText.trim().split(' ')[0];
+        let cleanPrice = priceStr.replace(/[^\d]/g, '');
+        return parseInt(cleanPrice);
     }
 }
 
 
-
-// Initialize the TSMS Cashier system
 document.addEventListener('DOMContentLoaded', () => {
     new TSMSCashier();
 });
@@ -382,7 +414,7 @@ const notificationStyles = `
 }
 `;
 
-// Add styles to head
+
 const styleSheet = document.createElement('style');
 styleSheet.textContent = notificationStyles;
 document.head.appendChild(styleSheet);
