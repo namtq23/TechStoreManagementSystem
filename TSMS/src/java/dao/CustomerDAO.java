@@ -21,10 +21,7 @@ public class CustomerDAO {
         String sql = "SELECT * FROM Customers";
 
         try (
-            Connection conn = DBUtil.getConnectionTo(dbName);
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery()
-        ) {
+                Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 int customerId = rs.getInt("CustomerID");
                 String fullName = rs.getString("FullName");
@@ -34,14 +31,14 @@ public class CustomerDAO {
 
                 // Chuyển giới tính từ bit thành String: "Nam"/"Nữ"
                 String gender = rs.getString("Gender");
-    
+
                 Date dateOfBirth = rs.getDate("DateOfBirth");
                 Date createdAt = rs.getTimestamp("CreatedAt");
                 Date updatedAt = rs.getTimestamp("UpdatedAt");
 
                 Customer customer = new Customer(
-                    customerId, fullName, phoneNumber, email, address,
-                    gender, dateOfBirth, createdAt, updatedAt
+                        customerId, fullName, phoneNumber, email, address,
+                        gender, dateOfBirth, createdAt, updatedAt
                 );
 
                 customers.add(customer);
@@ -62,47 +59,117 @@ public class CustomerDAO {
             System.out.println(c);
         }
     }
-    
+
     // Tìm kiếm khách hàng theo tên (FullName)
-public List<Customer> searchCustomersByName(String dbName, String keyword) throws SQLException {
-    List<Customer> customers = new ArrayList<>();
-    String sql = "SELECT * FROM Customers WHERE FullName LIKE ?";
+    public List<Customer> searchCustomersByName(String dbName, String keyword) throws SQLException {
+        List<Customer> customers = new ArrayList<>();
+        String sql = "SELECT * FROM Customers WHERE FullName LIKE ?";
 
-    try (
-        Connection conn = DBUtil.getConnectionTo(dbName);
-        PreparedStatement stmt = conn.prepareStatement(sql)
-    ) {
-        stmt.setString(1, "%" + keyword + "%"); // Tìm tương đối (chứa từ khoá)
+        try (
+                Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, "%" + keyword + "%"); // Tìm tương đối (chứa từ khoá)
 
-        try (ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                int customerId = rs.getInt("CustomerID");
-                String fullName = rs.getString("FullName");
-                String phoneNumber = rs.getString("PhoneNumber");
-                String email = rs.getString("Email");
-                String address = rs.getString("Address");
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int customerId = rs.getInt("CustomerID");
+                    String fullName = rs.getString("FullName");
+                    String phoneNumber = rs.getString("PhoneNumber");
+                    String email = rs.getString("Email");
+                    String address = rs.getString("Address");
 
-                String gender = rs.getString("Gender");
-                Date dateOfBirth = rs.getDate("DateOfBirth");
-                Date createdAt = rs.getTimestamp("CreatedAt");
-                Date updatedAt = rs.getTimestamp("UpdatedAt");
+                    String gender = rs.getString("Gender");
+                    Date dateOfBirth = rs.getDate("DateOfBirth");
+                    Date createdAt = rs.getTimestamp("CreatedAt");
+                    Date updatedAt = rs.getTimestamp("UpdatedAt");
 
-                Customer customer = new Customer(
-                    customerId, fullName, phoneNumber, email, address,
-                    gender, dateOfBirth, createdAt, updatedAt
-                );
+                    Customer customer = new Customer(
+                            customerId, fullName, phoneNumber, email, address,
+                            gender, dateOfBirth, createdAt, updatedAt
+                    );
 
-                customers.add(customer);
+                    customers.add(customer);
+                }
             }
+        } catch (Exception e) {
+            System.out.println("Lỗi khi tìm kiếm khách hàng: " + e.getMessage());
         }
-    } catch (Exception e) {
-        System.out.println("Lỗi khi tìm kiếm khách hàng: " + e.getMessage());
+
+        return customers;
     }
 
-    return customers;
-}
+    //Phuong
+    public static boolean insertCustomer(String dbName, Customer customer) {
+        Connection conn;
+        PreparedStatement stmt;
 
-    
-    
-    
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+
+            String sql = "INSERT INTO Customers (FullName, PhoneNumber, Email, Address, Gender, DateOfBirth, CreatedAt, UpdatedAt) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, GETDATE(), NULL)";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, customer.getFullName());
+            stmt.setString(2, customer.getPhoneNumber());
+            stmt.setString(3, customer.getEmail());
+            stmt.setString(4, customer.getAddress());
+            stmt.setString(5, customer.isGender());
+            stmt.setDate(6, (java.sql.Date) customer.getDateOfBirth());
+
+            int rowsInserted = stmt.executeUpdate();
+            return rowsInserted > 0;
+
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    //Phuong
+    public static int getCustomerId(String dbName, String phone) {
+        int customerId = -1;
+        Connection conn;
+        PreparedStatement stmt;
+        ResultSet rs;
+
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+
+            String sql = "SELECT CustomerID FROM Customers WHERE PhoneNumber = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, phone);
+
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                customerId = rs.getInt("CustomerID");
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+
+        return customerId;
+    }
+
+    //Phuong
+    public static boolean checkCustomerExist(String dbName, String phone) {
+        boolean exists = false;
+        Connection conn;
+        PreparedStatement stmt;
+        ResultSet rs;
+
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+
+            String sql = "SELECT 1 FROM Customers WHERE PhoneNumber = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, phone);
+
+            rs = stmt.executeQuery();
+            exists = rs.next();
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+
+        return exists;
+    }
 }

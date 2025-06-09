@@ -11,12 +11,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import model.Category;
-import model.Product;
 import model.ProductDTO;
 import model.ProductStatsDTO;
-import model.PromotionDTO;
-import model.SalesStatisticsDTO;
-import model.SalesTransactionDTO;
 import util.DBUtil;
 
 /**

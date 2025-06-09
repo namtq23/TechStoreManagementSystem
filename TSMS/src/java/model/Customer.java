@@ -13,11 +13,14 @@ public class Customer {
     private String phoneNumber;
     private String email;
     private String address;
-    private String gender; // true = Nam, false = Nữ (tuỳ quy ước)
+    private String gender; 
     private Date dateOfBirth;
     private Date createdAt;
     private Date updatedAt;
 
+    public Customer() {
+    }
+    
     public Customer(int customerId, String fullName, String phoneNumber, String email,
                     String address, String gender, Date dateOfBirth,
                     Date createdAt, Date updatedAt) {

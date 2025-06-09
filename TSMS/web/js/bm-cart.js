@@ -58,6 +58,13 @@ class TSMSCashier {
 
                 quantitySpan.textContent = quantity;
                 this.updateRowTotal(row);
+
+                const code = row.cells[1].textContent;
+                const productInCart = this.cart.find(p => p.serialNum === code);
+                if (productInCart) {
+                    productInCart.quantity = quantity;
+                }
+
                 this.updateSummary();
             }
         });
@@ -126,6 +133,7 @@ class TSMSCashier {
         document.querySelector("#processPayment").addEventListener("click", (e) => {
             const hiddenInput = document.getElementById("cartDataInput");
             hiddenInput.value = JSON.stringify(this.cart);
+            console.log(JSON.stringify(this.cart));
         });
     }
 
@@ -145,8 +153,16 @@ class TSMSCashier {
             const currentQty = parseInt(quantitySpan.textContent);
             quantitySpan.textContent = currentQty + 1;
             this.updateRowTotal(existingRow);
+            const item = this.cart.find(item => item.serialNum === product.code);
+            if (item) {
+                item.quantity = currentQty + 1;
+            }
         } else {
-            this.addNewInvoiceRow(product);
+            const productToAdd = {
+                ...product,
+                quantity: 1
+            };
+            this.addNewInvoiceRow(productToAdd);
         }
 
         this.updateSummary();

@@ -235,18 +235,18 @@ Author     : admin
                 <div class="customer-info-form">
                     <div class="form-row">
                         <label>Họ tên:</label>
-                        <input type="text" name="fullName">
+                        <input type="text" name="fullName" required="">
                     </div>
                     <div class="form-row">
                         <label>Số điện thoại:</label>
-                        <input type="text" name="phone">
+                        <input type="text" name="phone" required="">
                     </div>
                     <div class="form-row">
                         <label>Giới tính:</label>
                         <select name="gender">
-                            <option value="men">Nam</option>
-                            <option value="women">Nữ</option>
-                            <option value="other">Khác</option>
+                            <option value="1">Nam</option>
+                            <option value="0">Nữ</option>
+                            <option value="3">Khác</option>
                         </select>
                     </div>
                     <div class="form-row">
@@ -274,8 +274,8 @@ Author     : admin
                     <div class="form-row">
                         <label>Phương thức thanh toán:</label>
                         <select name="paymentMethod">
-                            <option value="cash">Tiền mặt</option>
-                            <option value="banking">Chuyển khoản</option>
+                            <option value="Tiền mặt">Tiền mặt</option>
+                            <option value="Chuyển khoản">Chuyển khoản</option>
                         </select>
                     </div>
                     <div class="form-row">
@@ -294,7 +294,7 @@ Author     : admin
                 <div class="payment-input">
                     <div class="form-row">
                         <label>Tiền khách đưa:</label>
-                        <input type="number" id="cashGiven" min="0">
+                        <input type="number" name="cashGiven" id="cashGiven" min="0">
                     </div>
                     <div class="form-row">
                         <label>Tiền thừa trả lại:</label>
