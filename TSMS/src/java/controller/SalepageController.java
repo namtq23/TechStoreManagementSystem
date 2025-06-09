@@ -138,14 +138,15 @@ public class SalepageController extends HttpServlet {
 
     private void handleProductsSection(HttpServletRequest request, String dbName, int branchId) {
         try {
-            // FIX: Use only existing methods and let JSP handle client-side filtering
+            // Use only existing methods and let JSP handle client-side filtering
             String search = request.getParameter("search");
             int page = parseIntParameter(request.getParameter("page"), 1);
             int pageSize = 50; // Increase page size for client-side filtering
+            String inventory = request.getParameter("inventory");
 
             List<ProductDTO> products;
             
-            // FIX: Only use methods that exist in ProductDAO
+            // Only use methods that exist in ProductDAO
             if (search != null && !search.trim().isEmpty()) {
                 // Try to use search method if it exists, otherwise use regular method
                 try {
@@ -157,13 +158,23 @@ public class SalepageController extends HttpServlet {
                     // Let JSP handle the search filtering
                     request.setAttribute("searchQuery", search);
                 }
-            } else {
+            } 
+            else if (inventory != null && !inventory.equals("all")) {
+            try {
+                products = productDAO.getProductsByStockStatus(dbName, branchId, inventory);
+            } catch (SQLException e) {
+                LOGGER.log(Level.WARNING, "Error fetching products by stock status: {0}", e.getMessage());
+                products = new ArrayList<>();
+            }
+            }
+            else {
                 products = productDAO.getInventoryProductListByPageByBranchId(dbName, branchId, 0, pageSize);
             }
 
             request.setAttribute("products", products);
+            request.setAttribute("inventory", inventory);
             
-            // FIX: Safe count method
+            // Safe count method
             try {
                 int totalProducts = productDAO.countProductsByBranchId(dbName, branchId);
                 request.setAttribute("totalProducts", totalProducts);
@@ -187,7 +198,7 @@ public class SalepageController extends HttpServlet {
             String search = request.getParameter("search");
             List<SalesTransactionDTO> transactions = new ArrayList<>();
             
-            // FIX: Use safe method calls
+            // Use safe method calls
             try {
                 if (search != null && !search.trim().isEmpty()) {
                     transactions = salesDAO.searchTransactions(dbName, userId, search);
@@ -211,7 +222,7 @@ public class SalepageController extends HttpServlet {
         try {
             List<PromotionDTO> promotions = new ArrayList<>();
             
-            // FIX: Use safe method calls
+            // Use safe method calls
             try {
                 promotions = salesDAO.getActivePromotions(dbName, branchId);
             } catch (Exception e) {
@@ -242,7 +253,7 @@ public class SalepageController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // FIX: Preserve section parameter in redirect
+        // Preserve section parameter in redirect
         String section = request.getParameter("section");
         String redirectUrl = request.getContextPath() + "/salepage";
         

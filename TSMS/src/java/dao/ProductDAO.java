@@ -344,15 +344,14 @@ public class ProductDAO {
             ORDER BY 
                 p.ProductName
         """;
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-            PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             String searchPattern = "%" + keyword + "%";
             ps.setInt(1, branchId);
             ps.setString(2, searchPattern);
             ps.setString(3, searchPattern);
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ProductDTO product = extractProductDTOFromResultSet(rs);
@@ -363,14 +362,14 @@ public class ProductDAO {
             System.out.println("Error in searchProducts: " + e.getMessage());
             throw e;
         }
-        
+
         return products;
     }
 
     /*
       Lấy sản phẩm theo danh mục
      */
-     public List<ProductDTO> getProductsByCategory(String dbName, int branchId, int categoryId) throws SQLException {
+    public List<ProductDTO> getProductsByCategory(String dbName, int branchId, int categoryId) throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
         String sql = """
             SELECT 
@@ -401,13 +400,12 @@ public class ProductDAO {
             ORDER BY 
                 p.ProductName
         """;
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, branchId);
             ps.setInt(2, categoryId);
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ProductDTO product = extractProductDTOFromResultSet(rs);
@@ -418,7 +416,7 @@ public class ProductDAO {
             System.out.println("Error in getProductsByCategory: " + e.getMessage());
             throw e;
         }
-        
+
         return products;
     }
 
@@ -542,7 +540,7 @@ public class ProductDAO {
 
     /*      Lấy sản phẩm theo trạng thái tồn kho
      */
-   public List<ProductDTO> getProductsByStockStatus(String dbName, int branchId, String stockStatus) throws SQLException {
+    public List<ProductDTO> getProductsByStockStatus(String dbName, int branchId, String stockStatus) throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
         String sql = """
             SELECT 
@@ -570,34 +568,33 @@ public class ProductDAO {
                 p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive
             HAVING 
         """;
-        
+
         // Thêm điều kiện HAVING dựa trên stockStatus
         switch (stockStatus.toLowerCase()) {
             case "below":
-                sql += "ISNULL(SUM(ip.Quantity), 0) < 20";
+                sql += "ISNULL(SUM(ip.Quantity), 0) > 0 AND ISNULL(SUM(ip.Quantity), 0) < 20";
                 break;
             case "above":
-                sql += "ISNULL(SUM(ip.Quantity), 0) > 100";
+                sql += "ISNULL(SUM(ip.Quantity), 0) > 50";
                 break;
             case "in-stock":
-                sql += "ISNULL(SUM(ip.Quantity), 0) BETWEEN 20 AND 100";
+                sql += "ISNULL(SUM(ip.Quantity), 0) BETWEEN 1 AND 50";
                 break;
             case "out-stock":
-                sql += "ISNULL(SUM(ip.Quantity), 0) = 0";
+                sql += "ISNULL(SUM(ip.Quantity), 0) = 0  ";
                 break;
             default:
                 // "all" - bỏ HAVING clause
                 sql = sql.replace("HAVING ", "");
                 break;
         }
-        
+
         sql += " ORDER BY p.ProductName";
-        
-        try (Connection conn = DBUtil.getConnectionTo(dbName); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, branchId);
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ProductDTO product = extractProductDTOFromResultSet(rs);
@@ -608,7 +605,7 @@ public class ProductDAO {
             System.out.println("Error in getProductsByStockStatus: " + e.getMessage());
             throw e;
         }
-        
+
         return products;
     }
 

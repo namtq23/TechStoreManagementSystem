@@ -65,12 +65,11 @@ public class PromotionDAO {
         return promotions;
     }
 
-    /*
-      Lấy tất cả khuyến mãi cho chi nhánh (bao gồm cả hết hạn và chưa áp dụng)
+       /**
+     * Lấy tất cả khuyến mãi theo chi nhánh (bao gồm cả đã hết hạn)
      */
     public List<PromotionDTO> getAllPromotionsByBranch(String dbName, int branchId) throws SQLException {
         List<PromotionDTO> promotions = new ArrayList<>();
-
         String sql = """
             SELECT DISTINCT
                 p.PromotionID,
@@ -79,26 +78,37 @@ public class PromotionDAO {
                 p.StartDate,
                 p.EndDate,
                 p.ApplyToAllBranches
-            FROM Promotions p
-            LEFT JOIN PromotionBranches pb ON p.PromotionID = pb.PromotionID
-            WHERE (p.ApplyToAllBranches = 1 OR pb.BranchID = ?)
-            ORDER BY p.StartDate DESC
+            FROM 
+                Promotions p
+                LEFT JOIN PromotionBranches pb ON p.PromotionID = pb.PromotionID
+            WHERE 
+                (p.ApplyToAllBranches = 1 OR pb.BranchID = ?)
+            ORDER BY 
+                p.StartDate DESC
         """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, branchId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
+        
+        try (Connection conn = DBUtil.getConnectionTo(dbName); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, branchId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    PromotionDTO promotion = new PromotionDTO(
-                            rs.getInt("PromotionID"),
-                            rs.getString("PromoName"),
-                            rs.getBigDecimal("DiscountPercent"),
-                            rs.getDate("StartDate"),
-                            rs.getDate("EndDate"),
-                            rs.getBoolean("ApplyToAllBranches")
-                    );
+                    PromotionDTO promotion = new PromotionDTO();
+                    promotion.setPromotionID(rs.getInt("PromotionID"));
+                    promotion.setPromoName(rs.getString("PromoName"));
+                    promotion.setDiscountPercent(rs.getBigDecimal("DiscountPercent"));
+                    promotion.setStartDate(rs.getDate("StartDate"));
+                    promotion.setEndDate(rs.getDate("EndDate"));
+                    promotion.setApplyToAllBranches(rs.getBoolean("ApplyToAllBranches"));
+                    
+                    // Tạo mô tả
+                    String description = String.format("Giảm %s%% từ %s đến %s", 
+                        promotion.getDiscountPercent(), 
+                        promotion.getStartDate(), 
+                        promotion.getEndDate());
+                    promotion.setDescription(description);
+                    
                     promotions.add(promotion);
                 }
             }
@@ -106,7 +116,7 @@ public class PromotionDAO {
             System.out.println("Error in getAllPromotionsByBranch: " + e.getMessage());
             throw e;
         }
-
+        
         return promotions;
     }
 
