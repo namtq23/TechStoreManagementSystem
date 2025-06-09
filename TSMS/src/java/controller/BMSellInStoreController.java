@@ -4,6 +4,8 @@
  */
 package controller;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import dao.ProductDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -12,6 +14,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.lang.reflect.Type;
 import java.util.List;
 import model.ProductDTO;
 
@@ -64,6 +67,26 @@ public class BMSellInStoreController extends HttpServlet {
         } catch (ServletException | IOException | NumberFormatException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String customerName = req.getParameter("fullName");
+        String customerPhone = req.getParameter("phone");
+        String customerGender = req.getParameter("gender");
+        String customerAddress = req.getParameter("address");
+        String customerMail = req.getParameter("email");
+        String customerDob = req.getParameter("dob");
+
+        String amountDue = req.getParameter("amountDue");
+        String totalAmount = req.getParameter("totalAmount");
+
+        String cartJson = req.getParameter("cartData");
+
+        Gson gson = new Gson();
+        Type productListType = new TypeToken<List<ProductDTO>>() {}.getType();
+        List<ProductDTO> cartItems = gson.fromJson(cartJson, productListType);
+        System.out.println(cartItems);
     }
 
 }
