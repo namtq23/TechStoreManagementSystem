@@ -8,11 +8,13 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>KiotViet - Tổng quan</title>
+        <title>TSMS - Tổng quan</title>
         <link rel="stylesheet" href="css/header.css">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="css/so-overall.css">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     </head>
     <body>
         <header class="header">
@@ -66,7 +68,7 @@
                     </div>
                 </div>        
             </div>
-        </header>F
+        </header>
 
         <div class="main-container">
             <!-- Main Content -->
@@ -130,18 +132,28 @@
 
                 <!-- Revenue Chart Section -->
                 <section class="revenue-chart">
-                    <div class="chart-header">
-                        <h3>DOANH THU THUẦN THÁNG NÀY <i class="fas fa-info-circle"></i></h3>
-                        <div class="chart-controls">
-                            <select class="period-select">
-                                <option>Tháng này</option>
-                                <option>7 ngày qua</option>
-                            </select>
+                    <form id="chartFilterForm" action="so-overview" method="GET">
+                        <div class="chart-header">
+                            <h3>
+                                DOANH THU THUẦN 
+                                ${currentPeriod == 'last_month' ? 'THÁNG TRƯỚC' : 'THÁNG NÀY'}
+                                <i class="fas fa-info-circle"></i>
+                            </h3>
+                            <div class="chart-controls">
+
+                                <select name="period" class="period-select">
+                                    <option value="this_month" ${currentPeriod == 'this_month' ? 'selected' : ''}>
+                                        Tháng này
+                                    </option>
+                                    <option value="last_month" ${currentPeriod == 'last_month' ? 'selected' : ''}>
+                                        Tháng trước
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <form action="so-overview" method="GET">
+
                         <div class="chart-filters">
-                            <c:set var="currentFilter" value="${filterType}" />
+
 
                             <button type="submit" name="filterType" value="day"
                                     class="filter-btn ${currentFilter == 'day' ? 'active' : ''}">
@@ -162,7 +174,7 @@
                     </form>
 
 
-                  <c:set var="hasData" value="false"/>
+                    <c:set var="hasData" value="false"/>
                     <c:forEach var="data" items="${revenueData.data}">
                         <c:if test="${data gt 0}">
                             <c:set var="hasData" value="true"/>
@@ -173,7 +185,7 @@
 
                     <div class="chart-container">
                         <div class="no-data">
-                        <c:if test="${not hasData}">
+                            <c:if test="${not hasData}">
                                 <div class="no-data">
                                     <i class="fas fa-box"></i>
                                     <p>Không có dữ liệu</p>
@@ -192,26 +204,32 @@
                 <!-- Top Products Section -->
                 <section class="top-products">
                     <div class="section-header">
-                        <h3>TOP 10 HÀNG HÓA BÁN CHẠY THÁNG NÀY</h3>
-                        <div class="section-controls">
-                            <select class="sort-select">
-                                <option>THEO DOANH THU THUẦN</option>
-                            </select>
-                            <select class="period-select">
-                                <option>Tháng này</option>
-                                <option>7 ngày qua</option>
-                            </select>
-                        </div>
+                        <h3>TOP 5 HÀNG HÓA BÁN CHẠY ${topPeriod == 'last_month' ? 'THÁNG TRƯỚC' : 'THÁNG NÀY'}</h3>
+                        <form id="topProductsForm" action="so-overview" method="GET">
+                            <div class="section-controls">
+                                <select name="sortBy" class="sort-select">
+                                    <option value="revenue" ${sortBy == 'revenue' ? 'selected' : ''}>THEO DOANH THU THUẦN</option>
+                                    <option value="quantity" ${sortBy == 'quantity' ? 'selected' : ''}>THEO SỐ LƯỢNG</option>
+                                </select>
+                                <select name="topPeriod" class="period-select">
+                                    <option value="this_month" ${topPeriod == 'this_month' ? 'selected' : ''}>Tháng này</option>
+                                    <option value="last_month" ${topPeriod == 'last_month' ? 'selected' : ''}>Tháng trước</option>
+                                </select>
+                            </div>
+                        </form>
                     </div>
-
                     <div class="products-table">
-                        <div class="no-data">
-                            <i class="fas fa-box"></i>
-                            <p>Không có dữ liệu</p>
-                        </div>
+
+                        <canvas id="myTopProduct" ></canvas>
                     </div>
                 </section>
+
             </main>
+            <!--                        <div class="no-data">
+                   <canvas id="myTopProduct" width="600" height="300"></canvas>
+                  <i class="fas fa-box"></i>
+                    <p>Không có dữ liệu</p>
+                </div>-->
 
             <!-- Sidebar -->
             <aside class="sidebar">
@@ -370,5 +388,65 @@
             }
         });
     </script>
+    <script>
+        // Lắng nghe sự kiện "change" trên thẻ select
+        document.querySelector('.period-select').addEventListener('change', function () {
+            // Tự động submit form khi người dùng thay đổi lựa chọn
+            this.form.submit();
+        });
+    </script>
+
+    <script>
+        const ctxTop = document.getElementById('myTopProduct').getContext('2d');
+        const labelsTop = [
+        <c:forEach var="p" items="${topProducts}" varStatus="status">
+        "${p.productName}"<c:if test="${!status.last}">,</c:if>
+        </c:forEach>
+        ];
+        const dataTop = [
+        <c:forEach var="p" items="${topProducts}" varStatus="status">
+            ${sortBy == 'quantity' ? p.totalQuantity : p.revenue}<c:if test="${!status.last}">,</c:if>
+        </c:forEach>
+        ];
+
+
+        new Chart(ctxTop, {
+            type: 'bar',
+            data: {
+                labels: labelsTop,
+                datasets: [{
+                        label: '${sortBy == "quantity" ? "Số lượng bán" : "Doanh thu thuần"}',
+                        data: dataTop,
+                        backgroundColor: '#1787FC',
+                        borderColor: '#1787FC',
+                        borderWidth: 1
+                    }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    legend: {display: false},
+                    title: {
+                        display: true,
+                        text: 'TOP 5 HÀNG HÓA BÁN CHẠY ${topPeriod == "last_month" ? "THÁNG TRƯỚC" : "THÁNG NÀY"}'
+                    }
+                },
+                scales: {x: {beginAtZero: true}}
+            }
+        });
+    </script>
+
+
+    <script>
+        // Tự động submit form khi thay đổi bất kỳ select nào trong topProductsForm
+        document.querySelectorAll('#topProductsForm select').forEach(function (select) {
+            select.addEventListener('change', function () {
+                this.form.submit();
+            });
+        });
+    </script>
+
+</script>
 
 </html>

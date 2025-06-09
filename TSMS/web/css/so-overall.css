@@ -305,7 +305,7 @@ body {
 }
 
 .products-table {
-    height: 200px;
+    height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -594,6 +594,13 @@ body {
 .chart-container canvas {
     width: 100% !important;
     height: 100% !important;
+    display: block;
+
+}
+
+canvas#myTopProduct{
+    width: 90% !important;
+    height: 90% !important;
     display: block;
 
 }
