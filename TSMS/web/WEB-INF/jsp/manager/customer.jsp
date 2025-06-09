@@ -7,6 +7,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*, model.Customer" %>
 <%@ page import="util.Validate" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -133,6 +134,7 @@
                                 <th>Số Điện Thoại</th>
                                 <th>Gmail</th>
                                 <th>Địa Chỉ</th>
+                                <th>Giới Tính</th>
                                 <th>Ngày tạo thông tin</th>
                                 <th>cập nhật thông tin</th>
                             </tr>
@@ -149,6 +151,9 @@
                                 <td><%= customer.getPhoneNumber() %></td>
                                 <td><%= customer.getEmail() != null ? customer.getEmail() : "" %></td>
                                 <td><%= customer.getAddress() != null ? customer.getAddress() : "" %></td>
+                                <td>
+  <%= customer.getGender() != null ? (customer.getGender() ? "Nam" : "Nữ") : "" %>
+</td>
                                 <td><%= Validate.formatDateTime(customer.getCreatedAt()) %></td>
                                 <td><%= customer.getUpdatedAt() != null ? Validate.formatDateTime(customer.getUpdatedAt()) : "" %></td>
                             </tr>
@@ -161,31 +166,30 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
+<!-- Pagination -->
                 <div class="pagination-container">
                     <div class="pagination-info">
-                        Hiển thị 1 - 15 / Tổng số 30 khách hàng
+                        Hiển thị ${startCustomer} - ${endCustomer} / Tổng số ${totalProducts} Khách hàng
                     </div>
                     <div class="pagination">
-                        <button class="page-btn" disabled>
+                        <a href="bm-customer?page=1" class="page-btn ${currentPage == 1 ? "disabled" : ""}"> 
                             <i class="fas fa-angle-double-left"></i>
-                        </button>
-                        <button class="page-btn" disabled>
+                        </a>
+                        <a href="bm-customer?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
                             <i class="fas fa-angle-left"></i>
-                        </button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">
+                        </a>
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <a href="bm-customer?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                        </c:forEach>
+
+                        <a href="bm-customer?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
                             <i class="fas fa-angle-right"></i>
-                        </button>
-                        <button class="page-btn">
+                        </a>
+                        <a href="bm-customer?page=${totalPages}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
                             <i class="fas fa-angle-double-right"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
-            </main>
-        </div>
-
         <!-- Support Chat Button -->
         <div class="support-chat">
             <i class="fas fa-headset"></i>

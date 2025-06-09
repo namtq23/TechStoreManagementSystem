@@ -33,7 +33,11 @@ public class CustomerDAO {
                 String address = rs.getString("Address");
 
                 // Chuyển giới tính từ bit thành String: "Nam"/"Nữ"
-                String gender = rs.getString("Gender");
+                Boolean gender = null;
+boolean genderValue = rs.getBoolean("Gender");
+if (!rs.wasNull()) {
+    gender = genderValue;
+}
     
                 Date dateOfBirth = rs.getDate("DateOfBirth");
                 Date createdAt = rs.getTimestamp("CreatedAt");
@@ -66,7 +70,21 @@ public class CustomerDAO {
     // Tìm kiếm khách hàng theo tên (FullName)
 public List<Customer> searchCustomersByName(String dbName, String keyword) throws SQLException {
     List<Customer> customers = new ArrayList<>();
-    String sql = "SELECT * FROM Customers WHERE FullName LIKE ?";
+String sql = """
+    SELECT 
+        CustomerID,
+        FullName,
+        PhoneNumber,
+        Email,
+        Address,
+        Gender,
+        DateOfBirth,
+        CreatedAt,
+        UpdatedAt
+    FROM Customers
+    ORDER BY CustomerID
+    OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+""";
 
     try (
         Connection conn = DBUtil.getConnectionTo(dbName);
@@ -82,7 +100,11 @@ public List<Customer> searchCustomersByName(String dbName, String keyword) throw
                 String email = rs.getString("Email");
                 String address = rs.getString("Address");
 
-                String gender = rs.getString("Gender");
+                Boolean gender = null;
+boolean genderValue = rs.getBoolean("Gender");
+if (!rs.wasNull()) {
+    gender = genderValue;
+}
                 Date dateOfBirth = rs.getDate("DateOfBirth");
                 Date createdAt = rs.getTimestamp("CreatedAt");
                 Date updatedAt = rs.getTimestamp("UpdatedAt");
@@ -101,7 +123,80 @@ public List<Customer> searchCustomersByName(String dbName, String keyword) throw
 
     return customers;
 }
+    // ✅ Hàm dùng chung để map ResultSet → Customer object
+    private Customer extractCustomerFromResultSet(ResultSet rs) throws SQLException {
+        int customerId = rs.getInt("CustomerID");
+        String fullName = rs.getString("FullName");
+        String phoneNumber = rs.getString("PhoneNumber");
+        String email = rs.getString("Email");
+        String address = rs.getString("Address");
 
+        Boolean gender = null;
+boolean genderValue = rs.getBoolean("Gender");
+if (!rs.wasNull()) {
+    gender = genderValue;
+}  // đã dùng CASE WHEN để trả về Nam/Nữ
+        Date dateOfBirth = rs.getDate("DateOfBirth");
+        Date createdAt = rs.getTimestamp("CreatedAt");
+        Date updatedAt = rs.getTimestamp("UpdatedAt");
+
+        return new Customer(customerId, fullName, phoneNumber, email, address,
+                gender, dateOfBirth, createdAt, updatedAt);
+    }
+    
+        // ✅ Đếm tổng số khách hàng (loại bỏ branchId)
+    public int countCustomers(String dbName) {
+        int count = 0;
+        String sql = "SELECT COUNT(*) FROM Customers";
+
+        try (Connection con = DBUtil.getConnectionTo(dbName);
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (Exception e) {
+            System.out.println("Lỗi khi đếm khách hàng: " + e.getMessage());
+        }
+        return count;
+    }
+    
+        // ✅ Phân trang danh sách khách hàng
+    public List<Customer> getCustomerListByPage(String dbName, int offset, int limit) {
+        List<Customer> list = new ArrayList<>();
+        String sql = """
+    SELECT 
+        CustomerID,
+        FullName,
+        PhoneNumber,
+        Email,
+        Address,
+        Gender,
+        DateOfBirth,
+        CreatedAt,
+        UpdatedAt
+    FROM Customers
+    ORDER BY CustomerID
+    OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+""";
+
+        try (Connection con = DBUtil.getConnectionTo(dbName);
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, offset);
+            ps.setInt(2, limit);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(extractCustomerFromResultSet(rs));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Lỗi khi phân trang khách hàng: " + e.getMessage());
+        }
+        return list;
+    }
     
     
     
