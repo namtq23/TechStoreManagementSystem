@@ -16,8 +16,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import model.ProductSaleDTO;
 import util.Validate;
 
 /**
@@ -30,41 +33,80 @@ public class SOOverallController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        String sortBy = request.getParameter("sortBy");
+        if (sortBy == null || sortBy.isEmpty()) {
+            sortBy = "revenue";
+        }
+        String topPeriod = request.getParameter("topPeriod");
+        if (topPeriod == null || topPeriod.isEmpty()) {
+            topPeriod = "this_month"; // 
+        }
 
+        String period = request.getParameter("period");
+        if (period == null || period.isEmpty()) {
+            period = "this_month";
+        }
         String filterType = request.getParameter("filterType");
         if (filterType == null || filterType.isEmpty()) {
             filterType = "day";
         }
+
+        List<ProductSaleDTO> topProducts = new ArrayList<>();
         Map<String, Object> Revenue = new HashMap<>();
+        String dbName = (String) request.getSession().getAttribute("dbName");
+        CashFlowDAO cashFlowDAO = new CashFlowDAO();
 
         try {
 
-            // Lấy tên CSDL từ session
-            String dbName = (String) request.getSession().getAttribute("dbName");
-
-            // Gọi DAO để lấy tổng thu nhập hôm nay
-            CashFlowDAO cashFlowDAO = new CashFlowDAO();
-
             BigDecimal incomeTotalToDay = cashFlowDAO.getTodayIncome(dbName);
 
-            // CHỈ GỌI 1 LẦN theo filterType
-            switch (filterType) {
-                case "day":
-                    Revenue = cashFlowDAO.getMonthlyRevenueByDay(dbName);
-                    break;
-                case "weekday":
-                    Revenue = cashFlowDAO.getMonthlyRevenueByWeekday(dbName);
-                    break;
-                case "hour":
-                    Revenue = cashFlowDAO.getMonthlyRevenueByHour(dbName);
-                    break;
-                default:
-                    Revenue = cashFlowDAO.getMonthlyRevenueByDay(dbName);
-                    break;
+            if ("this_month".equals(period)) {
+                switch (filterType) {
+                    case "day":
+                        Revenue = cashFlowDAO.getMonthlyRevenueByDay(dbName);
+                        break;
+                    case "weekday":
+                        Revenue = cashFlowDAO.getMonthlyRevenueByWeekday(dbName);
+                        break;
+                    case "hour":
+                        Revenue = cashFlowDAO.getMonthlyRevenueByHour(dbName);
+                        break;
+                    default:
+                        Revenue = cashFlowDAO.getMonthlyRevenueByDay(dbName);
+                        break;
+                }
+            } else if ("last_month".equals(period)) {
+                switch (filterType) {
+                    case "day":
+                        Revenue = cashFlowDAO.getPreviousMonthRevenueByDay(dbName);
+                        break;
+                    case "weekday":
+                        Revenue = cashFlowDAO.getPreviousMonthRevenueByWeekday(dbName);
+                        break;
+                    case "hour":
+                        Revenue = cashFlowDAO.getPreviousMonthRevenueByHour(dbName);
+                        break;
+                    default:
+                        Revenue = cashFlowDAO.getPreviousMonthRevenueByDay(dbName);
+                        break;
+                }
+
             }
 
-            // XÓA DÒNG NÀY - Đây là nguyên nhân gọi 2 lần:
-            // Revenue = cashFlowDAO.getMonthlyRevenueByWeekday(dbName);
+            if ("last_month".equals(topPeriod)) {
+                if ("quantity".equals(sortBy)) {
+                    topProducts = cashFlowDAO.getTop5ProductSalesLastMonthByQuantity(dbName);
+                } else {
+                    topProducts = cashFlowDAO.getTop5ProductSalesLastMonthByRevenue(dbName);
+                }
+            } else {
+                if ("quantity".equals(sortBy)) {
+                    topProducts = cashFlowDAO.getTop5ProductSalesThisMonthByQuantity(dbName);
+                } else {
+                    topProducts = cashFlowDAO.getTop5ProductSalesThisMonthByRevenue(dbName);
+                }
+            }
+
             // Debug dữ liệu trước khi gửi tới JSP
             System.out.println("Final Revenue Data:");
             System.out.println("Labels: " + Revenue.get("labels"));
@@ -80,14 +122,18 @@ public class SOOverallController extends HttpServlet {
             BigDecimal sameDayLastMonthIncome = cashFlowDAO.getSameDayLastMonthIncome(dbName, sameDayLastMonth);
 
             double percentageChange = Validate.calculatePercentageChange(incomeTotalToDay, yesterdayIncome);
+
             double monthlyChange = Validate.calculatePercentageChange(incomeTotalToDay, sameDayLastMonthIncome);
             // Đặt vào request để render ra JSP
-            request.setAttribute("filterType", filterType);
+            request.setAttribute("currentPeriod", period);
+            request.setAttribute("currentFilter", filterType);
             request.setAttribute("revenueData", Revenue);
             request.setAttribute("percentageChange", percentageChange);
             request.setAttribute("invoiceToDay", invoiceToDay);
             request.setAttribute("incomeTotal", Validate.formatCurrency(incomeTotalToDay));
             request.setAttribute("monthlyChange", monthlyChange);
+            request.setAttribute("topProducts", topProducts);
+            request.setAttribute("topPeriod", topPeriod);
 
         } catch (SQLException e) {
             e.printStackTrace(); // Log lỗi
