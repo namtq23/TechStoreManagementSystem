@@ -52,7 +52,7 @@ public class BMSellInStoreController extends HttpServlet {
             String dbName = dbNameObj.toString();
             int branchId = Integer.parseInt(branchIdObj.toString());
             int page = 1;
-            int pageSize = 10;
+            int pageSize = 100;
 
             if (req.getParameter("page") != null) {
                 page = Integer.parseInt(req.getParameter("page"));

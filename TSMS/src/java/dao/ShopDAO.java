@@ -34,6 +34,6 @@ public class ShopDAO {
     
     public static void main(String[] args) throws SQLException {
         ShopDAO shop = new ShopDAO();
-        System.out.println(shop.isShopTaken("TiemCongNghe"));
+        System.out.println(shop.isShopTaken("pp"));
     }
 }

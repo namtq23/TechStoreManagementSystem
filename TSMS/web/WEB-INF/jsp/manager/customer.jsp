@@ -74,6 +74,7 @@
                         </div>
                     </div>      
                 </div>
+            </div>
         </header>
 
         <div class="main-container">
@@ -90,7 +91,7 @@
                             <label class="checkbox-item">
                                 <input type="radio" id="active" name="employeeStatus" value="active" checked="">
                                 <span for="active">Tổng hợp</span><br>
-                                
+
                             </label>
                             <label class="checkbox-item">
                                 <input type="radio" id="inactive" name="employeeStatus" value="inactive">
@@ -99,34 +100,34 @@
                         </form>
                     </div>
                 </div>
-                                <div class="filter-section">
+                <div class="filter-section">
                     <div class="filter-header">
                         <h3>Giới tính khách hàng</h3>
                         <i class="fas fa-chevron-up"></i>
                     </div>
-<div class="filter-content">
-    <form action="bm-customer" method="get">
-        <label class="checkbox-item">
-            <input type="radio" id="gender-all" name="gender" value="all"
-                   <%= request.getParameter("gender") == null || "all".equals(request.getParameter("gender")) ? "checked" : "" %>>
-            <span for="gender-all">Tổng hợp</span><br>
-        </label>
+                    <div class="filter-content">
+                        <form action="bm-customer" method="get">
+                            <label class="checkbox-item">
+                                <input type="radio" id="gender-all" name="gender" value="all"
+                                       <%= request.getParameter("gender") == null || "all".equals(request.getParameter("gender")) ? "checked" : "" %>>
+                                <span for="gender-all">Tổng hợp</span><br>
+                            </label>
 
-        <label class="checkbox-item">
-            <input type="radio" id="gender-male" name="gender" value="male"
-                   <%= "male".equals(request.getParameter("gender")) ? "checked" : "" %>>
-            <span for="gender-male">Nam</span><br>
-        </label>
+                            <label class="checkbox-item">
+                                <input type="radio" id="gender-male" name="gender" value="male"
+                                       <%= "male".equals(request.getParameter("gender")) ? "checked" : "" %>>
+                                <span for="gender-male">Nam</span><br>
+                            </label>
 
-        <label class="checkbox-item">
-            <input type="radio" id="gender-female" name="gender" value="female"
-                   <%= "female".equals(request.getParameter("gender")) ? "checked" : "" %>>
-            <span for="gender-female">Nữ</span><br>
-        </label>
+                            <label class="checkbox-item">
+                                <input type="radio" id="gender-female" name="gender" value="female"
+                                       <%= "female".equals(request.getParameter("gender")) ? "checked" : "" %>>
+                                <span for="gender-female">Nữ</span><br>
+                            </label>
 
-        <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
-    </form>
-</div>
+                            <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
+                        </form>
+                    </div>
 
                 </div>
             </aside>
@@ -137,14 +138,14 @@
                     <h1>Khách hàng</h1>
                     <div class="header-actions">
 
-<form action="bm-customer" method="get" class="search-container">
-    <i class="fas fa-search"></i>
-    <input type="text" name="keyword" placeholder="Theo mã, tên khách hàng" class="search-input"
-           value="${param.keyword != null ? param.keyword : ''}" />
-    <button type="submit" style="border: none; background: none;">
-        <i class="fas fa-chevron-down"></i>
-    </button>
-</form>
+                        <form action="bm-customer" method="get" class="search-container">
+                            <i class="fas fa-search"></i>
+                            <input type="text" name="keyword" placeholder="Theo mã, tên khách hàng" class="search-input"
+                                   value="${param.keyword != null ? param.keyword : ''}" />
+                            <button type="submit" style="border: none; background: none;">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </form>
 
                         <button class="btn btn-success">
                             <i class="fas fa-plus"></i>
@@ -200,7 +201,7 @@
                     </table>
                 </div>
 
-<!-- Pagination -->
+                <!-- Pagination -->
                 <div class="pagination-container">
                     <div class="pagination-info">
                         Hiển thị ${startCustomer} - ${endCustomer} / Tổng số ${totalProducts} Khách hàng
@@ -224,11 +225,28 @@
                         </a>
                     </div>
                 </div>
-        <!-- Support Chat Button -->
-        <div class="support-chat">
-            <i class="fas fa-headset"></i>
-            <span>Hỗ trợ:1900 9999</span>
+                <!-- Support Chat Button -->
+                <div class="support-chat">
+                    <i class="fas fa-headset"></i>
+                    <span>Hỗ trợ:1900 9999</span>
+                </div>
         </div>
     </body>
+    <script>
+        const toggle = document.getElementById("dropdownToggle");
+        const menu = document.getElementById("dropdownMenu");
+
+        toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        });
+
+        // Đóng dropdown nếu click ra ngoài
+        document.addEventListener("click", function (e) {
+            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                menu.style.display = "none";
+            }
+        });
+    </script>
 </html>
 
