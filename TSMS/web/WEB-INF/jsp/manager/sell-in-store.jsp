@@ -23,7 +23,7 @@ Author     : admin
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="#" class="logo">
+                    <a href="bm-overview" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
