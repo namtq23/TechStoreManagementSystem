@@ -14,6 +14,7 @@ if (currentSection == null) currentSection = "products";
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TSMS - Hệ thống bán hàng</title>
         <link rel="stylesheet" href="css/sale.css">
+        <link rel="stylesheet" href="css/header.css"/>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     </head>
     <body>
@@ -21,7 +22,7 @@ if (currentSection == null) currentSection = "products";
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="login" class="logo">
+                    <a href="salepage" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
@@ -45,10 +46,16 @@ if (currentSection == null) currentSection = "products";
                     </a>
                 </nav>
                 <div class="header-right">
-                    <a href="profile" class="user-icon gradient">
-                        <i class="fas fa-user-circle fa-2x"></i>
-                    </a>
-                </div>       
+                    <div class="user-dropdown">
+                        <a href="#" class="user-icon gradient" id="dropdownToggle">
+                            <i class="fas fa-user-circle fa-2x"></i>
+                        </a>
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="logout" class="dropdown-item">Đăng xuất</a>
+                        </div>
+                    </div>      
+                </div>      
             </div>
         </header>
 
@@ -728,7 +735,22 @@ if (currentSection == null) currentSection = "products";
             });
         </script>
 
+        <script>
+            const toggle = document.getElementById("dropdownToggle");
+            const menu = document.getElementById("dropdownMenu");
 
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                menu.style.display = menu.style.display === "block" ? "none" : "block";
+            });
+
+            // Đóng dropdown nếu click ra ngoài
+            document.addEventListener("click", function (e) {
+                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                    menu.style.display = "none";
+                }
+            });
+        </script>
 
     </body>
 </html>
