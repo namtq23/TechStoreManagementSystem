@@ -303,7 +303,7 @@ Author     : admin
 
                 <!-- Nút thanh toán và đóng -->
                 <div class="form-actions">
-                    <button type="submit" id="processPayment" class="btn-primary">
+                    <button type="button" id="processPayment" class="btn-primary">
                         <i class="fas fa-credit-card"></i> Thanh toán
                     </button>
                         <button type="button" id="closeOrderDetail" class="btn-secondary">

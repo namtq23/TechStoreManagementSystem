@@ -33,15 +33,41 @@ class TSMSCashier {
     }
 
     bindEvents() {
+
         document.addEventListener('click', (e) => {
+            const productCard = e.target.closest('.product-card');
+
             if (e.target.closest('.add-to-cart')) {
                 e.preventDefault();
-                const productCard = e.target.closest('.product-card');
+                if (productCard) {
+                    const productId = parseInt(productCard.dataset.productId);
+                    this.addToCart(productId);
+                }
+                return;
+            }
+
+            if (productCard) {
+                const productInfo = productCard.querySelector('.product-info');
                 const productId = parseInt(productCard.dataset.productId);
-                console.log(productId);
-                this.addToCart(productId);
+                const product = this.products.find(p => p.productDetailId === productId);
+                const existingDetail = productCard.querySelector('.product-detail');
+                if (existingDetail) {
+                    existingDetail.remove();
+                    return;
+                }
+
+
+                const detailHTML = `
+            <div class="product-detail" style="padding: 10px; background-color: #f8f8f8; border-top: 1px solid #ccc; margin-top: 5px;">
+                <p><strong>Nhãn hiệu:</strong> ${product.brand}</p>
+                <p><em>(Thông tin chi tiết khác nếu có...)</em></p>
+            </div>
+        `;
+
+                productInfo.insertAdjacentHTML('afterend', detailHTML);
             }
         });
+
 
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('qty-btn')) {
@@ -142,10 +168,9 @@ class TSMSCashier {
         if (!product)
             return;
 
-        // Check if product already exists in invoice table
         const existingRow = Array.from(document.querySelectorAll('.item-row')).find(row => {
             const code = row.cells[1].textContent;
-            return code === product.code;
+            return code === product.serialNum;
         });
 
         if (existingRow) {
