@@ -133,6 +133,8 @@
                 <!-- Revenue Chart Section -->
                 <section class="revenue-chart">
                     <form id="chartFilterForm" action="so-overview" method="GET">
+                        <input type="hidden" name="sortBy" value="${sortBy}">
+                        <input type="hidden" name="topPeriod" value="${topPeriod}">
                         <div class="chart-header">
                             <h3>
                                 DOANH THU THUẦN 
@@ -206,10 +208,14 @@
                     <div class="section-header">
                         <h3>TOP 5 HÀNG HÓA BÁN CHẠY ${topPeriod == 'last_month' ? 'THÁNG TRƯỚC' : 'THÁNG NÀY'}</h3>
                         <form id="topProductsForm" action="so-overview" method="GET">
+         
+                            <input type="hidden" name="period" value="${currentPeriod}">
+                            <input type="hidden" name="filterType" value="${currentFilter}">
                             <div class="section-controls">
                                 <select name="sortBy" class="sort-select">
-                                    <option value="revenue" ${sortBy == 'revenue' ? 'selected' : ''}>THEO DOANH THU THUẦN</option>
                                     <option value="quantity" ${sortBy == 'quantity' ? 'selected' : ''}>THEO SỐ LƯỢNG</option>
+                                    <option value="revenue" ${sortBy == 'revenue' ? 'selected' : ''}>THEO DOANH THU THUẦN</option>
+
                                 </select>
                                 <select name="topPeriod" class="period-select">
                                     <option value="this_month" ${topPeriod == 'this_month' ? 'selected' : ''}>Tháng này</option>
@@ -405,7 +411,14 @@
         ];
         const dataTop = [
         <c:forEach var="p" items="${topProducts}" varStatus="status">
-            ${sortBy == 'quantity' ? p.totalQuantity : p.revenue}<c:if test="${!status.last}">,</c:if>
+            <c:choose>
+                <c:when test="${param.sortBy == 'revenue'}">
+                    ${p.revenue != null ? p.revenue : 0}
+                </c:when>
+                <c:otherwise>
+                    ${p.totalQuantity}
+                </c:otherwise>
+            </c:choose><c:if test="${!status.last}">,</c:if>
         </c:forEach>
         ];
 
