@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.util.List;
+import model.Category;
 import model.ProductDTO;
 
 /**
@@ -54,6 +55,8 @@ public class BMProductController extends HttpServlet {
             int totalProducts = p.countProductsByBranchId(dbName, branchId);
             int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
 
+            List<Category> categories = p.getAllCategories(dbName);
+            req.setAttribute("categories", categories);
             req.setAttribute("currentPage", page);
             req.setAttribute("totalPages", totalPages);
             req.setAttribute("totalProducts", totalProducts);
@@ -64,6 +67,26 @@ public class BMProductController extends HttpServlet {
         } catch (ServletException | IOException | NumberFormatException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String[] filterCate = req.getParameterValues("categories");
+        String stockStatus = req.getParameter("inventory");
+        try {
+            if (filterCate.length == 0 || filterCate[0].contains("all")) {
+                if (stockStatus.contains("all")) {
+                    //Hiển thị hết tất cả sản phẩm
+                } else if (stockStatus.contains("in-stock")){
+                    //Còn hàng
+                } else {
+                    //hét hàng
+                }
+            } 
+        } catch (Exception e){
+            System.out.println(e);
+        }
+
     }
 
 }
