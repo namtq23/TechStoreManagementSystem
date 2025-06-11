@@ -362,7 +362,7 @@ body {
 
 .page-btn {
     text-decoration: none;
-    color: black;   
+    color: black;
     width: 32px;
     height: 32px;
     border: 1px solid #ddd;
@@ -416,24 +416,67 @@ body {
     background: #1976D2;
 }
 
+.filter-actions {
+    padding: 20px;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid #eee;
+}
+
+.btn-clear, .btn-apply {
+    flex: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-clear {
+    background: #f8f9fa;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.btn-clear:hover {
+    background: #e9ecef;
+}
+
+.btn-apply {
+    background: #007bff;
+    color: white;
+}
+
+.btn-apply:hover {
+    background: #0056b3;
+}
+
+
 /* Responsive Design */
 @media (max-width: 1200px) {
     .main-container {
         flex-direction: column;
     }
-    
+
     .sidebar {
         width: 100%;
         margin-bottom: 20px;
     }
-    
+
     .filter-section {
         display: inline-block;
         width: calc(33.333% - 10px);
         margin-right: 15px;
         vertical-align: top;
     }
-    
+
     .filter-section:nth-child(3n) {
         margin-right: 0;
     }
@@ -443,30 +486,30 @@ body {
     .main-container {
         padding: 10px;
     }
-    
+
     .search-container {
         min-width: 200px;
     }
-    
+
     .main-nav {
         display: none;
     }
-    
+
     .filter-section {
         width: 100%;
         margin-right: 0;
         margin-bottom: 10px;
     }
-    
+
     .table-container {
         font-size: 12px;
     }
-    
+
     .products-table th,
     .products-table td {
         padding: 8px 4px;
     }
-    
+
     .pagination-container {
         flex-direction: column;
         gap: 15px;
