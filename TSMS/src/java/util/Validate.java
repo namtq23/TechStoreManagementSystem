@@ -106,7 +106,6 @@ public class Validate {
         }
     }
 
-
     public static String formatCurrency(BigDecimal amount) {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("vi", "VN"));
         symbols.setGroupingSeparator('.');
@@ -140,7 +139,6 @@ public class Validate {
         return LocalDate.of(previousMonth.getYear(), previousMonth.getMonth(), day);
     }
 
-
     public static String formatCostPriceToVND(double costPrice) {
         try {
             NumberFormat vndFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
@@ -150,10 +148,22 @@ public class Validate {
         }
     }
 
+    public static double safeParseDouble(String input) throws NumberFormatException {
+        if (input == null || input.trim().isEmpty()) {
+            return 0.0;
+        }
+
+        input = input.replaceAll("[^\\d]", "");
+
+        return Double.parseDouble(input);
+    }
+
     public static void main(String[] args) {
         // Test hàm với đầu vào mới
         String input = "hanh tinh xanh";
         System.out.println("Input: " + input + " -> Output: " + shopNameConverter(input));
+
+        System.out.println(safeParseDouble("1.250.000"));
     }
- 
+
 }
