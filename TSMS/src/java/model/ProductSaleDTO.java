@@ -19,7 +19,7 @@ public class ProductSaleDTO {
     private String productName;
     private int productId;
     private int totalQuantity;
-    private BigDecimal revenue; // Thêm trường doanh thu
+    private BigDecimal revenue; 
 
     public ProductSaleDTO(String productName, int productId, int totalQuantity, BigDecimal revenue) {
         this.productName = productName;
@@ -34,10 +34,39 @@ public class ProductSaleDTO {
         this.totalQuantity = totalQuantity;
     }
 
-    // Getters và setters
-    public String getProductName() { return productName; }
-    public int getProductId() { return productId; }
-    public int getTotalQuantity() { return totalQuantity; }
-    public BigDecimal getRevenue() { return revenue; }
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public int getProductId() {
+        return productId;
+    }
+
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
+
+    public int getTotalQuantity() {
+        return totalQuantity;
+    }
+
+    public void setTotalQuantity(int totalQuantity) {
+        this.totalQuantity = totalQuantity;
+    }
+
+    public BigDecimal getRevenue() {
+        return revenue;
+    }
+
+    public void setRevenue(BigDecimal revenue) {
+        this.revenue = revenue;
+    }
+
+    
+ 
 }
 

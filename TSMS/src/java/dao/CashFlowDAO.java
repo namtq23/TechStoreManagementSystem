@@ -619,22 +619,25 @@ public class CashFlowDAO {
         return result;
     }
 // Hàm lấy ra top 5 sản phẩm bán theo số lượng tháng này
+
     public List<ProductSaleDTO> getTop5ProductSalesThisMonthByQuantity(String dbName) throws SQLException {
         String sql = """
         SELECT TOP 5
             p.ProductName,
-            od.ProductID,
+            p.ProductID,    
             SUM(od.Quantity) AS TotalQuantity
         FROM CashFlows cf
         JOIN Orders o ON cf.RelatedOrderID = o.OrderID
         JOIN OrderDetails od ON o.OrderID = od.OrderID
-        JOIN Products p ON od.ProductID = p.ProductID
+        JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID 
+        JOIN Products p ON pd.ProductID = p.ProductID  
         WHERE cf.FlowType = 'income'
           AND YEAR(cf.CreatedAt) = YEAR(GETDATE())
           AND MONTH(cf.CreatedAt) = MONTH(GETDATE())
-        GROUP BY p.ProductName, od.ProductID
+        GROUP BY p.ProductName, p.ProductID  
         ORDER BY TotalQuantity DESC
     """;
+
         List<ProductSaleDTO> result = new ArrayList<>();
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
@@ -649,19 +652,20 @@ public class CashFlowDAO {
 
 // Hàm lấy ra top 5 sản phẩm bán theo số lượng tháng trước
     public List<ProductSaleDTO> getTop5ProductSalesLastMonthByQuantity(String dbName) throws SQLException {
- String sql = """
+        String sql = """
     SELECT TOP 5
         p.ProductName,
-        od.ProductID,
+        p.ProductID,    
         SUM(od.Quantity) AS TotalQuantity
     FROM CashFlows cf
     JOIN Orders o ON cf.RelatedOrderID = o.OrderID
     JOIN OrderDetails od ON o.OrderID = od.OrderID
-    JOIN Products p ON od.ProductID = p.ProductID
+    JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID  
+    JOIN Products p ON pd.ProductID = p.ProductID  
     WHERE cf.FlowType = 'income'
       AND YEAR(cf.CreatedAt) = YEAR(DATEADD(MONTH, -1, GETDATE()))
       AND MONTH(cf.CreatedAt) = MONTH(DATEADD(MONTH, -1, GETDATE()))
-    GROUP BY p.ProductName, od.ProductID
+    GROUP BY p.ProductName, p.ProductID  
     ORDER BY TotalQuantity DESC
 """;
 
@@ -682,19 +686,21 @@ public class CashFlowDAO {
         String sql = """
         SELECT TOP 5
             p.ProductName,
-            od.ProductID,
+            p.ProductID,     
             SUM(od.Quantity) AS TotalQuantity,
             SUM(od.Quantity * p.RetailPrice) AS Revenue
         FROM CashFlows cf
         JOIN Orders o ON cf.RelatedOrderID = o.OrderID
         JOIN OrderDetails od ON o.OrderID = od.OrderID
-        JOIN Products p ON od.ProductID = p.ProductID
+        JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID 
+        JOIN Products p ON pd.ProductID = p.ProductID  
         WHERE cf.FlowType = 'income'
           AND YEAR(cf.CreatedAt) = YEAR(GETDATE())
           AND MONTH(cf.CreatedAt) = MONTH(GETDATE())
-        GROUP BY p.ProductName, od.ProductID
+        GROUP BY p.ProductName, p.ProductID  
         ORDER BY Revenue DESC
     """;
+
         List<ProductSaleDTO> result = new ArrayList<>();
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
@@ -713,19 +719,21 @@ public class CashFlowDAO {
         String sql = """
             SELECT TOP 5
                 p.ProductName,
-                od.ProductID,
+                p.ProductID,     
                 SUM(od.Quantity) AS TotalQuantity,
                 SUM(od.Quantity * p.RetailPrice) AS Revenue
             FROM CashFlows cf
             JOIN Orders o ON cf.RelatedOrderID = o.OrderID
             JOIN OrderDetails od ON o.OrderID = od.OrderID
-            JOIN Products p ON od.ProductID = p.ProductID
+            JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID  
+            JOIN Products p ON pd.ProductID = p.ProductID  
             WHERE cf.FlowType = 'income'
               AND YEAR(cf.CreatedAt) = YEAR(DATEADD(MONTH, -1, GETDATE()))
               AND MONTH(cf.CreatedAt) = MONTH(DATEADD(MONTH, -1, GETDATE()))
-            GROUP BY p.ProductName, od.ProductID
+            GROUP BY p.ProductName, p.ProductID 
             ORDER BY Revenue DESC
         """;
+
         List<ProductSaleDTO> result = new ArrayList<>();
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
