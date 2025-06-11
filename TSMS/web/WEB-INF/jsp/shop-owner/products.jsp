@@ -170,9 +170,12 @@
                                 <td><%= product.getIsActive() %></td>
                                 <td style="justify-content: center;align-content: center; display: flex;gap: 5px">
                                     <!-- Nút Chi Tiết -->
-                                    <a href="./so-products?action=view&productDetailId=<%= product.getProductDetailId() %>" 
-                                       class="btn btn-success" 
-                                       style="text-decoration: none; width: 79px;background:#2196F3">Chi tiết</a>
+                                    <!-- Nút Chi Tiết -->
+                                    <form action="so-products" method="get" style="display:inline;">
+                                        <input type="hidden" name="action" value="view">
+                                        <input type="hidden" name="productDetailId" value="<%= product.getProductDetailId() %>">
+                                        <button type="submit" class="btn btn-success" style="text-decoration: none; width: 79px;background:#2196F3">Chi tiết</button>
+                                    </form>
 
 
                                     <!-- Nút Xoá -->

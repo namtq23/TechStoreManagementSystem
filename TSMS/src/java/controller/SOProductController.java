@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import model.Category;
 import model.Product;
@@ -44,6 +45,8 @@ public class SOProductController extends HttpServlet {
             String search = req.getParameter("search");
             if (search == null) {
                 search = "";
+            } else {
+                search = search.trim().replaceAll("\\s+", "");
             }
             Integer categoryId = null;
             if (req.getParameter("categoryId") != null && !req.getParameter("categoryId").isEmpty()) {
@@ -63,6 +66,7 @@ public class SOProductController extends HttpServlet {
             }
             // Kiểm tra action để hiển thị form thêm sản phẩm
             String action = req.getParameter("action");
+            ProductDAO p = new ProductDAO();
             if ("showCreateForm".equals(action)) {
                 req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/add-product.jsp").forward(req, resp);
                 return;
@@ -70,21 +74,22 @@ public class SOProductController extends HttpServlet {
             } else if ("view".equals(action)) {
                 try {
                     int productDetailId = Integer.parseInt(req.getParameter("productDetailId"));
-                    ProductDAO dao = new ProductDAO();
-                    ProductDTO product = dao.getProductByDetailId(dbName, productDetailId);
+                    ProductDTO product = p.getProductByDetailId(dbName, productDetailId);
+                    if (product == null) {
+                        resp.sendRedirect("so-products?error=notfound");
+                        return;
+                    }
                     req.setAttribute("product", product);
                     req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/edit-products.jsp").forward(req, resp);
-                    return;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    resp.sendRedirect("so-products?error=view");
-                    return;
+                } catch (NumberFormatException e) {
+                    resp.sendRedirect("so-products?error=invalid");
                 }
+                return;
             }
 
             // Hiển thị danh sách sản phẩm
             
-            ProductDAO p = new ProductDAO();
+
 //            List<ProductDTO> products = p.getWarehouseProductList(dbName, 1);
             List<ProductDTO> products = p.getWarehouseProductListByPageAndCategory(dbName, 1, page, pageSize,search,categoryId,inventory);
             int totalProducts = p.countProductsByWarehouseIdAndCategory(dbName, 1,search,categoryId,inventory);
@@ -131,18 +136,33 @@ public class SOProductController extends HttpServlet {
         } else if ("update".equals(action)) {
             try {
                 int productDetailId = Integer.parseInt(req.getParameter("productDetailId"));
-                String productName = req.getParameter("productName");
-                String costPrice = req.getParameter("costPrice");
+                int productId = Integer.parseInt(req.getParameter("productId"));
                 String retailPrice = req.getParameter("retailPrice");
+                String costPrice = req.getParameter("costPrice");
+                String description = req.getParameter("description");
                 String isActive = req.getParameter("isActive");
+
                 ProductDAO dao = new ProductDAO();
-                dao.updateProductInfo(dbName, productDetailId, productName, costPrice, retailPrice, isActive);
-                resp.sendRedirect("so-products");
+                ProductDTO existingProduct = dao.getProductByDetailId(dbName, productDetailId);
+                if (existingProduct == null) {
+                    resp.sendRedirect("so-products?error=notfound");
+                    return;
+                }
+
+                // Update only the allowed fields
+                existingProduct.setRetailPrice(retailPrice);
+                existingProduct.setCostPrice(costPrice);
+                existingProduct.setDescription(description);
+                existingProduct.setIsActive(isActive);
+
+                dao.updateProductDetails(dbName, existingProduct);
+                resp.sendRedirect("so-products?success=updated");
             } catch (Exception e) {
                 e.printStackTrace();
                 resp.sendRedirect("so-products?error=update");
             }
-        } else if ("delete".equals(action)) {
+        }
+ else if ("delete".equals(action)) {
             try {
                 String productDetailIdParam = req.getParameter("productDetailId");
                 System.out.println("productDetailId param = " + productDetailIdParam);
@@ -157,24 +177,6 @@ public class SOProductController extends HttpServlet {
         }
     }
 
-//    public static void main(String[] args) {
-//        String dbName = "DTB_Kien"; // Tên database của bạn
-//        Integer categoryId = 1; // Thay bằng categoryId bạn muốn test
-//        
-//        ProductDAO dao = new ProductDAO();
-//
-//        try {
-//            List<ProductDTO> products = dao.getWarehouseProductListByPageAndCategory(dbName, 1, 1, 10, "", categoryId,inventory);
-//            System.out.println("Kết quả lọc với categoryId: " + categoryId);
-//            for (ProductDTO product : products) {
-//                System.out.println("ProductDetailID: " + product.getProductDetailId() + ", Name: " + product.getProductName());
-//            }
-//            if (products.isEmpty()) {
-//                System.out.println("Không tìm thấy sản phẩm nào với categoryId: " + categoryId);
-//            }
-//        } catch (Exception e) {
-//            System.out.println("Lỗi khi lọc: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//    }
+
 }
+
