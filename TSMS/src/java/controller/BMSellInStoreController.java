@@ -19,10 +19,8 @@ import jakarta.servlet.http.HttpSession;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.sql.Date;
-import java.util.ArrayList;
 import model.Customer;
 import model.Order;
-import model.OrderDetails;
 import model.ProductDTO;
 import util.Validate;
 
