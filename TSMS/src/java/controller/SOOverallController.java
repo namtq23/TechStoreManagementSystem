@@ -35,11 +35,11 @@ public class SOOverallController extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         String sortBy = request.getParameter("sortBy");
         if (sortBy == null || sortBy.isEmpty()) {
-            sortBy = "revenue";
+            sortBy = "quantity"; 
         }
         String topPeriod = request.getParameter("topPeriod");
         if (topPeriod == null || topPeriod.isEmpty()) {
-            topPeriod = "this_month"; // 
+            topPeriod = "this_month"; 
         }
 
         String period = request.getParameter("period");
@@ -107,6 +107,16 @@ public class SOOverallController extends HttpServlet {
                 }
             }
 
+            System.out.println("=== DEBUG TOP PRODUCTS ===");
+            System.out.println("TopProducts size: " + topProducts.size());
+            for (int i = 0; i < topProducts.size(); i++) {
+                ProductSaleDTO product = topProducts.get(i);
+                System.out.println("Product " + (i + 1) + ": " + product.getProductName()
+                        + " - Quantity: " + product.getTotalQuantity()
+                        + " - Revenue: " + product.getRevenue());
+            }
+            System.out.println("========================");
+
             // Debug dữ liệu trước khi gửi tới JSP
             System.out.println("Final Revenue Data:");
             System.out.println("Labels: " + Revenue.get("labels"));
@@ -125,13 +135,21 @@ public class SOOverallController extends HttpServlet {
 
             double monthlyChange = Validate.calculatePercentageChange(incomeTotalToDay, sameDayLastMonthIncome);
             // Đặt vào request để render ra JSP
+            
+            
+            //Phần doang thu
             request.setAttribute("currentPeriod", period);
-            request.setAttribute("currentFilter", filterType);
-            request.setAttribute("revenueData", Revenue);
+            request.setAttribute("currentFilter", filterType);     
             request.setAttribute("percentageChange", percentageChange);
             request.setAttribute("invoiceToDay", invoiceToDay);
             request.setAttribute("incomeTotal", Validate.formatCurrency(incomeTotalToDay));
             request.setAttribute("monthlyChange", monthlyChange);
+            
+            
+            //Phân doanh thu theo filter
+             request.setAttribute("revenueData", Revenue);
+            //Phần top sản phẩm
+            request.setAttribute("sortBy", sortBy);
             request.setAttribute("topProducts", topProducts);
             request.setAttribute("topPeriod", topPeriod);
 
