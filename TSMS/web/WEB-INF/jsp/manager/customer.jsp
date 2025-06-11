@@ -8,6 +8,7 @@
 <%@ page import="java.util.*, model.Customer" %>
 <%@ page import="util.Validate" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -85,7 +86,9 @@
                         <h3>Trạng thái khách hàng</h3>
                         <i class="fas fa-chevron-up"></i>
                     </div>
+                    
                     <div class="filter-content">
+<<<<<<< Updated upstream
                         <form action="action">
                             <label class="checkbox-item">
                                 <input type="radio" id="active" name="employeeStatus" value="active" checked="">
@@ -97,7 +100,24 @@
                                 <span for="inactive">Tiềm năng</span><br>
                             </label>
                         </form>
+=======
+                        <form action="bm-customer" method="get">
+                          <label class="checkbox-item">
+                          <input type="radio" name="top" value="" 
+                   <%= request.getParameter("top") == null ? "checked" : "" %>>
+                 <span>Tổng hợp</span><br>
+                  </label>
+                  <label class="checkbox-item">
+                  <input type="radio" name="top" value="true" 
+               <%= "true".equals(request.getParameter("top")) ? "checked" : "" %>>
+                     <span>Tiềm năng</span><br>
+                 </label>
+    
+                       <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
+                </form>
+>>>>>>> Stashed changes
                     </div>
+                                
                 </div>
                                 <div class="filter-section">
                     <div class="filter-header">
@@ -165,33 +185,25 @@
                                 <th>Gmail</th>
                                 <th>Địa Chỉ</th>
                                 <th>Giới Tính</th>
+                                <th>Số tiền đã chi</th>
                                 <th>Ngày tạo thông tin</th>
-                                <th>cập nhật thông tin</th>
+                                
                             </tr>
                         </thead>
                         <tbody>
-                            <% 
-                                List<Customer> customers = (List<Customer>) request.getAttribute("customers");
-                                for (Customer customer : customers) { 
-                            %>
-                            <tr>
+<c:forEach var="customer" items="${customers}">
+<tr>
+    <td>${customer.customerId}</td>
+    <td>${customer.fullName}</td>
+    <td>${customer.phoneNumber}</td>
+    <td>${customer.email}</td>
+    <td>${customer.address}</td>
+    <td>${customer.gender ? 'Nam' : 'Nữ'}</td>
+    <td><fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true" /> ₫</td>
+    <td>${customer.createdAt}</td>
+</tr>
+</c:forEach>
 
-                                <td><%= customer.getCustomerId() %></td>
-                                <td><%= customer.getFullName() %></td>
-                                <td><%= customer.getPhoneNumber() %></td>
-                                <td><%= customer.getEmail() != null ? customer.getEmail() : "" %></td>
-                                <td><%= customer.getAddress() != null ? customer.getAddress() : "" %></td>
-                                <%
-                                String genderStr = "";
-                                if (customer.getGender() != null) {
-                                genderStr = customer.getGender() ? "Nam" : "Nữ";
-                                }
-                                %>
-                                <td><%= genderStr %></td>
-                                <td><%= Validate.formatDateTime(customer.getCreatedAt()) %></td>
-                                <td><%= customer.getUpdatedAt() != null ? Validate.formatDateTime(customer.getUpdatedAt()) : "" %></td>
-                            </tr>
-                            <% } %>
 
 
 
