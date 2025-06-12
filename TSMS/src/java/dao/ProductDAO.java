@@ -778,7 +778,7 @@ public class ProductDAO {
                 if (i < filter.getCategories().length - 1) {
                     sql.append(",");
                 }
-                parameters.add(Integer.parseInt(filter.getCategories()[i]));
+                parameters.add(filter.getCategories()[i]);
             }
             sql.append(") ");
         }
@@ -794,7 +794,6 @@ public class ProductDAO {
             }
         }
 
-        // Filter theo search keyword
         if (filter.hasSearchKeyword()) {
             sql.append("AND (p.ProductName LIKE ? OR pd.Description LIKE ? OR pd.SerialNumber LIKE ?) ");
             String searchPattern = "%" + filter.getSearchKeyword() + "%";
@@ -806,15 +805,12 @@ public class ProductDAO {
         sql.append("ORDER BY ip.ProductDetailID ");
         sql.append("OFFSET ? ROWS ");
         sql.append("FETCH NEXT ? ROWS ONLY");
-
-        // Thêm parameters cho pagination
         parameters.add(offset);
         parameters.add(limit);
 
         List<ProductDTO> products = new ArrayList<>();
 
         try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql.toString())) {
-            // Set parameters
             for (int i = 0; i < parameters.size(); i++) {
                 ps.setObject(i + 1, parameters.get(i));
             }

@@ -80,7 +80,7 @@
         <div class="main-container">
             <!-- Sidebar -->
             <aside class="sidebar">
-                <form action="bm-products" method="post">
+                <form action="bm-products" method="get">
                     <!-- Category Filter -->
                     <div class="filter-section">
                         <div class="filter-header">
@@ -157,10 +157,10 @@
                 <div class="page-header">
                     <h1>Hàng hóa</h1>
                     <div class="header-actions">
-                        <form action="so-products" method="get" class="search-form" style="display: flex; align-items: center; gap: 8px;">
+                        <form action="bm-products" method="get" class="search-form" style="display: flex; align-items: center; gap: 8px;">
                             <div style="position: relative; flex: 1;">
                                 <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
-                                <input type="text" name="search" placeholder="Theo tên hàng" value="${param.search}"
+                                <input type="text" name="search" placeholder="Theo tên hàng"
                                        style="padding: 10px 10px 10px 60px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
                             </div>
                             <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
@@ -204,7 +204,7 @@
                                     <!-- Nút Chi Tiết -->
                                     <a href="./so-products?action=view&productDetailId=<%= product.getProductDetailId() %>" 
                                        class="btn btn-success" 
-                                       style="text-decoration: none; width: 79px;background:green">Chi tiết</a>
+                                       style="text-decoration: none; width: 79px;background:#2196F3">Chi tiết</a>
 
 
                                     <!-- Nút Xoá -->
@@ -226,20 +226,19 @@
                         Hiển thị ${startProduct} - ${endProduct} / Tổng số ${totalProducts} hàng hóa
                     </div>
                     <div class="pagination">
-                        <a href="bm-products?page=1" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
+                        <a href="${pagingUrl}1" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
                             <i class="fas fa-angle-double-left"></i>
                         </a>
-                        <a href="bm-products?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
+                        <a href="${pagingUrl}${currentPage - 1}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
                             <i class="fas fa-angle-left"></i>
                         </a>
                         <c:forEach begin="1" end="${totalPages}" var="i">
-                            <a href="bm-products?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                            <a href="${pagingUrl}${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
                         </c:forEach>
-
-                        <a href="bm-products?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
+                        <a href="${pagingUrl}${currentPage + 1}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
                             <i class="fas fa-angle-right"></i>
                         </a>
-                        <a href="bm-products?page=${totalPages}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
+                        <a href="${pagingUrl}${totalPages}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
                             <i class="fas fa-angle-double-right"></i>
                         </a>
                     </div>

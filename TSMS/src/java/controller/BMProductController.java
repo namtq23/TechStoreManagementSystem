@@ -14,6 +14,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import model.BMProductFilter;
 import model.Category;
 import model.ProductDTO;
 
@@ -23,6 +26,8 @@ import model.ProductDTO;
  */
 @WebServlet(name = "BMProductController", urlPatterns = {"/bm-products"})
 public class BMProductController extends HttpServlet {
+
+    ProductDAO p = new ProductDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -50,43 +55,77 @@ public class BMProductController extends HttpServlet {
             }
             int offset = (page - 1) * pageSize;
 
-            ProductDAO p = new ProductDAO();
-            List<ProductDTO> products = p.getInventoryProductListByPageByBranchId(dbName, branchId, offset, pageSize);
-            int totalProducts = p.countProductsByBranchId(dbName, branchId);
-            int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
-
+//            List<ProductDTO> products = p.getInventoryProductListByPageByBranchId(dbName, branchId, offset, pageSize);
+//            int totalProducts = p.countProductsByBranchId(dbName, branchId);
+//            int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
+            doPost(req, resp, offset, pageSize);
             List<Category> categories = p.getAllCategories(dbName);
             req.setAttribute("categories", categories);
             req.setAttribute("currentPage", page);
-            req.setAttribute("totalPages", totalPages);
-            req.setAttribute("totalProducts", totalProducts);
-            req.setAttribute("startProduct", offset + 1);
-            req.setAttribute("endProduct", Math.min(offset + pageSize, totalProducts));
-            req.setAttribute("products", products);
+//            req.setAttribute("totalPages", totalPages);
+//            req.setAttribute("totalProducts", totalProducts);
+//            req.setAttribute("startProduct", offset + 1);
+//            req.setAttribute("endProduct", Math.min(offset + pageSize, totalProducts));
+//            req.setAttribute("products", products);
             req.getRequestDispatcher("/WEB-INF/jsp/manager/products.jsp").forward(req, resp);
         } catch (ServletException | IOException | NumberFormatException e) {
             System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            Logger.getLogger(BMProductController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp, int offset, int limit) throws ServletException, IOException, SQLException {
         String[] filterCate = req.getParameterValues("categories");
         String stockStatus = req.getParameter("inventory");
-        try {
-            if (filterCate.length == 0 || filterCate[0].contains("all")) {
-                if (stockStatus.contains("all")) {
-                    //Hiển thị hết tất cả sản phẩm
-                } else if (stockStatus.contains("in-stock")){
-                    //Còn hàng
-                } else {
-                    //hét hàng
-                }
-            } 
-        } catch (Exception e){
-            System.out.println(e);
+        String searchKey = req.getParameter("search");
+        System.out.println("11" + filterCate);
+        System.out.println("22" + stockStatus);
+        System.out.println("33" + searchKey);
+
+        BMProductFilter filter = new BMProductFilter(filterCate, stockStatus, searchKey);
+        HttpSession session = req.getSession(true);
+
+        Object dbNameObj = session.getAttribute("dbName");
+        Object branchIdObj = session.getAttribute("branchId");
+
+        if (dbNameObj == null || branchIdObj == null) {
+            resp.sendRedirect("login");
+            return;
         }
 
+        String dbName = dbNameObj.toString();
+        int branchId = Integer.parseInt(branchIdObj.toString());
+        List<ProductDTO> products = p.getProductsByFilter(dbName, branchId, offset, limit, filter);
+        int totalProducts = p.getTotalProductsByFilter(dbName, branchId, filter);
+        int totalPages = (int) Math.ceil((double) totalProducts / 10);
+
+        String pagingURL = "";
+        StringBuilder urlBuilder = new StringBuilder("bm-products?");
+
+        if (filterCate != null) {
+            for (String cateId : filter.getCategories()) {
+                urlBuilder.append("categories=").append(cateId).append("&");
+            }
+        }
+
+        if (stockStatus != null && !stockStatus.isEmpty()) {
+            urlBuilder.append("inventory=").append(filter.getInventoryStatus()).append("&");
+        }
+
+        if (searchKey != null && !searchKey.isEmpty()) {
+            urlBuilder.append("search=").append(filter.getSearchKeyword()).append("&");
+        }
+        
+        urlBuilder.append("page=");
+        
+        pagingURL = urlBuilder.toString();
+        req.setAttribute("pagingUrl", pagingURL);
+        req.setAttribute("totalPages", totalPages);
+        req.setAttribute("totalProducts", totalProducts);
+        req.setAttribute("startProduct", offset + 1);
+        req.setAttribute("endProduct", Math.min(offset + 10, totalProducts));
+        req.setAttribute("products", products);
     }
 
 }
