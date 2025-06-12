@@ -29,7 +29,7 @@ public class SalepageController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+              throws ServletException, IOException {
         try {
             HttpSession session = request.getSession(false);
             if (session == null || session.getAttribute("userId") == null) {
@@ -94,12 +94,12 @@ public class SalepageController extends HttpServlet {
             LOGGER.log(Level.SEVERE, "Error processing request", ex);
             request.setAttribute("error", "Không thể tải dữ liệu: " + ex.getMessage());
             request.setAttribute("currentSection", "products");
-            
+
             // FIX: Ensure we have empty lists to prevent JSP errors
             request.setAttribute("products", new ArrayList<ProductDTO>());
             request.setAttribute("transactions", new ArrayList<SalesTransactionDTO>());
             request.setAttribute("promotions", new ArrayList<PromotionDTO>());
-            
+
             request.getRequestDispatcher("/WEB-INF/jsp/sale/salepage.jsp").forward(request, response);
         }
     }
@@ -115,7 +115,7 @@ public class SalepageController extends HttpServlet {
         } else if (userIdObj instanceof Integer) {
             return (Integer) userIdObj;
         }
-        LOGGER.log(Level.WARNING, "Unsupported userId type: {0}", 
+        LOGGER.log(Level.WARNING, "Unsupported userId type: {0}",
                   (userIdObj != null ? userIdObj.getClass().getName() : "null"));
         return null;
     }
@@ -131,65 +131,84 @@ public class SalepageController extends HttpServlet {
         } else if (branchIdObj instanceof Integer) {
             return (Integer) branchIdObj;
         }
-        LOGGER.log(Level.WARNING, "Unsupported branchId type: {0}", 
+        LOGGER.log(Level.WARNING, "Unsupported branchId type: {0}",
                   (branchIdObj != null ? branchIdObj.getClass().getName() : "null"));
         return null;
     }
 
     private void handleProductsSection(HttpServletRequest request, String dbName, int branchId) {
         try {
-            // Use only existing methods and let JSP handle client-side filtering
             String search = request.getParameter("search");
-            int page = parseIntParameter(request.getParameter("page"), 1);
-            int pageSize = 50; // Increase page size for client-side filtering
             String inventory = request.getParameter("inventory");
+            int page = parseIntParameter(request.getParameter("page"), 1);
+            int pageSize = 10;
+            int offset = (page - 1) * pageSize;
 
             List<ProductDTO> products;
-            
-            // Only use methods that exist in ProductDAO
+            int totalProducts;
+            int totalPages;
+
+            ProductDAO productDAO = new ProductDAO();
+
             if (search != null && !search.trim().isEmpty()) {
-                // Try to use search method if it exists, otherwise use regular method
-                try {
-                    // Check if search method exists
-                    products = productDAO.searchProducts(dbName, branchId, search);
-                } catch (Exception e) {
-                    LOGGER.log(Level.INFO, "Search method not available, using regular product list");
-                    products = productDAO.getInventoryProductListByPageByBranchId(dbName, branchId, 0, pageSize);
-                    // Let JSP handle the search filtering
-                    request.setAttribute("searchQuery", search);
-                }
-            } 
-            else if (inventory != null && !inventory.equals("all")) {
-            try {
+                // Tìm kiếm sản phẩm
+                products = productDAO.searchProducts(dbName, branchId, search.trim());
+                totalProducts = products.size(); // Đếm kết quả tìm kiếm
+                totalPages = (int) Math.ceil((double) totalProducts / pageSize);
+
+                // Phân trang thủ công cho kết quả tìm kiếm
+                int startIndex = Math.min(offset, products.size());
+                int endIndex = Math.min(startIndex + pageSize, products.size());
+                products = products.subList(startIndex, endIndex);
+            } else if (inventory != null && !inventory.equals("all")) {
+                // Lọc theo trạng thái tồn kho
                 products = productDAO.getProductsByStockStatus(dbName, branchId, inventory);
-            } catch (SQLException e) {
-                LOGGER.log(Level.WARNING, "Error fetching products by stock status: {0}", e.getMessage());
-                products = new ArrayList<>();
+                totalProducts = products.size();
+                totalPages = (int) Math.ceil((double) totalProducts / pageSize);
+
+                // Phân trang thủ công
+                int startIndex = Math.min(offset, products.size());
+                int endIndex = Math.min(startIndex + pageSize, products.size());
+                products = products.subList(startIndex, endIndex);
+            } else {
+                // Lấy danh sách sản phẩm với phân trang
+                products = productDAO.getInventoryProductListByPageByBranchId(dbName, branchId, offset, pageSize);
+                totalProducts = productDAO.countProductsByBranchId(dbName, branchId);
+                totalPages = (int) Math.ceil((double) totalProducts / pageSize);
             }
-            }
-            else {
-                products = productDAO.getInventoryProductListByPageByBranchId(dbName, branchId, 0, pageSize);
+
+            // Điều chỉnh page nếu vượt quá totalPages
+            if (page > totalPages && totalPages > 0) {
+                page = totalPages;
+                offset = (page - 1) * pageSize;
+                if (search != null && !search.trim().isEmpty()) {
+                    products = productDAO.searchProducts(dbName, branchId, search.trim());
+                    products = products.subList(offset, Math.min(offset + pageSize, products.size()));
+                } else if (inventory != null && !inventory.equals("all")) {
+                    products = productDAO.getProductsByStockStatus(dbName, branchId, inventory);
+                    products = products.subList(offset, Math.min(offset + pageSize, products.size()));
+                } else {
+                    products = productDAO.getInventoryProductListByPageByBranchId(dbName, branchId, offset, pageSize);
+                }
             }
 
             request.setAttribute("products", products);
             request.setAttribute("inventory", inventory);
-            
-            // Safe count method
-            try {
-                int totalProducts = productDAO.countProductsByBranchId(dbName, branchId);
-                request.setAttribute("totalProducts", totalProducts);
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Could not get product count", e);
-                request.setAttribute("totalProducts", products.size());
-            }
-            
+            request.setAttribute("search", search);
             request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("totalProducts", totalProducts);
+            request.setAttribute("startProduct", search != null && !search.trim().isEmpty() ? offset + 1 : offset + 1);
+            request.setAttribute("endProduct", Math.min(offset + pageSize, totalProducts));
             request.setAttribute("pageSize", pageSize);
-            
-        } catch (Exception e) {
+
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error loading products", e);
+            request.setAttribute("error", "Không thể tải danh sách sản phẩm: " + e.getMessage());
             request.setAttribute("products", new ArrayList<ProductDTO>());
             request.setAttribute("totalProducts", 0);
+            request.setAttribute("currentPage", 1);
+            request.setAttribute("totalPages", 1);
         }
     }
 
@@ -197,7 +216,7 @@ public class SalepageController extends HttpServlet {
         try {
             String search = request.getParameter("search");
             List<SalesTransactionDTO> transactions = new ArrayList<>();
-            
+
             // Use safe method calls
             try {
                 if (search != null && !search.trim().isEmpty()) {
@@ -209,9 +228,9 @@ public class SalepageController extends HttpServlet {
                 LOGGER.log(Level.WARNING, "Could not load transactions", e);
                 // Continue with empty list
             }
-            
+
             request.setAttribute("transactions", transactions);
-            
+
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error in transactions section", e);
             request.setAttribute("transactions", new ArrayList<SalesTransactionDTO>());
@@ -221,7 +240,7 @@ public class SalepageController extends HttpServlet {
     private void handlePromotionsSection(HttpServletRequest request, String dbName, int branchId) {
         try {
             List<PromotionDTO> promotions = new ArrayList<>();
-            
+
             // Use safe method calls
             try {
                 promotions = salesDAO.getActivePromotions(dbName, branchId);
@@ -229,9 +248,9 @@ public class SalepageController extends HttpServlet {
                 LOGGER.log(Level.WARNING, "Could not load promotions", e);
                 // Continue with empty list
             }
-            
+
             request.setAttribute("promotions", promotions);
-            
+
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error in promotions section", e);
             request.setAttribute("promotions", new ArrayList<PromotionDTO>());
@@ -252,15 +271,15 @@ public class SalepageController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+              throws ServletException, IOException {
         // Preserve section parameter in redirect
         String section = request.getParameter("section");
         String redirectUrl = request.getContextPath() + "/salepage";
-        
+
         if (section != null && !section.trim().isEmpty()) {
             redirectUrl += "?section=" + section;
         }
-        
+
         response.sendRedirect(redirectUrl);
     }
 

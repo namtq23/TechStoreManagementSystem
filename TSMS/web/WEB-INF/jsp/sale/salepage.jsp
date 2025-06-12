@@ -116,36 +116,50 @@ if (currentSection == null) currentSection = "products";
                         <i class="fas fa-chevron-up"></i>
                     </div>
                     <div class="filter-content">
-                        <label class="radio-item">
-                            <input type="radio" name="inventory" value="all" ${param.inventory == 'all' || empty param.inventory ? 'checked' : ''}>
-                            <span class="radio-mark"></span>
-                            <span class="status-indicator all"></span>
-                            Tất cả
-                        </label>
-                        <label class="radio-item">
-                            <input type="radio" name="inventory" value="below" ${param.inventory == 'below' ? 'checked' : ''}>
-                            <span class="radio-mark"></span>
-                            <span class="status-indicator below"></span>
-                            Dưới định mức tồn
-                        </label>
-                        <label class="radio-item">
-                            <input type="radio" name="inventory" value="above" ${param.inventory == 'above' ? 'checked' : ''}>
-                            <span class="radio-mark"></span>
-                            <span class="status-indicator above"></span>
-                            Vượt định mức tồn
-                        </label>
-                        <label class="radio-item">
-                            <input type="radio" name="inventory" value="in-stock" ${param.inventory == 'in-stock' ? 'checked' : ''}>
-                            <span class="radio-mark"></span>
-                            <span class="status-indicator in-stock"></span>
-                            Còn hàng trong kho
-                        </label>
-                        <label class="radio-item">
-                            <input type="radio" name="inventory" value="out-stock" ${param.inventory == 'out-stock' ? 'checked' : ''}>
-                            <span class="radio-mark"></span>
-                            <span class="status-indicator out-stock"></span>
-                            Hết hàng trong kho
-                        </label>
+                        <form method="GET" action="salepage">
+                            <input type="hidden" name="section" value="products">
+
+                            <label class="radio-item">
+                                <input type="radio" name="inventory" value="all" onchange="this.form.submit()"
+                                       ${param.inventory == 'all' || empty param.inventory ? 'checked' : ''}>
+                                <span class="radio-mark"></span>
+                                <span class="status-indicator all"></span>
+                                Tất cả
+                            </label>
+
+                            <label class="radio-item">
+                                <input type="radio" name="inventory" value="below" onchange="this.form.submit()"
+                                       ${param.inventory == 'below' ? 'checked' : ''}>
+                                <span class="radio-mark"></span>
+                                <span class="status-indicator below"></span>
+                                Dưới định mức tồn
+                            </label>
+
+                            <label class="radio-item">
+                                <input type="radio" name="inventory" value="above" onchange="this.form.submit()"
+                                       ${param.inventory == 'above' ? 'checked' : ''}>
+                                <span class="radio-mark"></span>
+                                <span class="status-indicator above"></span>
+                                Vượt định mức tồn
+                            </label>
+
+                            <label class="radio-item">
+                                <input type="radio" name="inventory" value="in-stock" onchange="this.form.submit()"
+                                       ${param.inventory == 'in-stock' ? 'checked' : ''}>
+                                <span class="radio-mark"></span>
+                                <span class="status-indicator in-stock"></span>
+                                Còn hàng trong kho
+                            </label>
+
+                            <label class="radio-item">
+                                <input type="radio" name="inventory" value="out-stock" onchange="this.form.submit()"
+                                       ${param.inventory == 'out-stock' ? 'checked' : ''}>
+                                <span class="radio-mark"></span>
+                                <span class="status-indicator out-stock"></span>
+                                Hết hàng trong kho
+                            </label>
+                        </form>
+
                     </div>
                 </div>
             </aside>
@@ -173,6 +187,9 @@ if (currentSection == null) currentSection = "products";
                             </form>
                         </div>
                     </div>
+                    <c:if test="${not empty error}">
+                        <div class="error-message">${error}</div>
+                    </c:if>
                     <div class="table-container">
                         <table class="products-table">
                             <thead>
@@ -236,6 +253,34 @@ if (currentSection == null) currentSection = "products";
                                 </c:if>
                             </tbody>
                         </table>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            Hiển thị ${startProduct} - ${endProduct} / Tổng số ${totalProducts} sản phẩm
+                        </div>
+                        <div class="pagination">
+                            <a href="salepage?section=products&page=1&search=${param.search}&inventory=${param.inventory}" 
+                               class="page-btn ${currentPage == 1 ? '' : 'disabled'}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                            <a href="salepage?section=products&page=${currentPage - 1}&search=${param.search}&inventory=${currentPage}" 
+                               class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <a href="salepage?section=products&page=${i}&search=${param.search}&inventory=${param.inventory}" 
+                                   class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                            </c:forEach>
+                            <a href="salepage?section=products&page=${currentPage + 1}&search=${param.search}&inventory=${param.inventory}" 
+                               class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                            <a href="salepage?section=products&page=${totalPages}&search=${param.search}&inventory=${param.inventory}" 
+                               class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </div>
                     </div>
                     <!-- Modal Chi tiết sản phẩm -->
                     <div id="productDetailModal" class="modal">

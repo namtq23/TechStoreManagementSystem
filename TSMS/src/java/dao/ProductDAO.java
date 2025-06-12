@@ -363,43 +363,97 @@ public class ProductDAO {
      */
     public List<ProductDTO> searchProducts(String dbName, int branchId, String keyword) throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
-        String sql = """
+        String sql;
+        if (keyword != null && keyword.trim().matches("\\d+")) {
+            sql = """
+        SELECT 
+            pd.ProductDetailID,
+            p.ProductID,
+            p.ProductName,
+            c.CategoryName,
+            b.BrandName,
+            s.SupplierName,
+            p.CostPrice,
+            p.RetailPrice,
+            p.ImageURL,
+            p.CreatedAt,
+            p.IsActive,
+            ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity,
+            NULL AS Description, 
+            NULL AS SerialNumber,
+            NULL AS WarrantyPeriod,
+            NULL AS PromoName,
+            NULL AS DiscountPercent,
+            NULL AS StartDate,
+            NULL AS EndDate,
+            NULL AS Status 
+        FROM 
+            Products p
+            LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
+            LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
+            LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID AND i.BranchID = ?
+            LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+            LEFT JOIN Brands b ON p.BrandID = b.BrandID
+            LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                     
+        WHERE 
+            p.ProductID = ?
+        GROUP BY 
+            pd.ProductDetailID,
+            p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
+            p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive
+        ORDER BY 
+            p.ProductID
+    """;
+        } else {
+            sql = """
             SELECT 
-                p.ProductID,
-                p.ProductName,
-                c.CategoryName,
-                b.BrandName,
-                s.SupplierName,
-                p.CostPrice,
-                p.RetailPrice,
-                p.ImageURL,
-                p.CreatedAt,
-                p.IsActive,
-                ISNULL(SUM(ip.Quantity), 0) AS TotalQuantity
+                            pd.ProductDetailID,
+                            p.ProductID,
+                            p.ProductName,
+                            c.CategoryName,
+                            b.BrandName,
+                            s.SupplierName,
+                            p.CostPrice,
+                            p.RetailPrice,
+                            p.ImageURL,
+                            p.CreatedAt,
+                            p.IsActive,
+                            ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity,
+                            NULL AS Description, 
+                            NULL AS SerialNumber,
+                            NULL AS WarrantyPeriod,
+                            NULL AS PromoName,
+                            NULL AS DiscountPercent,
+                            NULL AS StartDate,
+                            NULL AS EndDate,
+                            NULL AS Status 
             FROM 
                 Products p
-                LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
                 LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
                 LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
                 LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID AND i.BranchID = ?
+                LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
             WHERE 
-                p.ProductName LIKE ? OR CAST(p.ProductID AS NVARCHAR) LIKE ?
+                p.ProductName LIKE ?
             GROUP BY 
-                p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
-                p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive
+                pd.ProductDetailID, p.ProductID, p.ProductName, c.CategoryName, b.BrandName, 
+                s.SupplierName, p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive
             ORDER BY 
                 p.ProductName
         """;
+        }
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            String searchPattern = "%" + keyword + "%";
-            ps.setInt(1, branchId);
-            ps.setString(2, searchPattern);
-            ps.setString(3, searchPattern);
-
+            if (keyword != null && keyword.trim().matches("\\d+")) {
+                ps.setInt(1, branchId);
+                ps.setInt(2, Integer.parseInt(keyword.trim()));
+            } else {
+                ps.setInt(1, branchId);
+                ps.setString(2, "%" + (keyword != null ? keyword.trim() : "") + "%");
+            }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ProductDTO product = extractProductDTOFromResultSet(rs);
@@ -410,7 +464,6 @@ public class ProductDAO {
             System.out.println("Error in searchProducts: " + e.getMessage());
             throw e;
         }
-
         return products;
     }
 
@@ -431,7 +484,7 @@ public class ProductDAO {
                 p.ImageURL,
                 p.CreatedAt,
                 p.IsActive,
-                ISNULL(SUM(ip.Quantity), 0) AS TotalQuantity
+                ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity
             FROM 
                 Products p
                 LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
@@ -612,59 +665,64 @@ public class ProductDAO {
      */
     public List<ProductDTO> getProductsByStockStatus(String dbName, int branchId, String stockStatus) throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
-        String sql = """
-            SELECT 
-                p.ProductID,
-                p.ProductName,
-                c.CategoryName,
-                b.BrandName,
-                s.SupplierName,
-                p.CostPrice,
-                p.RetailPrice,
-                p.ImageURL,
-                p.CreatedAt,
-                p.IsActive,
-                ISNULL(SUM(ip.Quantity), 0) AS TotalQuantity
-            FROM 
-                Products p
-                LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
-                LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
-                LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID AND i.BranchID = ?
-            GROUP BY 
-                p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
-                p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive
-            HAVING 
-        """;
 
-        // Thêm điều kiện HAVING dựa trên stockStatus
-        switch (stockStatus.toLowerCase()) {
-            case "below":
-                sql += "ISNULL(SUM(ip.Quantity), 0) > 0 AND ISNULL(SUM(ip.Quantity), 0) < 20";
-                break;
-            case "above":
-                sql += "ISNULL(SUM(ip.Quantity), 0) > 50";
-                break;
-            case "in-stock":
-                sql += "ISNULL(SUM(ip.Quantity), 0) BETWEEN 1 AND 50";
-                break;
-            case "out-stock":
-                sql += "ISNULL(SUM(ip.Quantity), 0) = 0  ";
-                break;
-            default:
-                // "all" - bỏ HAVING clause
-                sql = sql.replace("HAVING ", "");
-                break;
+        StringBuilder sql = new StringBuilder("""
+        SELECT 
+            pd.ProductDetailID,
+            p.ProductID,
+            p.ProductName,
+            c.CategoryName,
+            b.BrandName,
+            s.SupplierName,
+            p.CostPrice,
+            p.RetailPrice,
+            p.ImageURL,
+            p.CreatedAt,
+            p.IsActive,
+            ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity, 
+            pd.Description,
+            pd.SerialNumber,
+            pd.WarrantyPeriod,
+            NULL AS PromoName, 
+            NULL AS DiscountPercent,
+            NULL AS StartDate,
+            NULL AS EndDate,
+            CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status
+        FROM 
+            Products p
+            LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
+            LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
+            LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID WHERE i.BranchID = ?
+            LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+            LEFT JOIN Brands b ON p.BrandID = b.BrandID
+            LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+        GROUP BY 
+            pd.ProductDetailID,
+            p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
+            p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive,
+            pd.Description, pd.SerialNumber, pd.WarrantyPeriod
+    """);
+
+        if (stockStatus != null && !stockStatus.equals("all")) {
+            switch (stockStatus.toLowerCase()) {
+                case "below":
+                    sql.append(" HAVING ISNULL(SUM(ip.Quantity), 0) > 0 AND ISNULL(SUM(ip.Quantity), 0) < 20");
+                    break;
+                case "above":
+                    sql.append(" HAVING ISNULL(SUM(ip.Quantity), 0) > 50");
+                    break;
+                case "in-stock":
+                    sql.append(" HAVING ISNULL(SUM(ip.Quantity), 0) BETWEEN 1 AND 50");
+                    break;
+                case "out-stock":
+                    sql.append(" HAVING ISNULL(SUM(ip.Quantity), 0) = 0");
+                    break;
+            }
         }
+        sql.append(" ORDER BY p.ProductName");
 
-        sql += " ORDER BY p.ProductName";
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             ps.setInt(1, branchId);
-
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ProductDTO product = extractProductDTOFromResultSet(rs);
@@ -675,7 +733,6 @@ public class ProductDAO {
             System.out.println("Error in getProductsByStockStatus: " + e.getMessage());
             throw e;
         }
-
         return products;
     }
 
