@@ -45,6 +45,8 @@ public class RegisterController extends HttpServlet {
         String password = req.getParameter("password");
         String confirmedPassword = req.getParameter("confirmPassword");
         String email = req.getParameter("email");
+        String phone = req.getParameter("phone");
+        System.out.println(phone);
 
         String newDbName = Validate.shopNameConverter(shopName);
         try {
@@ -85,8 +87,8 @@ public class RegisterController extends HttpServlet {
         
         try {
 
-            if (UserDAO.isAccountTaken(email)) {
-                req.setAttribute("error", "Tài khoản đã tồn tại!");
+            if (UserDAO.isAccountTaken(email, phone)) {
+                req.setAttribute("error", "Email hoặc điện thoại đã tồn tại!");
                 req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
                 return;
             }

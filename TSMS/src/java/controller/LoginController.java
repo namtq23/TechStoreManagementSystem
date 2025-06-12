@@ -71,6 +71,7 @@ public class LoginController extends HttpServlet {
             req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
             return;
         }
+        
 
         if (shopName == null || shopName.trim().isEmpty()) {
             req.setAttribute("error", "Tên shop không được để trống");

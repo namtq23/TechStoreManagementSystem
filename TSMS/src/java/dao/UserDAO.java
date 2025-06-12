@@ -60,12 +60,13 @@ public class UserDAO {
     }
 
     //SO
-    public static boolean isAccountTaken(String email) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM ShopOwner WHERE Email = ?";
+    public static boolean isAccountTaken(String email, String phone) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM ShopOwner WHERE Email = ? OR Phone = ?";
 
         try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, email);
+            stmt.setString(2, phone);
             try (ResultSet rs = stmt.executeQuery()) {
                 return rs.next() && rs.getInt(1) > 0;
             }

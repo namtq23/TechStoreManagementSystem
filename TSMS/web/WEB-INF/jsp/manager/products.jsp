@@ -189,33 +189,42 @@
                         </thead>
                         <tbody>
                             <% List<ProductDTO> products = (List<ProductDTO>) request.getAttribute("products");
-                            for (ProductDTO product : products) { %>
-                            <tr class="">
-                                <td><input type="checkbox"></td>
-                                <td><div class="product-image phone"></div></td>
-                                <td><%= product.getProductDetailId() %></td>
-                                <td><%= product.getDescription() %></td>
-                                <td><%= Validate.formatCostPriceToVND(product.getRetailPrice())%></td>
-                                <td><%= Validate.formatCostPriceToVND(product.getCostPrice())%></td>
-                                <td><%= product.getQuantity() %></td>
-                                <td><%= Validate.formatDateTime(product.getCreatedAt()) %></td>
-                                <td><%= product.getIsActive() %></td>
-                                <td style="justify-content: center;align-content: center; display: flex;gap: 5px">
-                                    <!-- Nút Chi Tiết -->
-                                    <a href="./so-products?action=view&productDetailId=<%= product.getProductDetailId() %>" 
-                                       class="btn btn-success" 
-                                       style="text-decoration: none; width: 79px;background:#2196F3">Chi tiết</a>
+                            
+                            if (products.size() == 0){
+                            %>
+                        <div>
+                            KHÔNG CÓ SẢN PHẨM NÀO.
+                        </div>
+                        <%
+                            }
+                            
+                        for (ProductDTO product : products) { %>
+                        <tr class="">
+                            <td><input type="checkbox"></td>
+                            <td><div class="product-image phone"></div></td>
+                            <td><%= product.getProductDetailId() %></td>
+                            <td><%= product.getDescription() %></td>
+                            <td><%= Validate.formatCostPriceToVND(product.getRetailPrice())%></td>
+                            <td><%= Validate.formatCostPriceToVND(product.getCostPrice())%></td>
+                            <td><%= product.getQuantity() %></td>
+                            <td><%= Validate.formatDateTime(product.getCreatedAt()) %></td>
+                            <td><%= product.getIsActive() %></td>
+                            <td style="justify-content: center;align-content: center; display: flex;gap: 5px">
+                                <!-- Nút Chi Tiết -->
+                                <a href="./so-products?action=view&productDetailId=<%= product.getProductDetailId() %>" 
+                                   class="btn btn-success" 
+                                   style="text-decoration: none; width: 79px;background:#2196F3">Chi tiết</a>
 
 
-                                    <!-- Nút Xoá -->
-                                    <form action="so-products" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xoá sản phẩm này không?');">
-                                        <input type="hidden" name="action" value="delete" />
-                                        <input type="hidden" name="productDetailId" value="<%= product.getProductDetailId() %>" />
-                                        <button type="submit" class="btn btn-success" style="background: #f44336;">Xoá</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <%}%>
+                                <!-- Nút Xoá -->
+                                <form action="so-products" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xoá sản phẩm này không?');">
+                                    <input type="hidden" name="action" value="delete" />
+                                    <input type="hidden" name="productDetailId" value="<%= product.getProductDetailId() %>" />
+                                    <button type="submit" class="btn btn-success" style="background: #f44336;">Xoá</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <%}%>
                         </tbody>
                     </table>
                 </div>

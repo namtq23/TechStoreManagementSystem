@@ -88,6 +88,11 @@
                         <label for="email" class="form-label">Email *</label>
                         <input type="email" id="email" name="email" class="form-input" placeholder="Nhập địa chỉ email" required>
                     </div>
+                    
+                    <div class="form-group">
+                        <label for="phone" class="form-label">Số điện thoại *</label>
+                        <input type="phone" id="phone" name="phone" class="form-input" placeholder="Nhập số điện thoại" required>
+                    </div>
 
                     <div class="form-group">
                         <label for="password" class="form-label">Mật khẩu *</label>
