@@ -140,6 +140,10 @@ body {
     margin-right: 8px;
 }
 
+.category-label {
+    margin-left: 10px;
+}
+
 .status-indicator.all {
     background: #4caf50;
 }
@@ -226,12 +230,12 @@ body {
 }
 
 .btn-success {
-    background: #4caf50;
+    background: #2196F3;
     color: white;
 }
 
 .btn-success:hover {
-    background: #45a049;
+    background: #0a60a5;
 }
 
 .btn-menu {

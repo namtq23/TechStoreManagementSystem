@@ -48,7 +48,6 @@ public class BMProductFilter {
         this.searchKeyword = searchKeyword;
     }
 
-    // Helper methods
     public boolean hasCategories() {
         return categories != null && categories.length > 0 && !isAllCategoriesSelected();
     }
