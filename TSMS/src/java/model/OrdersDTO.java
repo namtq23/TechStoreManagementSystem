@@ -10,7 +10,8 @@ import java.util.Date;
  *
  * @author Dell
  */
-public class OrdersDTO extends Orders{
+public class OrdersDTO extends Orders {
+
     private int orderDetailID;
     private int productDetailID;
     private int quantity;
@@ -32,10 +33,8 @@ public class OrdersDTO extends Orders{
         this.productDetailID = productDetailID;
         this.quantity = quantity;
     }
-    public OrdersDTO(int orderDetailID, int productDetailID, int quantity, int orderID, int branchID, int createdBy, 
-                     String orderStatus, Date createdAt, int customerID, String paymentMethod, String notes, 
-                     double grandTotal, double customerPay, double change, String branchName, String customerName, 
-                     String createdByName) {
+
+    public OrdersDTO(int orderDetailID, int productDetailID, int quantity, String branchName, String customerName, String createdByName, String productName, int orderID, int branchID, int createdBy, String orderStatus, Date createdAt, int customerID, String paymentMethod, String notes, double grandTotal, double customerPay, double change) {
         super(orderID, branchID, createdBy, orderStatus, createdAt, customerID, paymentMethod, notes, grandTotal, customerPay, change);
         this.orderDetailID = orderDetailID;
         this.productDetailID = productDetailID;
@@ -43,15 +42,40 @@ public class OrdersDTO extends Orders{
         this.branchName = branchName;
         this.customerName = customerName;
         this.createdByName = createdByName;
+        this.productName = productName;
     }
-    public String getBranchName() { return branchName; }
-    public void setBranchName(String branchName) { this.branchName = branchName; }
-    public String getCustomerName() { return customerName; }
-    public void setCustomerName(String customerName) { this.customerName = customerName; }
-    public String getCreatedByName() { return createdByName; }
-    public void setCreatedByName(String createdByName) { this.createdByName = createdByName; }
-    public String getProductName() { return productName; }
-public void setProductName(String productName) { this.productName = productName; }
+
+    public String getBranchName() {
+        return branchName;
+    }
+
+    public void setBranchName(String branchName) {
+        this.branchName = branchName;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCreatedByName() {
+        return createdByName;
+    }
+
+    public void setCreatedByName(String createdByName) {
+        this.createdByName = createdByName;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
 
     public int getOrderDetailID() {
         return orderDetailID;
@@ -76,5 +100,5 @@ public void setProductName(String productName) { this.productName = productName;
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-  
+
 }
