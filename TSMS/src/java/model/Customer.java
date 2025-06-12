@@ -14,30 +14,22 @@ public class Customer {
     private Date dateOfBirth;
     private Date createdAt;
     private Date updatedAt;
-    private Integer branchId;
-    private double grandTotal;
-public Integer getBranchId() { return branchId; }
-public void setBranchId(Integer branchId) { this.branchId = branchId; }
 
+    public Customer() {
+    }
 
-public Customer(int customerId, String fullName, String phoneNumber, String email,
-                String address, Boolean gender, Date dateOfBirth,
-                Date createdAt, Date updatedAt, Integer branchId, double grandTotal) {
-    this.customerId = customerId;
-    this.fullName = fullName;
-    this.phoneNumber = phoneNumber;
-    this.email = email;
-    this.address = address;
-    this.gender = gender;
-    this.dateOfBirth = dateOfBirth;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-    this.branchId = branchId;
-    this.grandTotal = grandTotal;
-}
+    public Customer(int customerId, String fullName, String phoneNumber, String email, String address, Boolean gender, Date dateOfBirth, Date createdAt, Date updatedAt) {
+        this.customerId = customerId;
+        this.fullName = fullName;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.address = address;
+        this.gender = gender;
+        this.dateOfBirth = dateOfBirth;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
-
-    // Getters and Setters
     public int getCustomerId() {
         return customerId;
     }
@@ -109,28 +101,12 @@ public Customer(int customerId, String fullName, String phoneNumber, String emai
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
-    
-    public double getGrandTotal() {
-    return grandTotal;
+
+    @Override
+    public String toString() {
+        return "Customer{" + "customerId=" + customerId + ", fullName=" + fullName + ", phoneNumber=" + phoneNumber + ", email=" + email + ", address=" + address + ", gender=" + gender + ", dateOfBirth=" + dateOfBirth + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + '}';
     }
 
-    
-    @Override
 
-public String toString() {
-    return "Customer{" +
-            "customerId=" + customerId +
-            ", fullName='" + fullName + '\'' +
-            ", phoneNumber='" + phoneNumber + '\'' +
-            ", email='" + email + '\'' +
-            ", address='" + address + '\'' +
-            ", gender=" + gender +
-            ", dateOfBirth=" + dateOfBirth +
-            ", createdAt=" + createdAt +
-            ", updatedAt=" + updatedAt +
-            ", branchId=" + branchId +
-            ", grandTotal=" + grandTotal +
-            '}';
-}
 
 }

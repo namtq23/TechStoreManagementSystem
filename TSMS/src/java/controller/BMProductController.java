@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import model.BMProductFilter;
 import model.Category;
 import model.ProductDTO;
+import util.Validate;
 
 /**
  *
@@ -78,7 +79,11 @@ public class BMProductController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp, int offset, int limit) throws ServletException, IOException, SQLException {
         String[] filterCate = req.getParameterValues("categories");
         String stockStatus = req.getParameter("inventory");
-        String searchKey = req.getParameter("search");
+        String searchKeyStr = req.getParameter("search");
+        String searchKey = "";
+        if (searchKeyStr != null) {
+            searchKey = Validate.standardizeName(searchKeyStr);
+        }
         System.out.println("11" + filterCate);
         System.out.println("22" + stockStatus);
         System.out.println("33" + searchKey);

@@ -18,7 +18,7 @@ public class CustomerDAO {
     // Lấy danh sách tất cả khách hàng
     public List<Customer> getAllCustomers(String dbName) throws SQLException {
         List<Customer> customers = new ArrayList<>();
-            String sql = """
+        String sql = """
         SELECT 
             c.CustomerID,
             c.FullName,
@@ -64,7 +64,7 @@ public class CustomerDAO {
 
                 Customer customer = new Customer(
                         customerId, fullName, phoneNumber, email, address,
-                        gender, dateOfBirth, createdAt, updatedAt, branchId, grandTotal
+                        gender, dateOfBirth, createdAt, updatedAt
                 );
 
                 customers.add(customer);
@@ -156,7 +156,7 @@ public class CustomerDAO {
         double grandTotal = rs.getDouble("GrandTotal");
 
         return new Customer(customerId, fullName, phoneNumber, email, address,
-                gender, dateOfBirth, createdAt, updatedAt, branchId, grandTotal);
+                gender, dateOfBirth, createdAt, updatedAt);
     }
 
     // ✅ Đếm tổng số khách hàng (loại bỏ branchId)
@@ -231,12 +231,12 @@ public class CustomerDAO {
         }
         return list;
     }
-    
-    //  Lấy 10 khách hàng có GrandTotal cao nhất
-public List<Customer> getTop10CustomersBySpending(String dbName) {
-    List<Customer> customers = new ArrayList<>();
 
-    String sql = """
+    //  Lấy 10 khách hàng có GrandTotal cao nhất
+    public List<Customer> getTop10CustomersBySpending(String dbName) {
+        List<Customer> customers = new ArrayList<>();
+
+        String sql = """
         SELECT TOP 10 
             c.CustomerID,
             c.FullName,
@@ -259,21 +259,17 @@ public List<Customer> getTop10CustomersBySpending(String dbName) {
         ORDER BY o.GrandTotal DESC
     """;
 
-    try (
-        Connection conn = DBUtil.getConnectionTo(dbName);
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        ResultSet rs = stmt.executeQuery()
-    ) {
-        while (rs.next()) {
-            customers.add(extractCustomerFromResultSet(rs));
+        try (
+                Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                customers.add(extractCustomerFromResultSet(rs));
+            }
+        } catch (Exception e) {
+            System.out.println("Lỗi khi lấy top 10 khách hàng chi tiêu nhiều nhất: " + e.getMessage());
         }
-    } catch (Exception e) {
-        System.out.println("Lỗi khi lấy top 10 khách hàng chi tiêu nhiều nhất: " + e.getMessage());
+
+        return customers;
     }
-
-    return customers;
-}
-
 
     //Phuong
     public static boolean insertCustomer(String dbName, Customer customer) {

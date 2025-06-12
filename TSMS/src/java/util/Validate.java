@@ -157,6 +157,12 @@ public class Validate {
 
         return Double.parseDouble(input);
     }
+    
+    public static String standardizeName(String name){
+        String standardizedName = "";
+        standardizedName = name.trim();
+        return standardizedName;
+    }
 
     public static void main(String[] args) {
         // Test hàm với đầu vào mới
@@ -164,6 +170,8 @@ public class Validate {
         System.out.println("Input: " + input + " -> Output: " + shopNameConverter(input));
 
         System.out.println(safeParseDouble("1.250.000"));
+        
+        System.out.println(standardizeName("       an       d     "));
     }
 
 }
