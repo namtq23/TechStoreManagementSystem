@@ -18,7 +18,27 @@ public class CustomerDAO {
     // Lấy danh sách tất cả khách hàng
     public List<Customer> getAllCustomers(String dbName) throws SQLException {
         List<Customer> customers = new ArrayList<>();
-        String sql = "SELECT * FROM Customers";
+            String sql = """
+        SELECT 
+            c.CustomerID,
+            c.FullName,
+            c.PhoneNumber,
+            c.Email,
+            c.Address,
+            c.Gender,
+            c.DateOfBirth,
+            c.CreatedAt,
+            c.UpdatedAt,
+            o.BranchID,
+            o.grandTotal             
+        FROM Customers c
+        INNER JOIN (
+            SELECT CustomerID, MIN(OrderID) AS FirstOrderID
+            FROM Orders
+            GROUP BY CustomerID
+        ) fo ON c.CustomerID = fo.CustomerID
+        INNER JOIN Orders o ON fo.FirstOrderID = o.OrderID
+    """;
 
         try (
                 Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
@@ -39,10 +59,12 @@ public class CustomerDAO {
                 Date dateOfBirth = rs.getDate("DateOfBirth");
                 Date createdAt = rs.getTimestamp("CreatedAt");
                 Date updatedAt = rs.getTimestamp("UpdatedAt");
+                int branchId = rs.getInt("BranchID");
+                double grandTotal = rs.getDouble("GrandTotal");
 
                 Customer customer = new Customer(
                         customerId, fullName, phoneNumber, email, address,
-                        gender, dateOfBirth, createdAt, updatedAt
+                        gender, dateOfBirth, createdAt, updatedAt, branchId, grandTotal
                 );
 
                 customers.add(customer);
@@ -57,7 +79,7 @@ public class CustomerDAO {
     // Ví dụ test
     public static void main(String[] args) throws SQLException {
         CustomerDAO dao = new CustomerDAO();
-        List<Customer> customers = dao.getAllCustomers("DTB_DatTech");
+        List<Customer> customers = dao.getAllCustomers("DTB_Test2");
 
         for (Customer c : customers) {
             System.out.println(c);
@@ -69,17 +91,25 @@ public class CustomerDAO {
         List<Customer> customers = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
         SELECT 
-            CustomerID,
-            FullName,
-            PhoneNumber,
-            Email,
-            Address,
-            Gender,
-            DateOfBirth,
-            CreatedAt,
-            UpdatedAt
-        FROM Customers
-        WHERE FullName LIKE ?
+                    c.CustomerID,
+                    c.FullName,
+                    c.PhoneNumber,
+                    c.Email,
+                    c.Address,
+                    c.Gender,
+                    c.DateOfBirth,
+                    c.CreatedAt,
+                    c.UpdatedAt,
+                    o.BranchID,      
+                    o.grandTotal                                                   
+                FROM Customers c
+                JOIN (
+                SELECT CustomerID, MIN(OrderID) AS FirstOrderID
+                FROM Orders
+                GROUP BY CustomerID
+                ) fo ON c.CustomerID = fo.CustomerID
+                JOIN Orders o ON fo.FirstOrderID = o.OrderID      
+        WHERE RIGHT(FullName, CHARINDEX(' ', REVERSE(FullName)) - 1) COLLATE Latin1_General_CI_AI LIKE ?
     """);
 
         if ("male".equalsIgnoreCase(genderFilter)) {
@@ -122,9 +152,11 @@ public class CustomerDAO {
         Date dateOfBirth = rs.getDate("DateOfBirth");
         Date createdAt = rs.getTimestamp("CreatedAt");
         Date updatedAt = rs.getTimestamp("UpdatedAt");
+        int branchId = rs.getInt("BranchID");
+        double grandTotal = rs.getDouble("GrandTotal");
 
         return new Customer(customerId, fullName, phoneNumber, email, address,
-                gender, dateOfBirth, createdAt, updatedAt);
+                gender, dateOfBirth, createdAt, updatedAt, branchId, grandTotal);
     }
 
     // ✅ Đếm tổng số khách hàng (loại bỏ branchId)
@@ -155,16 +187,24 @@ public class CustomerDAO {
         List<Customer> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
         SELECT 
-            CustomerID,
-            FullName,
-            PhoneNumber,
-            Email,
-            Address,
-            Gender,
-            DateOfBirth,
-            CreatedAt,
-            UpdatedAt
-        FROM Customers
+            c.CustomerID,
+            c.FullName,
+            c.PhoneNumber,
+            c.Email,
+            c.Address,
+            c.Gender,
+            c.DateOfBirth,
+            c.CreatedAt,
+            c.UpdatedAt,
+            o.BranchID,
+            o.grandTotal                                                               
+        FROM Customers c
+        JOIN (
+        SELECT CustomerID, MIN(OrderID) AS FirstOrderID
+        FROM Orders
+        GROUP BY CustomerID
+        ) fo ON c.CustomerID = fo.CustomerID
+        JOIN Orders o ON fo.FirstOrderID = o.OrderID                                              
         WHERE 1=1
     """);
 
@@ -191,6 +231,49 @@ public class CustomerDAO {
         }
         return list;
     }
+    
+    //  Lấy 10 khách hàng có GrandTotal cao nhất
+public List<Customer> getTop10CustomersBySpending(String dbName) {
+    List<Customer> customers = new ArrayList<>();
+
+    String sql = """
+        SELECT TOP 10 
+            c.CustomerID,
+            c.FullName,
+            c.PhoneNumber,
+            c.Email,
+            c.Address,
+            c.Gender,
+            c.DateOfBirth,
+            c.CreatedAt,
+            c.UpdatedAt,
+            o.BranchID,
+            o.GrandTotal
+        FROM Customers c
+        JOIN (
+            SELECT CustomerID, MIN(OrderID) AS FirstOrderID
+            FROM Orders
+            GROUP BY CustomerID
+        ) fo ON c.CustomerID = fo.CustomerID
+        JOIN Orders o ON fo.FirstOrderID = o.OrderID
+        ORDER BY o.GrandTotal DESC
+    """;
+
+    try (
+        Connection conn = DBUtil.getConnectionTo(dbName);
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        ResultSet rs = stmt.executeQuery()
+    ) {
+        while (rs.next()) {
+            customers.add(extractCustomerFromResultSet(rs));
+        }
+    } catch (Exception e) {
+        System.out.println("Lỗi khi lấy top 10 khách hàng chi tiêu nhiều nhất: " + e.getMessage());
+    }
+
+    return customers;
+}
+
 
     //Phuong
     public static boolean insertCustomer(String dbName, Customer customer) {
