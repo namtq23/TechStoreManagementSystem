@@ -8,7 +8,7 @@
 <%@ page import="java.util.*, model.Customer" %>
 <%@ page import="util.Validate" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -89,19 +89,7 @@
                     </div>
                     
                     <div class="filter-content">
-<<<<<<< Updated upstream
-                        <form action="action">
-                            <label class="checkbox-item">
-                                <input type="radio" id="active" name="employeeStatus" value="active" checked="">
-                                <span for="active">Tổng hợp</span><br>
 
-                            </label>
-                            <label class="checkbox-item">
-                                <input type="radio" id="inactive" name="employeeStatus" value="inactive">
-                                <span for="inactive">Tiềm năng</span><br>
-                            </label>
-                        </form>
-=======
                         <form action="bm-customer" method="get">
                           <label class="checkbox-item">
                           <input type="radio" name="top" value="" 
@@ -116,7 +104,7 @@
     
                        <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
                 </form>
->>>>>>> Stashed changes
+
                     </div>
                                 
                 </div>
@@ -186,7 +174,7 @@
                                 <th>Gmail</th>
                                 <th>Địa Chỉ</th>
                                 <th>Giới Tính</th>
-                                <th>Số tiền đã chi</th>
+                              
                                 <th>Ngày tạo thông tin</th>
                                 
                             </tr>
@@ -200,7 +188,7 @@
     <td>${customer.email}</td>
     <td>${customer.address}</td>
     <td>${customer.gender ? 'Nam' : 'Nữ'}</td>
-    <td><fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true" /> ₫</td>
+
     <td>${customer.createdAt}</td>
 </tr>
 </c:forEach>
