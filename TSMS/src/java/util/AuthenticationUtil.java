@@ -4,7 +4,9 @@
  */
 package util;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
@@ -31,10 +33,21 @@ public class AuthenticationUtil {
     }
 
     //Dang xuat
-    public static void logout(HttpServletRequest request) {
+    public static void logout(HttpServletRequest request, HttpServletResponse resp) {
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
         }
+        // Xóa cookie rememberUser và rememberDb
+        Cookie userCookie = new Cookie("rememberUser", "");
+        userCookie.setMaxAge(0);
+        userCookie.setPath(request.getContextPath());
+        resp.addCookie(userCookie);
+
+        Cookie dbCookie = new Cookie("rememberDb", "");
+        dbCookie.setMaxAge(0);
+        dbCookie.setPath(request.getContextPath());
+        resp.addCookie(dbCookie);
     }
+
 }

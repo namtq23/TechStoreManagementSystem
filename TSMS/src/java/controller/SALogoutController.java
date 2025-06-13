@@ -23,7 +23,7 @@ public class SALogoutController extends HttpServlet {
    
 @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        AuthenticationUtil.logout(req);
+        AuthenticationUtil.logout(req, resp);
         
         resp.sendRedirect(req.getContextPath() + "/sa-login");
     }

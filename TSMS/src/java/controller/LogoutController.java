@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-
 package controller;
 
 import java.io.IOException;
@@ -17,11 +16,11 @@ import util.AuthenticationUtil;
  *
  * @author admin
  */
-@WebServlet(name="LogoutController", urlPatterns={"/logout"})
+@WebServlet(name = "LogoutController", urlPatterns = {"/logout"})
 public class LogoutController extends HttpServlet {
-   
+
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        AuthenticationUtil.logout(req);
+        AuthenticationUtil.logout(req, resp);
         resp.sendRedirect(req.getContextPath() + "/login");
     }
 

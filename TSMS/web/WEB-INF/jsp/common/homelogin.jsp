@@ -101,7 +101,7 @@
                                 <input type="checkbox" id="remember" name="remember">
                                 <label for="remember">Nhớ mật khẩu</label>
                             </div>
-                            <a href="forgot-password.jsp" class="forgot-password">Quên mật khẩu?</a>
+                            <a href="forgot-password" class="forgot-password">Quên mật khẩu?</a>
                         </div>
 
                         <% if(request.getAttribute("error") != null) { %>
