@@ -210,6 +210,47 @@ public class UserDAO {
         }
     }
 
+    public static User getUserById(int userId, String dbName) throws SQLException {
+        Connection conn;
+        PreparedStatement ps;
+        ResultSet rs;
+
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            String sql = "SELECT * FROM Users WHERE UserID = ?";
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, userId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                User user = extractUserFromResultSet(rs);
+                return user;
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+
+    public static boolean updateSOPassword(int ownerId, String hashedPassword) throws SQLException {
+        String sql = "UPDATE ShopOwner SET Password = ? WHERE OwnerID = ?";
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hashedPassword);
+            ps.setInt(2, ownerId);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+
+    public static boolean updateSOPasswordInTheirDTB(String dbName, String hashedPassword) throws SQLException {
+        String sql = "UPDATE Users SET PasswordHash = ? WHERE UserID = 1";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hashedPassword);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+
     private static ShopOwner extractShopOwnerFromResultSet(ResultSet rs) throws SQLException {
         ShopOwner shopOwner = new ShopOwner(
                 rs.getInt("OwnerID"),
@@ -270,8 +311,10 @@ public class UserDAO {
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
 //        List<ShopOwner> shopOwners = ud.getShopOwners();  
-        List<User> users = ud.getStaffsByBranchID(1, "DTB_StoreTemp");
+//        List<User> users = ud.getStaffsByBranchID(1, "DTB_StoreTemp");
 //        User o = ud.getUserByEmail("an.nguyen@email.com", "DTB_StoreTemp");
-        System.out.println(users);
+
+        ShopOwner so = ud.getShopOwnwerByEmail("ndpp.work@gmail.com");
+        System.out.println(so.getPassword());
     }
 }
