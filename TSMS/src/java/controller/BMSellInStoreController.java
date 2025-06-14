@@ -4,6 +4,10 @@
  */
 package controller;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import dao.CustomerDAO;
+import dao.OrderDAO;
 import dao.ProductDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -12,8 +16,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.lang.reflect.Type;
 import java.util.List;
+import java.sql.Date;
+import model.Customer;
+import model.Order;
 import model.ProductDTO;
+import util.Validate;
 
 /**
  *
@@ -41,7 +50,7 @@ public class BMSellInStoreController extends HttpServlet {
             String dbName = dbNameObj.toString();
             int branchId = Integer.parseInt(branchIdObj.toString());
             int page = 1;
-            int pageSize = 10;
+            int pageSize = 100;
 
             if (req.getParameter("page") != null) {
                 page = Integer.parseInt(req.getParameter("page"));
@@ -64,6 +73,80 @@ public class BMSellInStoreController extends HttpServlet {
         } catch (ServletException | IOException | NumberFormatException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession(true);
+        Object userIdObj = session.getAttribute("userId");
+        Object roleIdObj = session.getAttribute("roleId");
+        Object dbNameObj = session.getAttribute("dbName");
+        Object branchIdObj = session.getAttribute("branchId");
+
+        if (userIdObj == null || roleIdObj == null || dbNameObj == null) {
+            resp.sendRedirect("login");
+            return;
+        }
+
+        int userId = Integer.parseInt(userIdObj.toString());
+        int roleId = Integer.parseInt(roleIdObj.toString());
+        String dbName = dbNameObj.toString();
+        int branchId = Integer.parseInt(branchIdObj.toString());
+
+        String customerName = req.getParameter("fullName");
+        String customerPhone = req.getParameter("phone");
+        String customerGender = req.getParameter("gender");
+        String customerAddress = req.getParameter("address");
+        String customerMail = req.getParameter("email");
+        String dobStr = req.getParameter("dob");
+        boolean gender = true;
+        switch (customerGender) {
+            case "1":
+                gender = true;
+                break;
+            case "0":
+                gender = false;
+                break;
+        }
+        Date customerDob;
+        if (dobStr == null || dobStr.isEmpty()) {
+            customerDob = null;
+        } else {
+            customerDob = Date.valueOf(dobStr);
+        }
+
+        String paymentMethod = req.getParameter("paymentMethod");
+        Double amountDue = Validate.safeParseDouble(req.getParameter("amountDue"));
+        Double cashGiven = Validate.safeParseDouble(req.getParameter("cashGiven"));
+        Double changeDue = Validate.safeParseDouble(req.getParameter("changeDue"));
+
+        String cartJson = req.getParameter("cartData");
+
+        Gson gson = new Gson();
+        Type productListType = new TypeToken<List<ProductDTO>>() {
+        }.getType();
+        List<ProductDTO> cartItems = gson.fromJson(cartJson, productListType);
+//        System.out.println(cartItems);
+
+        Order order;
+        Customer customer = new Customer();
+
+        if (CustomerDAO.checkCustomerExist(dbName, customerPhone)) {
+            int customerId = CustomerDAO.getCustomerId(dbName, customerPhone);
+            order = new Order(0, branchId, userId, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven, changeDue);
+        } else {
+            customer = new Customer(0, customerName, customerPhone, customerMail, customerAddress, gender, customerDob, null, null);
+            CustomerDAO.insertCustomer(dbName, customer);
+            int customerId = CustomerDAO.getCustomerId(dbName, customerPhone);
+            order = new Order(0, branchId, userId, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven, changeDue);
+        }
+
+        OrderDAO.insertOrderWithDetails(dbName, order, cartItems);
+
+        System.out.println(customer);
+        System.out.println(order);
+
+        resp.sendRedirect(req.getContextPath() + "/bm-cart");
     }
 
 }

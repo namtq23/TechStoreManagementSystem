@@ -4,6 +4,7 @@
  */
 package controller;
 
+import dao.ShopDAO;
 import dao.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -13,6 +14,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.User;
 import util.DBUtil;
 import util.Validate;
@@ -73,6 +76,16 @@ public class LoginController extends HttpServlet {
             req.setAttribute("error", "Tên shop không được để trống");
             req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
             return;
+        }
+
+        try {
+            if (!ShopDAO.isShopTaken(shopName)) {
+                req.setAttribute("error", "Tên shop không tồn tại!");
+                req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
+                return;
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
         }
 
         try {

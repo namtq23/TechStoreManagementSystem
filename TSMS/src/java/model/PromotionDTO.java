@@ -30,8 +30,8 @@ public class PromotionDTO extends Promotions {
         generateStatusClass();
     }
     
-    /**
-     * Tính toán trạng thái dựa trên ngày hiện tại
+    /*
+     Tính toán trạng thái dựa trên ngày hiện tại
      */
     private void calculateStatus() {
         Date now = new Date();

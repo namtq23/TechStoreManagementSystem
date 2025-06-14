@@ -3,233 +3,250 @@
     Created on : May 22, 2025, 11:19:37 AM
     Author     : admin
 --%>
-
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*, model.ProductDTO" %>
 <%@ page import="util.Validate" %>
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSMS - Hàng hóa</title>
-    <link rel="stylesheet" href="css/bm-products.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Header -->
-    <jsp:include page="../common/header-so.jsp" />
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TSMS - Hàng hóa</title>
+        <link rel="stylesheet" href="css/so-products.css">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    </head>
+    <body>
+        <!-- Header -->
+        <jsp:include page="../common/header-so.jsp" />
 
-    <div class="main-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-<!--             Product Type Filter 
-            <div class="filter-section">
-                <div class="filter-header">
-                    <h3>Loại hàng</h3>
-                    <i class="fas fa-chevron-up"></i>
-                </div>
-                <div class="filter-content">
-                    <label class="checkbox-item">
-                        <input type="checkbox" checked>
-                        <span class="checkmark"></span>
-                        Hàng hóa thường
-                    </label>
-                    <label class="checkbox-item">
-                        <input type="checkbox">
-                        <span class="checkmark"></span>
-                        Hàng hóa - Serial/IMEI
-                    </label>
-                    <label class="checkbox-item">
-                        <input type="checkbox">
-                        <span class="checkmark"></span>
-                        Dịch vụ
-                    </label>
-                    <label class="checkbox-item">
-                        <input type="checkbox">
-                        <span class="checkmark"></span>
-                        Combo - Đóng gói
-                    </label>
-                </div>
-            </div>-->
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!--             Product Type Filter 
+                            <div class="filter-section">
+                                <div class="filter-header">
+                                    <h3>Loại hàng</h3>
+                                    <i class="fas fa-chevron-up"></i>
+                                </div>
+                                <div class="filter-content">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" checked>
+                                        <span class="checkmark"></span>
+                                        Hàng hóa thường
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span class="checkmark"></span>
+                                        Hàng hóa - Serial/IMEI
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span class="checkmark"></span>
+                                        Dịch vụ
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span class="checkmark"></span>
+                                        Combo - Đóng gói
+                                    </label>
+                                </div>
+                            </div>-->
 
-            <!-- Product Group Filter -->
-            <div class="filter-section">
-                <div class="filter-header">
-                    <h3>Nhóm hàng</h3>
-                    <i class="fas fa-question-circle"></i>
-                    <i class="fas fa-chevron-up"></i>
-                </div>
-                <div class="filter-content">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Tìm kiếm nhóm hàng">
+                <!-- Category Filter -->
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <h3>Nhóm hàng</h3>
+                        <i class="fas fa-question-circle"></i>
+                        <i class="fas fa-chevron-up"></i>
                     </div>
-                    <div class="category-tree">
-                        <div class="category-item">
-                            <span class="category-label">Tất cả</span>
+                    <div class="filter-content">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Tìm kiếm nhóm hàng" value="${param.search}">
                         </div>
-                        <div class="category-item expandable">
-                            <i class="fas fa-plus"></i>
-                            <span class="category-label">Điện thoại</span>
-                        </div>
-                        <div class="category-item expandable">
-                            <i class="fas fa-plus"></i>
-                            <span class="category-label">Đồng hồ thông minh</span>
-                        </div>
-                        <div class="category-item expandable">
-                            <i class="fas fa-plus"></i>
-                            <span class="category-label">Laptop</span>
-                        </div>
-                        <div class="category-item expandable">
-                            <i class="fas fa-plus"></i>
-                            <span class="category-label">Máy tính bảng</span>
-                        </div>
-                        <div class="category-item expandable">
-                            <i class="fas fa-plus"></i>
-                            <span class="category-label">Phụ kiện</span>
+                        <div class="category-tree">
+                            <div class="category-item ${selectedCategoryId == null ? 'selected' : ''}">
+                                <span class="category-label" onclick="filterProducts(null)">Tất cả</span>
+                            </div>
+                            <c:forEach var="category" items="${categories}">
+                                <div class="category-item expandable ${selectedCategoryId == category.categoryID ? 'selected' : ''}">
+                                    <i class="fas fa-plus"></i>
+                                    <span class="category-label" onclick="filterProducts(${category.categoryID})">${category.categoryName}</span>
+                                </div>
+                            </c:forEach>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Inventory Filter -->
-            <div class="filter-section">
-                <div class="filter-header">
-                    <h3>Tồn kho</h3>
-                    <i class="fas fa-chevron-up"></i>
-                </div>
-                <div class="filter-content">
-                    <label class="radio-item">
-                        <input type="radio" name="inventory" value="all" checked>
-                        <span class="radio-mark"></span>
-                        <span class="status-indicator all"></span>
-                        Tất cả
-                    </label>
-                    <label class="radio-item">
-                        <input type="radio" name="inventory" value="below">
-                        <span class="radio-mark"></span>
-                        <span class="status-indicator below"></span>
-                        Dưới định mức tồn
-                    </label>
-                    <label class="radio-item">
-                        <input type="radio" name="inventory" value="above">
-                        <span class="radio-mark"></span>
-                        <span class="status-indicator above"></span>
-                        Vượt định mức tồn
-                    </label>
-                    <label class="radio-item">
-                        <input type="radio" name="inventory" value="in-stock">
-                        <span class="radio-mark"></span>
-                        <span class="status-indicator in-stock"></span>
-                        Còn hàng trong kho
-                    </label>
-                    <label class="radio-item">
-                        <input type="radio" name="inventory" value="out-stock">
-                        <span class="radio-mark"></span>
-                        <span class="status-indicator out-stock"></span>
-                        Hết hàng trong kho
-                    </label>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="page-header">
-                <h1>Hàng hóa</h1>
-                <div class="header-actions">
-                    <div class="search-container">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Theo mã, tên hàng" class="search-input">
-                        <i class="fas fa-chevron-down"></i>
+                <!-- Inventory Filter -->
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <h3>Tồn kho</h3>
+                        <i class="fas fa-chevron-up"></i>
                     </div>
-                    <button class="btn btn-success">
-                        <i class="fas fa-plus"></i>
-                        Thêm mới
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <button class="btn btn-success">
-                        <i class="fas fa-download"></i>
-                        Import
-                    </button>
-                    <button class="btn btn-success">
-                        <i class="fas fa-upload"></i>
-                        Xuất file
-                    </button>
-                    <button class="btn btn-menu">
-                        <i class="fas fa-bars"></i>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
+                    <div class="filter-content">
+                        <label class="radio-item">
+                            <input type="radio" name="inventory" value="all" ${selectedInventory == 'all' ? 'checked' : ''} onchange="filterProducts()">
+                            <span class="radio-mark"></span>
+                            <span class="status-indicator all"></span>
+                            Tất cả
+                        </label>                        
+                        <label class="radio-item">
+                            <input type="radio" name="inventory" value="in-stock" ${selectedInventory == 'in-stock' ? 'checked' : ''} onchange="filterProducts()">
+                            <span class="radio-mark"></span>
+                            <span class="status-indicator in-stock"></span>
+                            Còn hàng trong kho
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="inventory" value="out-stock" ${selectedInventory == 'out-stock' ? 'checked' : ''} onchange="filterProducts()">
+                            <span class="radio-mark"></span>
+                            <span class="status-indicator out-stock"></span>
+                            Hết hàng trong kho
+                        </label>
+                    </div>
                 </div>
-            </div>
+            </aside>
 
-            <!-- Products Table -->
-            <div class="table-container">
-                <table class="products-table">
-                    <thead>
-                        <tr>
-<!--                            <th class="checkbox-col">
-                                <input type="checkbox">
-                            </th>-->
-                            <th class="image-col"></th>
-                            <th>Mã hàng</th>
-                            <th>Tên hàng</th>
-                            <th>Giá bán</th>
-                            <th>Giá vốn</th>
-                            <th>Tồn kho</th>
-                            <th>Thời gian tạo</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% List<ProductDTO> products = (List<ProductDTO>) request.getAttribute("products");
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="page-header">
+                    <h1>Hàng hóa</h1>
+                    <div class="header-actions">
+                        <form action="so-products" method="get" class="search-form" style="display: flex; align-items: center; gap: 8px;">
+                            <div style="position: relative; flex: 1;">
+                                <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
+                                <input type="text" name="search" placeholder="Theo tên hàng" value="${param.search}"
+                                       style="padding: 10px 10px 10px 60px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
+                            </div>
+                            <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
+                        </form>
+
+                        <form action="so-products" method="post" class="add-form">
+                            <input type="hidden" name="action" value="showCreateForm">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Thêm mới
+                            </button>
+                        </form>
+
+                        <button class="btn btn-menu">
+                            <i class="fas fa-bars"></i>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Products Table -->
+                <div class="table-container">
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th class="checkbox-col">
+                                    <input type="checkbox" id="selectAll">
+                                </th>
+                                <th></th>
+                                <th>Mã hàng</th>
+                                <th>Tên hàng</th>
+                                <th>Giá bán</th>
+                                <th>Giá vốn</th>
+                                <th>Tồn kho</th>
+                                <th>Thời gian tạo</th>
+                                <th>Trạng thái</th>
+                                <th style="justify-content: center;text-align: center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% List<ProductDTO> products = (List<ProductDTO>) request.getAttribute("products");
                             for (ProductDTO product : products) { %>
-                        <tr class="">
-                            <td><input type="checkbox"></td>
-                            <td><div class="product-image phone"></div></td>
-                            <td><%= product.getProductDetailId() %></td>
-                            <td><%= product.getProductName() %></td>
-                            <td><%= Validate.formatCostPriceToVND(product.getRetailPrice())%></td>
-                            <td><%= Validate.formatCostPriceToVND(product.getCostPrice())%></td>
-                            <td><%= product.getQuantity() %></td>
-                            <td><%= Validate.formatDateTime(product.getCreatedAt()) %></td>
-                            <td><%= product.getIsActive() %></td>
-                        </tr>
-                        <%}%>
-                    </tbody>
-                </table>
-            </div>
+                            <tr>
+                                <td><input type="checkbox" class="product-checkbox"></td>
+                                <td><div class="product-image phone"></div></td>
+                                <td><%= product.getProductDetailId() %></td>
+                                <td><%= product.getProductName() %></td>
+                                <td><%= Validate.formatCostPriceToVND(product.getRetailPrice()) %></td>
+                                <td><%= Validate.formatCostPriceToVND(product.getCostPrice()) %></td>
+                                <td><%= product.getQuantity() %></td>
+                                <td><%= Validate.formatDateTime(product.getCreatedAt()) %></td>
+                                <td><%= product.getIsActive() %></td>
+                                <td style="justify-content: center;align-content: center; display: flex;gap: 5px">
+                                    <!-- Nút Chi Tiết -->
+                                    <!-- Nút Chi Tiết -->
+                                    <form action="so-products" method="get" style="display:inline;">
+                                        <input type="hidden" name="action" value="view">
+                                        <input type="hidden" name="productDetailId" value="<%= product.getProductDetailId() %>">
+                                        <button type="submit" class="btn btn-success" style="text-decoration: none; width: 79px;background:#2196F3">Chi tiết</button>
+                                    </form>
 
-            <!-- Pagination -->
-            <div class="pagination-container">
-                <div class="pagination-info">
-                    Hiển thị 1 - 15 / Tổng số 30 hàng hóa
-                </div>
-                <div class="pagination">
-                    <button class="page-btn" disabled>
-                        <i class="fas fa-angle-double-left"></i>
-                    </button>
-                    <button class="page-btn" disabled>
-                        <i class="fas fa-angle-left"></i>
-                    </button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">
-                        <i class="fas fa-angle-right"></i>
-                    </button>
-                    <button class="page-btn">
-                        <i class="fas fa-angle-double-right"></i>
-                    </button>
-                </div>
-            </div>
-        </main>
-    </div>
 
-    <!-- Support Chat Button -->
-    <div class="support-chat">
-        <i class="fas fa-headset"></i>
-        <span>Hỗ trợ:1900 9999</span>
-    </div>
-</body>
+                                    <!-- Nút Xoá -->
+                                    <form action="so-products" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xoá sản phẩm này không?');">
+                                        <input type="hidden" name="action" value="delete" />
+                                        <input type="hidden" name="productDetailId" value="<%= product.getProductDetailId() %>" />
+                                        <button type="submit" class="btn btn-success" style="background: #f44336;">Xoá</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        Hiển thị ${startProduct} - ${endProduct} / Tổng số ${totalProducts} hàng hóa
+                    </div>
+                    <div class="pagination">
+                        <a href="so-products?page=1" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="so-products?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <a href="so-products?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                        </c:forEach>
+
+                        <a href="so-products?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="so-products?page=${totalPages}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+
+            </main>
+        </div>
+        <script>
+            document.getElementById('selectAll').addEventListener('change', function () {
+                const checkboxes = document.querySelectorAll('.product-checkbox');
+                checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+            function filterProducts(categoryId) {
+            const search = document.getElementById('searchInput').value;
+            let url = 'so-products?page=1&search=' + encodeURIComponent(search);
+
+            // Lấy categoryId từ tham số nếu không được truyền trực tiếp
+            if (categoryId === undefined) {
+                const selectedCategory = document.querySelector('.category-item.selected .category-label');
+                categoryId = selectedCategory ? selectedCategory.getAttribute('onclick').match(/\d+/) : null;
+                if (categoryId) {
+                    url += '&categoryId=' + encodeURIComponent(categoryId[0]);
+                }
+            } else if (categoryId !== null && categoryId !== undefined) {
+                url += '&categoryId=' + encodeURIComponent(categoryId);
+            }
+
+            // Lấy inventory từ radio button
+            const inventory = document.querySelector('input[name="inventory"]:checked') ? document.querySelector('input[name="inventory"]:checked').value : 'all';
+            url += '&inventory=' + encodeURIComponent(inventory);
+
+            console.log('Chuyển hướng đến URL: ' + url);
+            window.location.href = url;
+        }
+        </script>
+
+    </body>
 </html>

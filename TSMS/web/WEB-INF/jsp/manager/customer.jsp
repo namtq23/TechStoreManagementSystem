@@ -7,6 +7,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*, model.Customer" %>
 <%@ page import="util.Validate" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -22,7 +23,7 @@
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="#" class="logo">
+                    <a href="bm-overview" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
@@ -73,6 +74,7 @@
                         </div>
                     </div>      
                 </div>
+            </div>
         </header>
 
         <div class="main-container">
@@ -89,6 +91,7 @@
                             <label class="checkbox-item">
                                 <input type="radio" id="active" name="employeeStatus" value="active" checked="">
                                 <span for="active">Tổng hợp</span><br>
+
                             </label>
                             <label class="checkbox-item">
                                 <input type="radio" id="inactive" name="employeeStatus" value="inactive">
@@ -97,6 +100,36 @@
                         </form>
                     </div>
                 </div>
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <h3>Giới tính khách hàng</h3>
+                        <i class="fas fa-chevron-up"></i>
+                    </div>
+                    <div class="filter-content">
+                        <form action="bm-customer" method="get">
+                            <label class="checkbox-item">
+                                <input type="radio" id="gender-all" name="gender" value="all"
+                                       <%= request.getParameter("gender") == null || "all".equals(request.getParameter("gender")) ? "checked" : "" %>>
+                                <span for="gender-all">Tổng hợp</span><br>
+                            </label>
+
+                            <label class="checkbox-item">
+                                <input type="radio" id="gender-male" name="gender" value="male"
+                                       <%= "male".equals(request.getParameter("gender")) ? "checked" : "" %>>
+                                <span for="gender-male">Nam</span><br>
+                            </label>
+
+                            <label class="checkbox-item">
+                                <input type="radio" id="gender-female" name="gender" value="female"
+                                       <%= "female".equals(request.getParameter("gender")) ? "checked" : "" %>>
+                                <span for="gender-female">Nữ</span><br>
+                            </label>
+
+                            <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
+                        </form>
+                    </div>
+
+                </div>
             </aside>
 
             <!-- Main Content -->
@@ -104,11 +137,16 @@
                 <div class="page-header">
                     <h1>Khách hàng</h1>
                     <div class="header-actions">
-                        <div class="search-container">
+
+                        <form action="bm-customer" method="get" class="search-container">
                             <i class="fas fa-search"></i>
-                            <input type="text" placeholder="Theo mã, tên hàng" class="search-input">
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
+                            <input type="text" name="keyword" placeholder="Theo mã, tên khách hàng" class="search-input"
+                                   value="${param.keyword != null ? param.keyword : ''}" />
+                            <button type="submit" style="border: none; background: none;">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </form>
+
                         <button class="btn btn-success">
                             <i class="fas fa-plus"></i>
                             Thêm mới
@@ -127,6 +165,7 @@
                                 <th>Số Điện Thoại</th>
                                 <th>Gmail</th>
                                 <th>Địa Chỉ</th>
+                                <th>Giới Tính</th>
                                 <th>Ngày tạo thông tin</th>
                                 <th>cập nhật thông tin</th>
                             </tr>
@@ -143,10 +182,19 @@
                                 <td><%= customer.getPhoneNumber() %></td>
                                 <td><%= customer.getEmail() != null ? customer.getEmail() : "" %></td>
                                 <td><%= customer.getAddress() != null ? customer.getAddress() : "" %></td>
+                                <%
+                                String genderStr = "";
+                                if (customer.getGender() != null) {
+                                genderStr = customer.getGender() ? "Nam" : "Nữ";
+                                }
+                                %>
+                                <td><%= genderStr %></td>
                                 <td><%= Validate.formatDateTime(customer.getCreatedAt()) %></td>
                                 <td><%= customer.getUpdatedAt() != null ? Validate.formatDateTime(customer.getUpdatedAt()) : "" %></td>
                             </tr>
                             <% } %>
+
+
 
 
                         </tbody>
@@ -156,33 +204,49 @@
                 <!-- Pagination -->
                 <div class="pagination-container">
                     <div class="pagination-info">
-                        Hiển thị 1 - 15 / Tổng số 30 khách hàng
+                        Hiển thị ${startCustomer} - ${endCustomer} / Tổng số ${totalProducts} Khách hàng
                     </div>
                     <div class="pagination">
-                        <button class="page-btn" disabled>
+                        <a href="bm-customer?page=1" class="page-btn ${currentPage == 1 ? "disabled" : ""}"> 
                             <i class="fas fa-angle-double-left"></i>
-                        </button>
-                        <button class="page-btn" disabled>
+                        </a>
+                        <a href="bm-customer?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
                             <i class="fas fa-angle-left"></i>
-                        </button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">
+                        </a>
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <a href="bm-customer?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                        </c:forEach>
+
+                        <a href="bm-customer?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
                             <i class="fas fa-angle-right"></i>
-                        </button>
-                        <button class="page-btn">
+                        </a>
+                        <a href="bm-customer?page=${totalPages}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
                             <i class="fas fa-angle-double-right"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
-            </main>
-        </div>
-
-        <!-- Support Chat Button -->
-        <div class="support-chat">
-            <i class="fas fa-headset"></i>
-            <span>Hỗ trợ:1900 9999</span>
+                <!-- Support Chat Button -->
+                <div class="support-chat">
+                    <i class="fas fa-headset"></i>
+                    <span>Hỗ trợ:1900 9999</span>
+                </div>
         </div>
     </body>
+    <script>
+        const toggle = document.getElementById("dropdownToggle");
+        const menu = document.getElementById("dropdownMenu");
+
+        toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        });
+
+        // Đóng dropdown nếu click ra ngoài
+        document.addEventListener("click", function (e) {
+            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                menu.style.display = "none";
+            }
+        });
+    </script>
 </html>
 

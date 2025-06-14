@@ -1,3 +1,5 @@
+/* global cart */
+
 // TSMS Cashier POS System JavaScript
 
 class TSMSCashier {
@@ -31,18 +33,42 @@ class TSMSCashier {
     }
 
     bindEvents() {
-        // Product card click events
+
         document.addEventListener('click', (e) => {
+            const productCard = e.target.closest('.product-card');
+
             if (e.target.closest('.add-to-cart')) {
                 e.preventDefault();
-                const productCard = e.target.closest('.product-card');
+                if (productCard) {
+                    const productId = parseInt(productCard.dataset.productId);
+                    this.addToCart(productId);
+                }
+                return;
+            }
+
+            if (productCard) {
+                const productInfo = productCard.querySelector('.product-info');
                 const productId = parseInt(productCard.dataset.productId);
-                console.log(productId);
-                this.addToCart(productId);
+                const product = this.products.find(p => p.productDetailId === productId);
+                const existingDetail = productCard.querySelector('.product-detail');
+                if (existingDetail) {
+                    existingDetail.remove();
+                    return;
+                }
+
+
+                const detailHTML = `
+            <div class="product-detail" style="padding: 10px; background-color: #f8f8f8; border-top: 1px solid #ccc; margin-top: 5px;">
+                <p><strong>Nhãn hiệu:</strong> ${product.brand}</p>
+                <p><em>(Thông tin chi tiết khác nếu có...)</em></p>
+            </div>
+        `;
+
+                productInfo.insertAdjacentHTML('afterend', detailHTML);
             }
         });
 
-        // Quantity control events
+
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('qty-btn')) {
                 const isIncrement = e.target.textContent === '+';
@@ -58,6 +84,13 @@ class TSMSCashier {
 
                 quantitySpan.textContent = quantity;
                 this.updateRowTotal(row);
+
+                const code = row.cells[1].textContent;
+                const productInCart = this.cart.find(p => p.serialNum === code);
+                if (productInCart) {
+                    productInCart.quantity = quantity;
+                }
+
                 this.updateSummary();
             }
         });
@@ -107,6 +140,27 @@ class TSMSCashier {
                 document.querySelector('.customer-input')?.focus();
             }
         });
+
+        const discountInput = document.querySelector('#discountPercent');
+        if (discountInput) {
+            discountInput.addEventListener('input', () => {
+                this.updateSummary();
+            });
+        }
+
+        const cashGiven = document.querySelector('#cashGiven');
+        if (cashGiven) {
+            cashGiven.addEventListener('input', () => {
+                this.updateSummary();
+            });
+        }
+
+
+        document.querySelector("#processPayment").addEventListener("click", (e) => {
+            const hiddenInput = document.getElementById("cartDataInput");
+            hiddenInput.value = JSON.stringify(this.cart);
+            console.log(JSON.stringify(this.cart));
+        });
     }
 
     addToCart(productId) {
@@ -114,21 +168,26 @@ class TSMSCashier {
         if (!product)
             return;
 
-        // Check if product already exists in invoice table
         const existingRow = Array.from(document.querySelectorAll('.item-row')).find(row => {
             const code = row.cells[1].textContent;
-            return code === product.code;
+            return code === product.serialNum;
         });
 
         if (existingRow) {
-            // Increase quantity
             const quantitySpan = existingRow.querySelector('.quantity');
             const currentQty = parseInt(quantitySpan.textContent);
             quantitySpan.textContent = currentQty + 1;
             this.updateRowTotal(existingRow);
+            const item = this.cart.find(item => item.serialNum === product.code);
+            if (item) {
+                item.quantity = currentQty + 1;
+            }
         } else {
-            // Add new row
-            this.addNewInvoiceRow(product);
+            const productToAdd = {
+                ...product,
+                quantity: 1
+            };
+            this.addNewInvoiceRow(productToAdd);
         }
 
         this.updateSummary();
@@ -136,40 +195,84 @@ class TSMSCashier {
     }
 
     addNewInvoiceRow(product) {
+        this.cart.push(product);
         const tbody = document.querySelector('.invoice-table tbody');
         const rowCount = tbody.children.length;
-
         const row = document.createElement('tr');
         row.className = 'item-row';
+
+        // Calculate the final price (discounted or original)
+        let finalPrice = 0;
+        let priceDisplay = '';
+
+        try {
+            const retailPriceStr = product.retailPrice;
+            const discountPercent = product.discountPercent;
+
+            // Handle both String and numeric retailPrice
+            if (retailPriceStr !== null && retailPriceStr !== undefined &&
+                    String(retailPriceStr).trim() !== '') {
+
+                let retailPrice = parseFloat(String(retailPriceStr).trim());
+
+                if (isNaN(retailPrice)) {
+                    throw new Error('Invalid price format');
+                }
+
+                // Check if discount is valid and greater than 0
+                if (discountPercent !== null && discountPercent !== undefined && discountPercent > 0) {
+                    finalPrice = retailPrice * (1 - discountPercent / 100.0);
+                    priceDisplay = `
+                    <div class="original-price" style="text-decoration: line-through; font-size: 0.9em; color: #999;">
+                        ${this.formatCurrency(retailPrice)}
+                    </div>
+                    <div class="discounted-price">
+                        ${this.formatCurrency(finalPrice)} (-${discountPercent.toFixed(1)}%)
+                    </div>
+                `;
+                } else {
+                    finalPrice = retailPrice;
+                    priceDisplay = `<div class="discounted-price">
+                        ${this.formatCurrency(finalPrice)}
+                    </div>`;
+                }
+            } else {
+                finalPrice = 0;
+                priceDisplay = 'N/A';
+            }
+        } catch (error) {
+            finalPrice = 0;
+            priceDisplay = 'Error';
+        }
+
         row.innerHTML = `
-            <td style="justify-content: center; display: flex;">${rowCount + 1}</td>
-            <td>${product.serialNum}</td>
-            <td>${product.description}</td>
-            <td>
-                <div class="quantity-controls">
-                    <button class="qty-btn">-</button>
-                    <span class="quantity">1</span>
-                    <button class="qty-btn">+</button>
-                </div>
-            </td>
-            <td class="price">${this.formatCurrency(product.retailPrice)}</td>
-            <td class="total">${this.formatCurrency(product.retailPrice)}</td>
-            <td>
-                <button class="delete-btn">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        `;
+        <td>${rowCount + 1}</td>
+        <td>${product.serialNum || 'N/A'}</td>
+        <td>${product.description || 'N/A'}</td>
+        <td>
+            <div class="quantity-controls">
+                <button class="qty-btn"">-</button>
+                <span class="quantity">1</span>
+                <button class="qty-btn"">+</button>
+            </div>
+        </td>
+        <td class="price">${priceDisplay}</td>
+        <td class="total" style="font-weight: bold;">${this.formatCurrency(finalPrice)}</td>
+        <td>
+            <button class="delete-btn">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
 
         tbody.appendChild(row);
     }
 
     updateRowTotal(row) {
         const quantity = parseInt(row.querySelector('.quantity').textContent);
-        const priceText = row.querySelector('.price').textContent;
+        const priceText = row.querySelector('.discounted-price').textContent;
         const price = this.parseCurrency(priceText);
         const total = quantity * price;
-
         row.querySelector('.total').textContent = this.formatCurrency(total);
     }
 
@@ -180,10 +283,20 @@ class TSMSCashier {
         document.querySelectorAll('.item-row').forEach(row => {
             const quantity = parseInt(row.querySelector('.quantity').textContent);
             const total = this.parseCurrency(row.querySelector('.total').textContent);
-
             totalQuantity += quantity;
-            subtotal += total;
+            subtotal = subtotal + total;
         });
+
+        const discountInput = document.querySelector('#discountPercent');
+        const discountPercent = parseFloat(discountInput.value) || 0;
+        const discountTotal = subtotal * (1 - discountPercent / 100);
+
+        const cashGiven = parseFloat(document.querySelector('#cashGiven').value || 0);
+        let changeDue = 0;
+        if (cashGiven > discountTotal) {
+            changeDue = cashGiven - discountTotal;
+        }
+
 
         // Update summary display
         const summaryRows = document.querySelectorAll('.summary-row');
@@ -196,13 +309,17 @@ class TSMSCashier {
         if (summaryRows[3]) {
             summaryRows[3].querySelector('.summary-value').textContent = this.formatCurrency(subtotal);
         }
+
+        document.querySelector('#totalAmount').value = this.formatCurrency(subtotal);
+        document.querySelector('#amountDue').value = this.formatCurrency(discountTotal);
+        document.querySelector('#changeDue').value = this.formatCurrency(changeDue);
     }
 
     searchProducts(query) {
         const productCards = document.querySelectorAll('.product-card');
 
         productCards.forEach(card => {
-            const productName = card.querySelector('h4').textContent.toLowerCase();
+            const productName = card.querySelector('h3').textContent.toLowerCase();
             const isVisible = productName.includes(query.toLowerCase());
             card.style.display = isVisible ? 'block' : 'none';
         });
@@ -217,13 +334,9 @@ class TSMSCashier {
     completeTransaction() {
         const rows = document.querySelectorAll('.item-row');
         if (rows.length === 0) {
-            this.showNotification('Chưa có sản phẩm nào trong hóa đơn!', 'error');
+            this.showNotification('Vui lòng thêm ít nhất một sản phẩm vào hóa đơn trước khi thanh toán!', 'error');
             return;
         }
-
-        const total = this.parseCurrency(document.querySelector('.total-row .summary-value').textContent);
-
-        this.showPaymentModal(total);
     }
 
     showPaymentModal(total) {
@@ -290,13 +403,13 @@ class TSMSCashier {
     }
 
     parseCurrency(currencyText) {
-        return parseInt(currencyText.replace(/[^\d]/g, '')) || 0;
+        let priceStr = currencyText.trim().split(' ')[0];
+        let cleanPrice = priceStr.replace(/[^\d]/g, '');
+        return parseInt(cleanPrice);
     }
 }
 
 
-
-// Initialize the TSMS Cashier system
 document.addEventListener('DOMContentLoaded', () => {
     new TSMSCashier();
 });
@@ -342,7 +455,7 @@ const notificationStyles = `
 }
 `;
 
-// Add styles to head
+
 const styleSheet = document.createElement('style');
 styleSheet.textContent = notificationStyles;
 document.head.appendChild(styleSheet);

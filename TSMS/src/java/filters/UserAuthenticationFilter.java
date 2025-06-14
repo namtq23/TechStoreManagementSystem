@@ -14,7 +14,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebFilter(filterName = "AuthenticationFilter", urlPatterns = {"/bm-products", "/bm-overview", "/bm-staff", "/bm-customer"})
+@WebFilter(filterName = "UserAuthenticationFilter", urlPatterns = {"/bm-products", "/bm-overview", "/bm-staff", "/bm-customer"})
 public class UserAuthenticationFilter implements Filter {
 
     @Override

@@ -14,7 +14,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebFilter(filterName = "AuthenticationFilter", urlPatterns = {"/sa-home"})
+@WebFilter(filterName = "AdminAuthenticationFilter", urlPatterns = {"/sa-home"})
 public class AdminAuthenticationFilter implements Filter {
 
     @Override
