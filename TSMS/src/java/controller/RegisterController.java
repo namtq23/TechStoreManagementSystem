@@ -48,7 +48,7 @@ public class RegisterController extends HttpServlet {
         String confirmedPassword = req.getParameter("confirmPassword");
         String email = req.getParameter("email");
         String phone = req.getParameter("phone");
-        System.out.println(phone);
+        
 
         String newDbName = Validate.shopNameConverter(shopName);
         try {

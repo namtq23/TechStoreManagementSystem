@@ -17,6 +17,8 @@ public class User {
     private String phone;
     private String branchId;
     private String warehouseId;
+    private String gender;
+    private String avaUrl;
     private int roleId;
     private int isActive;
 
@@ -24,7 +26,7 @@ public class User {
     public User() {
     }
 
-    public User(int userID, String password, String fullName, String email, String phone, String branchId, String warehouseId, int roleId, int isActive) {
+    public User(int userID, String password, String fullName, String email, String phone, String branchId, String warehouseId, String gender, String avaUrl, int roleId, int isActive) {
         this.userID = userID;
         this.password = password;
         this.fullName = fullName;
@@ -32,8 +34,26 @@ public class User {
         this.phone = phone;
         this.branchId = branchId;
         this.warehouseId = warehouseId;
+        this.gender = gender;
+        this.avaUrl = avaUrl;
         this.roleId = roleId;
         this.isActive = isActive;
+    }
+
+    public String getAvaUrl() {
+        return avaUrl;
+    }
+
+    public void setAvaUrl(String avaUrl) {
+        this.avaUrl = avaUrl;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public int getUserID() {
@@ -110,9 +130,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" + "userID=" + userID + ", password=" + password + ", fullName=" + fullName + ", email=" + email + ", phone=" + phone + ", branchId=" + branchId + ", warehouseId=" + warehouseId + ", roleId=" + roleId + ", isActive=" + isActive + '}';
+        return "User{" + "userID=" + userID + ", password=" + password + ", fullName=" + fullName + ", email=" + email + ", phone=" + phone + ", branchId=" + branchId + ", warehouseId=" + warehouseId + ", gender=" + gender + ", roleId=" + roleId + ", isActive=" + isActive + '}';
     }
-
-    
 
 }
