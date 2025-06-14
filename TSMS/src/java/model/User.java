@@ -21,12 +21,13 @@ public class User {
     private String avaUrl;
     private int roleId;
     private int isActive;
+    private String address;
 
     // Constructors
     public User() {
     }
 
-    public User(int userID, String password, String fullName, String email, String phone, String branchId, String warehouseId, String gender, String avaUrl, int roleId, int isActive) {
+    public User(int userID, String password, String fullName, String email, String phone, String branchId, String warehouseId, String gender, String avaUrl, int roleId, int isActive, String address) {
         this.userID = userID;
         this.password = password;
         this.fullName = fullName;
@@ -38,6 +39,15 @@ public class User {
         this.avaUrl = avaUrl;
         this.roleId = roleId;
         this.isActive = isActive;
+        this.address = address;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getAvaUrl() {
