@@ -307,7 +307,21 @@ public class UserDAO {
         return false;
     }
 
+    
+    //All User
+    public static boolean isUserAccountTaken(String dbName, String email, String phone) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Users WHERE Email = ? OR Phone = ?";
 
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+            stmt.setString(2, phone);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+    
 
     private static ShopOwner extractShopOwnerFromResultSet(ResultSet rs) throws SQLException {
         ShopOwner shopOwner = new ShopOwner(
@@ -362,7 +376,8 @@ public class UserDAO {
                 rs.getString("Gender"),
                 rs.getString("AvaUrl"),
                 rs.getInt("RoleID"),
-                rs.getInt("IsActive")
+                rs.getInt("IsActive"),
+                rs.getString("Address")
         );
 
         return user;

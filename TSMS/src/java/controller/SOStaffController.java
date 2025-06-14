@@ -6,6 +6,7 @@ package controller;
 
 import dao.BranchDAO;
 import dao.UserDAO;
+import dao.WareHouseDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -20,7 +21,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Branch;
 import model.User;
+import model.Warehouse;
 import org.mindrot.jbcrypt.BCrypt;
+import util.Validate;
 
 /**
  *
@@ -46,8 +49,23 @@ public class SOStaffController extends HttpServlet {
             int roleId = Integer.parseInt(roleIdObj.toString());
             String dbName = dbNameObj.toString();
 
+            String success = (String) session.getAttribute("success");
+            if (success != null) {
+                req.setAttribute("success", success);
+                session.removeAttribute("success");
+            }
+
+            String error = (String) session.getAttribute("error");
+            if (error != null) {
+                req.setAttribute("error", error);
+                session.removeAttribute("error");
+            }
+
             List<Branch> branches = BranchDAO.getBranchList(dbName);
             req.setAttribute("branches", branches);
+            
+            List<Warehouse> warehouses = WareHouseDAO.getBranchList(dbName);
+            req.setAttribute("whs", warehouses);
 
             req.getRequestDispatcher("WEB-INF/jsp/shop-owner/staff.jsp").forward(req, resp);
         } catch (SQLException ex) {
@@ -74,8 +92,8 @@ public class SOStaffController extends HttpServlet {
             Object dbNameObj = session.getAttribute("dbName");
 
             if (!confirmedPassword.equals(password)) {
-                req.setAttribute("error", "Mật khẩu không khớp!");
-                req.getRequestDispatcher("WEB-INF/jsp/shop-owner/staff.jsp").forward(req, resp);
+                session.setAttribute("error", "Mật khẩu không khớp!");
+                resp.sendRedirect("so-staff");
                 return;
             }
 
@@ -83,41 +101,71 @@ public class SOStaffController extends HttpServlet {
                 resp.sendRedirect("login");
                 return;
             }
-
-            if ((roleId.contains("1") || roleId.contains("2")) && branchId.isEmpty()) {
-                req.setAttribute("error", "Hãy chọn chi nhánh!");
-                req.getRequestDispatcher("WEB-INF/jsp/shop-owner/staff.jsp").forward(req, resp);
+            
+            if (roleId == null){
+                session.setAttribute("error", "Hãy chọn vai trò!");
+                resp.sendRedirect("so-staff");
                 return;
             }
 
-            if (roleId.contains("3") && whId.isEmpty()) {
-                req.setAttribute("error", "Hãy chọn kho hàng tổng!");
-                req.getRequestDispatcher("WEB-INF/jsp/shop-owner/staff.jsp").forward(req, resp);
+            if ((roleId.contains("1") || roleId.contains("2")) && branchId == null) {
+                session.setAttribute("error", "Hãy chọn chi nhánh!");
+                resp.sendRedirect("so-staff");
+                return;
+            }
+
+            if (roleId.contains("3") && whId == null) {
+                session.setAttribute("error", "Hãy chọn kho hàng tổng!");
+                resp.sendRedirect("so-staff");
+                return;
+            }
+            
+            if (!Validate.isValidName(fullName)){
+                session.setAttribute("error", "Tên nhân viên không hợp lệ!");
+                resp.sendRedirect("so-staff");
+                return;
+            }
+            
+            if (!Validate.isValidPhone(phone)){
+                session.setAttribute("error", "Số điện thoại không hợp lệ!");
+                resp.sendRedirect("so-staff");
+                return;
+            }
+            
+            if (!Validate.isValidEmail(email)){
+                session.setAttribute("error", "Email không hợp lệ!");
+                resp.sendRedirect("so-staff");
                 return;
             }
 
             String dbName = dbNameObj.toString();
             System.out.println("SOStaffController: " + dbName);
 
+            if (UserDAO.isUserAccountTaken(dbName, email, phone)) {
+                session.setAttribute("error", "Email hoặc số điện thoại đã tồn tại trong hệ thống của hàng!");
+                resp.sendRedirect("so-staff");
+                return;
+            }
+
             String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
             switch (roleId) {
                 case "1":
-                    User bm = new User(0, hashedPassword, fullName, email, phone, branchId, null, genderId, null, 1, 1);
+                    User bm = new User(0, hashedPassword, fullName, email, phone, branchId, null, genderId, null, 1, 1, address);
                     UserDAO.insertBranchManagerAndSaleIntoUser(dbName, bm);
                     break;
                 case "2":
-                    User sale = new User(0, hashedPassword, fullName, email, phone, branchId, null, genderId, null, 2, 1);
+                    User sale = new User(0, hashedPassword, fullName, email, phone, branchId, null, genderId, null, 2, 1, address);
                     UserDAO.insertBranchManagerAndSaleIntoUser(dbName, sale);
                     break;
                 case "3":
-                    User wm = new User(0, hashedPassword, fullName, email, phone, null, whId, genderId, null, 3, 1);
+                    User wm = new User(0, hashedPassword, fullName, email, phone, null, whId, genderId, null, 3, 1, address);
                     UserDAO.insertBranchManagerAndSaleIntoUser(dbName, wm);
                     break;
             }
 
-            req.setAttribute("success", "Tạo thành công !");
-            req.getRequestDispatcher("WEB-INF/jsp/shop-owner/staff.jsp").forward(req, resp);
+            session.setAttribute("success", "Tạo thành công !");
+            resp.sendRedirect("so-staff");
         } catch (SQLException ex) {
             Logger.getLogger(SOStaffController.class.getName()).log(Level.SEVERE, null, ex);
         }

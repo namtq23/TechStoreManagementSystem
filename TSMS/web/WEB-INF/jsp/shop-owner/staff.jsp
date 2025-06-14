@@ -175,10 +175,14 @@
             <span>Hỗ trợ:1900 9999</span>
         </div>
 
-        <div class="notification" id="notification">
-            <span style="color:red;">${error}</span>
-            <span style="color:green;">${success}</span>
-        </div>
+        <c:if test="${not empty success}">
+            <div class="notification success" id="notification">${success}</div>
+        </c:if>
+
+        <c:if test="${not empty error}">
+            <div class="notification error" id="notification">${error}</div>
+        </c:if>
+
 
         <!-- Overlay làm mờ nền -->
         <div id="overlay" class="overlay hidden"></div>
@@ -249,7 +253,7 @@
                         <label>Chọn kho tổng:</label>
                         <select name="wh" id="wh">
                             <c:forEach var="wh" items="${whs}">
-                                <option value="${wh.branchId}">${wh.branchName}</option>
+                                <option value="${wh.wareHouseId}">${wh.wareHouseName}</option>
                             </c:forEach>
                         </select>
                     </div>
