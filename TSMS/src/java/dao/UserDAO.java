@@ -251,6 +251,78 @@ public class UserDAO {
         }
     }
 
+    public static boolean insertBranchManagerAndSaleIntoUser(String dbName, User user) throws SQLException {
+        String sql = """
+        INSERT INTO Users (
+            PasswordHash, FullName, Email, Phone,
+            BranchID, WarehouseID, RoleID, IsActive,
+            Gender, AvaUrl
+        ) VALUES (?, ?, ?, ?, ?, null, ?, ?, ?, ?);
+    """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, user.getPassword());
+            stmt.setString(2, user.getFullName());
+            stmt.setString(3, user.getEmail());
+            stmt.setString(4, user.getPhone());
+            stmt.setString(5, user.getBranchId());
+            stmt.setInt(6, user.getRoleId());
+            stmt.setInt(7, user.getIsActive());
+            stmt.setString(8, user.getGender());
+            stmt.setString(9, user.getAvaUrl());
+
+            int rs = stmt.executeUpdate();
+            if (rs > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean insertWareHouseManagerIntoUser(String dbName, User user) throws SQLException {
+        String sql = """
+        INSERT INTO Users (
+            PasswordHash, FullName, Email, Phone,
+            BranchID, WarehouseID, RoleID, IsActive,
+            Gender, AvaUrl
+        ) VALUES (?, ?, ?, ?, null, ?, ?, ?, ?, ?);
+    """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, user.getPassword());
+            stmt.setString(2, user.getFullName());
+            stmt.setString(3, user.getEmail());
+            stmt.setString(4, user.getPhone());
+            stmt.setString(5, user.getWarehouseId());
+            stmt.setInt(6, user.getRoleId());
+            stmt.setInt(7, user.getIsActive());
+            stmt.setString(8, user.getGender());
+            stmt.setString(9, user.getAvaUrl());
+
+            int rs = stmt.executeUpdate();
+            if (rs > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    
+    //All User
+    public static boolean isUserAccountTaken(String dbName, String email, String phone) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Users WHERE Email = ? OR Phone = ?";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+            stmt.setString(2, phone);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+    
+
     private static ShopOwner extractShopOwnerFromResultSet(ResultSet rs) throws SQLException {
         ShopOwner shopOwner = new ShopOwner(
                 rs.getInt("OwnerID"),
@@ -301,8 +373,11 @@ public class UserDAO {
                 rs.getString("Phone"),
                 rs.getString("BranchID"),
                 rs.getString("WarehouseID"),
+                rs.getString("Gender"),
+                rs.getString("AvaUrl"),
                 rs.getInt("RoleID"),
-                rs.getInt("IsActive")
+                rs.getInt("IsActive"),
+                rs.getString("Address")
         );
 
         return user;

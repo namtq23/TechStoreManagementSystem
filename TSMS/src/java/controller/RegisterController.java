@@ -21,7 +21,6 @@ import util.DatabaseUtils;
 import util.Validate;
 import org.mindrot.jbcrypt.BCrypt;
 
-
 /**
  *
  * @author admin
@@ -48,7 +47,6 @@ public class RegisterController extends HttpServlet {
         String confirmedPassword = req.getParameter("confirmPassword");
         String email = req.getParameter("email");
         String phone = req.getParameter("phone");
-        System.out.println(phone);
 
         String newDbName = Validate.shopNameConverter(shopName);
         try {
@@ -85,6 +83,7 @@ public class RegisterController extends HttpServlet {
             req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
             return;
         }
+
 
         if (!Validate.isValidPhone(phone)) {
             req.setAttribute("error", "Số điện thoại không hợp lệ!");

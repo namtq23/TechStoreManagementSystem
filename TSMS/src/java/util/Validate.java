@@ -55,6 +55,10 @@ public class Validate {
         return password != null && password.length() >= 8;
     }
 
+    public static boolean isValidPhone(String phone) {
+        return phone != null && phone.matches("0\\d{9}");
+    }
+
     public static String shopNameConverter(String input) {
         // Kiểm tra chuỗi rỗng hoặc null
         if (input == null || input.trim().isEmpty()) {
@@ -157,8 +161,8 @@ public class Validate {
 
         return Double.parseDouble(input);
     }
-    
-    public static String standardizeName(String name){
+
+    public static String standardizeName(String name) {
         String standardizedName = "";
         standardizedName = name.trim();
         return standardizedName;
@@ -170,8 +174,10 @@ public class Validate {
         System.out.println("Input: " + input + " -> Output: " + shopNameConverter(input));
 
         System.out.println(safeParseDouble("1.250.000"));
-        
+
         System.out.println(standardizeName("       an       d     "));
+        
+        System.out.println(isValidEmail("h@gmail.com"));
     }
 
 }
