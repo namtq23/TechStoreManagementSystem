@@ -33,7 +33,7 @@ public class DBUtil {
 //            dataSource.setPassword("123456");
 
             //Kien
-            dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
+            dataSource.setUrl("jdbc:sqlserver://DESKTOP-LJ3A22Q:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
             dataSource.setUsername("sa");
             dataSource.setPassword("123");
             
@@ -81,7 +81,7 @@ public class DBUtil {
 
 
         //Kien
-        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;encrypt=false";
+        String url = "jdbc:sqlserver://DESKTOP-LJ3A22Q:1433;encrypt=false";
         return DriverManager.getConnection(url, "sa", "123");
         //Phung
 //        String url = "jdbc:sqlserver://DESKTOP-C3OA5SJ:1433;encrypt=false";
@@ -106,7 +106,7 @@ public class DBUtil {
 //        String url = "jdbc:sqlserver://MAYTINHCUANAM:1433;instanceName=TRNAM;databaseName=" + dbName + ";encrypt=false";
 //         return DriverManager.getConnection(url, "sa", "123456");
         //Kien
-        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=" + dbName + ";encrypt=false";
+        String url = "jdbc:sqlserver://DESKTOP-LJ3A22Q:1433;databaseName=" + dbName + ";encrypt=false";
         return DriverManager.getConnection(url, "sa", "123");
         //Phung
 //        String url = "jdbc:sqlserver://DESKTOP-C3OA5SJ:1433;databaseName=" + dbName + ";encrypt=false";
