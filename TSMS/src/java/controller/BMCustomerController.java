@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.util.List;
-import model.Customer;
+import model.CustomerDTO;
 
 @WebServlet(name = "BMCustomerController", urlPatterns = {"/bm-customer"})
 public class BMCustomerController extends HttpServlet {
@@ -48,7 +48,7 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
         int offset = (page - 1) * pageSize;
 
         CustomerDAO customerDAO = new CustomerDAO();
-        List<Customer> customers;
+        List<CustomerDTO> customers;
         int totalCustomers;
         int totalPages;
         

@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import model.Customer;
+import model.CustomerDTO;
 import util.DBUtil;
 
 /**
@@ -16,9 +16,15 @@ import util.DBUtil;
 public class CustomerDAO {
 
     // Lấy danh sách tất cả khách hàng
+<<<<<<< Updated upstream
     public List<Customer> getAllCustomers(String dbName) throws SQLException {
         List<Customer> customers = new ArrayList<>();
             String sql = """
+=======
+    public List<CustomerDTO> getAllCustomers(String dbName) throws SQLException {
+        List<CustomerDTO> customers = new ArrayList<>();
+        String sql = """
+>>>>>>> Stashed changes
         SELECT 
             c.CustomerID,
             c.FullName,
@@ -29,15 +35,13 @@ public class CustomerDAO {
             c.DateOfBirth,
             c.CreatedAt,
             c.UpdatedAt,
-            o.BranchID,
-            o.grandTotal             
-        FROM Customers c
-        INNER JOIN (
-            SELECT CustomerID, MIN(OrderID) AS FirstOrderID
-            FROM Orders
-            GROUP BY CustomerID
-        ) fo ON c.CustomerID = fo.CustomerID
-        INNER JOIN Orders o ON fo.FirstOrderID = o.OrderID
+    COALESCE(SUM(o.GrandTotal), 0) AS GrandTotal,
+        MAX(o.BranchID) AS BranchID
+    FROM Customers c
+    LEFT JOIN Orders o ON c.CustomerID = o.CustomerID
+    GROUP BY 
+        c.CustomerID, c.FullName, c.PhoneNumber, c.Email, c.Address,
+        c.Gender, c.DateOfBirth, c.CreatedAt, c.UpdatedAt
     """;
 
         try (
@@ -62,7 +66,7 @@ public class CustomerDAO {
                 int branchId = rs.getInt("BranchID");
                 double grandTotal = rs.getDouble("GrandTotal");
 
-                Customer customer = new Customer(
+                CustomerDTO customer = new CustomerDTO(
                         customerId, fullName, phoneNumber, email, address,
                         gender, dateOfBirth, createdAt, updatedAt, branchId, grandTotal
                 );
@@ -79,16 +83,16 @@ public class CustomerDAO {
     // Ví dụ test
     public static void main(String[] args) throws SQLException {
         CustomerDAO dao = new CustomerDAO();
-        List<Customer> customers = dao.getAllCustomers("DTB_Test2");
+        List<CustomerDTO> customers = dao.getAllCustomers("DTB_Test2");
 
-        for (Customer c : customers) {
+        for (CustomerDTO c : customers) {
             System.out.println(c);
         }
     }
 
     // Tìm kiếm khách hàng theo tên (FullName)
-    public List<Customer> searchCustomersByName(String dbName, String keyword, String genderFilter) throws SQLException {
-        List<Customer> customers = new ArrayList<>();
+    public List<CustomerDTO> searchCustomersByName(String dbName, String keyword, String genderFilter) throws SQLException {
+        List<CustomerDTO> customers = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
         SELECT 
                     c.CustomerID,
@@ -137,7 +141,7 @@ public class CustomerDAO {
     }
 
     // ✅ Hàm dùng chung để map ResultSet → Customer object
-    private Customer extractCustomerFromResultSet(ResultSet rs) throws SQLException {
+    private CustomerDTO extractCustomerFromResultSet(ResultSet rs) throws SQLException {
         int customerId = rs.getInt("CustomerID");
         String fullName = rs.getString("FullName");
         String phoneNumber = rs.getString("PhoneNumber");
@@ -153,10 +157,15 @@ public class CustomerDAO {
         Date createdAt = rs.getTimestamp("CreatedAt");
         Date updatedAt = rs.getTimestamp("UpdatedAt");
         int branchId = rs.getInt("BranchID");
-        double grandTotal = rs.getDouble("GrandTotal");
+        int grandTotal = rs.getInt("GrandTotal");
 
+<<<<<<< Updated upstream
         return new Customer(customerId, fullName, phoneNumber, email, address,
                 gender, dateOfBirth, createdAt, updatedAt, branchId, grandTotal);
+=======
+        return new CustomerDTO(customerId, fullName, phoneNumber, email, address,
+                gender, dateOfBirth, createdAt, updatedAt ,branchId, grandTotal );
+>>>>>>> Stashed changes
     }
 
     // ✅ Đếm tổng số khách hàng (loại bỏ branchId)
@@ -183,8 +192,8 @@ public class CustomerDAO {
     }
 
     // ✅ Phân trang danh sách khách hàng
-    public List<Customer> getCustomerListByPage(String dbName, int offset, int limit, String genderFilter) {
-        List<Customer> list = new ArrayList<>();
+    public List<CustomerDTO> getCustomerListByPage(String dbName, int offset, int limit, String genderFilter) {
+        List<CustomerDTO> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
         SELECT 
             c.CustomerID,
@@ -233,8 +242,13 @@ public class CustomerDAO {
     }
     
     //  Lấy 10 khách hàng có GrandTotal cao nhất
+<<<<<<< Updated upstream
 public List<Customer> getTop10CustomersBySpending(String dbName) {
     List<Customer> customers = new ArrayList<>();
+=======
+    public List<CustomerDTO> getTop10CustomersBySpending(String dbName) {
+        List<CustomerDTO> customers = new ArrayList<>();
+>>>>>>> Stashed changes
 
     String sql = """
         SELECT TOP 10 
@@ -276,7 +290,7 @@ public List<Customer> getTop10CustomersBySpending(String dbName) {
 
 
     //Phuong
-    public static boolean insertCustomer(String dbName, Customer customer) {
+    public static boolean insertCustomer(String dbName, CustomerDTO customer) {
         Connection conn;
         PreparedStatement stmt;
 

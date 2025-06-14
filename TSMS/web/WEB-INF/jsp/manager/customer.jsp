@@ -8,7 +8,13 @@
 <%@ page import="java.util.*, model.Customer" %>
 <%@ page import="util.Validate" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<<<<<<< Updated upstream
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+=======
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+
+
+>>>>>>> Stashed changes
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -185,7 +191,11 @@
                                 <th>Gmail</th>
                                 <th>Địa Chỉ</th>
                                 <th>Giới Tính</th>
+<<<<<<< Updated upstream
                                 <th>Số tiền đã chi</th>
+=======
+                                <th>Tổng tiền đã chi</th>
+>>>>>>> Stashed changes
                                 <th>Ngày tạo thông tin</th>
                                 
                             </tr>
@@ -199,7 +209,11 @@
     <td>${customer.email}</td>
     <td>${customer.address}</td>
     <td>${customer.gender ? 'Nam' : 'Nữ'}</td>
+<<<<<<< Updated upstream
     <td><fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true" /> ₫</td>
+=======
+    <td><fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true"/> ₫ </td>
+>>>>>>> Stashed changes
     <td>${customer.createdAt}</td>
 </tr>
 </c:forEach>
