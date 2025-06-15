@@ -19,6 +19,8 @@ import java.util.logging.Logger;
 import model.BMProductFilter;
 import model.Brand;
 import model.Supplier;
+import util.Validate;
+
 
 /**
  *
@@ -239,8 +241,7 @@ public class ProductDAO {
             COMMIT;
         """);
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             int paramIndex = 1;
             stmt.setBigDecimal(paramIndex++, new java.math.BigDecimal(product.getRetailPrice()));
             stmt.setBigDecimal(paramIndex++, new java.math.BigDecimal(product.getCostPrice()));
@@ -297,8 +298,7 @@ public class ProductDAO {
                 pd.ProductDetailID = ?
         """);
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             stmt.setInt(1, productDetailId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -727,16 +727,16 @@ public List<Category> getAllCategory(String dbName) {
     }
 
     public List<ProductDTO> getWarehouseProductListByPageAndCategory(String dbName, int warehouseId, int page, int pageSize, String search, Integer categoryId, String inventory) {
-    List<ProductDTO> products = new ArrayList<>();
+        List<ProductDTO> products = new ArrayList<>();
 
-    // Làm sạch search string: loại bỏ khoảng trắng đầu/cuối, chuẩn hóa dấu cách thành 1
-    if (search == null) {
-        search = "";
-    } else {
-        search = search.trim().replaceAll("\\s+", "");
-    }
+        // Làm sạch search string: loại bỏ khoảng trắng đầu/cuối, chuẩn hóa dấu cách thành 1
+        if (search == null) {
+            search = "";
+        } else {
+            search = search.trim().replaceAll("\\s+", "");
+        }
 
-    StringBuilder query = new StringBuilder("""
+        StringBuilder query = new StringBuilder("""
              SELECT 
                  wp.WarehouseID,
                  p.ProductID,
@@ -775,43 +775,41 @@ public List<Category> getAllCategory(String dbName) {
                  AND REPLACE(LOWER(p.ProductName), ' ', '') LIKE ?
     """);
 
-    if (categoryId != null) {
-        query.append(" AND p.CategoryID = ?");
-    }
-    if ("in-stock".equals(inventory)) {
-        query.append(" AND wp.Quantity > 0");
-    } else if ("out-stock".equals(inventory)) {
-        query.append(" AND wp.Quantity = 0");
-    }
-
-    query.append(" ORDER BY p.ProductID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
-
-    try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
-        int paramIndex = 1;
-        stmt.setInt(paramIndex++, warehouseId);
-        stmt.setString(paramIndex++, "%" + search.toLowerCase() + "%");
         if (categoryId != null) {
-            stmt.setInt(paramIndex++, categoryId);
+            query.append(" AND p.CategoryID = ?");
         }
-        stmt.setInt(paramIndex++, (page - 1) * pageSize);
-        stmt.setInt(paramIndex, pageSize);
-
-        ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
-            ProductDTO product = extractProductDTOFromResultSet(rs);
-            products.add(product);
+        if ("in-stock".equals(inventory)) {
+            query.append(" AND wp.Quantity > 0");
+        } else if ("out-stock".equals(inventory)) {
+            query.append(" AND wp.Quantity = 0");
         }
 
-        System.out.println("Sản phẩm lọc theo inventory: " + products.size() + " cho inventory: " + inventory);
-    } catch (Exception e) {
-        System.err.println("Lỗi trong getWarehouseProductListByPageAndCategory: " + e.getMessage());
-        e.printStackTrace();
+        query.append(" ORDER BY p.ProductID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+            int paramIndex = 1;
+            stmt.setInt(paramIndex++, warehouseId);
+            stmt.setString(paramIndex++, "%" + search.toLowerCase() + "%");
+            if (categoryId != null) {
+                stmt.setInt(paramIndex++, categoryId);
+            }
+            stmt.setInt(paramIndex++, (page - 1) * pageSize);
+            stmt.setInt(paramIndex, pageSize);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                ProductDTO product = extractProductDTOFromResultSet(rs);
+                products.add(product);
+            }
+
+            System.out.println("Sản phẩm lọc theo inventory: " + products.size() + " cho inventory: " + inventory);
+        } catch (Exception e) {
+            System.err.println("Lỗi trong getWarehouseProductListByPageAndCategory: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return products;
     }
-
-    return products;
-}
-
-
 
     public int countProductsByWarehouseIdAndCategory(String dbName, int warehouseId, String search, Integer categoryId, String inventory) {
         int count = 0;
@@ -1040,11 +1038,14 @@ public List<Category> getAllCategory(String dbName) {
         }
 
         if (filter.hasSearchKeyword()) {
-            sql.append("AND (p.ProductName LIKE ? OR pd.Description LIKE ? OR pd.SerialNumber LIKE ?) ");
-            String searchPattern = "%" + filter.getSearchKeyword() + "%";
+            String keyword = filter.getSearchKeyword();
+            String keywordUnsigned = Validate.normalizeSearch(keyword);
+
+            sql.append("AND (pd.ProductNameUnsigned LIKE ? OR pd.Description LIKE ? OR pd.SerialNumber LIKE ?) ");
+            String searchPattern = "%" + keywordUnsigned + "%";
             parameters.add(searchPattern);
-            parameters.add(searchPattern);
-            parameters.add(searchPattern);
+            parameters.add("%" + keyword + "%"); 
+            parameters.add("%" + keyword + "%"); 
         }
 
         sql.append("ORDER BY ip.ProductDetailID ");
@@ -1168,8 +1169,7 @@ public List<Category> getAllCategory(String dbName) {
     }
 
     public static void main(String[] args) {
-        
+
     }
-    
 
 }

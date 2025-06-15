@@ -48,7 +48,7 @@ public class BMCustomerJson extends HttpServlet {
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
 
-            List<Customer> customers = c.getAllCustomers(dbName);
+            List<Customer> customers = c.getCustomers(dbName);
 
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
             

@@ -347,5 +347,65 @@ public class CustomerDAO {
 
         return exists;
     }
+    
+    public List<Customer> getCustomers(String dbName) throws SQLException {
+        List<Customer> customers = new ArrayList<>();
+        String sql = """
+        SELECT 
+            c.CustomerID,
+            c.FullName,
+            c.PhoneNumber,
+            c.Email,
+            c.Address,
+            c.Gender,
+            c.DateOfBirth,
+            c.CreatedAt,
+            c.UpdatedAt,
+            o.BranchID,
+            o.grandTotal             
+        FROM Customers c
+        INNER JOIN (
+            SELECT CustomerID, MIN(OrderID) AS FirstOrderID
+            FROM Orders
+            GROUP BY CustomerID
+        ) fo ON c.CustomerID = fo.CustomerID
+        INNER JOIN Orders o ON fo.FirstOrderID = o.OrderID
+    """;
+
+        try (
+                Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                int customerId = rs.getInt("CustomerID");
+                String fullName = rs.getString("FullName");
+                String phoneNumber = rs.getString("PhoneNumber");
+                String email = rs.getString("Email");
+                String address = rs.getString("Address");
+
+                // Chuyển giới tính từ bit thành String: "Nam"/"Nữ"
+                Boolean gender = null;
+                boolean genderValue = rs.getBoolean("Gender");
+                if (!rs.wasNull()) {
+                    gender = genderValue;
+                }
+
+                Date dateOfBirth = rs.getDate("DateOfBirth");
+                Date createdAt = rs.getTimestamp("CreatedAt");
+                Date updatedAt = rs.getTimestamp("UpdatedAt");
+                int branchId = rs.getInt("BranchID");
+                double grandTotal = rs.getDouble("GrandTotal");
+
+                CustomerDTO customer = new CustomerDTO(
+                        customerId, fullName, phoneNumber, email, address,
+                        gender, dateOfBirth, createdAt, updatedAt, branchId, grandTotal
+                );
+
+                customers.add((CustomerDTO) customer);
+            }
+        } catch (Exception e) {
+            System.out.println("Lỗi khi load danh sách khách hàng: " + e.getMessage());
+        }
+
+        return customers;
+    }
 
 }
