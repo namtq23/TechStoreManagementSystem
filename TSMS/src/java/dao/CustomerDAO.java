@@ -80,8 +80,8 @@ public class CustomerDAO {
     // Ví dụ test
     public static void main(String[] args) throws SQLException {
         CustomerDAO dao = new CustomerDAO();
-        List<CustomerDTO> customers = dao.getAllCustomers("DTB_Test3");
 
+        List<CustomerDTO> customers = dao.getAllCustomers("DTB_Test3");
         for (Customer c : customers) {
             System.out.println(c);
         }

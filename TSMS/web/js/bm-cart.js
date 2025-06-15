@@ -6,13 +6,21 @@ class TSMSCashier {
     constructor() {
         this.cart = [];
         this.products = [];
+        this.customers = [];
         this.currentCustomer = null;
         this.init();
     }
 
     async init() {
         await this.fetchProducts();
+        console.log("Xong fetchProducts");
+
+        await this.fetchCustomers();
+        console.log("Xong fetchCustomers");
+
+        this.bindCreateCustomerEvents();
         this.bindEvents();
+        this.bindCustomerEvents();
         this.updateSummary();
         this.loadProducts();
     }
@@ -32,8 +40,23 @@ class TSMSCashier {
         }
     }
 
-    bindEvents() {
+    async fetchCustomers() {
+        try {
+            const response = await fetch('/TSMS/customers-json');
+            if (!response.ok)
+                throw new Error("Lỗi khi fecth");
 
+            const data = await response.json();
+            this.customers = data;
+
+            console.log("Loaded customers:", this.customers);
+        } catch (error) {
+            console.error("Error fetching customers:", error);
+        }
+    }
+
+    bindEvents() {
+        const productList = this.products;
         document.addEventListener('click', (e) => {
             const productCard = e.target.closest('.product-card');
 
@@ -73,18 +96,28 @@ class TSMSCashier {
             if (e.target.classList.contains('qty-btn')) {
                 const isIncrement = e.target.textContent === '+';
                 const row = e.target.closest('.item-row');
-                const quantitySpan = row.querySelector('.quantity');
-                let quantity = parseInt(quantitySpan.textContent);
+                console.log(row);
+                const quantityInput = row.querySelector('.quantity');
+                let quantity = parseInt(quantityInput.value);
+
+                const product = productList.find(p => p.productDetailId === parseInt(row.querySelector('.productId').textContent));
+                const maxQty = parseInt(product.quantity);
+
+                if (isNaN(quantity))
+                    quantity = 1;
 
                 if (isIncrement) {
-                    quantity++;
+                    if (quantity < maxQty) {
+                        quantity++;
+                    }
                 } else if (quantity > 1) {
                     quantity--;
                 }
 
-                quantitySpan.textContent = quantity;
+                quantityInput.value = quantity;
                 this.updateRowTotal(row);
 
+                // Update cart data
                 const code = row.cells[1].textContent;
                 const productInCart = this.cart.find(p => p.serialNum === code);
                 if (productInCart) {
@@ -99,7 +132,11 @@ class TSMSCashier {
         document.addEventListener('click', (e) => {
             if (e.target.closest('.delete-btn')) {
                 const row = e.target.closest('.item-row');
+                const code = row.cells[1].textContent;
+
                 this.showDeleteConfirmation(() => {
+                    // Remove from cart array
+                    this.cart = this.cart.filter(item => item.serialNum !== code);
                     row.remove();
                     this.updateSummary();
                 });
@@ -155,12 +192,142 @@ class TSMSCashier {
             });
         }
 
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('quantity')) {
+                const input = e.target;
+                const row = input.closest('.item-row');
+                const product = productList.find(p => p.productDetailId === parseInt(row.querySelector('.productId').textContent));
+                const maxQty = parseInt(product.quantity);
+                let value = parseInt(input.value);
+
+                if (isNaN(value) || value < 1) {
+                    value = 1;
+                } else if (value > maxQty) {
+                    value = maxQty;
+                }
+
+                input.value = value;
+
+                const code = row.cells[1].textContent;
+                const productInCart = this.cart.find(p => p.serialNum === code);
+                if (productInCart) {
+                    productInCart.quantity = value;
+                }
+
+                this.updateRowTotal(row);
+                this.updateSummary();
+            }
+        });
+
 
         document.querySelector("#processPayment").addEventListener("click", (e) => {
             const hiddenInput = document.getElementById("cartDataInput");
             hiddenInput.value = JSON.stringify(this.cart);
             console.log(JSON.stringify(this.cart));
         });
+    }
+
+    bindCustomerEvents() {
+        const input = document.querySelector(".customer-input");
+        const resultsBox = document.querySelector(".customer-search-results");
+
+        input.addEventListener("input", (e) => {
+            const keyword = e.target.value.trim().toLowerCase();
+            resultsBox.innerHTML = "";
+
+            if (keyword.length === 0) {
+                resultsBox.style.display = "none";
+                return;
+            }
+
+            const matches = this.customers.filter(cus =>
+                cus.fullName.toLowerCase().includes(keyword) ||
+                        cus.phoneNumber.includes(keyword)
+            );
+
+            if (matches.length === 0) {
+                resultsBox.style.display = "none";
+                return;
+            }
+
+            matches.forEach(cus => {
+                const div = document.createElement("div");
+                div.classList.add("suggestion-item");
+                div.innerHTML = `
+                <strong>${cus.fullName}</strong><br>
+                <small>${cus.phoneNumber} - ${cus.address}</small>
+            `;
+                div.addEventListener("click", () => {
+                    this.currentCustomer = cus;
+                    this.fillCustomerForm(cus);
+                    resultsBox.style.display = "none";
+                    input.value = cus.fullName;
+                });
+                resultsBox.appendChild(div);
+            });
+
+            resultsBox.style.display = "block";
+        });
+
+        // Click ra ngoài để ẩn ô gợi ý
+        document.addEventListener("click", (e) => {
+            if (!resultsBox.contains(e.target) && e.target !== input) {
+                resultsBox.style.display = "none";
+            }
+        });
+    }
+
+    bindCreateCustomerEvents() {
+        const addBtn = document.getElementById("addCustomerBtn");
+        const createForm = document.getElementById("createCustomerForm");
+        const closeBtn = document.getElementById("closeCustomerSubmit");
+        const submitBtn = document.getElementById("createCustomerSubmit");
+
+        const mainForm = document.getElementById("mainCustomerForm");
+        const input = document.querySelector(".customer-input");
+
+        // 1. Hiện form tạo KH
+        addBtn.addEventListener("click", () => {
+            createForm.classList.remove("hidden");
+        });
+
+        // 2. Đóng form tạo KH
+        closeBtn.addEventListener("click", () => {
+            createForm.classList.add("hidden");
+        });
+
+        // 3. Khi ấn nút "Thêm" trong form tạo KH
+        submitBtn.addEventListener("click", () => {
+            const fullName = createForm.querySelector("input[name='fullName']").value;
+            const phone = createForm.querySelector("input[name='phone']").value;
+            const gender = createForm.querySelector("select[name='gender']").value;
+            const address = createForm.querySelector("input[name='address']").value;
+            const email = createForm.querySelector("input[name='email']").value;
+            const dob = createForm.querySelector("input[name='dob']").value;
+
+            input.value = fullName;
+
+            // Đẩy dữ liệu vào form chính
+            mainForm.querySelector("input[name='fullName']").value = fullName;
+            mainForm.querySelector("input[name='phone']").value = phone;
+            mainForm.querySelector("select[name='gender']").value = gender;
+            mainForm.querySelector("input[name='address']").value = address;
+            mainForm.querySelector("input[name='email']").value = email;
+            mainForm.querySelector("input[name='dob']").value = dob;
+
+            // Ẩn form tạo KH sau khi gán xong
+            createForm.classList.add("hidden");
+        });
+    }
+
+    fillCustomerForm(customer) {
+        const form = document.getElementById("mainCustomerForm");
+        form.querySelector("input[name='fullName']").value = customer.fullName || '';
+        form.querySelector("input[name='phone']").value = customer.phoneNumber || '';
+        form.querySelector("select[name='gender']").value = customer.gender ? "1" : "0";
+        form.querySelector("input[name='address']").value = customer.address || '';
+        form.querySelector("input[name='email']").value = customer.email || '';
+        form.querySelector("input[name='dob']").value = customer.dateOfBirth || '';
     }
 
     addToCart(productId) {
@@ -175,12 +342,18 @@ class TSMSCashier {
 
         if (existingRow) {
             const quantitySpan = existingRow.querySelector('.quantity');
-            const currentQty = parseInt(quantitySpan.textContent);
-            quantitySpan.textContent = currentQty + 1;
-            this.updateRowTotal(existingRow);
-            const item = this.cart.find(item => item.serialNum === product.code);
-            if (item) {
-                item.quantity = currentQty + 1;
+            const currentQty = parseInt(quantitySpan.value);
+            if (currentQty < product.quantity) {
+                quantitySpan.value = currentQty + 1;
+                this.updateRowTotal(existingRow);
+                const item = this.cart.find(item => item.serialNum === product.serialNum);
+                if (item && (item.quantity < product.quantity)) {
+                    item.quantity = currentQty + 1;
+                }
+                this.updateSummary();
+                this.showNotification(`Đã thêm ${product.description} vào hóa đơn`);
+            } else {
+                this.showNotification(`Không thể thêm: chỉ còn ${product.quantity} sản phẩm trong kho`, 'error');
             }
         } else {
             const productToAdd = {
@@ -188,10 +361,9 @@ class TSMSCashier {
                 quantity: 1
             };
             this.addNewInvoiceRow(productToAdd);
+            this.updateSummary();
+            this.showNotification(`Đã thêm ${product.description} vào hóa đơn`);
         }
-
-        this.updateSummary();
-        this.showNotification(`Đã thêm ${product.description} vào hóa đơn`);
     }
 
     addNewInvoiceRow(product) {
@@ -246,13 +418,13 @@ class TSMSCashier {
         }
 
         row.innerHTML = `
-        <td>${rowCount + 1}</td>
+        <td class="productId">${rowCount + 1}</td>
         <td>${product.serialNum || 'N/A'}</td>
         <td>${product.description || 'N/A'}</td>
         <td>
             <div class="quantity-controls">
                 <button class="qty-btn"">-</button>
-                <span class="quantity">1</span>
+                <input type="number" class="quantity" value="1" min="1" max="${product.quantity}">
                 <button class="qty-btn"">+</button>
             </div>
         </td>
@@ -269,7 +441,7 @@ class TSMSCashier {
     }
 
     updateRowTotal(row) {
-        const quantity = parseInt(row.querySelector('.quantity').textContent);
+        const quantity = parseInt(row.querySelector('.quantity').value);
         const priceText = row.querySelector('.discounted-price').textContent;
         const price = this.parseCurrency(priceText);
         const total = quantity * price;
@@ -280,18 +452,25 @@ class TSMSCashier {
         let totalQuantity = 0;
         let subtotal = 0;
 
-        document.querySelectorAll('.item-row').forEach(row => {
-            const quantity = parseInt(row.querySelector('.quantity').textContent);
-            const total = this.parseCurrency(row.querySelector('.total').textContent);
-            totalQuantity += quantity;
-            subtotal = subtotal + total;
+        this.cart.forEach(item => {
+            totalQuantity += item.quantity;
+
+            let itemPrice = 0;
+            if (item.retailPrice && !isNaN(parseFloat(item.retailPrice))) {
+                itemPrice = parseFloat(item.retailPrice);
+                if (item.discountPercent && item.discountPercent > 0) {
+                    itemPrice = itemPrice * (1 - item.discountPercent / 100.0);
+                }
+            }
+
+            subtotal += itemPrice * item.quantity;
         });
 
         const discountInput = document.querySelector('#discountPercent');
         const discountPercent = parseFloat(discountInput.value) || 0;
         const discountTotal = subtotal * (1 - discountPercent / 100);
 
-        const cashGiven = parseFloat(document.querySelector('#cashGiven').value || 0);
+        const cashGiven = getCashGivenValue();
         let changeDue = 0;
         if (cashGiven > discountTotal) {
             changeDue = cashGiven - discountTotal;
@@ -310,9 +489,16 @@ class TSMSCashier {
             summaryRows[3].querySelector('.summary-value').textContent = this.formatCurrency(subtotal);
         }
 
-        document.querySelector('#totalAmount').value = this.formatCurrency(subtotal);
-        document.querySelector('#amountDue').value = this.formatCurrency(discountTotal);
-        document.querySelector('#changeDue').value = this.formatCurrency(changeDue);
+        const totalAmountEl = document.querySelector('#totalAmount');
+        const amountDueEl = document.querySelector('#amountDue');
+        const changeDueEl = document.querySelector('#changeDue');
+
+        if (totalAmountEl)
+            totalAmountEl.value = this.formatCurrency(subtotal);
+        if (amountDueEl)
+            amountDueEl.value = this.formatCurrency(discountTotal);
+        if (changeDueEl)
+            changeDueEl.value = this.formatCurrency(changeDue);
     }
 
     searchProducts(query) {
