@@ -12,7 +12,6 @@ public class Promotions {
     private BigDecimal discountPercent;
     private Date startDate;
     private Date endDate;
-    private boolean applyToAllBranches;  // BIT trong SQL = boolean trong Java
     
     // Constructor
     public Promotions() {}
@@ -24,7 +23,6 @@ public class Promotions {
         this.discountPercent = discountPercent;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.applyToAllBranches = applyToAllBranches;
     }
 
     // Getters and Setters - tên method phải khớp với tên field trong database
@@ -43,8 +41,6 @@ public class Promotions {
     public Date getEndDate() { return endDate; }
     public void setEndDate(Date endDate) { this.endDate = endDate; }
     
-    public boolean isApplyToAllBranches() { return applyToAllBranches; }
-    public void setApplyToAllBranches(boolean applyToAllBranches) { this.applyToAllBranches = applyToAllBranches; }
     
     @Override
     public String toString() {
@@ -54,7 +50,6 @@ public class Promotions {
                 ", discountPercent=" + discountPercent +
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
-                ", applyToAllBranches=" + applyToAllBranches +
                 '}';
     }
 }
