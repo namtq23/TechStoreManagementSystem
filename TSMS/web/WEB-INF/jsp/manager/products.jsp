@@ -173,60 +173,78 @@
                     <table class="products-table">
                         <thead>
                             <tr>
-                                <th class="checkbox-col">
-                                    <input type="checkbox">
-                                </th>
                                 <th class="image-col"></th>
                                 <th>Mã hàng</th>
                                 <th>Tên hàng</th>
                                 <th>Giá bán</th>
-                                <th>Giá vốn</th>
                                 <th>Tồn kho</th>
-                                <th>Thời gian tạo</th>
                                 <th>Trạng thái</th>
-                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             <% List<ProductDTO> products = (List<ProductDTO>) request.getAttribute("products");
-                            
-                            if (products.size() == 0){
-                            %>
-                        <div>
-                            KHÔNG CÓ SẢN PHẨM NÀO.
-                        </div>
-                        <%
-                            }
-                            
-                        for (ProductDTO product : products) { %>
-                        <tr class="">
-                            <td><input type="checkbox"></td>
-                            <td><div class="product-image phone"></div></td>
-                            <td><%= product.getProductDetailId() %></td>
-                            <td><%= product.getDescription() %></td>
-                            <td><%= Validate.formatCostPriceToVND(product.getRetailPrice())%></td>
-                            <td><%= Validate.formatCostPriceToVND(product.getCostPrice())%></td>
-                            <td><%= product.getQuantity() %></td>
-                            <td><%= Validate.formatDateTime(product.getCreatedAt()) %></td>
-                            <td><%= product.getIsActive() %></td>
-                            <td style="justify-content: center;align-content: center; display: flex;gap: 5px">
-                                <!-- Nút Chi Tiết -->
-                                <a href="./so-products?action=view&productDetailId=<%= product.getProductDetailId() %>" 
-                                   class="btn btn-success" 
-                                   style="text-decoration: none; width: 79px;background:#2196F3">Chi tiết</a>
 
+                            for (ProductDTO product : products) { %>
+                            <tr class="product-row">
+                                <td><div class="product-image phone"></div></td>
+                                <td><%= product.getProductDetailId() %></td>
+                                <td><%= product.getDescription() %></td>
+                                <%
+                                    double retailPrice = Double.parseDouble(product.getRetailPrice());
+                                    double discount = product.getDiscountPercent();
+                                    double priceAfterDiscount = retailPrice * (1 - (discount / 100.0));
+                                %>
+                                <td><%= Validate.formatCostPriceToVND(priceAfterDiscount) %></td>
+                                <td><%= product.getQuantity() %></td>
+                                <td><%= product.getIsActive() %></td>
+                            </tr>
+                            <tr class="detail-row">
+                                <td colspan="9" style="background:#f0f0f0">
+                                    <div class="product-detail-container">
+                                        <div class="left-section">
+                                            <h2><%= product.getProductName() %></h2>
+                                            <div class="product-images">
+                                                <img src="<%= product.getImgUrl() %>" alt="product-img" />
+                                            </div>
+                                        </div>
 
-                                <!-- Nút Xoá -->
-                                <form action="so-products" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xoá sản phẩm này không?');">
-                                    <input type="hidden" name="action" value="delete" />
-                                    <input type="hidden" name="productDetailId" value="<%= product.getProductDetailId() %>" />
-                                    <button type="submit" class="btn btn-success" style="background: #f44336;">Xoá</button>
-                                </form>
-                            </td>
-                        </tr>
-                        <%}%>
+                                        <div class="middle-section">
+                                            <table>
+                                                <tr><td><strong>Mã hàng:</strong></td><td><%= product.getSerialNum() %></td></tr>
+                                                <tr><td><strong>Nhóm hàng:</strong></td><td><%= product.getCategory() %></td></tr>
+                                                <tr><td><strong>Thương hiệu:</strong></td><td><%= product.getBrand() %></td></tr>
+                                                <tr><td><strong>Thời gian tạo:</strong></td><td><%= Validate.formatDateTime(product.getCreatedAt()) %></td></tr>
+                                                <tr><td><strong>Giá vốn:</strong></td><td><%= Validate.formatCostPriceToVND(product.getCostPrice())%></td></tr>
+                                                <tr><td><strong>Giá bán thực:</strong></td><td><%= Validate.formatCostPriceToVND(product.getRetailPrice())%></td></tr>
+                                                <tr><td><strong>Phần trăm giảm(nếu có)</strong></td><td><%= product.getDiscountPercent() %>%</td></tr>
+                                            </table>
+                                        </div>
+
+                                        <div class="right-section">
+                                            <div><strong>Mô tả</strong><br><div class="input-line"><%= product.getDescription() %></div></div>
+                                            <div><strong>Nhà cung cấp</strong><br><div class="input-line"><%= product.getSupplier() %></div></div>
+                                        </div>
+
+                                        <!--                                        <div class="actions">
+                                                                                    <button class="btn green">✅ Cập nhật</button>
+                                                                                    <button class="btn red">🗑️ Xoá</button>
+                                                                                </div>-->
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <%}%>
                         </tbody>
                     </table>
+                    <%
+                    if (products.size() == 0){
+                    %>
+                    <div>
+                        KHÔNG CÓ SẢN PHẨM NÀO.
+                    </div>
+                    <%
+                        }
+                    %>
                 </div>
 
                 <!-- Pagination -->
@@ -277,6 +295,28 @@
             if (!toggle.contains(e.target) && !menu.contains(e.target)) {
                 menu.style.display = "none";
             }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.product-row').forEach(function (row) {
+                row.addEventListener('click', function () {
+                    const detailRow = row.nextElementSibling;
+                    if (detailRow && detailRow.classList.contains('detail-row')) {
+                        // Toggle display: table-row <=> none
+                        if (detailRow.style.display === 'table-row') {
+                            detailRow.style.display = 'none';
+                        } else {
+                            detailRow.style.display = 'table-row';
+                        }
+                    }
+                });
+            });
+
+            // Ẩn tất cả detail-row lúc ban đầu
+            document.querySelectorAll('.detail-row').forEach(function (row) {
+                row.style.display = 'none';
+            });
         });
     </script>
 
