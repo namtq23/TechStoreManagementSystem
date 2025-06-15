@@ -15,298 +15,332 @@
 </head>
 <body>
     <jsp:include page="../common/header-so.jsp" />
-    
+
     <div class="main-container">
-        <div class="row g-0">
-            <!-- ✅ Sidebar -->
-            <div class="col-md-3 col-lg-2">
-                <div class="sidebar">
-                    <div class="sidebar-header">
-                        <i class="fas fa-percentage"></i>
-                        Khuyến mãi
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Category Filter -->
+            <div class="filter-section">
+                <div class="filter-header">
+                    <h3>Khuyến mãi</h3>
+                    <i class="fas fa-question-circle"></i>
+                    <i class="fas fa-chevron-up"></i>
+                </div>
+                <div class="filter-content">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm khuyến mãi" value="${param.search}">
                     </div>
-                    
-                    <!-- Search Section -->
-                    <div class="filter-section">
-                        <div class="search-box">
+                    <div class="category-tree">
+                        <div class="category-item ${selectedCategoryId == null ? 'selected' : ''}">
+                            <span class="category-label" onclick="filterPromotions(null)">Tất cả</span>
+                        </div>
+                        <c:forEach var="category" items="${categories}">
+                            <div class="category-item expandable ${selectedCategoryId == category.categoryID ? 'selected' : ''}">
+                                <i class="fas fa-plus"></i>
+                                <span class="category-label" onclick="filterPromotions(${category.categoryID})">${category.categoryName}</span>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="filter-section">
+                <div class="filter-header">
+                    <h3>Trạng thái</h3>
+                    <i class="fas fa-chevron-up"></i>
+                </div>
+                <div class="filter-content">
+                    <label class="radio-item">
+                        <input type="radio" name="statusFilter" value="all" ${param.status == null || param.status == 'all' ? 'checked' : ''} onchange="filterPromotions()">
+                        <span class="radio-mark"></span>
+                        <span class="status-indicator all"></span>
+                        Tất cả
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="statusFilter" value="active" ${param.status == 'active' ? 'checked' : ''} onchange="filterPromotions()">
+                        <span class="radio-mark"></span>
+                        <span class="status-indicator in-stock"></span>
+                        Đang hoạt động
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="statusFilter" value="scheduled" ${param.status == 'scheduled' ? 'checked' : ''} onchange="filterPromotions()">
+                        <span class="radio-mark"></span>
+                        <span class="status-indicator out-stock"></span>
+                        Đã lên lịch
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="statusFilter" value="expired" ${param.status == 'expired' ? 'checked' : ''} onchange="filterPromotions()">
+                        <span class="radio-mark"></span>
+                        <span class="status-indicator out-stock"></span>
+                        Đã hết hạn
+                    </label>
+                </div>
+            </div>
+
+            <!-- Discount Filter -->
+            <div class="filter-section">
+                <div class="filter-header">
+                    <h3>Mức giảm giá</h3>
+                    <i class="fas fa-chevron-up"></i>
+                </div>
+                <div class="filter-content">
+                    <label class="radio-item">
+                        <input type="radio" name="discountFilter" value="all" ${param.discount == null || param.discount == 'all' ? 'checked' : ''} onchange="filterPromotions()">
+                        <span class="radio-mark"></span>
+                        <span class="status-indicator all"></span>
+                        Tất cả
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="discountFilter" value="low" ${param.discount == 'low' ? 'checked' : ''} onchange="filterPromotions()">
+                        <span class="radio-mark"></span>
+                        <span class="status-indicator below"></span>
+                        Dưới 15%
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="discountFilter" value="medium" ${param.discount == 'medium' ? 'checked' : ''} onchange="filterPromotions()">
+                        <span class="radio-mark"></span>
+                        <span class="status-indicator in-stock"></span>
+                        15% - 25%
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="discountFilter" value="high" ${param.discount == 'high' ? 'checked' : ''} onchange="filterPromotions()">
+                        <span class="radio-mark"></span>
+                        <span class="status-indicator above"></span>
+                        Trên 25%
+                    </label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="page-header">
+                <h1>Khuyến mãi</h1>
+                <div class="header-actions">
+                    <form action="so-promotions" method="get" class="search-form">
+                        <div class="search-input-wrapper">
                             <i class="fas fa-search"></i>
-                            <input type="text" class="form-control" id="sidebarSearch" 
-                                   placeholder="Tìm kiếm khuyến mãi..." value="${param.search}">
+                            <input type="text" name="search" placeholder="Theo tên khuyến mãi" value="${param.search}">
                         </div>
-                    </div>
-                    
-                    <!-- Status Filter -->
-                    <div class="filter-section">
-                        <div class="filter-header">
-                            <i class="fas fa-filter"></i>
-                            Trạng thái
-                        </div>
-                        <div class="filter-options">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="statusFilter" id="statusAll" value="" checked>
-                                <label class="form-check-label" for="statusAll">Tất cả</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="statusFilter" id="statusActive" value="active">
-                                <label class="form-check-label" for="statusActive">Đang hoạt động</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="statusFilter" id="statusScheduled" value="scheduled">
-                                <label class="form-check-label" for="statusScheduled">Đã lên lịch</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="statusFilter" id="statusExpired" value="expired">
-                                <label class="form-check-label" for="statusExpired">Đã hết hạn</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Discount Filter -->
-                    <div class="filter-section">
-                        <div class="filter-header">
-                            <i class="fas fa-percentage"></i>
-                            Mức giảm giá
-                        </div>
-                        <div class="filter-options">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="discountFilter" id="discountAll" value="" checked>
-                                <label class="form-check-label" for="discountAll">Tất cả</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="discountFilter" id="discountLow" value="low">
-                                <label class="form-check-label" for="discountLow">Dưới 15%</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="discountFilter" id="discountMedium" value="medium">
-                                <label class="form-check-label" for="discountMedium">15% - 25%</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="discountFilter" id="discountHigh" value="high">
-                                <label class="form-check-label" for="discountHigh">Trên 25%</label>
-                            </div>
-                        </div>
-                    </div>
+                        <button type="submit" class="btn btn-success">Tìm Kiếm</button>
+                    </form>
+
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPromotionModal">
+                        <i class="fas fa-plus"></i> Thêm mới
+                    </button>
+
+                    <button class="btn btn-menu">
+                        <i class="fas fa-bars"></i>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
                 </div>
             </div>
+
+            <!-- Alert Messages -->
+            <c:if test="${not empty success}">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> ${success}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </c:if>
             
-            <!-- ✅ Main Content -->
-            <div class="col-md-9 col-lg-10">
-                <div class="main-content">
-                    <!-- Content Header -->
-                    <div class="content-header">
-                        <h1 class="page-title">Khuyến mãi</h1>
-                        <div class="header-actions">
-                            <div class="search-group">
-                                <input type="text" class="form-control" id="mainSearch" 
-                                       placeholder="Theo tên khuyến mãi" value="${param.search}">
-                                <button type="button" class="btn btn-outline-success" onclick="performSearch()">
-                                    Tìm Kiếm
-                                </button>
-                            </div>
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPromotionModal">
-                                <i class="fas fa-plus"></i> Thêm mới
-                            </button>
+            <c:if test="${not empty error}">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> ${error}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </c:if>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card total">
+                    <div class="stat-card-content">
+                        <div class="stat-icon">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number">${totalPromotions}</div>
+                            <div class="stat-label">Tổng khuyến mãi</div>
                         </div>
                     </div>
-                    
-                    <!-- Alert Messages -->
-                    <c:if test="${not empty success}">
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle"></i> ${success}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div class="stat-card active">
+                    <div class="stat-card-content">
+                        <div class="stat-icon">
+                            <i class="fas fa-play-circle"></i>
                         </div>
-                    </c:if>
-                    
-                    <c:if test="${not empty error}">
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-circle"></i> ${error}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    </c:if>
-                    
-                    <!-- Stats Cards -->
-                    <div class="stats-row">
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-percentage"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-number">${totalPromotions}</div>
-                                <div class="stat-label">Tổng khuyến mãi</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon active">
-                                <i class="fas fa-play-circle"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-number active">${activePromotions}</div>
-                                <div class="stat-label">Đang hoạt động</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon scheduled">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-number scheduled">${scheduledPromotions}</div>
-                                <div class="stat-label">Đã lên lịch</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon expired">
-                                <i class="fas fa-stop-circle"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-number expired">${expiredPromotions}</div>
-                                <div class="stat-label">Đã hết hạn</div>
-                            </div>
+                        <div class="stat-info">
+                            <div class="stat-number">${activePromotions}</div>
+                            <div class="stat-label">Đang hoạt động</div>
                         </div>
                     </div>
-                    
-                    <!-- Promotions Table -->
-                    <div class="table-container">
-                        <c:choose>
-                            <c:when test="${empty promotions}">
-                                <div class="empty-state">
-                                    <i class="fas fa-percentage"></i>
-                                    <h5>Chưa có khuyến mãi nào</h5>
-                                    <p>Hãy tạo khuyến mãi đầu tiên cho cửa hàng của bạn!</p>
-                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPromotionModal">
-                                        <i class="fas fa-plus"></i> Tạo khuyến mãi đầu tiên
-                                    </button>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <table class="table promotion-table">
-                                    <thead>
-                                        <tr>
-                                            <th>
-                                                <input type="checkbox" class="form-check-input" id="selectAll">
-                                            </th>
-                                            <th>Mã khuyến mãi</th>
-                                            <th>Tên khuyến mãi</th>
-                                            <th>Giảm giá</th>
-                                            <th>Thời gian</th>
-                                            <th>Phạm vi</th>
-                                            <th>Trạng thái</th>
-                                            <th>Thao tác</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <c:forEach var="promotion" items="${promotions}">
-                                            <tr>
-                                                <td>
-                                                    <input type="checkbox" class="form-check-input" value="${promotion.promotionID}">
-                                                </td>
-                                                <td>
-                                                    <div class="promotion-item">
-                                                        <div class="promotion-icon">
-                                                            <i class="fas fa-tag"></i>
-                                                        </div>
-                                                        <div class="promotion-info">
-                                                            <h6>${promotion.promotionID}</h6>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="promotion-info">
-                                                        <h6>${promotion.promoName}</h6>
-                                                        <c:if test="${not empty promotion.description}">
-                                                            <small>${promotion.description}</small>
-                                                        </c:if>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span class="badge discount-badge">
-                                                        ${promotion.formattedDiscountPercent}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <small>
-                                                        <fmt:formatDate value="${promotion.startDate}" pattern="dd/MM/yyyy" />
-                                                        <br>đến<br>
-                                                        <fmt:formatDate value="${promotion.endDate}" pattern="dd/MM/yyyy" />
-                                                    </small>
-                                                </td>
-                                                <td>
-                                                    <span class="badge scope-specific">
-                                                        <i class="fas fa-map-marker-alt"></i> ${promotion.branchCount} chi nhánh
-                                                    </span>
-                                                    <br><small>${promotion.productCount} sản phẩm</small>
-                                                </td>
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${promotion.status == 'active'}">
-                                                            <span class="badge status-active">
-                                                                <i class="fas fa-play"></i> Đang hoạt động
-                                                            </span>
-                                                        </c:when>
-                                                        <c:when test="${promotion.status == 'scheduled'}">
-                                                            <span class="badge status-scheduled">
-                                                                <i class="fas fa-clock"></i> Đã lên lịch
-                                                            </span>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="badge status-expired">
-                                                                <i class="fas fa-stop"></i> Đã hết hạn
-                                                            </span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td>
-                                                    <div class="action-buttons">
-                                                        <button type="button" class="btn btn-info btn-sm" 
-                                                                onclick="viewPromotion(${promotion.promotionID})"
-                                                                title="Chi tiết">
-                                                            Chi tiết
-                                                        </button>
-                                                        <button type="button" class="btn btn-danger btn-sm" 
-                                                                onclick="deletePromotion(${promotion.promotionID}, '${promotion.promoName}')"
-                                                                title="Xóa">
-                                                            Xóa
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                    </tbody>
-                                </table>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <c:if test="${not empty promotions}">
-                        <div class="pagination-container">
-                            <div class="pagination-info">
-                                Hiển thị 1 - ${promotions.size()} / Tổng số ${totalPromotions} khuyến mãi
-                            </div>
-                            <nav aria-label="Promotion pagination">
-                                <ul class="pagination">
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Previous">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item active">
-                                        <a class="page-link" href="#">1</a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">2</a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
+                </div>
+                <div class="stat-card scheduled">
+                    <div class="stat-card-content">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
                         </div>
-                    </c:if>
+                        <div class="stat-info">
+                            <div class="stat-number">${scheduledPromotions}</div>
+                            <div class="stat-label">Đã lên lịch</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card expired">
+                    <div class="stat-card-content">
+                        <div class="stat-icon">
+                            <i class="fas fa-stop-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number">${expiredPromotions}</div>
+                            <div class="stat-label">Đã hết hạn</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            
+
+            <!-- Tab Content -->
+            <div id="tab-all" class="tab-content active">
+                <div class="table-container">
+                    <table class="promotion-table">
+                        <thead>
+                            <tr>
+                                <th class="checkbox-col">
+                                    <input type="checkbox" id="selectAll">
+                                </th>
+                                <th></th>
+                                <th>Mã khuyến mãi</th>
+                                <th>Tên khuyến mãi</th>
+                                <th>Giảm giá</th>
+                                <th>Thời gian</th>
+                                <th>Phạm vi</th>
+                                <th>Trạng thái</th>
+                                <th class="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:choose>
+                                <c:when test="${empty promotions}">
+                                    <tr>
+                                        <td colspan="9" class="empty-state">
+                                            <i class="fas fa-percentage"></i>
+                                            <h5>Chưa có khuyến mãi nào</h5>
+                                            <p>Hãy tạo khuyến mãi đầu tiên cho cửa hàng của bạn!</p>
+                                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPromotionModal">
+                                                <i class="fas fa-plus"></i> Tạo khuyến mãi đầu tiên
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:forEach var="promotion" items="${promotions}">
+                                        <tr class="promotion-row" data-status="${promotion.status}">
+                                            <td><input type="checkbox" class="product-checkbox"></td>
+                                            <td><div class="product-image accessory"></div></td>
+                                            <td><strong>${promotion.promotionID}</strong></td>
+                                            <td>
+                                                <div class="promotion-info">
+                                                    <h6>${promotion.promoName}</h6>
+                                                    <c:if test="${not empty promotion.description}">
+                                                        <small>${promotion.description}</small>
+                                                    </c:if>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="discount-badge">
+                                                    ${promotion.formattedDiscountPercent}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small class="date-text">
+                                                    <fmt:formatDate value="${promotion.startDate}" pattern="dd/MM/yyyy" />
+                                                    <br>đến<br>
+                                                    <fmt:formatDate value="${promotion.endDate}" pattern="dd/MM/yyyy" />
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <span class="scope-specific">
+                                                    <i class="fas fa-map-marker-alt"></i> ${promotion.branchCount} chi nhánh
+                                                </span>
+                                                <br><small class="product-count">${promotion.productCount} sản phẩm</small>
+                                            </td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${promotion.status == 'active'}">
+                                                        <span class="status-badge status-active">
+                                                            <i class="fas fa-play"></i> Đang hoạt động
+                                                        </span>
+                                                    </c:when>
+                                                    <c:when test="${promotion.status == 'scheduled'}">
+                                                        <span class="status-badge status-scheduled">
+                                                            <i class="fas fa-clock"></i> Đã lên lịch
+                                                        </span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="status-badge status-inactive">
+                                                            <i class="fas fa-stop"></i> Đã hết hạn
+                                                        </span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <form action="so-promotions" method="get" style="display:inline;">
+                                                        <input type="hidden" name="action" value="view">
+                                                        <input type="hidden" name="promotionId" value="${promotion.promotionID}">
+                                                        <button type="submit" class="btn-detail">
+                                                            <i class="fas fa-eye"></i> Chi tiết
+                                                        </button>
+                                                    </form>
+                                                    <form action="so-promotions" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xoá khuyến mãi \"${promotion.promoName}\" không?');">
+                                                        <input type="hidden" name="action" value="delete" />
+                                                        <input type="hidden" name="promotionId" value="${promotion.promotionID}" />
+                                                        <button type="submit" class="btn-delete">
+                                                            <i class="fas fa-trash"></i> Xoá
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </c:otherwise>
+                            </c:choose>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+           
+
+            <!-- Pagination -->
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Hiển thị ${startPromotion} - ${endPromotion} / Tổng số ${totalPromotions} khuyến mãi
+                </div>
+                <div class="pagination">
+                    <a href="so-promotions?page=1" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="so-promotions?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                    <c:forEach begin="1" end="${totalPages}" var="i">
+                        <a href="so-promotions?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                    </c:forEach>
+                    <a href="so-promotions?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="so-promotions?page=${totalPages}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </div>
+            </div>
+        </main>
     </div>
 
     <!-- Create Promotion Modal -->
@@ -322,96 +356,74 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="mb-3">
-                                    <label for="promoName" class="form-label">
-                                        Tên khuyến mãi <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text" class="form-control" id="promoName" name="promoName" 
-                                           placeholder="VD: Khuyến mãi mùa hè 2024" required>
-                                    <div class="invalid-feedback">
-                                        Vui lòng nhập tên khuyến mãi.
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <label for="promoName" class="form-label">Tên khuyến mãi *</label>
+                            <input type="text" class="form-control" id="promoName" name="promoName" placeholder="VD: Khuyến mãi mùa hè 2024" required>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="discountPercent" class="form-label">
-                                        Tỷ lệ giảm giá (%) <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="number" class="form-control" id="discountPercent" name="discountPercent" 
-                                           min="0" max="100" step="0.1" placeholder="VD: 15" required>
-                                    <div class="invalid-feedback">
-                                        Vui lòng nhập tỷ lệ giảm giá từ 0 đến 100%.
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Mô tả</label>
-                                    <input type="text" class="form-control" name="description" 
-                                           placeholder="Mô tả ngắn về khuyến mãi">
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <label for="discountPercent" class="form-label">Tỷ lệ giảm giá (%) *</label>
+                            <input type="number" class="form-control" id="discountPercent" name="discountPercent" min="0" max="100" step="0.1" placeholder="VD: 15" required>
                         </div>
-                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Mô tả</label>
+                            <input type="text" class="form-control" id="description" name="description" placeholder="Mô tả ngắn về khuyến mãi">
+                        </div>
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="startDate" class="form-label">
-                                        Ngày bắt đầu <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="date" class="form-control" id="startDate" name="startDate" required>
-                                    <div class="invalid-feedback">
-                                        Vui lòng chọn ngày bắt đầu.
-                                    </div>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="startDate" class="form-label">Ngày bắt đầu *</label>
+                                <input type="date" class="form-control" id="startDate" name="startDate" required>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="endDate" class="form-label">
-                                        Ngày kết thúc <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="date" class="form-control" id="endDate" name="endDate" required>
-                                    <div class="invalid-feedback">
-                                        Vui lòng chọn ngày kết thúc.
-                                    </div>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="endDate" class="form-label">Ngày kết thúc *</label>
+                                <input type="date" class="form-control" id="endDate" name="endDate" required>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times"></i> Hủy
-                        </button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save"></i> Tạo khuyến mãi
-                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-success">Tạo khuyến mãi</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Set minimum date to today
+        // Tab switching functionality
+        function switchTab(tabName, buttonElement) {
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            buttonElement.classList.add('active');
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            // Filter table rows based on tab
+            filterTableByTab(tabName);
+        }
+        
+
+
+        // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startDate').min = today;
             document.getElementById('endDate').min = today;
             
-            // Update end date minimum when start date changes
             document.getElementById('startDate').addEventListener('change', function() {
                 document.getElementById('endDate').min = this.value;
             });
             
-            // Form validation
             const form = document.getElementById('createPromotionForm');
             form.addEventListener('submit', function(event) {
                 if (!form.checkValidity()) {
@@ -421,19 +433,19 @@
                 form.classList.add('was-validated');
             });
             
-            // Sync search boxes
-            const sidebarSearch = document.getElementById('sidebarSearch');
-            const mainSearch = document.getElementById('mainSearch');
+            const sidebarSearch = document.getElementById('searchInput');
+            const mainSearch = document.querySelector('input[name="search"]');
             
-            sidebarSearch.addEventListener('input', function() {
-                mainSearch.value = this.value;
-            });
+            if (sidebarSearch && mainSearch) {
+                sidebarSearch.addEventListener('input', function() {
+                    mainSearch.value = this.value;
+                });
+                
+                mainSearch.addEventListener('input', function() {
+                    sidebarSearch.value = this.value;
+                });
+            }
             
-            mainSearch.addEventListener('input', function() {
-                sidebarSearch.value = this.value;
-            });
-            
-            // Select all checkbox
             const selectAll = document.getElementById('selectAll');
             if (selectAll) {
                 selectAll.addEventListener('change', function() {
@@ -443,57 +455,28 @@
                     });
                 });
             }
+            
+            // Initialize first tab as active
+            filterTableByTab('all');
         });
 
-        // Search function
-        function performSearch() {
-            const searchTerm = document.getElementById('mainSearch').value;
-            const statusFilter = document.querySelector('input[name="statusFilter"]:checked').value;
-            const discountFilter = document.querySelector('input[name="discountFilter"]:checked').value;
-            
-            let url = 'so-promotions?';
-            if (searchTerm) url += 'search=' + encodeURIComponent(searchTerm) + '&';
-            if (statusFilter) url += 'status=' + statusFilter + '&';
-            if (discountFilter) url += 'discount=' + discountFilter + '&';
-            
+        // Filter functions
+        function filterPromotions(categoryId) {
+            const search = document.getElementById('searchInput').value;
+            const statusFilter = document.querySelector('input[name="statusFilter"]:checked') ? document.querySelector('input[name="statusFilter"]:checked').value : '';
+            const discountFilter = document.querySelector('input[name="discountFilter"]:checked') ? document.querySelector('input[name="discountFilter"]:checked').value : '';
+            let url = 'so-promotions?page=1&search=' + encodeURIComponent(search);
+
+            if (categoryId !== null && categoryId !== undefined) {
+                url += '&categoryId=' + encodeURIComponent(categoryId);
+            }
+            if (statusFilter) url += '&status=' + statusFilter;
+            if (discountFilter) url += '&discount=' + discountFilter;
+
             window.location.href = url;
         }
 
-        // Filter change handlers
-        document.querySelectorAll('input[name="statusFilter"], input[name="discountFilter"]').forEach(radio => {
-            radio.addEventListener('change', performSearch);
-        });
-
-        // View promotion details
-        function viewPromotion(promotionId) {
-            window.location.href = 'so-promotions?action=view&id=' + promotionId;
-        }
-
-        // Delete promotion
-        function deletePromotion(promotionId, promotionName) {
-            if (confirm('Bạn có chắc chắn muốn xóa khuyến mãi "' + promotionName + '"?\n\nHành động này không thể hoàn tác!')) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = 'so-promotions';
-                
-                const actionInput = document.createElement('input');
-                actionInput.type = 'hidden';
-                actionInput.name = 'action';
-                actionInput.value = 'delete';
-                
-                const idInput = document.createElement('input');
-                idInput.type = 'hidden';
-                idInput.name = 'promotionId';
-                idInput.value = promotionId;
-                
-                form.appendChild(actionInput);
-                form.appendChild(idInput);
-                document.body.appendChild(form);
-                form.submit();
-            }
-        }
-
-        // Auto-hide alerts after 5 seconds
+        // Auto-hide alerts
         document.addEventListener('DOMContentLoaded', function() {
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {
