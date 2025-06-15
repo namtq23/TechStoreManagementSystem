@@ -79,7 +79,7 @@ public class CustomerDAO {
     // Ví dụ test
     public static void main(String[] args) throws SQLException {
         CustomerDAO dao = new CustomerDAO();
-        List<Customer> customers = dao.getAllCustomers("DTB_Test2");
+        List<Customer> customers = dao.getAllCustomers("DTB_Bm");
 
         for (Customer c : customers) {
             System.out.println(c);

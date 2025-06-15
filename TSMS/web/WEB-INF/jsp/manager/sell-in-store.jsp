@@ -84,23 +84,76 @@ Author     : admin
                 <div class="panel-header">
                     <h2>Hóa đơn bán hàng</h2>
                     <div class="invoice-actions">
-                        <button class="btn-secondary">
-                            <i class="fas fa-plus"></i>
-                            Tạo mới
-                        </button>
-                        <!--                        <button class="btn-secondary">
-                                                    <i class="fas fa-save"></i>
-                                                    Lưu tạm
-                                                </button>-->
+                        <a href="bm-cart" style="text-decoration: none">
+                            <button class="btn-secondary">
+                                <i class="fas fa-plus"></i>
+                                Tạo mới
+                            </button>
+                        </a>
                     </div>
                 </div>
 
-                <div class="search-section">
+                <div class="customer-section">
                     <div class="search-container">
                         <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Tìm kiếm sản phẩm (F3)" class="search-input">
+                        <input type="text" placeholder="Tìm kiếm khách hàng (F4)" class="customer-input">
                     </div>
+                    <button class="btn-secondary" id="addCustomerBtn">
+                        <i class="fas fa-user-plus"></i>
+                        Thêm KH
+                    </button>
                 </div>
+
+                <!-- Form tạo khách hàng -->
+                <div  class="create-customer hidden" id="createCustomerForm">
+                    <h2>Tạo khách hàng</h2>
+
+
+                    <div class="customer-info">
+                        <div class="form-row">
+                            <label>Họ tên:</label>
+                            <input type="text" name="fullName" required="">
+                        </div>
+                        <div class="form-row">
+                            <label>Số điện thoại:</label>
+                            <input type="text" name="phone" required="">
+                        </div>
+                        <div class="form-row">
+                            <label>Giới tính:</label>
+                            <select name="gender">
+                                <option value="1">Nam</option>
+                                <option value="0">Nữ</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>Địa chỉ:</label>
+                            <input type="text" name="address">
+                        </div>
+                        <div class="form-row">
+                            <label>Email:</label>
+                            <input type="email" name="email">
+                        </div>
+                        <div class="form-row">
+                            <label>Ngày sinh:</label>
+                            <input type="date" name="dob">
+                        </div>
+                    </div>
+
+                    <!-- Nút thanh toán và đóng -->
+                    <div class="form-actions">
+                        <button type="button" id="createCustomerSubmit" class="btn-primary">
+                            <i class="fas fa-credit-card"></i> Thêm
+                        </button>
+                        <button type="button" id="closeCustomerSubmit" class="btn-secondary">
+                            <i class="fas fa-times"></i> Đóng
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="customer-search-results" style="display: none;"></div>
+
+
 
                 <div class="invoice-table">
                     <table>
@@ -141,10 +194,6 @@ Author     : admin
                         <i class="fas fa-check"></i>
                         Tiến hành thanh toán
                     </button>
-                    <!--                    <button class="btn-secondary">
-                                            <i class="fas fa-print"></i>
-                                            In hóa đơn
-                                        </button>-->
                 </div>
             </div>
 
@@ -162,16 +211,12 @@ Author     : admin
                     </div>
                 </div>
 
-                <!--                <div class="customer-section">
-                                    <div class="search-container">
-                                        <i class="fas fa-search"></i>
-                                        <input type="text" placeholder="Tìm kiếm khách hàng (F4)" class="customer-input">
-                                    </div>
-                                    <button class="btn-secondary">
-                                        <i class="fas fa-user-plus"></i>
-                                        Thêm KH
-                                    </button>
-                                </div>-->
+                <div class="search-section">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Tìm kiếm sản phẩm (F3)" class="search-input">
+                    </div>
+                </div>
 
 
                 <div class="product-grid">
@@ -232,14 +277,14 @@ Author     : admin
 
             <form id="checkoutForm" action="bm-cart" method="post">
                 <!-- Form nhập thông tin khách hàng -->
-                <div class="customer-info-form">
+                <div class="customer-info-form" id="mainCustomerForm">
                     <div class="form-row">
                         <label>Họ tên:</label>
-                        <input type="text" name="fullName" required="">
+                        <input type="text" name="fullName" readonly="" value="Khách lẻ">
                     </div>
                     <div class="form-row">
                         <label>Số điện thoại:</label>
-                        <input type="text" name="phone" required="">
+                        <input type="text" name="phone" readonly="" value="N/A">
                     </div>
                     <div class="form-row">
                         <label>Giới tính:</label>
@@ -250,15 +295,15 @@ Author     : admin
                     </div>
                     <div class="form-row">
                         <label>Địa chỉ:</label>
-                        <input type="text" name="address">
+                        <input type="text" name="address" readonly="" value="N/A">
                     </div>
                     <div class="form-row">
                         <label>Email:</label>
-                        <input type="email" name="email">
+                        <input type="email" name="email" readonly="" value="N/A">
                     </div>
                     <div class="form-row">
                         <label>Ngày sinh:</label>
-                        <input type="date" name="dob">
+                        <input type="date" name="dob" readonly="">
                     </div>
                 </div>
 
@@ -277,9 +322,11 @@ Author     : admin
                             <option value="Chuyển khoản">Chuyển khoản</option>
                         </select>
                     </div>
-                    <div class="form-row">
+                    <div class="form-row discount-wrapper">
                         <label>Giảm giá (%):</label>
-                        <input type="number" id="discountPercent" value="0" min="0" max="100">
+                        <div class="input-percent">
+                            <input type="text" id="discountPercent" placeholder="Phần trăm giảm giá...">
+                        </div>
                     </div>
                     <div class="form-row">
                         <label>Khách cần trả:</label>
@@ -293,7 +340,7 @@ Author     : admin
                 <div class="payment-input">
                     <div class="form-row">
                         <label>Tiền khách đưa:</label>
-                        <input type="number" name="cashGiven" id="cashGiven" min="0">
+                        <input type="text" name="cashGiven" id="cashGiven" placeholder="Nhập số tiền">
                     </div>
                     <div class="form-row">
                         <label>Tiền thừa trả lại:</label>
@@ -306,11 +353,11 @@ Author     : admin
                     <button type="submit" id="processPayment" class="btn-primary">
                         <i class="fas fa-credit-card"></i> Thanh toán
                     </button>
-                        <button type="button" id="closeOrderDetail" class="btn-secondary">
+                    <button type="button" id="closeOrderDetail" class="btn-secondary">
                         <i class="fas fa-times"></i> Đóng
                     </button>
                 </div>
-                
+
                 <input type="hidden" name="cartData" id="cartDataInput">
             </form>
 
@@ -352,6 +399,42 @@ Author     : admin
             document.querySelector(".overlay").addEventListener("click", () => {
                 document.querySelector(".order-detail").classList.add("hidden");
                 document.querySelector(".overlay").classList.add("hidden");
+            });
+            const cashGivenInput = document.getElementById("cashGiven");
+
+            cashGivenInput.addEventListener("input", function () {
+                let rawValue = this.value.replace(/[^\d]/g, '');
+
+                if (rawValue === '') {
+                    this.value = '';
+                    return;
+                }
+
+                let number = parseInt(rawValue, 10);
+                this.value = number.toLocaleString('vi-VN') + ' đ';
+            });
+
+            function getCashGivenValue() {
+                let value = document.getElementById('cashGiven').value;
+                return parseInt(value.replace(/[^\d]/g, ''), 10) || 0;
+            }
+
+
+            const discountInput = document.getElementById('discountPercent');
+
+            discountInput.addEventListener('input', function () {
+                let rawValue = this.value.replace(/[^\d]/g, '');
+
+                if (rawValue === '') {
+                    this.value = '';
+                    return;
+                }
+
+                if (isNaN(rawValue) || rawValue < 0) {
+                    discountInput.value = 0;
+                } else if (rawValue > 100) {
+                    discountInput.value = 100;
+                }
             });
         </script>
         <script src="js/bm-cart.js"></script>
