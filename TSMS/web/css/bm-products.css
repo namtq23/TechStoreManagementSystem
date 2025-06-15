@@ -423,6 +423,7 @@ body {
 .filter-actions {
     padding: 20px;
     display: flex;
+    flex-direction: column;
     gap: 10px;
     border-top: 1px solid #eee;
 }
