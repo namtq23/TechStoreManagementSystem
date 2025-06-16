@@ -239,7 +239,7 @@ body {
     background: #4CAF50 !important;
     border-color: #4CAF50 !important;
     color: white !important;
-
+}
 
 .btn-success:hover {
     background: #388E3C !important;
@@ -506,7 +506,6 @@ body {
         transform: translateY(0);
     }
 }
-
 /* Table */
 .table-container {
     background: white;
@@ -730,10 +729,6 @@ body {
     font-size: 16px;
     margin-bottom: 24px;
     color: #6b7280;
-}
-.empty-state .button .btn-success{
-    font-size: 20px;
-    color: white;
 }
 .empty-state .btn {
     padding: 8px 12px;
