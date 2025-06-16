@@ -190,9 +190,10 @@ body {
 }
 
 .quantity {
-    min-width: 24px;
+    width: 24px;
     text-align: center;
     font-weight: 500;
+    border: #1e293b;
 }
 
 .price, .total {
@@ -692,4 +693,8 @@ input[required] {
 
 .hidden {
     display: none;
+}
+
+.create-customer{
+    padding: 30px;
 }

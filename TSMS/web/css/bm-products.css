@@ -652,3 +652,8 @@ body {
         text-align: center;
     }
 }
+
+/*CSS hình ảnh sản phẩm*/
+img {
+    width: 60px;
+}
