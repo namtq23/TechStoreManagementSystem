@@ -526,11 +526,68 @@ public class ProductDAO {
             stmt.setInt(3, quantity);
             stmt.executeUpdate();
         }
-    } /*
-       * PHÙNG
-       * Lấy sản phẩm theo ID
-       */
+    } 
+                                                
+    public List<ProductDTO> getAllProducts(String dbName, int warehouseId) {
+        List<ProductDTO> products = new ArrayList<>();
+        String query = """
+            SELECT 
+                wp.WarehouseID,
+                p.ProductID,
+                pd.ProductDetailID,
+                wp.Quantity AS InventoryQuantity,
+                p.ProductName,
+                b.BrandName,
+                c.CategoryName,
+                s.SupplierName,
+                CAST(p.CostPrice AS NVARCHAR) AS CostPrice,
+                CAST(p.RetailPrice AS NVARCHAR) AS RetailPrice,
+                p.ImageURL,
+                p.CreatedAt,
+                CASE 
+                    WHEN p.IsActive = 1 THEN N'Đang kinh doanh' 
+                    ELSE N'Không kinh doanh' 
+                END AS Status,
+                pd.Description,
+                pd.SerialNumber,
+                pd.WarrantyPeriod,
+                promo.PromoName,
+                promo.DiscountPercent,
+                promo.StartDate,
+                promo.EndDate
+            FROM 
+                WarehouseProducts wp
+                LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
+                LEFT JOIN Products p ON pd.ProductID = p.ProductID
+                LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                LEFT JOIN PromotionProducts pp ON pp.ProductDetailID = pd.ProductDetailID
+                LEFT JOIN Promotions promo ON promo.PromotionID = pp.PromotionID
+            WHERE 
+                wp.WarehouseID = ?
+        """;
 
+        try (Connection conn = DBUtil.getConnectionTo(dbName); 
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, warehouseId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                ProductDTO product = extractProductDTOFromResultSet(rs);
+                products.add(product);
+            }
+            System.out.println("Fetched " + products.size() + " products for warehouseId: " + warehouseId);
+        } catch (SQLException e) {
+            System.err.println("Error in getAllProducts: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return products;
+    }
+
+
+    /* PHÙNG
+      Lấy sản phẩm theo ID
+     */
     public ProductDTO getProductById(String dbName, int productId) throws SQLException {
         String sql = """
                     SELECT
