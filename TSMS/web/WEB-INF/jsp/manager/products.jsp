@@ -117,8 +117,6 @@
                     <div class="filter-section">
                         <div class="filter-header">
                             <h3>Nhóm hàng</h3>
-                            <i class="fas fa-question-circle"></i>
-                            <i class="fas fa-chevron-up"></i>
                         </div>
                         <div class="filter-content">
                             <div class="search-box">
@@ -148,12 +146,11 @@
                     <div class="filter-section">
                         <div class="filter-header">
                             <h3>Tồn kho</h3>
-                            <i class="fas fa-chevron-up"></i>
                         </div>
                         <div class="filter-content">
                             <label class="radio-item">
-                                <input type="radio" name="inventory" value="all>
-                                       <span class="radio-mark"></span>
+                                <input type="radio" name="inventory" value="all" checked>
+                                <span class="radio-mark"></span>
                                 <span class="status-indicator all"></span>
                                 Tất cả
                             </label>                        
@@ -171,6 +168,45 @@
                             </label>
                         </div>
                     </div>
+
+                    <!-- Price Range Filter -->
+                    <div class="filter-section">
+                        <div class="filter-header">
+                            <h3>Khoảng giá</h3>
+                        </div>
+                        <div class="filter-content">
+                            <div class="price-range">
+                                <input type="number" name="minPrice" placeholder="Giá từ" min="0" class="price-input">
+                                <input type="number" name="maxPrice" placeholder="Giá đến" min="0" class="price-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="filter-section">
+                        <div class="filter-header">
+                            <h3>Trạng thái</h3>
+                        </div>
+                        <div class="filter-content">
+                            <label class="radio-item">
+                                <input type="radio" name="status" value="all" checked>
+                                <span class="radio-mark"></span>
+                                Tất cả
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="status" value="active">
+                                <span class="radio-mark"></span>
+                                Đang bán
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="status" value="inactive">
+                                <span class="radio-mark"></span>
+                                Ngừng bán
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
                     <div class="filter-actions">
                         <a href="bm-products?page=1" class="btn-clear">
                             <i class="fas fa-eraser"></i>
@@ -182,6 +218,7 @@
                         </button>
                     </div>
                 </form>
+
             </aside>
 
             <!-- Main Content -->
@@ -193,7 +230,7 @@
                             <div style="position: relative; flex: 1;">
                                 <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
                                 <input type="text" name="search" placeholder="Theo tên hàng"
-                                       style="padding: 10px 10px 10px 60px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
+                                       style="padding: 10px 10px 10px 35px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
                             </div>
                             <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
                         </form>
@@ -228,7 +265,15 @@
                                 %>
                                 <td><%= Validate.formatCostPriceToVND(priceAfterDiscount) %></td>
                                 <td><%= product.getQuantity() %></td>
-                                <td><%= product.getIsActive() %></td>
+                                <td>
+                                    <% if (product.getQuantity() == 0) { %>
+                                    <span class="status-badge inactive">Hết hàng</span>
+                                    <% } else if ("Ngừng bán".equals(product.getIsActive())) { %>
+                                    <span class="status-badge inactive">Ngừng bán</span>
+                                    <% } else { %>
+                                    <span class="status-badge active"><%= product.getIsActive() %></span>
+                                    <% } %>
+                                </td>
                             </tr>
                             <tr class="detail-row">
                                 <td colspan="9" style="background:#f0f0f0">
