@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.PromotionSearchCriteria;
 
 @WebServlet(name = "SOPromotionController", urlPatterns = {"/so-promotions", "/api/promotions"})
 public class SOPromotionController extends HttpServlet {
@@ -93,12 +94,64 @@ public class SOPromotionController extends HttpServlet {
     private void handlePageRequest(HttpServletRequest request, HttpServletResponse response, 
                                  String dbName, Integer branchId) throws ServletException, IOException, SQLException {
         List<PromotionDTO> promotions = promotionDAO.getAllPromotions(dbName);
+       // ✅ Đọc search parameters từ request
+        String search = request.getParameter("search");
+        String status = request.getParameter("status");
+        String discount = request.getParameter("discount");
+        String categoryIdStr = request.getParameter("categoryId");
+        String pageStr = request.getParameter("page");
+        
+        // ✅ Tạo search criteria object
+        PromotionSearchCriteria criteria = new PromotionSearchCriteria();
+        criteria.setSearchTerm(search);
+        criteria.setStatusFilter(status);
+        criteria.setDiscountFilter(discount);
+        
+        // Parse page number
+        int currentPage = 1;
+        if (pageStr != null && !pageStr.trim().isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageStr);
+                if (currentPage < 1) currentPage = 1;
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
+        criteria.setPage(currentPage);
+        criteria.setPageSize(10); // 10 items per page
+        
+        // Parse category ID
+        Integer categoryId = null;
+        if (categoryIdStr != null && !categoryIdStr.trim().isEmpty()) {
+            try {
+                categoryId = Integer.parseInt(categoryIdStr);
+            } catch (NumberFormatException e) {
+                // Ignore invalid category ID
+            }
+        }
+        
+        // ✅ Gọi DAO với search criteria
+        int totalPromotions;
+        
+        if (hasSearchCriteria(criteria) || categoryId != null) {
+            // Có search criteria - gọi search method
+            promotions = promotionDAO.searchPromotions(dbName, criteria, categoryId);
+            totalPromotions = promotionDAO.countPromotions(dbName, criteria, categoryId);
+        } else {
+            // Không có search criteria - lấy tất cả
+            promotions = promotionDAO.getAllPromotions(dbName);
+            totalPromotions = promotions.size();
+        }
         
         // Tính toán thống kê
-        int totalPromotions = promotions.size();
         int activePromotions = (int) promotions.stream().filter(p -> p.isActive()).count();
         int scheduledPromotions = (int) promotions.stream().filter(p -> p.isScheduled()).count();
         int expiredPromotions = (int) promotions.stream().filter(p -> p.isExpired()).count();
+        
+        // Tính toán pagination
+        int totalPages = (int) Math.ceil((double) totalPromotions / criteria.getPageSize());
+        int startPromotion = (currentPage - 1) * criteria.getPageSize() + 1;
+        int endPromotion = Math.min(currentPage * criteria.getPageSize(), totalPromotions);
         
         // Set attributes cho JSP
         request.setAttribute("promotions", promotions);
@@ -106,11 +159,27 @@ public class SOPromotionController extends HttpServlet {
         request.setAttribute("activePromotions", activePromotions);
         request.setAttribute("scheduledPromotions", scheduledPromotions);
         request.setAttribute("expiredPromotions", expiredPromotions);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("startPromotion", startPromotion);
+        request.setAttribute("endPromotion", endPromotion);
         request.setAttribute("dbName", dbName);
         request.setAttribute("branchId", branchId);
         
+        // ✅ Preserve search parameters
+        request.setAttribute("searchTerm", search);
+        request.setAttribute("selectedStatus", status);
+        request.setAttribute("selectedDiscount", discount);
+        request.setAttribute("selectedCategoryId", categoryId);
+        
         // Forward đến JSP
         request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/so-promotions.jsp").forward(request, response);
+    }
+    
+    private boolean hasSearchCriteria(PromotionSearchCriteria criteria) {
+        return (criteria.getSearchTerm() != null && !criteria.getSearchTerm().trim().isEmpty()) ||
+               (criteria.getStatusFilter() != null && !criteria.getStatusFilter().equals("all")) ||
+               (criteria.getDiscountFilter() != null && !criteria.getDiscountFilter().equals("all"));
     }
     
     @Override

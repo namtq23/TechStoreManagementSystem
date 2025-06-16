@@ -8,8 +8,205 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PromotionDAO {
+    public List<PromotionDTO> searchPromotions(String dbName, PromotionSearchCriteria criteria, Integer categoryId) throws SQLException {
+        List<PromotionDTO> promotions = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT PromotionID, PromoName, DiscountPercent, StartDate, EndDate ");
+        sql.append("FROM Promotions WHERE 1=1 ");
+        
+        List<Object> parameters = new ArrayList<>();
+        
+        // Thêm search term condition
+        if (criteria.getSearchTerm() != null && !criteria.getSearchTerm().trim().isEmpty()) {
+            sql.append("AND PromoName LIKE ? ");
+            parameters.add("%" + criteria.getSearchTerm().trim() + "%");
+        }
+        
+        // Thêm status filter
+        if (criteria.getStatusFilter() != null && !criteria.getStatusFilter().equals("all")) {
+            Date currentDate = new Date(System.currentTimeMillis());
+            switch (criteria.getStatusFilter()) {
+                case "active":
+                    sql.append("AND StartDate <= ? AND EndDate >= ? ");
+                    parameters.add(currentDate);
+                    parameters.add(currentDate);
+                    break;
+                case "scheduled":
+                    sql.append("AND StartDate > ? ");
+                    parameters.add(currentDate);
+                    break;
+                case "expired":
+                    sql.append("AND EndDate < ? ");
+                    parameters.add(currentDate);
+                    break;
+            }
+        }
+        
+        //Thêm discount filter
+        if (criteria.getDiscountFilter() != null && !criteria.getDiscountFilter().equals("all")) {
+            switch (criteria.getDiscountFilter()) {
+                case "low":
+                    sql.append("AND DiscountPercent < 15 ");
+                    break;
+                case "medium":
+                    sql.append("AND DiscountPercent >= 15 AND DiscountPercent <= 25 ");
+                    break;
+                case "high":
+                    sql.append("AND DiscountPercent > 25 ");
+                    break;
+            }
+        }
+        
+        // Thêm category filter (nếu có bảng liên kết)
+        if (categoryId != null) {
+            // Giả sử có bảng PromotionCategories hoặc field CategoryID trong Promotions
+            // sql.append("AND CategoryID = ? ");
+            // parameters.add(categoryId);
+        }
+        
+        // Thêm sorting và pagination
+        sql.append("ORDER BY ").append(criteria.getSortBy()).append(" ").append(criteria.getSortOrder()).append(" ");
+        sql.append("OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        
+        int offset = (criteria.getPage() - 1) * criteria.getPageSize();
+        parameters.add(offset);
+        parameters.add(criteria.getPageSize());
+        
+        System.out.println("DEBUG: Search SQL: " + sql.toString());
+        System.out.println("DEBUG: Parameters: " + parameters);
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            stmt = conn.prepareStatement(sql.toString());
+            
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+            
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                PromotionDTO promotion = new PromotionDTO();
+                promotion.setPromotionID(rs.getInt("PromotionID"));
+                promotion.setPromoName(rs.getString("PromoName"));
+                promotion.setDiscountPercent(rs.getDouble("DiscountPercent"));
+                promotion.setStartDate(rs.getDate("StartDate"));
+                promotion.setEndDate(rs.getDate("EndDate"));
+                
+                // Tính toán status
+                Date currentDate = new Date(System.currentTimeMillis());
+                if (currentDate.before(promotion.getStartDate())) {
+                    promotion.setStatus("scheduled");
+                } else if (currentDate.after(promotion.getEndDate())) {
+                    promotion.setStatus("expired");
+                } else {
+                    promotion.setStatus("active");
+                }
+                
+                // Lấy thông tin branch và product count
+                try {
+                    promotion.setBranchCount(getBranchCount(dbName, promotion.getPromotionID()));
+                    promotion.setProductCount(getProductCount(dbName, promotion.getPromotionID()));
+                } catch (Exception e) {
+                    promotion.setBranchCount(0);
+                    promotion.setProductCount(0);
+                }
+                
+                promotions.add(promotion);
+            }
+            
+        } finally {
+            if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            DBUtil.closeConnection(conn);
+        }
+        
+        return promotions;
+    }
     
-    // ✅ Lấy tất cả khuyến mãi - sửa query theo database thực tế
+    // Method đếm số lượng promotions theo criteria
+    public int countPromotions(String dbName, PromotionSearchCriteria criteria, Integer categoryId) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(*) FROM Promotions WHERE 1=1 ");
+        
+        List<Object> parameters = new ArrayList<>();
+        
+        // Thêm các conditions giống như searchPromotions
+        if (criteria.getSearchTerm() != null && !criteria.getSearchTerm().trim().isEmpty()) {
+            sql.append("AND PromoName LIKE ? ");
+            parameters.add("%" + criteria.getSearchTerm().trim() + "%");
+        }
+        
+        if (criteria.getStatusFilter() != null && !criteria.getStatusFilter().equals("all")) {
+            Date currentDate = new Date(System.currentTimeMillis());
+            switch (criteria.getStatusFilter()) {
+                case "active":
+                    sql.append("AND StartDate <= ? AND EndDate >= ? ");
+                    parameters.add(currentDate);
+                    parameters.add(currentDate);
+                    break;
+                case "scheduled":
+                    sql.append("AND StartDate > ? ");
+                    parameters.add(currentDate);
+                    break;
+                case "expired":
+                    sql.append("AND EndDate < ? ");
+                    parameters.add(currentDate);
+                    break;
+            }
+        }
+        
+        if (criteria.getDiscountFilter() != null && !criteria.getDiscountFilter().equals("all")) {
+            switch (criteria.getDiscountFilter()) {
+                case "low":
+                    sql.append("AND DiscountPercent < 15 ");
+                    break;
+                case "medium":
+                    sql.append("AND DiscountPercent >= 15 AND DiscountPercent <= 25 ");
+                    break;
+                case "high":
+                    sql.append("AND DiscountPercent > 25 ");
+                    break;
+            }
+        }
+        
+        if (categoryId != null) {
+            // sql.append("AND CategoryID = ? ");
+            // parameters.add(categoryId);
+        }
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            stmt = conn.prepareStatement(sql.toString());
+            
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+            
+            rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            
+        } finally {
+            if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            DBUtil.closeConnection(conn);
+        }
+        
+        return 0;
+    }
+    // Lấy tất cả khuyến mãi - sửa query theo database thực tế
     public List<PromotionDTO> getAllPromotions(String dbName) throws SQLException {
         List<PromotionDTO> promotions = new ArrayList<>();
         String sql = "SELECT PromotionID, PromoName, DiscountPercent, StartDate, EndDate FROM Promotions ORDER BY PromotionID DESC";
@@ -22,7 +219,7 @@ public class PromotionDAO {
         ResultSet rs = null;
         
         try {
-            // ✅ Sử dụng DBUtil.getConnectionTo() với dbName
+            // Sử dụng DBUtil.getConnectionTo() với dbName
             conn = DBUtil.getConnectionTo(dbName);
             if (conn == null) {
                 System.out.println("ERROR: Connection is null for database: " + dbName);
@@ -85,7 +282,7 @@ public class PromotionDAO {
         return promotions;
     }
     
-    // ✅ Lấy khuyến mãi theo ID
+    // Lấy khuyến mãi theo ID
     public PromotionDTO getPromotionById(String dbName, int promotionId) throws SQLException {
         String sql = "SELECT PromotionID, PromoName, DiscountPercent, StartDate, EndDate FROM Promotions WHERE PromotionID = ?";
         
@@ -134,7 +331,7 @@ public class PromotionDAO {
         return null;
     }
     
-    // ✅ Tạo khuyến mãi mới
+    // Tạo khuyến mãi mới
     public boolean createPromotion(String dbName, PromotionDTO promotion) throws SQLException {
         String sql = "INSERT INTO Promotions (PromoName, DiscountPercent, StartDate, EndDate) VALUES (?, ?, ?, ?)";
         
@@ -168,7 +365,7 @@ public class PromotionDAO {
         }
     }
     
-    // ✅ Cập nhật khuyến mãi
+    // Cập nhật khuyến mãi
     public boolean updatePromotion(String dbName, PromotionDTO promotion) throws SQLException {
         String sql = "UPDATE Promotions SET PromoName = ?, DiscountPercent = ?, StartDate = ?, EndDate = ? WHERE PromotionID = ?";
         
@@ -193,7 +390,7 @@ public class PromotionDAO {
         }
     }
     
-    // ✅ Xóa khuyến mãi
+    // Xóa khuyến mãi
     public boolean deletePromotion(String dbName, int promotionId) throws SQLException {
         Connection conn = null;
         try {
@@ -249,7 +446,7 @@ public class PromotionDAO {
         }
     }
     
-    // ✅ Helper methods với proper connection handling
+    // Helper methods với proper connection handling
     private int getBranchCount(String dbName, int promotionId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM PromotionBranches WHERE PromotionID = ?";
         
@@ -364,7 +561,7 @@ public class PromotionDAO {
         return productDetailIds;
     }
     
-    // ✅ Test connection method
+    // Test connection method
     public boolean testConnection(String dbName) {
         Connection conn = null;
         try {
