@@ -1,8 +1,5 @@
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="model.Brand" %>
-<%@ page import="model.Category" %>
-<%@ page import="model.Supplier" %>
+<%@ page import="model.Brand, model.Category, model.Supplier, java.util.List" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -10,9 +7,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TSMS - Thêm mới sản phẩm</title>
     <link rel="stylesheet" href="css/so-products.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Modal styles to match edit-products.jsp */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: #f5f7fa;
+        }
+
+        .main-container {
+            padding: 30px;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .page-header h1 {
+            font-size: 26px;
+            color: #333;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-success {
+            background-color: #2196F3;
+        }
+
+        .btn-success:hover {
+            background-color: #1976D2;
+        }
+
+        .btn-danger {
+            background-color: #f44336;
+        }
+
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+
+        .form-container {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            background: #fafafa;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #2196F3;
+            outline: none;
+        }
+
+        .form-group .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .error {
+            color: #f44336;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -25,117 +132,40 @@
             align-items: center;
             z-index: 1000;
         }
+
         .modal-content {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
             width: 400px;
             max-width: 90%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 0.3s ease-in-out;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+
         .modal-content h2 {
-            margin: 0 0 15px;
-            font-size: 1.5em;
+            font-size: 20px;
             color: #333;
+            margin-bottom: 15px;
         }
-        .modal-content input, .modal-content textarea, .modal-content select {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1em;
-            box-sizing: border-box;
+
+        .modal-content .form-group {
+            margin-bottom: 15px;
         }
-        .modal-content input:focus, .modal-content textarea:focus, .modal-content select:focus {
-            border-color: #4CAF50;
-            outline: none;
-        }
-        .modal-content button {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.2s;
-        }
-        .modal-content .btn-save {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .modal-content .btn-save:hover {
-            background-color: #45a049;
-        }
-        .modal-content .btn-cancel {
-            background-color: #f44336;
-            color: white;
-        }
-        .modal-content .btn-cancel:hover {
-            background-color: #d32f2f;
-        }
-        /* Form styles to match edit-products.jsp */
-        .add-product-form .form-group {
-            margin-bottom: 20px;
-        }
-        .add-product-form label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #333;
-        }
-        .add-product-form input, .add-product-form textarea, .add-product-form select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1em;
-        }
-        .add-product-form input:focus, .add-product-form textarea:focus, .add-product-form select:focus {
-            border-color: #4CAF50;
-            outline: none;
-        }
-        .add-product-form .form-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .error {
-            color: #d32f2f;
-            font-size: 0.85em;
-            margin-top: 5px;
-            display: none; /* Hidden by default, shown via JS */
-        }
-        /* Highlight invalid fields */
-        .invalid {
-            border-color: #d32f2f !important;
-        }
-        /* Ensure button consistency with so-products.css */
-        .btn {
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .btn-success {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .btn-success:hover {
-            background-color: #45a049;
-        }
-        .btn-cancel {
-            background-color: #f44336;
-            color: white;
-        }
-        .btn-cancel:hover {
-            background-color: #d32f2f;
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 20px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .form-group .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
     </style>
 </head>
@@ -146,181 +176,247 @@
         <main class="main-content">
             <div class="page-header">
                 <h1>Thêm mới sản phẩm</h1>
+                <a href="so-products" class="btn btn-success">← Quay lại</a>
             </div>
 
-            <form id="productForm" action="so-products" method="post" class="add-product-form">
-                <input type="hidden" name="action" value="create">
+            <div class="form-container">
+                <form action="so-products" method="post" class="product-form">
+                    <input type="hidden" name="action" value="create">
 
-                <div class="form-group">
-                    <label for="productName">Tên sản phẩm <span style="color: red;">*</span></label>
-                    <input type="text" id="productName" name="productName" value="<%= request.getAttribute("productName") != null ? request.getAttribute("productName") : "" %>" required onblur="validateNotEmpty(this, 'productNameError', 'Tên sản phẩm không được bỏ trống')">
-                    <div class="error" id="productNameError"><%= request.getAttribute("productNameError") != null ? request.getAttribute("productNameError") : "" %></div>
-                </div>
-
-                <div class="form-group">
-                    <label for="brandId">Thương hiệu <span style="color: red;">*</span></label>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <select id="brandId" name="brandId" required onblur="validateNotEmpty(this, 'brandIdError', 'Vui lòng chọn thương hiệu')">
-                            <option value="">Chọn thương hiệu</option>
-                            <c:forEach var="brand" items="${brands}">
-                                <option value="${brand.brandID}" <%= request.getAttribute("brandId") != null && request.getAttribute("brandId").equals(String.valueOf(((model.Brand)pageContext.getAttribute("brand")).getBrandID())) ? "selected" : "" %>>${brand.brandName}</option>
-                            </c:forEach>
-                        </select>
-                        <button type="button" class="btn btn-success" onclick="openModal('brandModal')">
-                            <i class="fas fa-plus"></i> Thêm mới
-                        </button>
+                    <div class="form-group">
+                        <label>Tên hàng: <span style="color: #f44336;">*</span></label>
+                        <input type="text" name="productName" value="<%= request.getParameter("productName") != null ? request.getParameter("productName") : "" %>" required>
+                        <div class="error" id="productNameError"><%= request.getAttribute("productNameError") != null ? request.getAttribute("productNameError") : "" %></div>
                     </div>
-                    <div class="error" id="brandIdError"></div>
-                </div>
 
-                <div class="form-group">
-                    <label for="categoryId">Nhóm hàng <span style="color: red;">*</span></label>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <select id="categoryId" name="categoryId" required onblur="validateNotEmpty(this, 'categoryIdError', 'Vui lòng chọn nhóm hàng')">
-                            <option value="">Chọn nhóm hàng</option>
-                            <c:forEach var="category" items="${categories}">
-                                <option value="${category.categoryID}" <%= request.getAttribute("categoryId") != null && request.getAttribute("categoryId").equals(String.valueOf(((model.Category)pageContext.getAttribute("category")).getCategoryID())) ? "selected" : "" %>>${category.categoryName}</option>
-                            </c:forEach>
-                        </select>
-                        <button type="button" class="btn btn-success" onclick="openModal('categoryModal')">
-                            <i class="fas fa-plus"></i> Thêm mới
-                        </button>
+                    <div class="form-group">
+                        <label>Thương hiệu: <span style="color: #f44336;">*</span></label>
+                        <div class="input-group">
+                            <select name="brandId" required>
+                                <option value="">Chọn thương hiệu</option>
+                                <%
+                                    List<Brand> brands = (List<Brand>) request.getAttribute("brands");
+                                    String selectedBrandId = request.getParameter("brandId") != null ? request.getParameter("brandId") : "";
+                                    if (brands != null) {
+                                        for (Brand brand : brands) {
+                                            String selected = selectedBrandId.equals(String.valueOf(brand.getBrandID())) ? "selected" : "";
+                                %>
+                                            <option value="<%= brand.getBrandID() %>" <%= selected %>><%= brand.getBrandName() %></option>
+                                <%
+                                        }
+                                    }
+                                %>
+                            </select>
+                            <button type="button" class="btn btn-success" onclick="openModal('brandModal')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="error" id="brandIdError"><%= request.getAttribute("brandIdError") != null ? request.getAttribute("brandIdError") : "" %></div>
                     </div>
-                    <div class="error" id="categoryIdError"></div>
-                </div>
 
-                <div class="form-group">
-                    <label for="supplierId">Nhà cung cấp <span style="color: red;">*</span></label>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <select id="supplierId" name="supplierId" required onblur="validateNotEmpty(this, 'supplierIdError', 'Vui lòng chọn nhà cung cấp')">
-                            <option value="">Chọn nhà cung cấp</option>
-                            <c:forEach var="supplier" items="${suppliers}">
-                                <option value="${supplier.supplierID}" <%= request.getAttribute("supplierId") != null && request.getAttribute("supplierId").equals(String.valueOf(((model.Supplier)pageContext.getAttribute("supplier")).getSupplierID())) ? "selected" : "" %>>${supplier.supplierName}</option>
-                            </c:forEach>
-                        </select>
-                        <button type="button" class="btn btn-success" onclick="openModal('supplierModal')">
-                            <i class="fas fa-plus"></i> Thêm mới
-                        </button>
+                    <div class="form-group">
+                        <label>Nhóm hàng: <span style="color: #f44336;">*</span></label>
+                        <div class="input-group">
+                            <select name="categoryId" required>
+                                <option value="">Chọn nhóm hàng</option>
+                                <%
+                                    List<Category> categories = (List<Category>) request.getAttribute("categories");
+                                    String selectedCategoryId = request.getParameter("categoryId") != null ? request.getParameter("categoryId") : "";
+                                    if (categories != null) {
+                                        for (Category category : categories) {
+                                            String selected = selectedCategoryId.equals(String.valueOf(category.getCategoryID())) ? "selected" : "";
+                                %>
+                                            <option value="<%= category.getCategoryID() %>" <%= selected %>><%= category.getCategoryName() %></option>
+                                <%
+                                        }
+                                    }
+                                %>
+                            </select>
+                            <button type="button" class="btn btn-success" onclick="openModal('categoryModal')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="error" id="categoryIdError"><%= request.getAttribute("categoryIdError") != null ? request.getAttribute("categoryIdError") : "" %></div>
                     </div>
-                    <div class="error" id="supplierIdError"></div>
-                </div>
 
-                <div class="form-group">
-                    <label for="costPrice">Giá vốn <span style="color: red;">*</span></label>
-                    <input type="number" id="costPrice" name="costPrice" step="0.01" value="<%= request.getAttribute("costPrice") != null ? request.getAttribute("costPrice") : "" %>" required onblur="validateNotEmpty(this, 'costPriceError', 'Giá vốn không được bỏ trống')">
-                    <div class="error" id="costPriceError"><%= request.getAttribute("costPriceError") != null ? request.getAttribute("costPriceError") : "" %></div>
-                </div>
+                    <div class="form-group">
+                        <label>Nhà cung cấp: <span style="color: #f44336;">*</span></label>
+                        <div class="input-group">
+                            <select name="supplierId" required>
+                                <option value="">Chọn nhà cung cấp</option>
+                                <%
+                                    List<Supplier> suppliers = (List<Supplier>) request.getAttribute("suppliers");
+                                    String selectedSupplierId = request.getParameter("supplierId") != null ? request.getParameter("supplierId") : "";
+                                    if (suppliers != null) {
+                                        for (Supplier supplier : suppliers) {
+                                            String selected = selectedSupplierId.equals(String.valueOf(supplier.getSupplierID())) ? "selected" : "";
+                                %>
+                                            <option value="<%= supplier.getSupplierID() %>" <%= selected %>><%= supplier.getSupplierName() %></option>
+                                <%
+                                        }
+                                    }
+                                %>
+                            </select>
+                            <button type="button" class="btn btn-success" onclick="openModal('supplierModal')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="error" id="supplierIdError"><%= request.getAttribute("supplierIdError") != null ? request.getAttribute("supplierIdError") : "" %></div>
+                    </div>
 
-                <div class="form-group">
-                    <label for="retailPrice">Giá bán <span style="color: red;">*</span></label>
-                    <input type="number" id="retailPrice" name="retailPrice" step="0.01" value="<%= request.getAttribute("retailPrice") != null ? request.getAttribute("retailPrice") : "" %>" required onblur="validateNotEmpty(this, 'retailPriceError', 'Giá bán không được bỏ trống')">
-                    <div class="error" id="retailPriceError"><%= request.getAttribute("retailPriceError") != null ? request.getAttribute("retailPriceError") : "" %></div>
-                </div>
+                    <div class="form-group">
+                        <label>Giá vốn: <span style="color: #f44336;">*</span></label>
+                        <input type="text" name="costPrice" value="<%= request.getParameter("costPrice") != null ? request.getParameter("costPrice") : "" %>" required>
+                        <div class="error" id="costPriceError"><%= request.getAttribute("costPriceError") != null ? request.getAttribute("costPriceError") : "" %></div>
+                    </div>
 
-                <div class="form-group">
-                    <label for="imageURL">URL hình ảnh</label>
-                    <input type="text" id="imageURL" name="imageURL" value="<%= request.getAttribute("imageURL") != null ? request.getAttribute("imageURL") : "" %>">
-                </div>
+                    <div class="form-group">
+                        <label>Giá bán: <span style="color: #f44336;">*</span></label>
+                        <input type="text" name="retailPrice" value="<%= request.getParameter("retailPrice") != null ? request.getParameter("retailPrice") : "" %>" required>
+                        <div class="error" id="retailPriceError"><%= request.getAttribute("retailPriceError") != null ? request.getAttribute("retailPriceError") : "" %></div>
+                    </div>
 
-                <div class="form-group">
-                    <label for="description">Mô tả</label>
-                    <textarea id="description" name="description" rows="4"><%= request.getAttribute("description") != null ? request.getAttribute("description") : "" %></textarea>
-                </div>
+                    <div class="form-group">
+                        <label>Số lượng: <span style="color: #f44336;">*</span></label>
+                        <input type="text" name="quantity" value="<%= request.getParameter("quantity") != null ? request.getParameter("quantity") : "" %>" required>
+                        <div class="error" id="quantityError"><%= request.getAttribute("quantityError") != null ? request.getAttribute("quantityError") : "" %></div>
+                    </div>
 
-                <div class="form-group">
-                    <label for="serialNumber">Số serial</label>
-                    <input type="text" id="serialNumber" name="serialNumber" value="<%= request.getAttribute("serialNumber") != null ? request.getAttribute("serialNumber") : "" %>">
-                </div>
+                    <div class="form-group">
+                        <label>Số serial/IMEI:</label>
+                        <input type="text" name="serialNumber" value="<%= request.getParameter("serialNumber") != null ? request.getParameter("serialNumber") : "" %>">
+                    </div>
 
-                <div class="form-group">
-                    <label for="warrantyPeriod">Thời gian bảo hành</label>
-                    <input type="text" id="warrantyPeriod" name="warrantyPeriod" placeholder="Ví dụ: 1 năm, 6 tháng" value="<%= request.getAttribute("warrantyPeriod") != null ? request.getAttribute("warrantyPeriod") : "" %>">
-                </div>
+                    <div class="form-group">
+                        <label>Thời hạn bảo hành:</label>
+                        <input type="text" name="warrantyPeriod" value="<%= request.getParameter("warrantyPeriod") != null ? request.getParameter("warrantyPeriod") : "" %>" placeholder="Ví dụ: 12 tháng">
+                    </div>
 
-                <div class="form-group">
-                    <label for="quantity">Số lượng <span style="color: red;">*</span></label>
-                    <input type="number" id="quantity" name="quantity" value="<%= request.getAttribute("quantity") != null ? request.getAttribute("quantity") : "" %>" required onblur="validateNotEmpty(this, 'quantityError', 'Số lượng không được bỏ trống')">
-                    <div class="error" id="quantityError"><%= request.getAttribute("quantityError") != null ? request.getAttribute("quantityError") : "" %></div>
-                </div>
+                    <div class="form-group">
+                        <label>URL hình ảnh:</label>
+                        <input type="text" name="imageURL" value="<%= request.getParameter("imageURL") != null ? request.getParameter("imageURL") : "" %>">
+                    </div>
 
-                <div class="form-group">
-                    <label for="isActive">Trạng thái</label>
-                    <select id="isActive" name="isActive">
-                        <option value="1" <%= request.getAttribute("isActive") != null && request.getAttribute("isActive").equals("1") ? "selected" : "" %>>Đang kinh doanh</option>
-                        <option value="0" <%= request.getAttribute("isActive") != null && request.getAttribute("isActive").equals("0") ? "selected" : "" %>>Không kinh doanh</option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label>Mô tả:</label>
+                        <textarea name="description" rows="4"><%= request.getParameter("description") != null ? request.getParameter("description") : "" %></textarea>
+                    </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-success">Lưu</button>
-                    <a href="so-products" class="btn btn-cancel">Hủy</a>
-                </div>
-            </form>
+                    <div class="form-group">
+                        <label>Trạng thái: <span style="color: #f44336;">*</span></label>
+                        <select name="isActive" required>
+                            <option value="1" <%= "1".equals(request.getParameter("isActive")) ? "selected" : "" %>>Kích hoạt</option>
+                            <option value="0" <%= "0".equals(request.getParameter("isActive")) ? "selected" : "" %>>Ngừng kinh doanh</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">Lưu</button>
+                        <a href="so-products" class="btn btn-danger">Hủy</a>
+                    </div>
+                </form>
+            </div>
 
             <div id="brandModal" class="modal" style="display: <%= request.getAttribute("showBrandModal") != null && request.getAttribute("showBrandModal").equals("true") ? "flex" : "none" %>">
                 <div class="modal-content">
-                    <h2>Thêm mới thương hiệu</h2>
-                    <form id="brandForm" action="so-products" method="post">
+                    <h2>Thêm thương hiệu</h2>
+                    <form action="so-products" method="post">
                         <input type="hidden" name="action" value="addBrand">
-                        <input type="hidden" name="productName" value="<%= request.getAttribute("productName") != null ? request.getAttribute("productName") : "" %>">
-                        <input type="hidden" name="brandId" value="<%= request.getAttribute("brandId") != null ? request.getAttribute("brandId") : "" %>">
-                        <input type="hidden" name="categoryId" value="<%= request.getAttribute("categoryId") != null ? request.getAttribute("categoryId") : "" %>">
-                        <input type="hidden" name="supplierId" value="<%= request.getAttribute("supplierId") != null ? request.getAttribute("supplierId") : "" %>">
-                        <input type="hidden" name="costPrice" value="<%= request.getAttribute("costPrice") != null ? request.getAttribute("costPrice") : "" %>">
-                        <input type="hidden" name="retailPrice" value="<%= request.getAttribute("retailPrice") != null ? request.getAttribute("retailPrice") : "" %>">
-                        <input type="hidden" name="description" value="<%= request.getAttribute("description") != null ? request.getAttribute("description") : "" %>">
-                        <input type="hidden" name="quantity" value="<%= request.getAttribute("quantity") != null ? request.getAttribute("quantity") : "" %>">
-                        <input type="text" id="brandName" name="brandName" placeholder="Tên thương hiệu" value="<%= request.getAttribute("brandName") != null ? request.getAttribute("brandName") : "" %>" required onblur="validateNotEmpty(this, 'brandNameError', 'Tên thương hiệu không được bỏ trống')">
-                        <div class="error" id="brandNameError"><%= request.getAttribute("brandNameError") != null ? request.getAttribute("brandNameError") : "" %></div>
-                        <button type="submit" class="btn-save">Lưu</button>
-                        <button type="button" class="btn-cancel" onclick="closeModal('brandModal')">Hủy</button>
+                        <input type="hidden" name="productName" value="<%= request.getParameter("productName") != null ? request.getParameter("productName") : "" %>">
+                        <input type="hidden" name="brandId" value="<%= request.getParameter("brandId") != null ? request.getParameter("brandId") : "" %>">
+                        <input type="hidden" name="categoryId" value="<%= request.getParameter("categoryId") != null ? request.getParameter("categoryId") : "" %>">
+                        <input type="hidden" name="supplierId" value="<%= request.getParameter("supplierId") != null ? request.getParameter("supplierId") : "" %>">
+                        <input type="hidden" name="costPrice" value="<%= request.getParameter("costPrice") != null ? request.getParameter("costPrice") : "" %>">
+                        <input type="hidden" name="retailPrice" value="<%= request.getParameter("retailPrice") != null ? request.getParameter("retailPrice") : "" %>">
+                        <input type="hidden" name="quantity" value="<%= request.getParameter("quantity") != null ? request.getParameter("quantity") : "" %>">
+                        <input type="hidden" name="serialNumber" value="<%= request.getParameter("serialNumber") != null ? request.getParameter("serialNumber") : "" %>">
+                        <input type="hidden" name="warrantyPeriod" value="<%= request.getParameter("warrantyPeriod") != null ? request.getParameter("warrantyPeriod") : "" %>">
+                        <input type="hidden" name="imageURL" value="<%= request.getParameter("imageURL") != null ? request.getParameter("imageURL") : "" %>">
+                        <input type="hidden" name="description" value="<%= request.getParameter("description") != null ? request.getParameter("description") : "" %>">
+                        <input type="hidden" name="isActive" value="<%= request.getParameter("isActive") != null ? request.getParameter("isActive") : "" %>">
+                        <div class="form-group">
+                            <label>Tên thương hiệu: <span style="color: #f44336;">*</span></label>
+                            <input type="text" name="brandName" value="<%= request.getParameter("brandName") != null ? request.getParameter("brandName") : "" %>" required>
+                            <div class="error" id="brandNameError"><%= request.getAttribute("brandNameError") != null ? request.getAttribute("brandNameError") : "" %></div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success">Lưu</button>
+                            <button type="button" class="btn btn-danger" onclick="closeModal('brandModal')">Hủy</button>
+                        </div>
                     </form>
                 </div>
             </div>
 
             <div id="categoryModal" class="modal" style="display: <%= request.getAttribute("showCategoryModal") != null && request.getAttribute("showCategoryModal").equals("true") ? "flex" : "none" %>">
                 <div class="modal-content">
-                    <h2>Thêm mới nhóm hàng</h2>
-                    <form id="categoryForm" action="so-products" method="post">
+                    <h2>Thêm nhóm hàng</h2>
+                    <form action="so-products" method="post">
                         <input type="hidden" name="action" value="addCategory">
-                        <input type="hidden" name="productName" value="<%= request.getAttribute("productName") != null ? request.getAttribute("productName") : "" %>">
-                        <input type="hidden" name="brandId" value="<%= request.getAttribute("brandId") != null ? request.getAttribute("brandId") : "" %>">
-                        <input type="hidden" name="categoryId" value="<%= request.getAttribute("categoryId") != null ? request.getAttribute("categoryId") : "" %>">
-                        <input type="hidden" name="supplierId" value="<%= request.getAttribute("supplierId") != null ? request.getAttribute("supplierId") : "" %>">
-                        <input type="hidden" name="costPrice" value="<%= request.getAttribute("costPrice") != null ? request.getAttribute("costPrice") : "" %>">
-                        <input type="hidden" name="retailPrice" value="<%= request.getAttribute("retailPrice") != null ? request.getAttribute("retailPrice") : "" %>">
-                        <input type="hidden" name="description" value="<%= request.getAttribute("description") != null ? request.getAttribute("description") : "" %>">
-                        <input type="hidden" name="quantity" value="<%= request.getAttribute("quantity") != null ? request.getAttribute("quantity") : "" %>">
-                        <input type="text" id="categoryName" name="categoryName" placeholder="Tên nhóm hàng" value="<%= request.getAttribute("categoryName") != null ? request.getAttribute("categoryName") : "" %>" required onblur="validateNotEmpty(this, 'categoryNameError', 'Tên nhóm hàng không được bỏ trống')">
-                        <div class="error" id="categoryNameError"><%= request.getAttribute("categoryNameError") != null ? request.getAttribute("categoryNameError") : "" %></div>
-                        <button type="submit" class="btn-save">Lưu</button>
-                        <button type="button" class="btn-cancel" onclick="closeModal('categoryModal')">Hủy</button>
+                        <input type="hidden" name="productName" value="<%= request.getParameter("productName") != null ? request.getParameter("productName") : "" %>">
+                        <input type="hidden" name="brandId" value="<%= request.getParameter("brandId") != null ? request.getParameter("brandId") : "" %>">
+                        <input type="hidden" name="categoryId" value="<%= request.getParameter("categoryId") != null ? request.getParameter("categoryId") : "" %>">
+                        <input type="hidden" name="supplierId" value="<%= request.getParameter("supplierId") != null ? request.getParameter("supplierId") : "" %>">
+                        <input type="hidden" name="costPrice" value="<%= request.getParameter("costPrice") != null ? request.getParameter("costPrice") : "" %>">
+                        <input type="hidden" name="retailPrice" value="<%= request.getParameter("retailPrice") != null ? request.getParameter("retailPrice") : "" %>">
+                        <input type="hidden" name="quantity" value="<%= request.getParameter("quantity") != null ? request.getParameter("quantity") : "" %>">
+                        <input type="hidden" name="serialNumber" value="<%= request.getParameter("serialNumber") != null ? request.getParameter("serialNumber") : "" %>">
+                        <input type="hidden" name="warrantyPeriod" value="<%= request.getParameter("warrantyPeriod") != null ? request.getParameter("warrantyPeriod") : "" %>">
+                        <input type="hidden" name="imageURL" value="<%= request.getParameter("imageURL") != null ? request.getParameter("imageURL") : "" %>">
+                        <input type="hidden" name="description" value="<%= request.getParameter("description") != null ? request.getParameter("description") : "" %>">
+                        <input type="hidden" name="isActive" value="<%= request.getParameter("isActive") != null ? request.getParameter("isActive") : "" %>">
+                        <div class="form-group">
+                            <label>Tên nhóm hàng: <span style="color: #f44336;">*</span></label>
+                            <input type="text" name="categoryName" value="<%= request.getParameter("categoryName") != null ? request.getParameter("categoryName") : "" %>" required>
+                            <div class="error" id="categoryNameError"><%= request.getAttribute("categoryNameError") != null ? request.getAttribute("categoryNameError") : "" %></div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success">Lưu</button>
+                            <button type="button" class="btn btn-danger" onclick="closeModal('categoryModal')">Hủy</button>
+                        </div>
                     </form>
                 </div>
             </div>
 
             <div id="supplierModal" class="modal" style="display: <%= request.getAttribute("showSupplierModal") != null && request.getAttribute("showSupplierModal").equals("true") ? "flex" : "none" %>">
                 <div class="modal-content">
-                    <h2>Thêm mới nhà cung cấp</h2>
-                    <form id="supplierForm" action="so-products" method="post">
+                    <h2>Thêm nhà cung cấp</h2>
+                    <form action="so-products" method="post">
                         <input type="hidden" name="action" value="addSupplier">
-                        <input type="hidden" name="productName" value="<%= request.getAttribute("productName") != null ? request.getAttribute("productName") : "" %>">
-                        <input type="hidden" name="brandId" value="<%= request.getAttribute("brandId") != null ? request.getAttribute("brandId") : "" %>">
-                        <input type="hidden" name="categoryId" value="<%= request.getAttribute("categoryId") != null ? request.getAttribute("categoryId") : "" %>">
-                        <input type="hidden" name="supplierId" value="<%= request.getAttribute("supplierId") != null ? request.getAttribute("supplierId") : "" %>">
-                        <input type="hidden" name="costPrice" value="<%= request.getAttribute("costPrice") != null ? request.getAttribute("costPrice") : "" %>">
-                        <input type="hidden" name="retailPrice" value="<%= request.getAttribute("retailPrice") != null ? request.getAttribute("retailPrice") : "" %>">
-                        <input type="hidden" name="description" value="<%= request.getAttribute("description") != null ? request.getAttribute("description") : "" %>">
-                        <input type="hidden" name="quantity" value="<%= request.getAttribute("quantity") != null ? request.getAttribute("quantity") : "" %>">
-                        <input type="text" id="supplierName" name="supplierName" placeholder="Tên nhà cung cấp" value="<%= request.getAttribute("supplierName") != null ? request.getAttribute("supplierName") : "" %>" required onblur="validateNotEmpty(this, 'supplierNameError', 'Tên nhà cung cấp không được bỏ trống')">
-                        <div class="error" id="supplierNameError"><%= request.getAttribute("supplierNameError") != null ? request.getAttribute("supplierNameError") : "" %></div>
-                        <input type="text" id="contactName" name="contactName" placeholder="Tên liên hệ" value="<%= request.getAttribute("contactName") != null ? request.getAttribute("contactName") : "" %>">
-                        <input type="text" id="phone" name="phone" placeholder="Số điện thoại" value="<%= request.getAttribute("phone") != null ? request.getAttribute("phone") : "" %>" onblur="validatePhone(this, 'phoneError')">
-                        <div class="error" id="phoneError"><%= request.getAttribute("phoneError") != null ? request.getAttribute("phoneError") : "" %></div>
-                        <input type="email" id="email" name="email" placeholder="Email" value="<%= request.getAttribute("email") != null ? request.getAttribute("email") : "" %>">
-                        <div class="error" id="emailError"><%= request.getAttribute("emailError") != null ? request.getAttribute("emailError") : "" %></div>
-                        <button type="submit" class="btn-save">Lưu</button>
-                        <button type="button" class="btn-cancel" onclick="closeModal('supplierModal')">Hủy</button>
+                        <input type="hidden" name="productName" value="<%= request.getParameter("productName") != null ? request.getParameter("productName") : "" %>">
+                        <input type="hidden" name="brandId" value="<%= request.getParameter("brandId") != null ? request.getParameter("brandId") : "" %>">
+                        <input type="hidden" name="categoryId" value="<%= request.getParameter("categoryId") != null ? request.getParameter("categoryId") : "" %>">
+                        <input type="hidden" name="supplierId" value="<%= request.getParameter("supplierId") != null ? request.getParameter("supplierId") : "" %>">
+                        <input type="hidden" name="costPrice" value="<%= request.getParameter("costPrice") != null ? request.getParameter("costPrice") : "" %>">
+                        <input type="hidden" name="retailPrice" value="<%= request.getParameter("retailPrice") != null ? request.getParameter("retailPrice") : "" %>">
+                        <input type="hidden" name="quantity" value="<%= request.getParameter("quantity") != null ? request.getParameter("quantity") : "" %>">
+                        <input type="hidden" name="serialNumber" value="<%= request.getParameter("serialNumber") != null ? request.getParameter("serialNumber") : "" %>">
+                        <input type="hidden" name="warrantyPeriod" value="<%= request.getParameter("warrantyPeriod") != null ? request.getParameter("warrantyPeriod") : "" %>">
+                        <input type="hidden" name="imageURL" value="<%= request.getParameter("imageURL") != null ? request.getParameter("imageURL") : "" %>">
+                        <input type="hidden" name="description" value="<%= request.getParameter("description") != null ? request.getParameter("description") : "" %>">
+                        <input type="hidden" name="isActive" value="<%= request.getParameter("isActive") != null ? request.getParameter("isActive") : "" %>">
+                        <div class="form-group">
+                            <label>Tên nhà cung cấp: <span style="color: #f44336;">*</span></label>
+                            <input type="text" name="supplierName" value="<%= request.getParameter("supplierName") != null ? request.getParameter("supplierName") : "" %>" required>
+                            <div class="error" id="supplierNameError"><%= request.getAttribute("supplierNameError") != null ? request.getAttribute("supplierNameError") : "" %></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Tên liên hệ:</label>
+                            <input type="text" name="contactName" value="<%= request.getParameter("contactName") != null ? request.getParameter("contactName") : "" %>">
+                        </div>
+                        <div class="form-group">
+                            <label>Số điện thoại: <span style="color: #f44336;">*</span></label>
+                            <input type="text" name="phone" value="<%= request.getParameter("phone") != null ? request.getParameter("phone") : "" %>" required>
+                            <div class="error" id="phoneError"><%= request.getAttribute("phoneError") != null ? request.getAttribute("phoneError") : "" %></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" name="email" value="<%= request.getParameter("email") != null ? request.getParameter("email") : "" %>">
+                            <div class="error" id="emailError"><%= request.getAttribute("emailError") != null ? request.getAttribute("emailError") : "" %></div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success">Lưu</button>
+                            <button type="button" class="btn btn-danger" onclick="closeModal('supplierModal')">Hủy</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -328,110 +424,79 @@
     </div>
 
     <script>
-        // Simple validation for non-empty fields
-        function validateNotEmpty(field, errorId, message) {
-            var error = document.getElementById(errorId);
-            if (field.value.trim() === "") {
-                error.textContent = message;
-                error.style.display = "block";
-                field.classList.add("invalid");
-            } else {
-                error.textContent = "";
-                error.style.display = "none";
-                field.classList.remove("invalid");
-            }
-        }
+        // Client-side form validation
+        document.querySelector('.product-form').addEventListener('submit', function(e) {
+            let isValid = true;
 
-        // Simple phone validation (empty or not 10 digits)
-        function validatePhone(field, errorId) {
-            var error = document.getElementById(errorId);
-            var value = field.value.trim();
-            if (value === "" || value.length !== 10) {
-                error.textContent = "Số điện thoại không được bỏ trống và phải nhập 10 số nguyên";
-                error.style.display = "block";
-                field.classList.add("invalid");
-            } else {
-                error.textContent = "";
-                error.style.display = "none";
-                field.classList.remove("invalid");
-            }
-        }
-
-        // Form submission validation (minimal, relies on server)
-        document.getElementById("productForm").onsubmit = function() {
-            var fields = [
-                { id: "productName", errorId: "productNameError", message: "Tên sản phẩm không được bỏ trống" },
-                { id: "brandId", errorId: "brandIdError", message: "Vui lòng chọn thương hiệu" },
-                { id: "categoryId", errorId: "categoryIdError", message: "Vui lòng chọn nhóm hàng" },
-                { id: "supplierId", errorId: "supplierIdError", message: "Vui lòng chọn nhà cung cấp" },
-                { id: "costPrice", errorId: "costPriceError", message: "Giá vốn không được bỏ trống" },
-                { id: "retailPrice", errorId: "retailPriceError", message: "Giá bán không được bỏ trống" },
-                { id: "quantity", errorId: "quantityError", message: "Số lượng không được bỏ trống" }
+            const fields = [
+                { input: 'productName', error: 'productNameError', message: 'Tên sản phẩm không được để trống.' },
+                { input: 'brandId', error: 'brandIdError', message: 'Vui lòng chọn thương hiệu.' },
+                { input: 'categoryId', error: 'categoryIdError', message: 'Vui lòng chọn nhóm hàng.' },
+                { input: 'supplierId', error: 'supplierIdError', message: 'Vui lòng chọn nhà cung cấp.' },
+                { input: 'costPrice', error: 'costPriceError', message: 'Giá vốn phải là số hợp lệ và lớn hơn 0.' },
+                { input: 'retailPrice', error: 'retailPriceError', message: 'Giá bán phải là số hợp lệ và lớn hơn giá vốn.' },
+                { input: 'quantity', error: 'quantityError', message: 'Số lượng phải là số nguyên dương.' }
             ];
-            var isValid = true;
-            for (var i = 0; i < fields.length; i++) {
-                var field = document.getElementById(fields[i].id);
-                var error = document.getElementById(fields[i].errorId);
-                if (field.value.trim() === "") {
-                    error.textContent = fields[i].message;
-                    error.style.display = "block";
-                    field.classList.add("invalid");
+
+            fields.forEach(field => {
+                const input = document.querySelector(`[name="${field.input}"]`);
+                const error = document.getElementById(field.error);
+                const value = input.value.trim();
+
+                if (!value) {
+                    error.textContent = field.message;
+                    error.style.display = 'block';
+                    input.style.borderColor = '#f44336';
                     isValid = false;
+                } else {
+                    error.textContent = '';
+                    error.style.display = 'none';
+                    input.style.borderColor = '';
                 }
-            }
-            return isValid;
-        };
+            });
 
-        // Brand form submission
-        document.getElementById("brandForm").onsubmit = function() {
-            var field = document.getElementById("brandName");
-            var error = document.getElementById("brandNameError");
-            if (field.value.trim() === "") {
-                error.textContent = "Tên thương hiệu không được bỏ trống";
-                error.style.display = "block";
-                field.classList.add("invalid");
-                return false;
-            }
-            return true;
-        };
+            const costPrice = parseFloat(document.querySelector('[name="costPrice"]').value);
+            const retailPrice = parseFloat(document.querySelector('[name="retailPrice"]').value);
+            const quantity = parseInt(document.querySelector('[name="quantity"]').value);
 
-        // Category form submission
-        document.getElementById("categoryForm").onsubmit = function() {
-            var field = document.getElementById("categoryName");
-            var error = document.getElementById("categoryNameError");
-            if (field.value.trim() === "") {
-                error.textContent = "Tên nhóm hàng không được bỏ trống";
-                error.style.display = "block";
-                field.classList.add("invalid");
-                return false;
-            }
-            return true;
-        };
-
-        // Supplier form submission
-        document.getElementById("supplierForm").onsubmit = function() {
-            var supplierName = document.getElementById("supplierName");
-            var phone = document.getElementById("phone");
-            var supplierNameError = document.getElementById("supplierNameError");
-            var phoneError = document.getElementById("phoneError");
-            var isValid = true;
-
-            if (supplierName.value.trim() === "") {
-                supplierNameError.textContent = "Tên nhà cung cấp không được bỏ trống";
-                supplierNameError.style.display = "block";
-                supplierName.classList.add("invalid");
+            if (isNaN(costPrice) || costPrice <= 0) {
+                document.getElementById('costPriceError').textContent = 'Giá vốn phải là số hợp lệ và lớn hơn 0.';
+                document.getElementById('costPriceError').style.display = 'block';
+                document.querySelector('[name="costPrice"]').style.borderColor = '#f44336';
                 isValid = false;
             }
-            if (phone.value.trim() === "" || phone.value.trim().length !== 10) {
-                phoneError.textContent = "Số điện thoại không được bỏ trống và phải nhập 10 số nguyên";
-                phoneError.style.display = "block";
-                phone.classList.add("invalid");
+
+            if (isNaN(retailPrice) || retailPrice <= 0 || retailPrice <= costPrice) {
+                document.getElementById('retailPriceError').textContent = 'Giá bán phải là số hợp lệ và lớn hơn giá vốn.';
+                document.getElementById('retailPriceError').style.display = 'block';
+                document.querySelector('[name="retailPrice"]').style.borderColor = '#f44336';
                 isValid = false;
             }
-            return isValid;
-        };
 
-        // Modal open/close functions
+            if (isNaN(quantity) || quantity < 0) {
+                document.getElementById('quantityError').textContent = 'Số lượng phải là số nguyên dương.';
+                document.getElementById('quantityError').style.display = 'block';
+                document.querySelector('[name="quantity"]').style.borderColor = '#f44336';
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+
+        // Restrict number inputs to valid numbers
+        const numberInputs = document.querySelectorAll('input[name="costPrice"], input[name="retailPrice"], input[name="quantity"]');
+        numberInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9.]/g, '');
+                if (this.name === 'quantity') {
+                    this.value = this.value.replace(/\./g, '');
+                }
+            });
+        });
+
+        // Modal functions
         function openModal(modalId) {
             document.getElementById(modalId).style.display = 'flex';
         }
@@ -440,55 +505,70 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
-        // Show server-side errors on page load (minimal)
+        // Show server-side errors on page load
         <% if (request.getAttribute("productNameError") != null) { %>
-            document.getElementById("productNameError").textContent = "<%= request.getAttribute("productNameError") %>";
-            document.getElementById("productNameError").style.display = "block";
-            document.getElementById("productName").classList.add("invalid");
+            document.getElementById('productNameError').textContent = '<%= request.getAttribute("productNameError") %>';
+            document.getElementById('productNameError').style.display = 'block';
+            document.querySelector('[name="productName"]').style.borderColor = '#f44336';
+        <% } %>
+        <% if (request.getAttribute("brandIdError") != null) { %>
+            document.getElementById('brandIdError').textContent = '<%= request.getAttribute("brandIdError") %>';
+            document.getElementById('brandIdError').style.display = 'block';
+            document.querySelector('[name="brandId"]').style.borderColor = '#f44336';
+        <% } %>
+        <% if (request.getAttribute("categoryIdError") != null) { %>
+            document.getElementById('categoryIdError').textContent = '<%= request.getAttribute("categoryIdError") %>';
+            document.getElementById('categoryIdError').style.display = 'block';
+            document.querySelector('[name="categoryId"]').style.borderColor = '#f44336';
+        <% } %>
+        <% if (request.getAttribute("supplierIdError") != null) { %>
+            document.getElementById('supplierIdError').textContent = '<%= request.getAttribute("supplierIdError") %>';
+            document.getElementById('supplierIdError').style.display = 'block';
+            document.querySelector('[name="supplierId"]').style.borderColor = '#f44336';
         <% } %>
         <% if (request.getAttribute("costPriceError") != null) { %>
-            document.getElementById("costPriceError").textContent = "<%= request.getAttribute("costPriceError") %>";
-            document.getElementById("costPriceError").style.display = "block";
-            document.getElementById("costPrice").classList.add("invalid");
+            document.getElementById('costPriceError').textContent = '<%= request.getAttribute("costPriceError") %>';
+            document.getElementById('costPriceError').style.display = 'block';
+            document.querySelector('[name="costPrice"]').style.borderColor = '#f44336';
         <% } %>
         <% if (request.getAttribute("retailPriceError") != null) { %>
-            document.getElementById("retailPriceError").textContent = "<%= request.getAttribute("retailPriceError") %>";
-            document.getElementById("retailPriceError").style.display = "block";
-            document.getElementById("retailPrice").classList.add("invalid");
+            document.getElementById('retailPriceError').textContent = '<%= request.getAttribute("retailPriceError") %>';
+            document.getElementById('retailPriceError').style.display = 'block';
+            document.querySelector('[name="retailPrice"]').style.borderColor = '#f44336';
         <% } %>
         <% if (request.getAttribute("quantityError") != null) { %>
-            document.getElementById("quantityError").textContent = "<%= request.getAttribute("quantityError") %>";
-            document.getElementById("quantityError").style.display = "block";
-            document.getElementById("quantity").classList.add("invalid");
+            document.getElementById('quantityError').textContent = '<%= request.getAttribute("quantityError") %>';
+            document.getElementById('quantityError').style.display = 'block';
+            document.querySelector('[name="quantity"]').style.borderColor = '#f44336';
         <% } %>
         <% if (request.getAttribute("brandNameError") != null) { %>
-            document.getElementById("brandNameError").textContent = "<%= request.getAttribute("brandNameError") %>";
-            document.getElementById("brandNameError").style.display = "block";
-            document.getElementById("brandName").classList.add("invalid");
+            document.getElementById('brandNameError').textContent = '<%= request.getAttribute("brandNameError") %>';
+            document.getElementById('brandNameError').style.display = 'block';
+            document.querySelector('[name="brandName"]').style.borderColor = '#f44336';
             openModal('brandModal');
         <% } %>
         <% if (request.getAttribute("categoryNameError") != null) { %>
-            document.getElementById("categoryNameError").textContent = "<%= request.getAttribute("categoryNameError") %>";
-            document.getElementById("categoryNameError").style.display = "block";
-            document.getElementById("categoryName").classList.add("invalid");
+            document.getElementById('categoryNameError').textContent = '<%= request.getAttribute("categoryNameError") %>';
+            document.getElementById('categoryNameError').style.display = 'block';
+            document.querySelector('[name="categoryName"]').style.borderColor = '#f44336';
             openModal('categoryModal');
         <% } %>
         <% if (request.getAttribute("supplierNameError") != null) { %>
-            document.getElementById("supplierNameError").textContent = "<%= request.getAttribute("supplierNameError") %>";
-            document.getElementById("supplierNameError").style.display = "block";
-            document.getElementById("supplierName").classList.add("invalid");
+            document.getElementById('supplierNameError').textContent = '<%= request.getAttribute("supplierNameError") %>';
+            document.getElementById('supplierNameError').style.display = 'block';
+            document.querySelector('[name="supplierName"]').style.borderColor = '#f44336';
             openModal('supplierModal');
         <% } %>
         <% if (request.getAttribute("phoneError") != null) { %>
-            document.getElementById("phoneError").textContent = "<%= request.getAttribute("phoneError") %>";
-            document.getElementById("phoneError").style.display = "block";
-            document.getElementById("phone").classList.add("invalid");
+            document.getElementById('phoneError').textContent = '<%= request.getAttribute("phoneError") %>';
+            document.getElementById('phoneError').style.display = 'block';
+            document.querySelector('[name="phone"]').style.borderColor = '#f44336';
             openModal('supplierModal');
         <% } %>
         <% if (request.getAttribute("emailError") != null) { %>
-            document.getElementById("emailError").textContent = "<%= request.getAttribute("emailError") %>";
-            document.getElementById("emailError").style.display = "block";
-            document.getElementById("email").classList.add("invalid");
+            document.getElementById('emailError').textContent = '<%= request.getAttribute("emailError") %>';
+            document.getElementById('emailError').style.display = 'block';
+            document.querySelector('[name="email"]').style.borderColor = '#f44336';
             openModal('supplierModal');
         <% } %>
     </script>
