@@ -44,7 +44,7 @@
                         <div class="dropdown-menu">
                             <a href="#" class="dropdown-item">Đơn hàng</a>
                             <a href="#" class="dropdown-item">Nhập hàng</a>
-                            <a href="#" class="dropdown-item">Tạo yêu cầu nhập hàng</a>
+                            <a href="#" class="dropdown-item">Yêu cầu nhập hàng</a>
                         </div>
                     </div>
                     
