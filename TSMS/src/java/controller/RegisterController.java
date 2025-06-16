@@ -19,6 +19,7 @@ import model.ShopOwner;
 import util.DBUtil;
 import util.DatabaseUtils;
 import util.Validate;
+import org.mindrot.jbcrypt.BCrypt;
 
 /**
  *
@@ -26,7 +27,7 @@ import util.Validate;
  */
 @WebServlet(name = "RegisterController", urlPatterns = {"/register"})
 public class RegisterController extends HttpServlet {
-    
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
@@ -39,16 +40,17 @@ public class RegisterController extends HttpServlet {
         } catch (SQLException ex) {
             Logger.getLogger(RegisterController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         String fullName = req.getParameter("fullName");
         String shopName = req.getParameter("shopName");
         String password = req.getParameter("password");
         String confirmedPassword = req.getParameter("confirmPassword");
         String email = req.getParameter("email");
+        String phone = req.getParameter("phone");
 
         String newDbName = Validate.shopNameConverter(shopName);
         try {
-            if (ShopDAO.isShopTaken(shopName)){
+            if (ShopDAO.isShopTaken(shopName)) {
                 req.setAttribute("error", "Tên shop đã tồn tại!");
                 req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
                 return;
@@ -56,8 +58,7 @@ public class RegisterController extends HttpServlet {
         } catch (SQLException ex) {
             Logger.getLogger(RegisterController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        
+
         if (fullName == null || password == null || confirmedPassword == null
                 || shopName.isEmpty() || password.isEmpty() || email.isEmpty()) {
             req.setAttribute("error", "Hãy điền đầy đủ thông tin!");
@@ -70,28 +71,36 @@ public class RegisterController extends HttpServlet {
             req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
             return;
         }
-        
-        if (!Validate.isValidName(fullName)){
+
+        if (!Validate.isValidName(fullName)) {
             req.setAttribute("error", "Tên không hợp lệ!");
             req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
             return;
         }
-        
-        if (!Validate.isValidEmail(email)){
+
+        if (!Validate.isValidEmail(email)) {
             req.setAttribute("error", "Email không hợp lệ!");
             req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
             return;
         }
-        
+
+
+        if (!Validate.isValidPhone(phone)) {
+            req.setAttribute("error", "Số điện thoại không hợp lệ!");
+            req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
+            return;
+        }
+
         try {
 
-            if (UserDAO.isAccountTaken(email)) {
-                req.setAttribute("error", "Tài khoản đã tồn tại!");
+            if (UserDAO.isAccountTaken(email, phone)) {
+                req.setAttribute("error", "Email hoặc điện thoại đã tồn tại!");
                 req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
                 return;
             }
             // Tạo đối tượng ShopOwner để lưu vào AdminDB
-            ShopOwner newOwner = new ShopOwner(0, password, fullName, shopName, newDbName, email, null, null, null, null, 1);
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+            ShopOwner newOwner = new ShopOwner(0, hashedPassword, fullName, shopName, newDbName, email, null, null, null, null, 1);
 
             // 1. Tạo bản sao TemplateDB thành ShopDB_{username}
             DatabaseUtils.createDatabaseWithSchema(newDbName);

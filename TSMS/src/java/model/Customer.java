@@ -2,6 +2,7 @@ package model;
 
 import java.util.Date;
 
+
 public class Customer {
 
     private int customerId;
@@ -16,10 +17,8 @@ public class Customer {
 
     public Customer() {
     }
-    
-    public Customer(int customerId, String fullName, String phoneNumber, String email,
-                    String address, Boolean gender, Date dateOfBirth,
-                    Date createdAt, Date updatedAt) {
+
+    public Customer(int customerId, String fullName, String phoneNumber, String email, String address, Boolean gender, Date dateOfBirth, Date createdAt, Date updatedAt) {
         this.customerId = customerId;
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
@@ -31,7 +30,6 @@ public class Customer {
         this.updatedAt = updatedAt;
     }
 
-    // Getters and Setters
     public int getCustomerId() {
         return customerId;
     }
@@ -106,16 +104,9 @@ public class Customer {
 
     @Override
     public String toString() {
-        return "Customer{" +
-                "customerId=" + customerId +
-                ", fullName='" + fullName + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", email='" + email + '\'' +
-                ", address='" + address + '\'' +
-                ", gender=" + gender +
-                ", dateOfBirth=" + dateOfBirth +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
+        return "Customer{" + "customerId=" + customerId + ", fullName=" + fullName + ", phoneNumber=" + phoneNumber + ", email=" + email + ", address=" + address + ", gender=" + gender + ", dateOfBirth=" + dateOfBirth + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + '}';
     }
+
+
+
 }

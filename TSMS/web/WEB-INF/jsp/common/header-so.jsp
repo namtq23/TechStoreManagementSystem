@@ -36,6 +36,10 @@
                         <i class="fas fa-users"></i>
                         Nhân viên
                     </a>
+                    <a href="so-promotions" class="nav-item">
+                        <i class="fas fa-users"></i>
+                        Khuyến mãi
+                    </a>
                     <a href="#" class="nav-item">
                         <i class="fas fa-wallet"></i>
                         Sổ quỹ

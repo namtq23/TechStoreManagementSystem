@@ -126,7 +126,21 @@ public class BMSellInStoreController extends HttpServlet {
         Type productListType = new TypeToken<List<ProductDTO>>() {
         }.getType();
         List<ProductDTO> cartItems = gson.fromJson(cartJson, productListType);
-//        System.out.println(cartItems);
+        int newQuantity = 0;
+
+        for (ProductDTO product : cartItems) {
+            ProductDTO productDto = ProductDAO.getProductByDetailId(dbName, product.getProductDetailId());
+            if (productDto != null) {
+                newQuantity = productDto.getQuantity() - product.getQuantity();
+                if (newQuantity < 0) {
+                    resp.sendRedirect(req.getContextPath() + "/bm-cart?error=notEnoughStock");
+                    return;
+                }
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/bm-cart?error=productNotFound");
+                return;
+            }
+        }
 
         Order order;
         Customer customer = new Customer();
@@ -134,6 +148,7 @@ public class BMSellInStoreController extends HttpServlet {
         if (CustomerDAO.checkCustomerExist(dbName, customerPhone)) {
             int customerId = CustomerDAO.getCustomerId(dbName, customerPhone);
             order = new Order(0, branchId, userId, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven, changeDue);
+            ProductDAO.updateProductQuantityOfInventory(dbName, cartItems, newQuantity, branchId);
         } else {
             customer = new Customer(0, customerName, customerPhone, customerMail, customerAddress, gender, customerDob, null, null);
             CustomerDAO.insertCustomer(dbName, customer);

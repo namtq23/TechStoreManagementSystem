@@ -8,11 +8,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.Normalizer;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -53,6 +55,10 @@ public class Validate {
 
     public static boolean isValidPassword(String password) {
         return password != null && password.length() >= 8;
+    }
+
+    public static boolean isValidPhone(String phone) {
+        return phone != null && phone.matches("0\\d{9}");
     }
 
     public static String shopNameConverter(String input) {
@@ -113,6 +119,13 @@ public class Validate {
         return formatter.format(amount);  // trả về chuỗi như "5.000.000"
     }
 
+    public static String formatDoubleCurrency(Double amount) {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("vi", "VN"));
+        symbols.setGroupingSeparator('.');
+        DecimalFormat formatter = new DecimalFormat("#,###", symbols);
+        return formatter.format(amount);  // trả về chuỗi như "5.000.000"
+    }
+
     public static double calculatePercentageChange(BigDecimal today, BigDecimal yesterday) {
         if (yesterday.compareTo(BigDecimal.ZERO) == 0) {
             if (today.compareTo(BigDecimal.ZERO) == 0) {
@@ -158,12 +171,40 @@ public class Validate {
         return Double.parseDouble(input);
     }
 
+    public static String normalizeSearch(String input) {
+        if (input == null) {
+            return null;
+        }
+
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+
+        String noDiacritics = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+
+        noDiacritics = noDiacritics.replaceAll("đ", "d").replaceAll("Đ", "D");
+
+        String lowerCased = noDiacritics.toLowerCase();
+
+        String cleaned = lowerCased.replaceAll("\\s+", " ").trim();
+
+        return cleaned;
+    }
+
+    public static String standardizeName(String name) {
+        String standardizedName = "";
+        standardizedName = name.trim();
+        return standardizedName;
+    }
+
     public static void main(String[] args) {
         // Test hàm với đầu vào mới
         String input = "hanh tinh xanh";
         System.out.println("Input: " + input + " -> Output: " + shopNameConverter(input));
 
         System.out.println(safeParseDouble("1.250.000"));
+
+        System.out.println(standardizeName("       an       d     "));
+
+        System.out.println(normalizeSearch("máy"));
     }
 
 }

@@ -1,171 +1,417 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import model.PromotionDTO;
+import model.PromotionSearchCriteria;
+import util.DBUtil;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import model.PromotionDTO;
-import util.DBUtil;
 
-/**
- *
- * @author admin
- */
 public class PromotionDAO {
-
-    /*
-      Lấy danh sách khuyến mãi đang áp dụng cho chi nhánh
-     */
-    public List<PromotionDTO> getActivePromotionsByBranch(String dbName, int branchId) throws SQLException {
+    
+    // ✅ Lấy tất cả khuyến mãi - sửa query theo database thực tế
+    public List<PromotionDTO> getAllPromotions(String dbName) throws SQLException {
         List<PromotionDTO> promotions = new ArrayList<>();
-
-        String sql = """
-            SELECT DISTINCT
-                p.PromotionID,
-                p.PromoName,
-                p.DiscountPercent,
-                p.StartDate,
-                p.EndDate,
-                p.ApplyToAllBranches
-            FROM Promotions p
-            LEFT JOIN PromotionBranches pb ON p.PromotionID = pb.PromotionID
-            WHERE (p.ApplyToAllBranches = 1 OR pb.BranchID = ?)
-                AND GETDATE() BETWEEN p.StartDate AND p.EndDate
-            ORDER BY p.StartDate DESC
-        """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, branchId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    PromotionDTO promotion = new PromotionDTO(
-                            rs.getInt("PromotionID"),
-                            rs.getString("PromoName"),
-                            rs.getBigDecimal("DiscountPercent"),
-                            rs.getDate("StartDate"),
-                            rs.getDate("EndDate"),
-                            rs.getBoolean("ApplyToAllBranches")
-                    );
-                    promotions.add(promotion);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in getActivePromotionsByBranch: " + e.getMessage());
-            throw e;
-        }
-
-        return promotions;
-    }
-
-       /**
-     * Lấy tất cả khuyến mãi theo chi nhánh (bao gồm cả đã hết hạn)
-     */
-    public List<PromotionDTO> getAllPromotionsByBranch(String dbName, int branchId) throws SQLException {
-        List<PromotionDTO> promotions = new ArrayList<>();
-        String sql = """
-            SELECT DISTINCT
-                p.PromotionID,
-                p.PromoName,
-                p.DiscountPercent,
-                p.StartDate,
-                p.EndDate,
-                p.ApplyToAllBranches
-            FROM 
-                Promotions p
-                LEFT JOIN PromotionBranches pb ON p.PromotionID = pb.PromotionID
-            WHERE 
-                (p.ApplyToAllBranches = 1 OR pb.BranchID = ?)
-            ORDER BY 
-                p.StartDate DESC
-        """;
+        String sql = "SELECT PromotionID, PromoName, DiscountPercent, StartDate, EndDate FROM Promotions ORDER BY PromotionID DESC";
         
-        try (Connection conn = DBUtil.getConnectionTo(dbName); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
-            ps.setInt(1, branchId);
-            
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    PromotionDTO promotion = new PromotionDTO();
-                    promotion.setPromotionID(rs.getInt("PromotionID"));
-                    promotion.setPromoName(rs.getString("PromoName"));
-                    promotion.setDiscountPercent(rs.getBigDecimal("DiscountPercent"));
-                    promotion.setStartDate(rs.getDate("StartDate"));
-                    promotion.setEndDate(rs.getDate("EndDate"));
-                    promotion.setApplyToAllBranches(rs.getBoolean("ApplyToAllBranches"));
-                    
-                    // Tạo mô tả
-                    String description = String.format("Giảm %s%% từ %s đến %s", 
-                        promotion.getDiscountPercent(), 
-                        promotion.getStartDate(), 
-                        promotion.getEndDate());
-                    promotion.setDescription(description);
-                    
-                    promotions.add(promotion);
-                }
+        System.out.println("DEBUG: Getting promotions from database: " + dbName);
+        System.out.println("DEBUG: SQL Query: " + sql);
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            // ✅ Sử dụng DBUtil.getConnectionTo() với dbName
+            conn = DBUtil.getConnectionTo(dbName);
+            if (conn == null) {
+                System.out.println("ERROR: Connection is null for database: " + dbName);
+                throw new SQLException("Cannot connect to database: " + dbName);
             }
+            
+            System.out.println("DEBUG: Connection established successfully");
+            System.out.println("DEBUG: Connection URL: " + conn.getMetaData().getURL());
+            
+            stmt = conn.prepareStatement(sql);
+            rs = stmt.executeQuery();
+            
+            int count = 0;
+            while (rs.next()) {
+                count++;
+                PromotionDTO promotion = new PromotionDTO();
+                promotion.setPromotionID(rs.getInt("PromotionID"));
+                promotion.setPromoName(rs.getString("PromoName"));
+                promotion.setDiscountPercent(rs.getDouble("DiscountPercent"));
+                promotion.setStartDate(rs.getDate("StartDate"));
+                promotion.setEndDate(rs.getDate("EndDate"));
+            
+                // Tính toán status
+                Date currentDate = new Date(System.currentTimeMillis());
+                if (currentDate.before(promotion.getStartDate())) {
+                    promotion.setStatus("scheduled");
+                } else if (currentDate.after(promotion.getEndDate())) {
+                    promotion.setStatus("expired");
+                } else {
+                    promotion.setStatus("active");
+                }
+            
+                // Lấy thông tin branch và product count (với error handling)
+                try {
+                    promotion.setBranchCount(getBranchCount(dbName, promotion.getPromotionID()));
+                    promotion.setProductCount(getProductCount(dbName, promotion.getPromotionID()));
+                } catch (Exception e) {
+                    System.out.println("WARNING: Could not get branch/product count for promotion " + promotion.getPromotionID() + ": " + e.getMessage());
+                    promotion.setBranchCount(0);
+                    promotion.setProductCount(0);
+                }
+            
+                promotions.add(promotion);
+                System.out.println("DEBUG: Added promotion: " + promotion.getPromoName() + " (ID: " + promotion.getPromotionID() + ")");
+            }
+        
+            System.out.println("DEBUG: Found " + count + " promotions");
+        
         } catch (SQLException e) {
-            System.out.println("Error in getAllPromotionsByBranch: " + e.getMessage());
+            System.out.println("ERROR: SQL Exception in getAllPromotions: " + e.getMessage());
+            e.printStackTrace();
             throw e;
+        } finally {
+            // ✅ Sử dụng DBUtil.closeConnection()
+            if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            DBUtil.closeConnection(conn);
         }
         
         return promotions;
     }
-
-    /*
-      Lấy khuyến mãi áp dụng cho sản phẩm cụ thể
-     */
-    public List<PromotionDTO> getPromotionsByProduct(String dbName, int productId, int branchId) throws SQLException {
-        List<PromotionDTO> promotions = new ArrayList<>();
-
-        String sql = """
-            SELECT DISTINCT
-                p.PromotionID,
-                p.PromoName,
-                p.DiscountPercent,
-                p.StartDate,
-                p.EndDate,
-                p.ApplyToAllBranches
-            FROM Promotions p
-            LEFT JOIN PromotionBranches pb ON p.PromotionID = pb.PromotionID
-            LEFT JOIN PromotionProducts pp ON p.PromotionID = pp.PromotionID
-            WHERE (p.ApplyToAllBranches = 1 OR pb.BranchID = ?)
-                AND pp.ProductID = ?
-                AND GETDATE() BETWEEN p.StartDate AND p.EndDate
-            ORDER BY p.DiscountPercent DESC
-        """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, branchId);
-            stmt.setInt(2, productId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    PromotionDTO promotion = new PromotionDTO(
-                            rs.getInt("PromotionID"),
-                            rs.getString("PromoName"),
-                            rs.getBigDecimal("DiscountPercent"),
-                            rs.getDate("StartDate"),
-                            rs.getDate("EndDate"),
-                            rs.getBoolean("ApplyToAllBranches")
-                    );
-                    promotions.add(promotion);
+    
+    // ✅ Lấy khuyến mãi theo ID
+    public PromotionDTO getPromotionById(String dbName, int promotionId) throws SQLException {
+        String sql = "SELECT PromotionID, PromoName, DiscountPercent, StartDate, EndDate FROM Promotions WHERE PromotionID = ?";
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, promotionId);
+            rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                PromotionDTO promotion = new PromotionDTO();
+                promotion.setPromotionID(rs.getInt("PromotionID"));
+                promotion.setPromoName(rs.getString("PromoName"));
+                promotion.setDiscountPercent(rs.getDouble("DiscountPercent"));
+                promotion.setStartDate(rs.getDate("StartDate"));
+                promotion.setEndDate(rs.getDate("EndDate"));
+                
+                // Tính toán status
+                Date currentDate = new Date(System.currentTimeMillis());
+                if (currentDate.before(promotion.getStartDate())) {
+                    promotion.setStatus("scheduled");
+                } else if (currentDate.after(promotion.getEndDate())) {
+                    promotion.setStatus("expired");
+                } else {
+                    promotion.setStatus("active");
+                }
+                
+                // Lấy danh sách chi nhánh và sản phẩm
+                promotion.setBranchIDs(getPromotionBranches(dbName, promotionId));
+                promotion.setProductDetailIDs(getPromotionProducts(dbName, promotionId));
+                promotion.setBranchCount(promotion.getBranchIDs().size());
+                promotion.setProductCount(promotion.getProductDetailIDs().size());
+                
+                return promotion;
+            }
+        } finally {
+            if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            DBUtil.closeConnection(conn);
+        }
+        
+        return null;
+    }
+    
+    // ✅ Tạo khuyến mãi mới
+    public boolean createPromotion(String dbName, PromotionDTO promotion) throws SQLException {
+        String sql = "INSERT INTO Promotions (PromoName, DiscountPercent, StartDate, EndDate) VALUES (?, ?, ?, ?)";
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            
+            stmt.setString(1, promotion.getPromoName());
+            stmt.setDouble(2, promotion.getDiscountPercent());
+            stmt.setDate(3, promotion.getStartDate());
+            stmt.setDate(4, promotion.getEndDate());
+            
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                // Lấy ID được tạo tự động
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        promotion.setPromotionID(generatedKeys.getInt(1));
+                    }
+                }
+                return true;
+            }
+            return false;
+        } finally {
+            if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            DBUtil.closeConnection(conn);
+        }
+    }
+    
+    // ✅ Cập nhật khuyến mãi
+    public boolean updatePromotion(String dbName, PromotionDTO promotion) throws SQLException {
+        String sql = "UPDATE Promotions SET PromoName = ?, DiscountPercent = ?, StartDate = ?, EndDate = ? WHERE PromotionID = ?";
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            stmt = conn.prepareStatement(sql);
+            
+            stmt.setString(1, promotion.getPromoName());
+            stmt.setDouble(2, promotion.getDiscountPercent());
+            stmt.setDate(3, promotion.getStartDate());
+            stmt.setDate(4, promotion.getEndDate());
+            stmt.setInt(5, promotion.getPromotionID());
+            
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } finally {
+            if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            DBUtil.closeConnection(conn);
+        }
+    }
+    
+    // ✅ Xóa khuyến mãi
+    public boolean deletePromotion(String dbName, int promotionId) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            conn.setAutoCommit(false);
+            
+            // Xóa PromotionBranches trước (nếu có)
+            String deleteBranchesSQL = "DELETE FROM PromotionBranches WHERE PromotionID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteBranchesSQL)) {
+                stmt.setInt(1, promotionId);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                System.out.println("WARNING: Could not delete from PromotionBranches: " + e.getMessage());
+            }
+            
+            // Xóa PromotionProducts (nếu có)
+            String deleteProductsSQL = "DELETE FROM PromotionProducts WHERE PromotionID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteProductsSQL)) {
+                stmt.setInt(1, promotionId);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                System.out.println("WARNING: Could not delete from PromotionProducts: " + e.getMessage());
+            }
+            
+            // Xóa Promotion
+            String deletePromotionSQL = "DELETE FROM Promotions WHERE PromotionID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deletePromotionSQL)) {
+                stmt.setInt(1, promotionId);
+                int rowsAffected = stmt.executeUpdate();
+                
+                conn.commit();
+                return rowsAffected > 0;
+            }
+            
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    System.out.println("ERROR: Could not rollback transaction: " + rollbackEx.getMessage());
                 }
             }
-        } catch (SQLException e) {
-            System.out.println("Error in getPromotionsByProduct: " + e.getMessage());
             throw e;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                } catch (SQLException e) {
+                    System.out.println("WARNING: Could not reset autocommit: " + e.getMessage());
+                }
+                DBUtil.closeConnection(conn);
+            }
         }
+    }
+    
+    // ✅ Helper methods với proper connection handling
+    private int getBranchCount(String dbName, int promotionId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM PromotionBranches WHERE PromotionID = ?";
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, promotionId);
+            rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            // Nếu bảng PromotionBranches không tồn tại, return 0
+            System.out.println("WARNING: Could not get branch count: " + e.getMessage());
+            return 0;
+        } finally {
+            if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            DBUtil.closeConnection(conn);
+        }
+        
+        return 0;
+    }
+    
+    private int getProductCount(String dbName, int promotionId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM PromotionProducts WHERE PromotionID = ?";
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, promotionId);
+            rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            // Nếu bảng PromotionProducts không tồn tại, return 0
+            System.out.println("WARNING: Could not get product count: " + e.getMessage());
+            return 0;
+        } finally {
+            if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            DBUtil.closeConnection(conn);
+        }
+        
+        return 0;
+    }
+    
+    private List<Integer> getPromotionBranches(String dbName, int promotionId) throws SQLException {
+        List<Integer> branchIds = new ArrayList<>();
+        String sql = "SELECT BranchID FROM PromotionBranches WHERE PromotionID = ?";
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, promotionId);
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                branchIds.add(rs.getInt("BranchID"));
+            }
+        } catch (SQLException e) {
+            System.out.println("WARNING: Could not get promotion branches: " + e.getMessage());
+        } finally {
+            if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            DBUtil.closeConnection(conn);
+        }
+        
+        return branchIds;
+    }
 
-        return promotions;
+    private List<Integer> getPromotionProducts(String dbName, int promotionId) throws SQLException {
+        List<Integer> productDetailIds = new ArrayList<>();
+        String sql = "SELECT ProductDetailID FROM PromotionProducts WHERE PromotionID = ?";
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, promotionId);
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                productDetailIds.add(rs.getInt("ProductDetailID"));
+            }
+        } catch (SQLException e) {
+            System.out.println("WARNING: Could not get promotion products: " + e.getMessage());
+        } finally {
+            if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            DBUtil.closeConnection(conn);
+        }
+        
+        return productDetailIds;
+    }
+    
+    // ✅ Test connection method
+    public boolean testConnection(String dbName) {
+        Connection conn = null;
+        try {
+            System.out.println("Testing connection to database: " + dbName);
+            conn = DBUtil.getConnectionTo(dbName);
+            
+            if (conn != null) {
+                System.out.println("✓ Connection successful");
+                System.out.println("✓ Database URL: " + conn.getMetaData().getURL());
+                System.out.println("✓ Database Product: " + conn.getMetaData().getDatabaseProductName());
+                
+                // Test if Promotions table exists
+                String checkTableSQL = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Promotions'";
+                try (PreparedStatement stmt = conn.prepareStatement(checkTableSQL);
+                     ResultSet rs = stmt.executeQuery()) {
+                    
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        System.out.println("✓ Promotions table exists");
+                        
+                        // Check data count
+                        String countSQL = "SELECT COUNT(*) FROM Promotions";
+                        try (PreparedStatement countStmt = conn.prepareStatement(countSQL);
+                             ResultSet countRs = countStmt.executeQuery()) {
+                            
+                            if (countRs.next()) {
+                                int count = countRs.getInt(1);
+                                System.out.println("✓ Total promotions in table: " + count);
+                                return true;
+                            }
+                        }
+                    } else {
+                        System.out.println("✗ Promotions table does not exist");
+                        return false;
+                    }
+                }
+            } else {
+                System.out.println("✗ Connection failed");
+                return false;
+            }
+        } catch (SQLException e) {
+            System.out.println("✗ Database error: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } finally {
+            DBUtil.closeConnection(conn);
+        }
+        
+        return false;
     }
 }
