@@ -217,7 +217,7 @@
 
                             for (ProductDTO product : products) { %>
                             <tr class="product-row">
-                                <td><div class="product-image phone"></div></td>
+                                <td><img src="<%= product.getImgUrl() %>" alt="product-img"/></td>
                                 <td><%= product.getProductDetailId() %></td>
                                 <td><%= product.getDescription() %></td>
                                 <%
