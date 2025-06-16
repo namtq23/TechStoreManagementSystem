@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Statement;
 import model.Category;
 import model.ProductDTO;
 import model.ProductStatsDTO;
@@ -21,76 +22,76 @@ import model.Brand;
 import model.Supplier;
 import util.Validate;
 
-
 /**
  *
  * @author admin
  */
 public class ProductDAO {
 
-    //PHÙNG
+    // PHÙNG
     private static final Logger LOGGER = Logger.getLogger(ProductDAO.class.getName());
 
-    //Phuong
-    public List<ProductDTO> getInventoryProductListByPageByBranchId(String dbName, int branchId, int offset, int limit) {
+    // Phuong
+    public List<ProductDTO> getInventoryProductListByPageByBranchId(String dbName, int branchId, int offset,
+            int limit) {
         List<ProductDTO> list = new ArrayList<>();
         String sql = """
-                     SELECT 
-                         i.InventoryID,
-                         p.ProductID,
-                         ip.ProductDetailID,
-                         ip.Quantity AS InventoryQuantity,
-                         p.ProductName,
-                         b.BrandName,
-                         c.CategoryName,
-                         s.SupplierName,
-                         p.CostPrice,
-                         p.RetailPrice,
-                         p.ImageURL,
-                         CASE 
-                             WHEN p.IsActive = 1 THEN N'Đang kinh doanh' 
-                             ELSE N'Không kinh doanh' 
-                         END AS Status,
-                         pd.Description,
-                         pd.SerialNumber,
-                         pd.WarrantyPeriod,
-                         p.CreatedAt,
-                     
-                         -- Thông tin khuyến mãi hiện tại
-                         pr.PromotionID,
-                         pr.PromoName,
-                         pr.DiscountPercent,
-                         pr.StartDate,
-                         pr.EndDate,
-                         
-                         -- Thêm BranchID từ PromotionBranches
-                         pb.BranchID
-                     
-                     FROM 
-                         Inventory i
-                         LEFT JOIN InventoryProducts ip ON i.InventoryID = ip.InventoryID
-                         LEFT JOIN ProductDetails pd ON ip.ProductDetailID = pd.ProductDetailID
-                         LEFT JOIN Products p ON pd.ProductID = p.ProductID
-                         LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                         LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                         LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                     
-                         -- JOIN với bảng khuyến mãi
-                         LEFT JOIN PromotionProducts pp ON pd.ProductDetailID = pp.ProductDetailID
-                         LEFT JOIN Promotions pr ON pp.PromotionID = pr.PromotionID
-                             AND (pr.StartDate IS NULL OR pr.StartDate <= GETDATE())
-                             AND (pr.EndDate IS NULL OR pr.EndDate >= GETDATE())
-                         
-                         -- JOIN với PromotionBranches để lấy BranchID
-                         LEFT JOIN PromotionBranches pb ON pr.PromotionID = pb.PromotionID
-                     
-                     WHERE 
-                         i.InventoryID = ?
-                     ORDER BY
-                         ip.ProductDetailID 
-                     OFFSET ? ROWS
-                     FETCH NEXT ? ROWS ONLY;
-                     """;
+                SELECT
+                    i.InventoryID,
+                    p.ProductID,
+                    ip.ProductDetailID,
+                    ip.Quantity AS InventoryQuantity,
+                    p.ProductName,
+                    b.BrandName,
+                    c.CategoryName,
+                    s.SupplierName,
+                    p.CostPrice,
+                    p.RetailPrice,
+                    p.ImageURL,
+                    CASE
+                        WHEN p.IsActive = 1 THEN N'Đang kinh doanh'
+                        ELSE N'Không kinh doanh'
+                    END AS Status,
+                    pd.Description,
+                    pd.SerialNumber,
+                    pd.WarrantyPeriod,
+                    p.CreatedAt,
+
+                    -- Thông tin khuyến mãi hiện tại
+                    pr.PromotionID,
+                    pr.PromoName,
+                    pr.DiscountPercent,
+                    pr.StartDate,
+                    pr.EndDate,
+
+                    -- Thêm BranchID từ PromotionBranches
+                    pb.BranchID
+
+                FROM
+                    Inventory i
+                    LEFT JOIN InventoryProducts ip ON i.InventoryID = ip.InventoryID
+                    LEFT JOIN ProductDetails pd ON ip.ProductDetailID = pd.ProductDetailID
+                    LEFT JOIN Products p ON pd.ProductID = p.ProductID
+                    LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                    LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                    LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+
+                    -- JOIN với bảng khuyến mãi
+                    LEFT JOIN PromotionProducts pp ON pd.ProductDetailID = pp.ProductDetailID
+                    LEFT JOIN Promotions pr ON pp.PromotionID = pr.PromotionID
+                        AND (pr.StartDate IS NULL OR pr.StartDate <= GETDATE())
+                        AND (pr.EndDate IS NULL OR pr.EndDate >= GETDATE())
+
+                    -- JOIN với PromotionBranches để lấy BranchID
+                    LEFT JOIN PromotionBranches pb ON pr.PromotionID = pb.PromotionID
+
+                WHERE
+                    i.InventoryID = ?
+                ORDER BY
+                    ip.ProductDetailID
+                OFFSET ? ROWS
+                FETCH NEXT ? ROWS ONLY;
+                """;
         try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, branchId);
             ps.setInt(2, offset);
@@ -106,19 +107,19 @@ public class ProductDAO {
         return list;
     }
 
-    //Phuong
+    // Phuong
     public int countProductsByBranchId(String dbName, int branchId) {
         int count = 0;
         String sql = """
-                     SELECT 
-                         InventoryID,
-                         COUNT(DISTINCT ProductDetailID) AS ProductCount
-                     FROM 
-                         InventoryProducts
-                     WHERE 
-                        InventoryID = ?
-                     GROUP BY 
-                         InventoryID;""";
+                SELECT
+                    InventoryID,
+                    COUNT(DISTINCT ProductDetailID) AS ProductCount
+                FROM
+                    InventoryProducts
+                WHERE
+                   InventoryID = ?
+                GROUP BY
+                    InventoryID;""";
         try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, branchId);
             ResultSet rs = ps.executeQuery();
@@ -131,7 +132,7 @@ public class ProductDAO {
         return count;
     }
 
-    //Dat
+    // Dat
     public void deleteProductAndDetail(String dbName, int productDetailId) throws SQLException {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -141,7 +142,8 @@ public class ProductDAO {
 
             // 1. Get ProductID from ProductDetails first
             int productId = -1;
-            String getProductIdSql = "SELECT ProductID FROM " + dbName + ".dbo.ProductDetails WHERE ProductDetailID = ?";
+            String getProductIdSql = "SELECT ProductID FROM " + dbName
+                    + ".dbo.ProductDetails WHERE ProductDetailID = ?";
             pstmt = conn.prepareStatement(getProductIdSql);
             pstmt.setInt(1, productDetailId);
             ResultSet rs = pstmt.executeQuery();
@@ -201,7 +203,8 @@ public class ProductDAO {
 
             // 8. Delete from Products if no ProductDetail exists for that ProductID
             String sql6 = "DELETE FROM " + dbName + ".dbo.Products "
-                    + "WHERE ProductID = ? AND NOT EXISTS (SELECT 1 FROM " + dbName + ".dbo.ProductDetails WHERE ProductID = ?)";
+                    + "WHERE ProductID = ? AND NOT EXISTS (SELECT 1 FROM " + dbName
+                    + ".dbo.ProductDetails WHERE ProductID = ?)";
             pstmt = conn.prepareStatement(sql6);
             pstmt.setInt(1, productId);
             pstmt.setInt(2, productId);
@@ -219,7 +222,8 @@ public class ProductDAO {
             }
             throw e;
         } finally {
-            if (pstmt != null) try {
+            if (pstmt != null)
+                try {
                 pstmt.close();
             } catch (SQLException ignored) {
             }
@@ -231,15 +235,15 @@ public class ProductDAO {
 
     public void updateProductDetails(String dbName, ProductDTO product) {
         StringBuilder query = new StringBuilder("""
-            BEGIN TRANSACTION;
-            UPDATE Products 
-            SET RetailPrice = ?, CostPrice = ?, IsActive = ?
-            WHERE ProductID = ?;
-            UPDATE ProductDetails 
-            SET Description = ?, UpdatedAt = GETDATE()
-            WHERE ProductDetailID = ?;
-            COMMIT;
-        """);
+                    BEGIN TRANSACTION;
+                    UPDATE Products
+                    SET RetailPrice = ?, CostPrice = ?, IsActive = ?
+                    WHERE ProductID = ?;
+                    UPDATE ProductDetails
+                    SET Description = ?, UpdatedAt = GETDATE()
+                    WHERE ProductDetailID = ?;
+                    COMMIT;
+                """);
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             int paramIndex = 1;
@@ -258,45 +262,45 @@ public class ProductDAO {
     }
 
     // Retrieves a ProductDTO by productDetailId
-    public ProductDTO getProductByDetailId(String dbName, int productDetailId) {
+    public static ProductDTO getProductByDetailId(String dbName, int productDetailId) {
         ProductDTO product = null;
         StringBuilder query = new StringBuilder("""
-            SELECT 
-                wp.WarehouseID,
-                p.ProductID,
-                pd.ProductDetailID,
-                wp.Quantity AS InventoryQuantity,
-                p.ProductName,
-                b.BrandName,
-                c.CategoryName,
-                s.SupplierName,
-                CAST(p.CostPrice AS NVARCHAR) AS CostPrice,
-                CAST(p.RetailPrice AS NVARCHAR) AS RetailPrice,
-                p.ImageURL,
-                p.CreatedAt,
-                CASE 
-                    WHEN p.IsActive = 1 THEN N'Đang kinh doanh' 
-                    ELSE N'Không kinh doanh' 
-                END AS Status,
-                pd.Description,
-                pd.SerialNumber,
-                pd.WarrantyPeriod,
-                promo.PromoName,
-                promo.DiscountPercent,
-                promo.StartDate,
-                promo.EndDate
-            FROM 
-                ProductDetails pd
-                LEFT JOIN Products p ON pd.ProductID = p.ProductID
-                LEFT JOIN WarehouseProducts wp ON pd.ProductDetailID = wp.ProductDetailID
-                LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                LEFT JOIN PromotionProducts pp ON pp.ProductDetailID = pd.ProductDetailID
-                LEFT JOIN Promotions promo ON promo.PromotionID = pp.PromotionID
-            WHERE 
-                pd.ProductDetailID = ?
-        """);
+                    SELECT
+                        wp.WarehouseID,
+                        p.ProductID,
+                        pd.ProductDetailID,
+                        wp.Quantity AS InventoryQuantity,
+                        p.ProductName,
+                        b.BrandName,
+                        c.CategoryName,
+                        s.SupplierName,
+                        CAST(p.CostPrice AS NVARCHAR) AS CostPrice,
+                        CAST(p.RetailPrice AS NVARCHAR) AS RetailPrice,
+                        p.ImageURL,
+                        p.CreatedAt,
+                        CASE
+                            WHEN p.IsActive = 1 THEN N'Đang kinh doanh'
+                            ELSE N'Không kinh doanh'
+                        END AS Status,
+                        pd.Description,
+                        pd.SerialNumber,
+                        pd.WarrantyPeriod,
+                        promo.PromoName,
+                        promo.DiscountPercent,
+                        promo.StartDate,
+                        promo.EndDate
+                    FROM
+                        ProductDetails pd
+                        LEFT JOIN Products p ON pd.ProductID = p.ProductID
+                        LEFT JOIN WarehouseProducts wp ON pd.ProductDetailID = wp.ProductDetailID
+                        LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                        LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                        LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                        LEFT JOIN PromotionProducts pp ON pp.ProductDetailID = pd.ProductDetailID
+                        LEFT JOIN Promotions promo ON promo.PromotionID = pp.PromotionID
+                    WHERE
+                        pd.ProductDetailID = ?
+                """);
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             stmt.setInt(1, productDetailId);
@@ -311,7 +315,8 @@ public class ProductDAO {
         }
         return product;
     }
-public List<Category> getAllCategory(String dbName) {
+
+    public List<Category> getAllCategory(String dbName) {
         List<Category> categories = new ArrayList<>();
         String query = "SELECT CategoryID, CategoryName FROM " + dbName + ".dbo.Categories";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
@@ -439,8 +444,10 @@ public List<Category> getAllCategory(String dbName) {
         return false;
     }
 
-    public int addSupplier(String dbName, String supplierName, String contactName, String phone, String email) throws SQLException {
-        String query = "INSERT INTO " + dbName + ".dbo.Suppliers (SupplierName, ContactName, Phone, Email) VALUES (?, ?, ?, ?)";
+    public int addSupplier(String dbName, String supplierName, String contactName, String phone, String email)
+            throws SQLException {
+        String query = "INSERT INTO " + dbName
+                + ".dbo.Suppliers (SupplierName, ContactName, Phone, Email) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, supplierName);
             stmt.setString(2, contactName != null && !contactName.isEmpty() ? contactName : null);
@@ -455,8 +462,10 @@ public List<Category> getAllCategory(String dbName) {
         throw new SQLException("Không thể thêm nhà cung cấp");
     }
 
-    public int addProduct(String dbName, String productName, int brandId, int categoryId, int supplierId, double costPrice, double retailPrice, String imageURL, boolean isActive) throws SQLException {
-        String query = "INSERT INTO " + dbName + ".dbo.Products (ProductName, BrandID, CategoryID, SupplierID, CostPrice, RetailPrice, ImageURL, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    public int addProduct(String dbName, String productName, int brandId, int categoryId, int supplierId,
+            double costPrice, double retailPrice, String imageURL, boolean isActive) throws SQLException {
+        String query = "INSERT INTO " + dbName
+                + ".dbo.Products (ProductName, BrandID, CategoryID, SupplierID, CostPrice, RetailPrice, ImageURL, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, productName);
             stmt.setInt(2, brandId);
@@ -475,8 +484,10 @@ public List<Category> getAllCategory(String dbName) {
         throw new SQLException("Không thể thêm sản phẩm");
     }
 
-    public int addProductDetail(String dbName, int productId, String description, String serialNumber, String warrantyPeriod) throws SQLException {
-        String query = "INSERT INTO " + dbName + ".dbo.ProductDetails (ProductID, Description, SerialNumber, WarrantyPeriod) VALUES (?, ?, ?, ?)";
+    public int addProductDetail(String dbName, int productId, String description, String serialNumber,
+            String warrantyPeriod) throws SQLException {
+        String query = "INSERT INTO " + dbName
+                + ".dbo.ProductDetails (ProductID, Description, SerialNumber, WarrantyPeriod) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, productId);
             stmt.setString(2, description != null && !description.isEmpty() ? description : null);
@@ -491,43 +502,103 @@ public List<Category> getAllCategory(String dbName) {
         throw new SQLException("Không thể thêm chi tiết sản phẩm");
     }
 
-    public void addWarehouseProduct(String dbName, int warehouseId, int productDetailId, int quantity) throws SQLException {
-        String query = "INSERT INTO " + dbName + ".dbo.WarehouseProducts (WarehouseID, ProductDetailID, Quantity) VALUES (?, ?, ?)";
+    public void addWarehouseProduct(String dbName, int warehouseId, int productDetailId, int quantity)
+            throws SQLException {
+        String query = "INSERT INTO " + dbName
+                + ".dbo.WarehouseProducts (WarehouseID, ProductDetailID, Quantity) VALUES (?, ?, ?)";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, warehouseId);
             stmt.setInt(2, productDetailId);
             stmt.setInt(3, quantity);
             stmt.executeUpdate();
         }
-    }    /* PHÙNG
-      Lấy sản phẩm theo ID
-     */
-    public ProductDTO getProductById(String dbName, int productId) throws SQLException {
-        String sql = """
+    }
+
+    public List<ProductDTO> getAllProducts(String dbName, int warehouseId) {
+        List<ProductDTO> products = new ArrayList<>();
+        String query = """
             SELECT 
-                pd.ProductDetailID,
-                ISNULL(ip.Quantity, 0) AS InventoryQuantity,
-                pd.Description,
-                pd.SerialNumber,
-                pd.WarrantyPeriod,
+                wp.WarehouseID,
                 p.ProductID,
+                pd.ProductDetailID,
+                wp.Quantity AS InventoryQuantity,
                 p.ProductName,
                 b.BrandName,
                 c.CategoryName,
                 s.SupplierName,
-                p.CostPrice,
-                p.RetailPrice,
+                CAST(p.CostPrice AS NVARCHAR) AS CostPrice,
+                CAST(p.RetailPrice AS NVARCHAR) AS RetailPrice,
                 p.ImageURL,
                 p.CreatedAt,
-                CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status
-            FROM Products p
-            LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
-            LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
-            LEFT JOIN Brands b ON p.BrandID = b.BrandID
-            LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-            LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-            WHERE p.ProductID = ?
+                CASE 
+                    WHEN p.IsActive = 1 THEN N'Đang kinh doanh' 
+                    ELSE N'Không kinh doanh' 
+                END AS Status,
+                pd.Description,
+                pd.SerialNumber,
+                pd.WarrantyPeriod,
+                promo.PromoName,
+                promo.DiscountPercent,
+                promo.StartDate,
+                promo.EndDate
+            FROM 
+                WarehouseProducts wp
+                LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
+                LEFT JOIN Products p ON pd.ProductID = p.ProductID
+                LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                LEFT JOIN PromotionProducts pp ON pp.ProductDetailID = pd.ProductDetailID
+                LEFT JOIN Promotions promo ON promo.PromotionID = pp.PromotionID
+            WHERE 
+                wp.WarehouseID = ?
         """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, warehouseId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                ProductDTO product = extractProductDTOFromResultSet(rs);
+                products.add(product);
+            }
+            System.out.println("Fetched " + products.size() + " products for warehouseId: " + warehouseId);
+        } catch (SQLException e) {
+            System.err.println("Error in getAllProducts: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return products;
+    }
+
+
+    /* PHÙNG
+      Lấy sản phẩm theo ID
+     */
+    public ProductDTO getProductById(String dbName, int productId) throws SQLException {
+        String sql = """
+                    SELECT
+                        pd.ProductDetailID,
+                        ISNULL(ip.Quantity, 0) AS InventoryQuantity,
+                        pd.Description,
+                        pd.SerialNumber,
+                        pd.WarrantyPeriod,
+                        p.ProductID,
+                        p.ProductName,
+                        b.BrandName,
+                        c.CategoryName,
+                        s.SupplierName,
+                        p.CostPrice,
+                        p.RetailPrice,
+                        p.ImageURL,
+                        p.CreatedAt,
+                        CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status
+                    FROM Products p
+                    LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
+                    LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
+                    LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                    LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                    LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                    WHERE p.ProductID = ?
+                """;
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -546,56 +617,16 @@ public List<Category> getAllCategory(String dbName) {
         return null;
     }
 
-    /* PHÙNG
-     Tìm kiếm sản phẩm theo tên hoặc mã
+    /*
+     * PHÙNG
+     * Tìm kiếm sản phẩm theo tên hoặc mã
      */
     public List<ProductDTO> searchProducts(String dbName, int branchId, String keyword) throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
         String sql;
         if (keyword != null && keyword.trim().matches("\\d+")) {
             sql = """
-        SELECT 
-            pd.ProductDetailID,
-            p.ProductID,
-            p.ProductName,
-            c.CategoryName,
-            b.BrandName,
-            s.SupplierName,
-            p.CostPrice,
-            p.RetailPrice,
-            p.ImageURL,
-            p.CreatedAt,
-            p.IsActive,
-            ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity,
-            NULL AS Description, 
-            NULL AS SerialNumber,
-            NULL AS WarrantyPeriod,
-            NULL AS PromoName,
-            NULL AS DiscountPercent,
-            NULL AS StartDate,
-            NULL AS EndDate,
-            NULL AS Status 
-        FROM 
-            Products p
-            LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
-            LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
-            LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID AND i.BranchID = ?
-            LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-            LEFT JOIN Brands b ON p.BrandID = b.BrandID
-            LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                     
-        WHERE 
-            p.ProductID = ?
-        GROUP BY 
-            pd.ProductDetailID,
-            p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
-            p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive
-        ORDER BY 
-            p.ProductID
-    """;
-        } else {
-            sql = """
-            SELECT 
+                        SELECT
                             pd.ProductDetailID,
                             p.ProductID,
                             p.ProductName,
@@ -608,30 +639,71 @@ public List<Category> getAllCategory(String dbName) {
                             p.CreatedAt,
                             p.IsActive,
                             ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity,
-                            NULL AS Description, 
+                            NULL AS Description,
                             NULL AS SerialNumber,
                             NULL AS WarrantyPeriod,
                             NULL AS PromoName,
                             NULL AS DiscountPercent,
                             NULL AS StartDate,
                             NULL AS EndDate,
-                            NULL AS Status 
-            FROM 
-                Products p
-                LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
-                LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
-                LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID AND i.BranchID = ?
-                LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-            WHERE 
-                p.ProductName LIKE ?
-            GROUP BY 
-                pd.ProductDetailID, p.ProductID, p.ProductName, c.CategoryName, b.BrandName, 
-                s.SupplierName, p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive
-            ORDER BY 
-                p.ProductName
-        """;
+                            NULL AS Status
+                        FROM
+                            Products p
+                            LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
+                            LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
+                            LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID AND i.BranchID = ?
+                            LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                            LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                            LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+
+                        WHERE
+                            p.ProductID = ?
+                        GROUP BY
+                            pd.ProductDetailID,
+                            p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
+                            p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive
+                        ORDER BY
+                            p.ProductID
+                    """;
+        } else {
+            sql = """
+                        SELECT
+                                        pd.ProductDetailID,
+                                        p.ProductID,
+                                        p.ProductName,
+                                        c.CategoryName,
+                                        b.BrandName,
+                                        s.SupplierName,
+                                        p.CostPrice,
+                                        p.RetailPrice,
+                                        p.ImageURL,
+                                        p.CreatedAt,
+                                        p.IsActive,
+                                        ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity,
+                                        NULL AS Description,
+                                        NULL AS SerialNumber,
+                                        NULL AS WarrantyPeriod,
+                                        NULL AS PromoName,
+                                        NULL AS DiscountPercent,
+                                        NULL AS StartDate,
+                                        NULL AS EndDate,
+                                        NULL AS Status
+                        FROM
+                            Products p
+                            LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
+                            LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
+                            LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID AND i.BranchID = ?
+                            LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                            LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                            LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                        WHERE
+                            p.ProductName LIKE ?
+                        GROUP BY
+                            pd.ProductDetailID, p.ProductID, p.ProductName, c.CategoryName, b.BrandName,
+                            s.SupplierName, p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive
+                        ORDER BY
+                            p.ProductName
+                    """;
         }
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -656,39 +728,39 @@ public List<Category> getAllCategory(String dbName) {
     }
 
     /*
-      Lấy sản phẩm theo danh mục
+     * Lấy sản phẩm theo danh mục
      */
     public List<ProductDTO> getProductsByCategory(String dbName, int branchId, int categoryId) throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
         String sql = """
-            SELECT 
-                p.ProductID,
-                p.ProductName,
-                c.CategoryName,
-                b.BrandName,
-                s.SupplierName,
-                p.CostPrice,
-                p.RetailPrice,
-                p.ImageURL,
-                p.CreatedAt,
-                p.IsActive,
-                ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity
-            FROM 
-                Products p
-                LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
-                LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
-                LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID AND i.BranchID = ?
-            WHERE 
-                p.CategoryID = ?
-            GROUP BY 
-                p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
-                p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive
-            ORDER BY 
-                p.ProductName
-        """;
+                    SELECT
+                        p.ProductID,
+                        p.ProductName,
+                        c.CategoryName,
+                        b.BrandName,
+                        s.SupplierName,
+                        p.CostPrice,
+                        p.RetailPrice,
+                        p.ImageURL,
+                        p.CreatedAt,
+                        p.IsActive,
+                        ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity
+                    FROM
+                        Products p
+                        LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                        LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                        LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                        LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
+                        LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
+                        LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID AND i.BranchID = ?
+                    WHERE
+                        p.CategoryID = ?
+                    GROUP BY
+                        p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
+                        p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive
+                    ORDER BY
+                        p.ProductName
+                """;
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -726,10 +798,12 @@ public List<Category> getAllCategory(String dbName) {
         return categories;
     }
 
-    public List<ProductDTO> getWarehouseProductListByPageAndCategory(String dbName, int warehouseId, int page, int pageSize, String search, Integer categoryId, String inventory) {
+    public List<ProductDTO> getWarehouseProductListByPageAndCategory(String dbName, int warehouseId, int page,
+            int pageSize, String search, Integer categoryId, String inventory) {
         List<ProductDTO> products = new ArrayList<>();
 
-        // Làm sạch search string: loại bỏ khoảng trắng đầu/cuối, chuẩn hóa dấu cách thành 1
+        // Làm sạch search string: loại bỏ khoảng trắng đầu/cuối, chuẩn hóa dấu cách
+        // thành 1
         if (search == null) {
             search = "";
         } else {
@@ -737,43 +811,43 @@ public List<Category> getAllCategory(String dbName) {
         }
 
         StringBuilder query = new StringBuilder("""
-             SELECT 
-                 wp.WarehouseID,
-                 p.ProductID,
-                 pd.ProductDetailID,
-                 wp.Quantity AS InventoryQuantity,
-                 p.ProductName,
-                 b.BrandName,
-                 c.CategoryName,
-                 s.SupplierName,
-                 CAST(p.CostPrice AS NVARCHAR) AS CostPrice,
-                 CAST(p.RetailPrice AS NVARCHAR) AS RetailPrice,
-                 p.ImageURL,
-                 p.CreatedAt,
-                 CASE 
-                      WHEN p.IsActive = 1 THEN N'Đang kinh doanh' 
-                      ELSE N'Không kinh doanh' 
-                  END AS Status,
-                 pd.Description,
-                 pd.SerialNumber,
-                 pd.WarrantyPeriod,
-                 promo.PromoName,
-                 promo.DiscountPercent,
-                 promo.StartDate,
-                 promo.EndDate
-             FROM 
-                 WarehouseProducts wp
-                 LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
-                 LEFT JOIN Products p ON pd.ProductID = p.ProductID
-                 LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                 LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                 LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                 LEFT JOIN PromotionProducts pp ON pp.ProductDetailID = pd.ProductDetailID
-                 LEFT JOIN Promotions promo ON promo.PromotionID = pp.PromotionID
-             WHERE 
-                 wp.WarehouseID = ?
-                 AND REPLACE(LOWER(p.ProductName), ' ', '') LIKE ?
-    """);
+                         SELECT
+                             wp.WarehouseID,
+                             p.ProductID,
+                             pd.ProductDetailID,
+                             wp.Quantity AS InventoryQuantity,
+                             p.ProductName,
+                             b.BrandName,
+                             c.CategoryName,
+                             s.SupplierName,
+                             CAST(p.CostPrice AS NVARCHAR) AS CostPrice,
+                             CAST(p.RetailPrice AS NVARCHAR) AS RetailPrice,
+                             p.ImageURL,
+                             p.CreatedAt,
+                             CASE
+                                  WHEN p.IsActive = 1 THEN N'Đang kinh doanh'
+                                  ELSE N'Không kinh doanh'
+                              END AS Status,
+                             pd.Description,
+                             pd.SerialNumber,
+                             pd.WarrantyPeriod,
+                             promo.PromoName,
+                             promo.DiscountPercent,
+                             promo.StartDate,
+                             promo.EndDate
+                         FROM
+                             WarehouseProducts wp
+                             LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
+                             LEFT JOIN Products p ON pd.ProductID = p.ProductID
+                             LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                             LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                             LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                             LEFT JOIN PromotionProducts pp ON pp.ProductDetailID = pd.ProductDetailID
+                             LEFT JOIN Promotions promo ON promo.PromotionID = pp.PromotionID
+                         WHERE
+                             wp.WarehouseID = ?
+                             AND REPLACE(LOWER(p.ProductName), ' ', '') LIKE ?
+                """);
 
         if (categoryId != null) {
             query.append(" AND p.CategoryID = ?");
@@ -811,15 +885,15 @@ public List<Category> getAllCategory(String dbName) {
         return products;
     }
 
-    public int countProductsByWarehouseIdAndCategory(String dbName, int warehouseId, String search, Integer categoryId, String inventory) {
+    public int countProductsByWarehouseIdAndCategory(String dbName, int warehouseId, String search, Integer categoryId,
+            String inventory) {
         int count = 0;
         StringBuilder query = new StringBuilder(
                 "SELECT COUNT(*) "
                 + "FROM Products p "
                 + "JOIN ProductDetails pd ON p.ProductID = pd.ProductID "
                 + "JOIN WarehouseProducts wp ON pd.ProductDetailID = wp.ProductDetailID "
-                + "WHERE wp.WarehouseID = ? AND p.ProductName LIKE ?"
-        );
+                + "WHERE wp.WarehouseID = ? AND p.ProductName LIKE ?");
         if (categoryId != null) {
             query.append(" AND p.CategoryID = ?");
         }
@@ -847,47 +921,49 @@ public List<Category> getAllCategory(String dbName) {
         return count;
     }
 
-    /*      Lấy sản phẩm theo trạng thái tồn kho
+    /*
+     * Lấy sản phẩm theo trạng thái tồn kho
      */
-    public List<ProductDTO> getProductsByStockStatus(String dbName, int branchId, String stockStatus) throws SQLException {
+    public List<ProductDTO> getProductsByStockStatus(String dbName, int branchId, String stockStatus)
+            throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("""
-        SELECT 
-            pd.ProductDetailID,
-            p.ProductID,
-            p.ProductName,
-            c.CategoryName,
-            b.BrandName,
-            s.SupplierName,
-            p.CostPrice,
-            p.RetailPrice,
-            p.ImageURL,
-            p.CreatedAt,
-            p.IsActive,
-            ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity, 
-            pd.Description,
-            pd.SerialNumber,
-            pd.WarrantyPeriod,
-            NULL AS PromoName, 
-            NULL AS DiscountPercent,
-            NULL AS StartDate,
-            NULL AS EndDate,
-            CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status
-        FROM 
-            Products p
-            LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
-            LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
-            LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID WHERE i.BranchID = ?
-            LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-            LEFT JOIN Brands b ON p.BrandID = b.BrandID
-            LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-        GROUP BY 
-            pd.ProductDetailID,
-            p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
-            p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive,
-            pd.Description, pd.SerialNumber, pd.WarrantyPeriod
-    """);
+                    SELECT
+                        pd.ProductDetailID,
+                        p.ProductID,
+                        p.ProductName,
+                        c.CategoryName,
+                        b.BrandName,
+                        s.SupplierName,
+                        p.CostPrice,
+                        p.RetailPrice,
+                        p.ImageURL,
+                        p.CreatedAt,
+                        p.IsActive,
+                        ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity,
+                        pd.Description,
+                        pd.SerialNumber,
+                        pd.WarrantyPeriod,
+                        NULL AS PromoName,
+                        NULL AS DiscountPercent,
+                        NULL AS StartDate,
+                        NULL AS EndDate,
+                        CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status
+                    FROM
+                        Products p
+                        LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
+                        LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
+                        LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID WHERE i.BranchID = ?
+                        LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                        LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                        LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                    GROUP BY
+                        pd.ProductDetailID,
+                        p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
+                        p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive,
+                        pd.Description, pd.SerialNumber, pd.WarrantyPeriod
+                """);
 
         if (stockStatus != null && !stockStatus.equals("all")) {
             switch (stockStatus.toLowerCase()) {
@@ -923,25 +999,25 @@ public List<Category> getAllCategory(String dbName) {
     }
 
     /*
-      Lấy thống kê tổng quan về sản phẩm
+     * Lấy thống kê tổng quan về sản phẩm
      */
     public ProductStatsDTO getProductStats(String dbName, int branchId) throws SQLException {
         String sql = """
-            SELECT 
-                COUNT(DISTINCT p.ProductID) as TotalProducts,
-                COUNT(CASE WHEN ip.Quantity > 0 THEN 1 END) as InStockProducts,
-                COUNT(CASE WHEN ip.Quantity <= 0 OR ip.Quantity IS NULL THEN 1 END) as OutOfStockProducts,
-                COUNT(CASE WHEN ip.Quantity > 0 AND ip.Quantity < 10 THEN 1 END) as LowStockProducts,
-                SUM(ISNULL(ip.Quantity, 0)) as TotalQuantity,
-                SUM(ISNULL(ip.Quantity, 0) * CAST(p.RetailPrice AS DECIMAL(18,2))) as TotalValue
-            FROM 
-                Inventory i
-                LEFT JOIN InventoryProducts ip ON i.InventoryID = ip.InventoryID
-                LEFT JOIN ProductDetails pd ON ip.ProductDetailID = pd.ProductDetailID
-                LEFT JOIN Products p ON pd.ProductID = p.ProductID
-            WHERE 
-                i.InventoryID = ?
-        """;
+                    SELECT
+                        COUNT(DISTINCT p.ProductID) as TotalProducts,
+                        COUNT(CASE WHEN ip.Quantity > 0 THEN 1 END) as InStockProducts,
+                        COUNT(CASE WHEN ip.Quantity <= 0 OR ip.Quantity IS NULL THEN 1 END) as OutOfStockProducts,
+                        COUNT(CASE WHEN ip.Quantity > 0 AND ip.Quantity < 10 THEN 1 END) as LowStockProducts,
+                        SUM(ISNULL(ip.Quantity, 0)) as TotalQuantity,
+                        SUM(ISNULL(ip.Quantity, 0) * CAST(p.RetailPrice AS DECIMAL(18,2))) as TotalValue
+                    FROM
+                        Inventory i
+                        LEFT JOIN InventoryProducts ip ON i.InventoryID = ip.InventoryID
+                        LEFT JOIN ProductDetails pd ON ip.ProductDetailID = pd.ProductDetailID
+                        LEFT JOIN Products p ON pd.ProductID = p.ProductID
+                    WHERE
+                        i.InventoryID = ?
+                """;
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -955,8 +1031,7 @@ public List<Category> getAllCategory(String dbName) {
                             rs.getInt("OutOfStockProducts"),
                             rs.getInt("LowStockProducts"),
                             rs.getInt("TotalQuantity"),
-                            rs.getBigDecimal("TotalValue")
-                    );
+                            rs.getBigDecimal("TotalValue"));
                 }
             }
         } catch (SQLException e) {
@@ -967,8 +1042,10 @@ public List<Category> getAllCategory(String dbName) {
         return null;
     }
 
-    //Phuong
-    public List<ProductDTO> getProductsByFilter(String dbName, int branchId, int offset, int limit, BMProductFilter filter) throws SQLException {
+    // Phuong
+    public List<ProductDTO> getProductsByFilter(String dbName, int branchId, int offset, int limit,
+            BMProductFilter filter) throws SQLException {
+
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append("    i.InventoryID, ");
@@ -982,7 +1059,7 @@ public List<Category> getAllCategory(String dbName) {
         sql.append("    p.CostPrice, ");
         sql.append("    p.RetailPrice, ");
         sql.append("    p.ImageURL, ");
-        sql.append("    CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status, ");
+        sql.append("    CASE WHEN p.IsActive = 1 THEN N'Đang bán' ELSE N'Ngừng bán' END AS Status, ");
         sql.append("    pd.Description, ");
         sql.append("    pd.SerialNumber, ");
         sql.append("    pd.WarrantyPeriod, ");
@@ -1044,13 +1121,33 @@ public List<Category> getAllCategory(String dbName) {
             sql.append("AND (pd.ProductNameUnsigned LIKE ? OR pd.Description LIKE ? OR pd.SerialNumber LIKE ?) ");
             String searchPattern = "%" + keywordUnsigned + "%";
             parameters.add(searchPattern);
-            parameters.add("%" + keyword + "%"); 
-            parameters.add("%" + keyword + "%"); 
+            parameters.add("%" + keyword + "%");
+            parameters.add("%" + keyword + "%");
+        }
+
+        if (filter.getMinPrice() != null) {
+            sql.append("AND p.RetailPrice >= ? ");
+            parameters.add(filter.getMinPrice());
+        }
+
+        if (filter.getMaxPrice() != null) {
+            sql.append("AND p.RetailPrice <= ? ");
+            parameters.add(filter.getMaxPrice());
+        }
+
+        if (filter.hasStatusFilter()) {
+            switch (filter.getStatus()) {
+                case "active":
+                    sql.append("AND p.IsActive = 1 ");
+                    break;
+                case "inactive":
+                    sql.append("AND p.IsActive = 0 ");
+                    break;
+            }
         }
 
         sql.append("ORDER BY ip.ProductDetailID ");
-        sql.append("OFFSET ? ROWS ");
-        sql.append("FETCH NEXT ? ROWS ONLY");
+        sql.append("OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ");
         parameters.add(offset);
         parameters.add(limit);
 
@@ -1072,15 +1169,17 @@ public List<Category> getAllCategory(String dbName) {
         return products;
     }
 
+    //Phuong
     public int getTotalProductsByFilter(String dbName, int branchId, BMProductFilter filter) throws SQLException {
-        // SQL tương tự nhưng chỉ COUNT và không có OFFSET/FETCH
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT COUNT(DISTINCT ip.ProductDetailID) ");
         sql.append("FROM Inventory i ");
         sql.append("    LEFT JOIN InventoryProducts ip ON i.InventoryID = ip.InventoryID ");
         sql.append("    LEFT JOIN ProductDetails pd ON ip.ProductDetailID = pd.ProductDetailID ");
         sql.append("    LEFT JOIN Products p ON pd.ProductID = p.ProductID ");
+        sql.append("    LEFT JOIN Brands b ON p.BrandID = b.BrandID ");
         sql.append("    LEFT JOIN Categories c ON p.CategoryID = c.CategoryID ");
+        sql.append("    LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID ");
         sql.append("    LEFT JOIN PromotionProducts pp ON pd.ProductDetailID = pp.ProductDetailID ");
         sql.append("    LEFT JOIN Promotions pr ON pp.PromotionID = pr.PromotionID ");
         sql.append("        AND (pr.StartDate IS NULL OR pr.StartDate <= GETDATE()) ");
@@ -1090,7 +1189,6 @@ public List<Category> getAllCategory(String dbName) {
 
         List<Object> parameters = new ArrayList<>();
 
-        // Áp dụng các filter tương tự như phương thức chính (trừ pagination)
         if (branchId > 0) {
             sql.append("AND i.InventoryID = ? ");
             parameters.add(branchId);
@@ -1103,7 +1201,7 @@ public List<Category> getAllCategory(String dbName) {
                 if (i < filter.getCategories().length - 1) {
                     sql.append(",");
                 }
-                parameters.add(Integer.parseInt(filter.getCategories()[i]));
+                parameters.add(filter.getCategories()[i]);
             }
             sql.append(") ");
         }
@@ -1120,11 +1218,34 @@ public List<Category> getAllCategory(String dbName) {
         }
 
         if (filter.hasSearchKeyword()) {
-            sql.append("AND (p.ProductName LIKE ? OR pd.Description LIKE ? OR pd.SerialNumber LIKE ?) ");
-            String searchPattern = "%" + filter.getSearchKeyword() + "%";
-            parameters.add(searchPattern);
-            parameters.add(searchPattern);
-            parameters.add(searchPattern);
+            String keyword = filter.getSearchKeyword();
+            String keywordUnsigned = Validate.normalizeSearch(keyword);
+
+            sql.append("AND (pd.ProductNameUnsigned LIKE ? OR pd.Description LIKE ? OR pd.SerialNumber LIKE ?) ");
+            parameters.add("%" + keywordUnsigned + "%");
+            parameters.add("%" + keyword + "%");
+            parameters.add("%" + keyword + "%");
+        }
+
+        if (filter.getMinPrice() != null) {
+            sql.append("AND p.RetailPrice >= ? ");
+            parameters.add(filter.getMinPrice());
+        }
+
+        if (filter.getMaxPrice() != null) {
+            sql.append("AND p.RetailPrice <= ? ");
+            parameters.add(filter.getMaxPrice());
+        }
+
+        if (filter.hasStatusFilter()) {
+            switch (filter.getStatus()) {
+                case "active":
+                    sql.append("AND p.IsActive = 1 ");
+                    break;
+                case "inactive":
+                    sql.append("AND p.IsActive = 0 ");
+                    break;
+            }
         }
 
         try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql.toString())) {
@@ -1142,7 +1263,31 @@ public List<Category> getAllCategory(String dbName) {
         return 0;
     }
 
-    //KO DONG VAO
+    // Phuong
+    public static boolean updateProductQuantityOfInventory(String dbName, List<ProductDTO> products, int newQuantity,
+            int branchId) {
+        String sql = "UPDATE InventoryProducts SET Quantity = ? WHERE ProductDetailID = ? AND InventoryID = ?";
+        try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql)) {
+            for (ProductDTO product : products) {
+                ps.setInt(1, newQuantity);
+                ps.setInt(2, product.getProductDetailId());
+                ps.setInt(3, branchId);
+                ps.addBatch();
+            }
+            int[] results = ps.executeBatch();
+            for (int result : results) {
+                if (result == Statement.EXECUTE_FAILED) {
+                    return false; // Nếu có bất kỳ bản ghi nào không cập nhật thành công
+                }
+            }
+            return true; // Tất cả bản ghi đã được cập nhật thành công
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi cập nhật số lượng sản phẩm trong kho: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // KO DONG VAO
     private static ProductDTO extractProductDTOFromResultSet(ResultSet rs) throws SQLException {
         ProductDTO productDTO = new ProductDTO(
                 rs.getInt("ProductDetailId"),
@@ -1163,8 +1308,7 @@ public List<Category> getAllCategory(String dbName) {
                 rs.getString("RetailPrice"),
                 rs.getString("ImageURL"),
                 rs.getDate("CreatedAt"),
-                rs.getString("Status")
-        );
+                rs.getString("Status"));
         return productDTO;
     }
 

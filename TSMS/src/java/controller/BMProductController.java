@@ -63,17 +63,11 @@ public class BMProductController extends HttpServlet {
             }
             int offset = (page - 1) * pageSize;
 
-//            List<ProductDTO> products = p.getInventoryProductListByPageByBranchId(dbName, branchId, offset, pageSize);
-//            int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
             doPost(req, resp, offset, pageSize);
+
             List<Category> categories = p.getAllCategories(dbName);
             req.setAttribute("categories", categories);
             req.setAttribute("currentPage", page);
-//            req.setAttribute("totalPages", totalPages);
-//            req.setAttribute("totalProducts", totalProducts);
-//            req.setAttribute("startProduct", offset + 1);
-//            req.setAttribute("endProduct", Math.min(offset + pageSize, totalProducts));
-//            req.setAttribute("products", products);
             req.getRequestDispatcher("/WEB-INF/jsp/manager/products.jsp").forward(req, resp);
         } catch (ServletException | IOException | NumberFormatException e) {
             System.out.println(e.getMessage());
@@ -86,15 +80,33 @@ public class BMProductController extends HttpServlet {
         String[] filterCate = req.getParameterValues("categories");
         String stockStatus = req.getParameter("inventory");
         String searchKeyStr = req.getParameter("search");
+
+        String minPriceStr = req.getParameter("minPrice");
+        String maxPriceStr = req.getParameter("maxPrice");
+        String status = req.getParameter("status");
+
+        Double minPrice = 0.0;
+        if (minPriceStr != null && !minPriceStr.trim().isEmpty()) {
+            minPrice = Double.parseDouble(minPriceStr);
+        }
+        Double maxPrice = 1000000000000000.0;
+        if (maxPriceStr != null && !maxPriceStr.trim().isEmpty()) {
+            maxPrice = Double.parseDouble(maxPriceStr);
+        }
+
         String searchKey = "";
         if (searchKeyStr != null) {
             searchKey = Validate.standardizeName(searchKeyStr);
         }
+
         System.out.println("11" + filterCate);
         System.out.println("22" + stockStatus);
         System.out.println("33" + searchKey);
+        System.out.println("44" + minPriceStr);
+        System.out.println("55" + maxPriceStr);
+        System.out.println("66" + status);
 
-        BMProductFilter filter = new BMProductFilter(filterCate, stockStatus, searchKey);
+        BMProductFilter filter = new BMProductFilter(filterCate, stockStatus, searchKey, minPrice, maxPrice, status);
         HttpSession session = req.getSession(true);
 
         Object dbNameObj = session.getAttribute("dbName");
@@ -128,8 +140,19 @@ public class BMProductController extends HttpServlet {
             urlBuilder.append("search=").append(filter.getSearchKeyword()).append("&");
         }
 
-        urlBuilder.append("page=");
+        if (minPriceStr != null && !minPriceStr.trim().isEmpty()) {
+            urlBuilder.append("minPrice=").append(minPriceStr.trim()).append("&");
+        }
 
+        if (maxPriceStr != null && !maxPriceStr.trim().isEmpty()) {
+            urlBuilder.append("maxPrice=").append(maxPriceStr.trim()).append("&");
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            urlBuilder.append("status=").append(status.trim()).append("&");
+        }
+
+        urlBuilder.append("page=");
         pagingURL = urlBuilder.toString();
         req.setAttribute("pagingUrl", pagingURL);
         req.setAttribute("totalPages", totalPages);

@@ -33,30 +33,63 @@
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
+
                     <a href="bm-products?page=1" class="nav-item active">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-exchange-alt"></i>
-                        Giao dịch
-                    </a>
-                    <a href="bm-customer" class="nav-item">
-                        <i class="fas fa-handshake"></i>
-                        Đối tác
-                    </a>
-                    <a href="bm-staff" class="nav-item">
-                        <i class="fas fa-users"></i>
-                        Nhân viên
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-wallet"></i>
-                        Sổ quỹ
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-chart-bar"></i>
-                        Báo cáo
-                    </a>
+
+                    <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-exchange-alt"></i>
+                            Giao dịch
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="#" class="dropdown-item">Đơn hàng</a>
+                            <a href="#" class="dropdown-item">Nhập hàng</a>
+                            <a href="#" class="dropdown-item">Yêu cầu nhập hàng</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-handshake"></i>
+                            Đối tác
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="bm-customer" class="dropdown-item">Khách hàng</a>
+                            <a href="bm-supplier" class="dropdown-item">Nhà cung cấp</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-users"></i>
+                            Nhân viên
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="bm-staff" class="dropdown-item">Danh sách nhân viên</a>
+                            <a href="#" class="dropdown-item">Hoa hồng</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-chart-bar"></i>
+                            Báo cáo
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="#" class="dropdown-item">Tài chính</a>
+                            <a href="#" class="dropdown-item">Đật hàng</a>
+                            <a href="#" class="dropdown-item">Hàng hoá</a>
+                            <a href="#" class="dropdown-item">Khách hàng</a>
+                        </div>
+                    </div>
+
                     <a href="bm-cart" class="nav-item">
                         <i class="fas fa-cash-register"></i>
                         Bán hàng
@@ -65,16 +98,15 @@
 
                 <div class="header-right">
                     <div class="user-dropdown">
-                        <a href="#" class="user-icon gradient" id="dropdownToggle">
+                        <a href="" class="user-icon gradient" id="dropdownToggle">
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
                             <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
-                    </div>
-                </div>        
-            </div>
+                    </div>      
+                </div>
         </header>
 
         <div class="main-container">
@@ -85,8 +117,6 @@
                     <div class="filter-section">
                         <div class="filter-header">
                             <h3>Nhóm hàng</h3>
-                            <i class="fas fa-question-circle"></i>
-                            <i class="fas fa-chevron-up"></i>
                         </div>
                         <div class="filter-content">
                             <div class="search-box">
@@ -116,12 +146,11 @@
                     <div class="filter-section">
                         <div class="filter-header">
                             <h3>Tồn kho</h3>
-                            <i class="fas fa-chevron-up"></i>
                         </div>
                         <div class="filter-content">
                             <label class="radio-item">
-                                <input type="radio" name="inventory" value="all>
-                                       <span class="radio-mark"></span>
+                                <input type="radio" name="inventory" value="all" checked>
+                                <span class="radio-mark"></span>
                                 <span class="status-indicator all"></span>
                                 Tất cả
                             </label>                        
@@ -139,6 +168,45 @@
                             </label>
                         </div>
                     </div>
+
+                    <!-- Price Range Filter -->
+                    <div class="filter-section">
+                        <div class="filter-header">
+                            <h3>Khoảng giá</h3>
+                        </div>
+                        <div class="filter-content">
+                            <div class="price-range">
+                                <input type="number" name="minPrice" placeholder="Giá từ" min="0" class="price-input">
+                                <input type="number" name="maxPrice" placeholder="Giá đến" min="0" class="price-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="filter-section">
+                        <div class="filter-header">
+                            <h3>Trạng thái</h3>
+                        </div>
+                        <div class="filter-content">
+                            <label class="radio-item">
+                                <input type="radio" name="status" value="all" checked>
+                                <span class="radio-mark"></span>
+                                Tất cả
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="status" value="active">
+                                <span class="radio-mark"></span>
+                                Đang bán
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="status" value="inactive">
+                                <span class="radio-mark"></span>
+                                Ngừng bán
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
                     <div class="filter-actions">
                         <a href="bm-products?page=1" class="btn-clear">
                             <i class="fas fa-eraser"></i>
@@ -150,6 +218,7 @@
                         </button>
                     </div>
                 </form>
+
             </aside>
 
             <!-- Main Content -->
@@ -161,7 +230,7 @@
                             <div style="position: relative; flex: 1;">
                                 <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
                                 <input type="text" name="search" placeholder="Theo tên hàng"
-                                       style="padding: 10px 10px 10px 60px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
+                                       style="padding: 10px 10px 10px 35px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
                             </div>
                             <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
                         </form>
@@ -186,7 +255,7 @@
 
                             for (ProductDTO product : products) { %>
                             <tr class="product-row">
-                                <td><div class="product-image phone"></div></td>
+                                <td><img src="<%= product.getImgUrl() %>" alt="product-img"/></td>
                                 <td><%= product.getProductDetailId() %></td>
                                 <td><%= product.getDescription() %></td>
                                 <%
@@ -196,7 +265,15 @@
                                 %>
                                 <td><%= Validate.formatCostPriceToVND(priceAfterDiscount) %></td>
                                 <td><%= product.getQuantity() %></td>
-                                <td><%= product.getIsActive() %></td>
+                                <td>
+                                    <% if (product.getQuantity() == 0) { %>
+                                    <span class="status-badge inactive">Hết hàng</span>
+                                    <% } else if ("Ngừng bán".equals(product.getIsActive())) { %>
+                                    <span class="status-badge inactive">Ngừng bán</span>
+                                    <% } else { %>
+                                    <span class="status-badge active"><%= product.getIsActive() %></span>
+                                    <% } %>
+                                </td>
                             </tr>
                             <tr class="detail-row">
                                 <td colspan="9" style="background:#f0f0f0">

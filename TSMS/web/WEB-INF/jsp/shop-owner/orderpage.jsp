@@ -29,10 +29,15 @@
                         <i class="fas fa-chevron-up"></i>
                     </div>
                     <div class="filter-content">
-                        <div class="category-tree">
-                            <div class="category-item selected">
-                                <span class="category-label" onclick="filterProducts(null)">Tất cả</span>
+                        <div class="category-tree" >
+                            <div class="category-item ${selectedBranchID == null ? 'selected' : ''}">
+                                <a href="so-orders?page=1" class="category-label" style="text-decoration: none">Tất cả</a>
                             </div>
+                            <c:forEach var="branch" items="${branchesList}">
+                                <div class="category-item ${selectedBranchID == branch.branchID ? 'selected' : ''}">
+                                    <a href="so-orders?page=1&branchID=${branch.branchID}" class="category-label" style="text-decoration: none">${branch.branchName}</a>
+                                </div>
+                            </c:forEach>
                         </div>
                     </div>
                 </div>
@@ -166,23 +171,23 @@
                     <div class="pagination-info">
                         Hiển thị ${startOrder} - ${endOrder} / Tổng số ${totalOrders} đơn hàng
                     </div>
-                    <div class="pagination">
-                        <a href="so-orders?page=1" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
-                            <i class="fas fa-angle-double-left"></i>
-                        </a>
-                        <a href="so-orders?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
-                            <i class="fas fa-angle-left"></i>
-                        </a>
-                        <c:forEach begin="1" end="${totalPages}" var="i">
-                            <a href="so-orders?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
-                        </c:forEach>
-                        <a href="so-orders?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
-                            <i class="fas fa-angle-right"></i>
-                        </a>
-                        <a href="so-orders?page=${totalPages}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
-                            <i class="fas fa-angle-double-right"></i>
-                        </a>
-                    </div>
+                        <div class="pagination">
+                            <a href="so-orders?page=1${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                            <a href="so-orders?page=${currentPage - 1}${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <a href="so-orders?page=${i}${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                            </c:forEach>
+                            <a href="so-orders?page=${currentPage + 1}${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                            <a href="so-orders?page=${totalPages}${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </div>
                 </div>
             </main>
         </div>

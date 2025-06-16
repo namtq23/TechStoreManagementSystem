@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PromotionDAO {
+
+        // Method tìm kiếm với criteria
     public List<PromotionDTO> searchPromotions(String dbName, PromotionSearchCriteria criteria, Integer categoryId) throws SQLException {
         List<PromotionDTO> promotions = new ArrayList<>();
         StringBuilder sql = new StringBuilder();
@@ -42,7 +44,9 @@ public class PromotionDAO {
             }
         }
         
+
         //Thêm discount filter
+
         if (criteria.getDiscountFilter() != null && !criteria.getDiscountFilter().equals("all")) {
             switch (criteria.getDiscountFilter()) {
                 case "low":
@@ -83,6 +87,7 @@ public class PromotionDAO {
             conn = DBUtil.getConnectionTo(dbName);
             stmt = conn.prepareStatement(sql.toString());
             
+
             // Set parameters
             for (int i = 0; i < parameters.size(); i++) {
                 stmt.setObject(i + 1, parameters.get(i));
@@ -128,6 +133,7 @@ public class PromotionDAO {
         
         return promotions;
     }
+
     
     // Method đếm số lượng promotions theo criteria
     public int countPromotions(String dbName, PromotionSearchCriteria criteria, Integer categoryId) throws SQLException {
@@ -273,7 +279,7 @@ public class PromotionDAO {
             e.printStackTrace();
             throw e;
         } finally {
-            // ✅ Sử dụng DBUtil.closeConnection()
+            // Sử dụng DBUtil.closeConnection()
             if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
             if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
             DBUtil.closeConnection(conn);
@@ -282,7 +288,8 @@ public class PromotionDAO {
         return promotions;
     }
     
-    // Lấy khuyến mãi theo ID
+
+    //Lấy khuyến mãi theo ID
     public PromotionDTO getPromotionById(String dbName, int promotionId) throws SQLException {
         String sql = "SELECT PromotionID, PromoName, DiscountPercent, StartDate, EndDate FROM Promotions WHERE PromotionID = ?";
         

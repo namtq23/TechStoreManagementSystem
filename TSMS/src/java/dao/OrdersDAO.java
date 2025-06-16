@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import model.Branches;
 import model.OrdersDTO;
 import util.DBUtil;
 
@@ -19,72 +20,88 @@ import util.DBUtil;
  */
 public class OrdersDAO {
 
-    public List<OrdersDTO> getOrdersListByPage(String dbName, int page, int pageSize) {
-        List<OrdersDTO> orders = new ArrayList<>();
-        String query = """
-                SELECT 
-                    od.OrderDetailID,
-                    od.ProductDetailID,
-                    od.Quantity,
-                    o.OrderID,
-                    o.BranchID,
-                    o.CreatedBy,
-                    o.OrderStatus,
-                    o.CreatedAt,
-                    o.CustomerID,
-                    o.PaymentMethod,
-                    o.Notes,
-                    o.GrandTotal,
-                    o.CustomerPay,
-                    o.Change,
-                    b.BranchName,
-                    c.FullName AS CustomerName,
-                    u.FullName AS CreatedByName,
-                    p.ProductName
-                FROM 
-                    Orders o
-                    LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID
-                    LEFT JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID
-                    LEFT JOIN Products p ON pd.ProductID = p.ProductID
-                    JOIN Branches b ON o.BranchID = b.BranchID
-                    JOIN Customers c ON o.CustomerID = c.CustomerID
-                    JOIN Users u ON o.CreatedBy = u.UserID
-                ORDER BY o.CreatedAt DESC
-                OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
-                """;
+    public List<OrdersDTO> getOrdersListByPage(String dbName, int page, int pageSize, Integer branchID) {
+    List<OrdersDTO> orders = new ArrayList<>();
+    StringBuilder query = new StringBuilder("""
+        SELECT 
+            od.OrderDetailID,
+            od.ProductDetailID,
+            od.Quantity,
+            o.OrderID,
+            o.BranchID,
+            o.CreatedBy,
+            o.OrderStatus,
+            o.CreatedAt,
+            o.CustomerID,
+            o.PaymentMethod,
+            o.Notes,
+            o.GrandTotal,
+            o.CustomerPay,
+            o.Change,
+            b.BranchName,
+            c.FullName AS CustomerName,
+            u.FullName AS CreatedByName,
+            p.ProductName
+        FROM 
+            Orders o
+            LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID
+            LEFT JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID
+            LEFT JOIN Products p ON pd.ProductID = p.ProductID
+            JOIN Branches b ON o.BranchID = b.BranchID
+            JOIN Customers c ON o.CustomerID = c.CustomerID
+            JOIN Users u ON o.CreatedBy = u.UserID
+        """);
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, (page - 1) * pageSize);
-            stmt.setInt(2, pageSize);
-
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                OrdersDTO order = extractOrderDTOFromResultSet(rs);
-                orders.add(order);
-            }
-        } catch (Exception e) {
-            System.err.println("Error in getOrdersListByPage: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return orders;
+    if (branchID != null && branchID > 0) {
+        query.append(" WHERE o.BranchID = ?");
     }
 
-    public int countOrderDetails(String dbName) {
-        int count = 0;
-        String query = "SELECT COUNT(*) "
-                + "FROM Orders o "
-                + "LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-        } catch (Exception e) {
-            System.err.println("Error in countOrderDetails: " + e.getMessage());
-            e.printStackTrace();
+    query.append(" ORDER BY o.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+        int paramIndex = 1;
+        if (branchID != null && branchID > 0) {
+            stmt.setInt(paramIndex++, branchID);
         }
-        return count;
+        stmt.setInt(paramIndex++, (page - 1) * pageSize);
+        stmt.setInt(paramIndex, pageSize);
+
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            OrdersDTO order = extractOrderDTOFromResultSet(rs);
+            orders.add(order);
+        }
+    } catch (SQLException e) {
+        System.err.println("Error in getOrdersListByPage: " + e.getMessage());
+        e.printStackTrace();
     }
+    return orders;
+}
+
+public int countOrderDetails(String dbName, Integer branchID) {
+    int count = 0;
+    StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM Orders o LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID");
+    
+    if (branchID != null && branchID > 0) {
+        query.append(" WHERE o.BranchID = ?");
+    }
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+        if (branchID != null && branchID > 0) {
+            stmt.setInt(1, branchID);
+        }
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            count = rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        System.err.println("Error in countOrderDetails: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return count;
+}
 
     public void updateOrderDetails(String dbName, OrdersDTO order) {
         String query = """
@@ -215,6 +232,25 @@ public class OrdersDAO {
             }
         }
     }
+    public List<Branches> getAllBranches(String dbName) {
+    List<Branches> branches = new ArrayList<>();
+    String query = "SELECT BranchID, BranchName FROM Branches WHERE IsActive = 1 ORDER BY BranchName";
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            Branches branch = new Branches();
+            branch.setBranchID(rs.getInt("BranchID"));
+            branch.setBranchName(rs.getString("BranchName"));
+            branches.add(branch);
+        }
+    } catch (SQLException e) {
+        System.err.println("Error in getAllBranches: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return branches;
+}
 
     private static OrdersDTO extractOrderDTOFromResultSet(ResultSet rs) throws SQLException {
         int orderDetailID = rs.getInt("OrderDetailID");
@@ -260,25 +296,5 @@ public class OrdersDAO {
     }
 
     public static void main(String[] args) {
-        String dbName = "DTB_Tien"; // Thay bằng tên DB của bạn
-        int page = 1;
-        int pageSize = 10;
-
-        OrdersDAO dao = new OrdersDAO();
-
-        List<OrdersDTO> ordersList = dao.getOrdersListByPage(dbName, page, pageSize);
-        for (OrdersDTO order : ordersList) {
-            System.out.println("OrderID: " + order.getOrderID()
-                    + ", Branch: " + order.getBranchID()
-                    + ", Customer: " + order.getCustomerID()
-                    + ", Total: " + order.getGrandTotal()
-                    + ", Status: " + order.getOrderStatus()
-                    + ", CreatedAt: " + order.getCreatedAt());
-        }
-
-        // Test hàm countOrders
-        System.out.println("\n=== Test countOrders ===");
-        int totalOrders = dao.countOrderDetails(dbName);
-        System.out.println("Total Orders: " + totalOrders);
     }
 }

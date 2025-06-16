@@ -424,7 +424,7 @@ class TSMSCashier {
         <td>
             <div class="quantity-controls">
                 <button class="qty-btn"">-</button>
-                <input type="number" class="quantity" value="1" min="1" max="${product.quantity}">
+                <input type="text" class="quantity" value="1" min="1" max="${product.quantity}">
                 <button class="qty-btn"">+</button>
             </div>
         </td>

@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.List;
+import model.Branches;
 import model.OrdersDTO;
 
 /**
@@ -27,10 +28,10 @@ public class SOOrderController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            HttpSession session = req.getSession(false); // Use false to avoid creating a new session
-            Object userIdObj = session != null ? session.getAttribute("userId") : null;
-            Object roleIdObj = session != null ? session.getAttribute("roleId") : null;
-            Object dbNameObj = session != null ? session.getAttribute("dbName") : null;
+            HttpSession session = req.getSession(false);
+            Object userIdObj = session.getAttribute("userId");
+            Object roleIdObj = session.getAttribute("roleId");
+            Object dbNameObj = session.getAttribute("dbName");
 
             if (userIdObj == null || roleIdObj == null || dbNameObj == null || Integer.parseInt(roleIdObj.toString()) != 0) {
                 resp.sendRedirect("login");
@@ -40,6 +41,7 @@ public class SOOrderController extends HttpServlet {
             String dbName = dbNameObj.toString();
             int page = 1;
             int pageSize = 10;
+            Integer branchID = null;
             if (req.getParameter("page") != null) {
                 try {
                     page = Integer.parseInt(req.getParameter("page"));
@@ -48,6 +50,16 @@ public class SOOrderController extends HttpServlet {
                     }
                 } catch (NumberFormatException e) {
                     page = 1;
+                }
+            }
+            if (req.getParameter("branchID") != null) {
+                try {
+                    branchID = Integer.parseInt(req.getParameter("branchID"));
+                    if (branchID < 1) {
+                        branchID = null;
+                    }
+                } catch (NumberFormatException e) {
+                    branchID = null;
                 }
             }
             OrdersDAO orderDAO = new OrdersDAO();
@@ -66,11 +78,13 @@ public class SOOrderController extends HttpServlet {
                     return;
                 }
             }
-
-            List<OrdersDTO> ordersList = orderDAO.getOrdersListByPage(dbName, page, pageSize);
-            int totalOrders = orderDAO.countOrderDetails(dbName);
+            // Fetch all branches
+            List<Branches> branchesList = orderDAO.getAllBranches(dbName);
+            req.setAttribute("branchesList", branchesList);
+            // Fetch orders based on branch filter
+            List<OrdersDTO> ordersList = orderDAO.getOrdersListByPage(dbName, page, pageSize, branchID);
+            int totalOrders = orderDAO.countOrderDetails(dbName, branchID);
             int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
-
             int startOrder = (page - 1) * pageSize + 1;
             int endOrder = Math.min(page * pageSize, totalOrders);
 
@@ -80,6 +94,7 @@ public class SOOrderController extends HttpServlet {
             req.setAttribute("totalOrders", totalOrders);
             req.setAttribute("startOrder", startOrder);
             req.setAttribute("endOrder", endOrder);
+            req.setAttribute("selectedBranchID", branchID);
 
             req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/orderpage.jsp").forward(req, resp);
         } catch (Exception e) {
