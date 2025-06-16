@@ -224,9 +224,9 @@ public class ProductDAO {
         } finally {
             if (pstmt != null)
                 try {
-                    pstmt.close();
-                } catch (SQLException ignored) {
-                }
+                pstmt.close();
+            } catch (SQLException ignored) {
+            }
             if (conn != null) {
                 DBUtil.closeConnection(conn);
             }
@@ -245,8 +245,7 @@ public class ProductDAO {
                     COMMIT;
                 """);
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             int paramIndex = 1;
             stmt.setBigDecimal(paramIndex++, new java.math.BigDecimal(product.getRetailPrice()));
             stmt.setBigDecimal(paramIndex++, new java.math.BigDecimal(product.getCostPrice()));
@@ -303,8 +302,7 @@ public class ProductDAO {
                         pd.ProductDetailID = ?
                 """);
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             stmt.setInt(1, productDetailId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -321,9 +319,7 @@ public class ProductDAO {
     public List<Category> getAllCategory(String dbName) {
         List<Category> categories = new ArrayList<>();
         String query = "SELECT CategoryID, CategoryName FROM " + dbName + ".dbo.Categories";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement stmt = conn.prepareStatement(query);
-                ResultSet rs = stmt.executeQuery()) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 Category category = new Category();
                 category.setCategoryID(rs.getInt("CategoryID"));
@@ -339,9 +335,7 @@ public class ProductDAO {
     public List<Brand> getAllBrands(String dbName) {
         List<Brand> brands = new ArrayList<>();
         String query = "SELECT BrandID, BrandName FROM " + dbName + ".dbo.Brands";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement stmt = conn.prepareStatement(query);
-                ResultSet rs = stmt.executeQuery()) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 Brand brand = new Brand();
                 brand.setBrandID(rs.getInt("BrandID"));
@@ -357,9 +351,7 @@ public class ProductDAO {
     public List<Supplier> getAllSuppliers(String dbName) {
         List<Supplier> suppliers = new ArrayList<>();
         String query = "SELECT SupplierID, SupplierName, ContactName, Phone, Email FROM " + dbName + ".dbo.Suppliers";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement stmt = conn.prepareStatement(query);
-                ResultSet rs = stmt.executeQuery()) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 Supplier supplier = new Supplier();
                 supplier.setSupplierID(rs.getInt("SupplierID"));
@@ -401,8 +393,7 @@ public class ProductDAO {
 
     public int addBrand(String dbName, String brandName) throws SQLException {
         String query = "INSERT INTO " + dbName + ".dbo.Brands (BrandName) VALUES (?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, brandName);
             stmt.executeUpdate();
             ResultSet rs = stmt.getGeneratedKeys();
@@ -428,9 +419,7 @@ public class ProductDAO {
     public int addCategory(String dbName, String categoryName) throws SQLException {
         String query = "SELECT ISNULL(MAX(CategoryID), 0) + 1 AS NextID FROM " + dbName + ".dbo.Categories";
         int categoryId;
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement stmt = conn.prepareStatement(query);
-                ResultSet rs = stmt.executeQuery()) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
             rs.next();
             categoryId = rs.getInt("NextID");
         }
@@ -459,8 +448,7 @@ public class ProductDAO {
             throws SQLException {
         String query = "INSERT INTO " + dbName
                 + ".dbo.Suppliers (SupplierName, ContactName, Phone, Email) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, supplierName);
             stmt.setString(2, contactName != null && !contactName.isEmpty() ? contactName : null);
             stmt.setString(3, phone != null && !phone.isEmpty() ? phone : null);
@@ -478,8 +466,7 @@ public class ProductDAO {
             double costPrice, double retailPrice, String imageURL, boolean isActive) throws SQLException {
         String query = "INSERT INTO " + dbName
                 + ".dbo.Products (ProductName, BrandID, CategoryID, SupplierID, CostPrice, RetailPrice, ImageURL, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, productName);
             stmt.setInt(2, brandId);
             stmt.setInt(3, categoryId);
@@ -501,8 +488,7 @@ public class ProductDAO {
             String warrantyPeriod) throws SQLException {
         String query = "INSERT INTO " + dbName
                 + ".dbo.ProductDetails (ProductID, Description, SerialNumber, WarrantyPeriod) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, productId);
             stmt.setString(2, description != null && !description.isEmpty() ? description : null);
             stmt.setString(3, serialNumber != null && !serialNumber.isEmpty() ? serialNumber : null);
@@ -526,8 +512,8 @@ public class ProductDAO {
             stmt.setInt(3, quantity);
             stmt.executeUpdate();
         }
-    } 
-                                                
+    }
+
     public List<ProductDTO> getAllProducts(String dbName, int warehouseId) {
         List<ProductDTO> products = new ArrayList<>();
         String query = """
@@ -568,8 +554,7 @@ public class ProductDAO {
                 wp.WarehouseID = ?
         """;
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName); 
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, warehouseId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
@@ -875,8 +860,7 @@ public class ProductDAO {
 
         query.append(" ORDER BY p.ProductID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             int paramIndex = 1;
             stmt.setInt(paramIndex++, warehouseId);
             stmt.setString(paramIndex++, "%" + search.toLowerCase() + "%");
@@ -906,10 +890,10 @@ public class ProductDAO {
         int count = 0;
         StringBuilder query = new StringBuilder(
                 "SELECT COUNT(*) "
-                        + "FROM Products p "
-                        + "JOIN ProductDetails pd ON p.ProductID = pd.ProductID "
-                        + "JOIN WarehouseProducts wp ON pd.ProductDetailID = wp.ProductDetailID "
-                        + "WHERE wp.WarehouseID = ? AND p.ProductName LIKE ?");
+                + "FROM Products p "
+                + "JOIN ProductDetails pd ON p.ProductID = pd.ProductID "
+                + "JOIN WarehouseProducts wp ON pd.ProductDetailID = wp.ProductDetailID "
+                + "WHERE wp.WarehouseID = ? AND p.ProductName LIKE ?");
         if (categoryId != null) {
             query.append(" AND p.CategoryID = ?");
         }
@@ -918,8 +902,7 @@ public class ProductDAO {
         } else if ("out-stock".equals(inventory)) {
             query.append(" AND wp.Quantity = 0");
         }
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             stmt.setInt(1, warehouseId);
             stmt.setString(2, "%" + search + "%");
             int paramIndex = 3;
@@ -1000,8 +983,7 @@ public class ProductDAO {
         }
         sql.append(" ORDER BY p.ProductName");
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-                PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             ps.setInt(1, branchId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -1063,6 +1045,7 @@ public class ProductDAO {
     // Phuong
     public List<ProductDTO> getProductsByFilter(String dbName, int branchId, int offset, int limit,
             BMProductFilter filter) throws SQLException {
+
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append("    i.InventoryID, ");
@@ -1076,7 +1059,7 @@ public class ProductDAO {
         sql.append("    p.CostPrice, ");
         sql.append("    p.RetailPrice, ");
         sql.append("    p.ImageURL, ");
-        sql.append("    CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status, ");
+        sql.append("    CASE WHEN p.IsActive = 1 THEN N'Đang bán' ELSE N'Ngừng bán' END AS Status, ");
         sql.append("    pd.Description, ");
         sql.append("    pd.SerialNumber, ");
         sql.append("    pd.WarrantyPeriod, ");
@@ -1142,16 +1125,35 @@ public class ProductDAO {
             parameters.add("%" + keyword + "%");
         }
 
+        if (filter.getMinPrice() != null) {
+            sql.append("AND p.RetailPrice >= ? ");
+            parameters.add(filter.getMinPrice());
+        }
+
+        if (filter.getMaxPrice() != null) {
+            sql.append("AND p.RetailPrice <= ? ");
+            parameters.add(filter.getMaxPrice());
+        }
+
+        if (filter.hasStatusFilter()) {
+            switch (filter.getStatus()) {
+                case "active":
+                    sql.append("AND p.IsActive = 1 ");
+                    break;
+                case "inactive":
+                    sql.append("AND p.IsActive = 0 ");
+                    break;
+            }
+        }
+
         sql.append("ORDER BY ip.ProductDetailID ");
-        sql.append("OFFSET ? ROWS ");
-        sql.append("FETCH NEXT ? ROWS ONLY");
+        sql.append("OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ");
         parameters.add(offset);
         parameters.add(limit);
 
         List<ProductDTO> products = new ArrayList<>();
 
-        try (Connection con = DBUtil.getConnectionTo(dbName);
-                PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql.toString())) {
             for (int i = 0; i < parameters.size(); i++) {
                 ps.setObject(i + 1, parameters.get(i));
             }
@@ -1167,15 +1169,17 @@ public class ProductDAO {
         return products;
     }
 
+    //Phuong
     public int getTotalProductsByFilter(String dbName, int branchId, BMProductFilter filter) throws SQLException {
-        // SQL tương tự nhưng chỉ COUNT và không có OFFSET/FETCH
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT COUNT(DISTINCT ip.ProductDetailID) ");
         sql.append("FROM Inventory i ");
         sql.append("    LEFT JOIN InventoryProducts ip ON i.InventoryID = ip.InventoryID ");
         sql.append("    LEFT JOIN ProductDetails pd ON ip.ProductDetailID = pd.ProductDetailID ");
         sql.append("    LEFT JOIN Products p ON pd.ProductID = p.ProductID ");
+        sql.append("    LEFT JOIN Brands b ON p.BrandID = b.BrandID ");
         sql.append("    LEFT JOIN Categories c ON p.CategoryID = c.CategoryID ");
+        sql.append("    LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID ");
         sql.append("    LEFT JOIN PromotionProducts pp ON pd.ProductDetailID = pp.ProductDetailID ");
         sql.append("    LEFT JOIN Promotions pr ON pp.PromotionID = pr.PromotionID ");
         sql.append("        AND (pr.StartDate IS NULL OR pr.StartDate <= GETDATE()) ");
@@ -1185,7 +1189,6 @@ public class ProductDAO {
 
         List<Object> parameters = new ArrayList<>();
 
-        // Áp dụng các filter tương tự như phương thức chính (trừ pagination)
         if (branchId > 0) {
             sql.append("AND i.InventoryID = ? ");
             parameters.add(branchId);
@@ -1198,7 +1201,7 @@ public class ProductDAO {
                 if (i < filter.getCategories().length - 1) {
                     sql.append(",");
                 }
-                parameters.add(Integer.parseInt(filter.getCategories()[i]));
+                parameters.add(filter.getCategories()[i]);
             }
             sql.append(") ");
         }
@@ -1215,15 +1218,37 @@ public class ProductDAO {
         }
 
         if (filter.hasSearchKeyword()) {
-            sql.append("AND (p.ProductName LIKE ? OR pd.Description LIKE ? OR pd.SerialNumber LIKE ?) ");
-            String searchPattern = "%" + filter.getSearchKeyword() + "%";
-            parameters.add(searchPattern);
-            parameters.add(searchPattern);
-            parameters.add(searchPattern);
+            String keyword = filter.getSearchKeyword();
+            String keywordUnsigned = Validate.normalizeSearch(keyword);
+
+            sql.append("AND (pd.ProductNameUnsigned LIKE ? OR pd.Description LIKE ? OR pd.SerialNumber LIKE ?) ");
+            parameters.add("%" + keywordUnsigned + "%");
+            parameters.add("%" + keyword + "%");
+            parameters.add("%" + keyword + "%");
         }
 
-        try (Connection con = DBUtil.getConnectionTo(dbName);
-                PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        if (filter.getMinPrice() != null) {
+            sql.append("AND p.RetailPrice >= ? ");
+            parameters.add(filter.getMinPrice());
+        }
+
+        if (filter.getMaxPrice() != null) {
+            sql.append("AND p.RetailPrice <= ? ");
+            parameters.add(filter.getMaxPrice());
+        }
+
+        if (filter.hasStatusFilter()) {
+            switch (filter.getStatus()) {
+                case "active":
+                    sql.append("AND p.IsActive = 1 ");
+                    break;
+                case "inactive":
+                    sql.append("AND p.IsActive = 0 ");
+                    break;
+            }
+        }
+
+        try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql.toString())) {
             for (int i = 0; i < parameters.size(); i++) {
                 ps.setObject(i + 1, parameters.get(i));
             }
