@@ -29,7 +29,7 @@
                 <div class="filter-content">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="Tìm kiếm khuyến mãi" value="${param.search}">
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm khuyến mãi" value="${searchTerm}">
                     </div>
                     <div class="category-tree">
                         <div class="category-item ${selectedCategoryId == null ? 'selected' : ''}">
@@ -53,25 +53,25 @@
                 </div>
                 <div class="filter-content">
                     <label class="radio-item">
-                        <input type="radio" name="statusFilter" value="all" ${param.status == null || param.status == 'all' ? 'checked' : ''} onchange="filterPromotions()">
+                        <input type="radio" name="statusFilter" value="all" ${selectedStatus == null || selectedStatus == 'all' ? 'checked' : ''} onchange="filterPromotions()">
                         <span class="radio-mark"></span>
                         <span class="status-indicator all"></span>
                         Tất cả
                     </label>
                     <label class="radio-item">
-                        <input type="radio" name="statusFilter" value="active" ${param.status == 'active' ? 'checked' : ''} onchange="filterPromotions()">
+                        <input type="radio" name="statusFilter" value="active" ${selectedStatus == 'active' ? 'checked' : ''} onchange="filterPromotions()">
                         <span class="radio-mark"></span>
                         <span class="status-indicator in-stock"></span>
                         Đang hoạt động
                     </label>
                     <label class="radio-item">
-                        <input type="radio" name="statusFilter" value="scheduled" ${param.status == 'scheduled' ? 'checked' : ''} onchange="filterPromotions()">
+                        <input type="radio" name="statusFilter" value="scheduled" ${selectedStatus == 'scheduled' ? 'checked' : ''} onchange="filterPromotions()">
                         <span class="radio-mark"></span>
                         <span class="status-indicator out-stock"></span>
                         Đã lên lịch
                     </label>
                     <label class="radio-item">
-                        <input type="radio" name="statusFilter" value="expired" ${param.status == 'expired' ? 'checked' : ''} onchange="filterPromotions()">
+                        <input type="radio" name="statusFilter" value="expired" ${selectedStatus == 'expired' ? 'checked' : ''} onchange="filterPromotions()">
                         <span class="radio-mark"></span>
                         <span class="status-indicator out-stock"></span>
                         Đã hết hạn
@@ -87,25 +87,25 @@
                 </div>
                 <div class="filter-content">
                     <label class="radio-item">
-                        <input type="radio" name="discountFilter" value="all" ${param.discount == null || param.discount == 'all' ? 'checked' : ''} onchange="filterPromotions()">
+                        <input type="radio" name="discountFilter" value="all" ${selectedDiscount == null || selectedDiscount == 'all' ? 'checked' : ''} onchange="filterPromotions()">
                         <span class="radio-mark"></span>
                         <span class="status-indicator all"></span>
                         Tất cả
                     </label>
                     <label class="radio-item">
-                        <input type="radio" name="discountFilter" value="low" ${param.discount == 'low' ? 'checked' : ''} onchange="filterPromotions()">
+                        <input type="radio" name="discountFilter" value="low" ${selectedDiscount == 'low' ? 'checked' : ''} onchange="filterPromotions()">
                         <span class="radio-mark"></span>
                         <span class="status-indicator below"></span>
                         Dưới 15%
                     </label>
                     <label class="radio-item">
-                        <input type="radio" name="discountFilter" value="medium" ${param.discount == 'medium' ? 'checked' : ''} onchange="filterPromotions()">
+                        <input type="radio" name="discountFilter" value="medium" ${selectedDiscount == 'medium' ? 'checked' : ''} onchange="filterPromotions()">
                         <span class="radio-mark"></span>
                         <span class="status-indicator in-stock"></span>
                         15% - 25%
                     </label>
                     <label class="radio-item">
-                        <input type="radio" name="discountFilter" value="high" ${param.discount == 'high' ? 'checked' : ''} onchange="filterPromotions()">
+                        <input type="radio" name="discountFilter" value="high" ${selectedDiscount == 'high' ? 'checked' : ''} onchange="filterPromotions()">
                         <span class="radio-mark"></span>
                         <span class="status-indicator above"></span>
                         Trên 25%
@@ -123,18 +123,13 @@
                     <form action="so-promotions" method="get" class="search-form">
                         <div class="search-input-wrapper">
                             <i class="fas fa-search"></i>
-                            <input type="text" name="search" placeholder="Theo tên khuyến mãi" value="${param.search}">
+                            <input type="text" name="search" placeholder="Theo tên khuyến mãi" value="${searchTerm}">
                         </div>
                         <button type="submit" class="btn btn-success">Tìm Kiếm</button>
                     </form>
 
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPromotionModal">
                         <i class="fas fa-plus"></i> Thêm mới
-                    </button>
-
-                    <button class="btn btn-menu">
-                        <i class="fas fa-bars"></i>
-                        <i class="fas fa-chevron-down"></i>
                     </button>
                 </div>
             </div>
@@ -202,8 +197,6 @@
                 </div>
             </div>
 
-            
-
             <!-- Tab Content -->
             <div id="tab-all" class="tab-content active">
                 <div class="table-container">
@@ -229,10 +222,10 @@
                                     <tr>
                                         <td colspan="9" class="empty-state">
                                             <i class="fas fa-percentage"></i>
-                                            <h5>Chưa có khuyến mãi nào</h5>
-                                            <p>Hãy tạo khuyến mãi đầu tiên cho cửa hàng của bạn!</p>
+                                            <h5>Không tìm thấy khuyến mãi nào</h5>
+                                            <p>Hãy thử thay đổi bộ lọc hoặc tạo khuyến mãi mới !!!</p>
                                             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPromotionModal">
-                                                <i class="fas fa-plus"></i> Tạo khuyến mãi đầu tiên
+                                                <i class="fas fa-plus"></i> Tạo khuyến mãi mới
                                             </button>
                                         </td>
                                     </tr>
@@ -314,7 +307,6 @@
                     </table>
                 </div>
             </div>
-
            
 
             <!-- Pagination -->
@@ -490,5 +482,6 @@
             });
         });
     </script>
+    
 </body>
 </html>
