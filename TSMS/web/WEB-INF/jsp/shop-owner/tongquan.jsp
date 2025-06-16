@@ -26,7 +26,7 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="so-overview"" class="nav-item">
+                    <a href="so-overview"" class="nav-item active">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
@@ -42,21 +42,22 @@
                         <i class="fas fa-handshake"></i>
                         Đối tác
                     </a>
-                    <a href="so-promotion" class="nav-item">
-                        <i class="fas fa-users"></i>
-                        Khuyến mãi
-                    </a>
+                    
                     <a href="so-staff" class="nav-item">
                         <i class="fas fa-users"></i>
                         Nhân viên
+                    </a>
+                    <a href="so-promotions" class="nav-item">
+                        <i class="fas fa-users"></i>
+                        Khuyến mãi
                     </a>
                     <a href="#" class="nav-item">
                         <i class="fas fa-wallet"></i>
                         Sổ quỹ
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="so-invoices" class="nav-item">
                         <i class="fas fa-chart-bar"></i>
-                        Báo cáo
+                        Báo cáo Chi tiết
                     </a>
                 </nav>
 

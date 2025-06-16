@@ -1,163 +1,117 @@
 package model;
 
-import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Date;
+import java.util.List;
 
-/*
-DTO class kế thừa từ Promotion - có thêm logic hiển thị và tính toán
- */
-public class PromotionDTO extends Promotions {
-    private String status;              // Trạng thái tính toán (Đang áp dụng/Hết hạn/Chưa áp dụng)
-    private String description;         // Mô tả tự động tạo
-    private String displayBadge;        // Text hiển thị trên badge (10%, Khuyến mãi)
-    private boolean isActive;           // Có đang hoạt động không
-    private String statusClass;         // CSS class cho status
-    
-    // Constructor
-    public PromotionDTO() {
-        super();
+public class PromotionDTO {
+    private int promotionID;
+    private String promoName;
+    private double discountPercent;
+    private Date startDate;
+    private Date endDate;
+    private String status; 
+    private List<Integer> branchIDs;
+    private List<Integer> productDetailIDs; 
+    private int branchCount;
+    private int productCount;
+    private String description;
+
+    // Constructors
+    public PromotionDTO() {}
+
+    public PromotionDTO(int promotionID, String promoName, double discountPercent, 
+                       Date startDate, Date endDate) {
+        this.promotionID = promotionID;
+        this.promoName = promoName;
+        this.discountPercent = discountPercent;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
-    
-    public PromotionDTO(int promotionID, String promoName, BigDecimal discountPercent,
-                       Date startDate, Date endDate, boolean applyToAllBranches) {
-        // Gọi constructor của class cha (Promotion)
-        super(promotionID, promoName, discountPercent, startDate, endDate, applyToAllBranches);
-        
-        // Tính toán các giá trị bổ sung cho hiển thị
-        calculateStatus();
-        generateDescription();
-        generateDisplayBadge();
-        generateStatusClass();
-    }
-    
-    /*
-     Tính toán trạng thái dựa trên ngày hiện tại
-     */
-    private void calculateStatus() {
-        Date now = new Date();
-        
-        if (super.getStartDate() != null && now.before(super.getStartDate())) {
-            this.status = "Chưa áp dụng";
-            this.isActive = false;
-        } else if (super.getEndDate() != null && now.after(super.getEndDate())) {
-            this.status = "Hết hạn";
-            this.isActive = false;
-        } else {
-            this.status = "Đang áp dụng";
-            this.isActive = true;
-        }
-    }
-    
-    /**
-     * Tạo mô tả tự động dựa trên thông tin khuyến mãi
-     */
-    private void generateDescription() {
-        StringBuilder desc = new StringBuilder();
-        
-        if (super.getDiscountPercent() != null && super.getDiscountPercent().compareTo(BigDecimal.ZERO) > 0) {
-            desc.append("Giảm ").append(super.getDiscountPercent()).append("% ");
-        }
-        
-        if (super.isApplyToAllBranches()) {
-            desc.append("áp dụng toàn hệ thống. ");
-        } else {
-            desc.append("áp dụng cho chi nhánh được chỉ định. ");
-        }
-        
-        desc.append("Chương trình khuyến mãi đặc biệt dành cho khách hàng.");
-        
-        this.description = desc.toString();
-    }
-    
-    /**
-     * Tạo text hiển thị trên badge
-     */
-    private void generateDisplayBadge() {
-        if (super.getDiscountPercent() != null && super.getDiscountPercent().compareTo(BigDecimal.ZERO) > 0) {
-            // Hiển thị phần trăm (ví dụ: "10%")
-            this.displayBadge = super.getDiscountPercent().stripTrailingZeros().toPlainString() + "%";
-        } else {
-            // Hiển thị text chung
-            this.displayBadge = "Khuyến mãi";
-        }
-    }
-    
-    /**
-     * Tạo CSS class cho status
-     */
-    private void generateStatusClass() {
-        switch (this.status) {
-            case "Đang áp dụng":
-                this.statusClass = "active";
-                break;
-            case "Hết hạn":
-                this.statusClass = "expired";
-                break;
-            case "Chưa áp dụng":
-                this.statusClass = "pending";
-                break;
-            default:
-                this.statusClass = "inactive";
-        }
-    }
-    
-    // Getters cho các thuộc tính bổ sung
+
+    // Getters and Setters (loại bỏ applyToAllBranches)
+    public int getPromotionID() { return promotionID; }
+    public void setPromotionID(int promotionID) { this.promotionID = promotionID; }
+
+    public String getPromoName() { return promoName; }
+    public void setPromoName(String promoName) { this.promoName = promoName; }
+
+    public double getDiscountPercent() { return discountPercent; }
+    public void setDiscountPercent(double discountPercent) { this.discountPercent = discountPercent; }
+
+    public Date getStartDate() { return startDate; }
+    public void setStartDate(Date startDate) { this.startDate = startDate; }
+
+    public Date getEndDate() { return endDate; }
+    public void setEndDate(Date endDate) { this.endDate = endDate; }
+
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    
+
+    public List<Integer> getBranchIDs() { return branchIDs; }
+    public void setBranchIDs(List<Integer> branchIDs) { this.branchIDs = branchIDs; }
+
+    public List<Integer> getProductDetailIDs() { return productDetailIDs; }
+    public void setProductDetailIDs(List<Integer> productDetailIDs) { this.productDetailIDs = productDetailIDs; }
+
+    public int getBranchCount() { return branchCount; }
+    public void setBranchCount(int branchCount) { this.branchCount = branchCount; }
+
+    public int getProductCount() { return productCount; }
+    public void setProductCount(int productCount) { this.productCount = productCount; }
+
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-    
-    public String getDisplayBadge() { return displayBadge; }
-    public void setDisplayBadge(String displayBadge) { this.displayBadge = displayBadge; }
-    
-    public boolean isActive() { return isActive; }
-    public void setActive(boolean active) { isActive = active; }
-    
-    public String getStatusClass() { return statusClass; }
-    public void setStatusClass(String statusClass) { this.statusClass = statusClass; }
-    
-    // Override các setter để tự động cập nhật các giá trị tính toán
-    @Override
-    public void setStartDate(Date startDate) {
-        super.setStartDate(startDate);
-        calculateStatus();
-        generateStatusClass();
+
+    // Utility methods
+    public String getFormattedDiscountPercent() {
+        return String.format("%.1f%%", discountPercent);
     }
-    
-    @Override
-    public void setEndDate(Date endDate) {
-        super.setEndDate(endDate);
-        calculateStatus();
-        generateStatusClass();
+
+    public String getStatusDisplayName() {
+        switch (status) {
+            case "active":
+                return "Đang hoạt động";
+            case "scheduled":
+                return "Đã lên lịch";
+            case "expired":
+                return "Đã hết hạn";
+            default:
+                return status;
+        }
     }
-    
-    @Override
-    public void setDiscountPercent(BigDecimal discountPercent) {
-        super.setDiscountPercent(discountPercent);
-        generateDescription();
-        generateDisplayBadge();
+
+    // Business logic methods
+    public boolean isActive() {
+        return "active".equals(status);
     }
-    
-    @Override
-    public void setApplyToAllBranches(boolean applyToAllBranches) {
-        super.setApplyToAllBranches(applyToAllBranches);
-        generateDescription();
+
+    public boolean isExpired() {
+        return "expired".equals(status);
     }
-    
+
+    public boolean isScheduled() {
+        return "scheduled".equals(status);
+    }
+
+    public boolean isValidDateRange() {
+        return startDate != null && endDate != null && startDate.before(endDate);
+    }
+
+    public boolean isValidDiscountPercent() {
+        return discountPercent >= 0 && discountPercent <= 100;
+    }
+
     @Override
     public String toString() {
         return "PromotionDTO{" +
-                "promotionID=" + super.getPromotionID() +
-                ", promoName='" + super.getPromoName() + '\'' +
-                ", discountPercent=" + super.getDiscountPercent() +
-                ", startDate=" + super.getStartDate() +
-                ", endDate=" + super.getEndDate() +
-                ", applyToAllBranches=" + super.isApplyToAllBranches() +
+                "promotionID=" + promotionID +
+                ", promoName='" + promoName + '\'' +
+                ", discountPercent=" + discountPercent +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
                 ", status='" + status + '\'' +
-                ", displayBadge='" + displayBadge + '\'' +
-                ", isActive=" + isActive +
-                ", statusClass='" + statusClass + '\'' +
+                ", branchCount=" + branchCount +
+                ", productCount=" + productCount +
                 '}';
     }
 }

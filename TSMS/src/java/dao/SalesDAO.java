@@ -136,10 +136,9 @@ public class SalesDAO {
                     PromotionDTO promotion = new PromotionDTO(
                             rs.getInt("PromotionID"),
                             rs.getString("PromoName"),
-                            rs.getBigDecimal("DiscountPercent"),
+                            rs.getDouble("DiscountPercent"),
                             rs.getDate("StartDate"),
-                            rs.getDate("EndDate"),
-                            rs.getBoolean("ApplyToAllBranches")
+                            rs.getDate("EndDate")
                     );
                     promotions.add(promotion);
                 }

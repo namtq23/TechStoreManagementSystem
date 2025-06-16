@@ -84,7 +84,8 @@ public class RegisterController extends HttpServlet {
             return;
         }
 
-        if (Validate.isValidPhone(phone)) {
+
+        if (!Validate.isValidPhone(phone)) {
             req.setAttribute("error", "Số điện thoại không hợp lệ!");
             req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
             return;

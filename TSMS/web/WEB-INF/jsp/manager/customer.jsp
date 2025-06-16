@@ -8,7 +8,7 @@
 <%@ page import="java.util.*, model.Customer" %>
 <%@ page import="util.Validate" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -174,7 +174,7 @@
                                 <th>Gmail</th>
                                 <th>Địa Chỉ</th>
                                 <th>Giới Tính</th>
-                              
+                                <th>Tổng tiền đã chi</th>
                                 <th>Ngày tạo thông tin</th>
                                 
                             </tr>
@@ -188,7 +188,7 @@
     <td>${customer.email}</td>
     <td>${customer.address}</td>
     <td>${customer.gender ? 'Nam' : 'Nữ'}</td>
-
+    <td><fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true"/> ₫ </td>
     <td>${customer.createdAt}</td>
 </tr>
 </c:forEach>
