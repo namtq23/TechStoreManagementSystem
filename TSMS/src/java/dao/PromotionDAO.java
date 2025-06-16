@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PromotionDAO {
+
         // Method tìm kiếm với criteria
     public List<PromotionDTO> searchPromotions(String dbName, PromotionSearchCriteria criteria, Integer categoryId) throws SQLException {
         List<PromotionDTO> promotions = new ArrayList<>();
@@ -43,7 +44,9 @@ public class PromotionDAO {
             }
         }
         
-        // Thêm discount filter
+
+        //Thêm discount filter
+
         if (criteria.getDiscountFilter() != null && !criteria.getDiscountFilter().equals("all")) {
             switch (criteria.getDiscountFilter()) {
                 case "low":
@@ -84,7 +87,8 @@ public class PromotionDAO {
             conn = DBUtil.getConnectionTo(dbName);
             stmt = conn.prepareStatement(sql.toString());
             
-            //Set parameters
+
+            // Set parameters
             for (int i = 0; i < parameters.size(); i++) {
                 stmt.setObject(i + 1, parameters.get(i));
             }
@@ -129,6 +133,7 @@ public class PromotionDAO {
         
         return promotions;
     }
+
     
     // Method đếm số lượng promotions theo criteria
     public int countPromotions(String dbName, PromotionSearchCriteria criteria, Integer categoryId) throws SQLException {
@@ -207,7 +212,6 @@ public class PromotionDAO {
         
         return 0;
     }
-    
     // Lấy tất cả khuyến mãi - sửa query theo database thực tế
     public List<PromotionDTO> getAllPromotions(String dbName) throws SQLException {
         List<PromotionDTO> promotions = new ArrayList<>();
@@ -284,6 +288,7 @@ public class PromotionDAO {
         return promotions;
     }
     
+
     //Lấy khuyến mãi theo ID
     public PromotionDTO getPromotionById(String dbName, int promotionId) throws SQLException {
         String sql = "SELECT PromotionID, PromoName, DiscountPercent, StartDate, EndDate FROM Promotions WHERE PromotionID = ?";
@@ -333,7 +338,7 @@ public class PromotionDAO {
         return null;
     }
     
-    // ✅ Tạo khuyến mãi mới
+    // Tạo khuyến mãi mới
     public boolean createPromotion(String dbName, PromotionDTO promotion) throws SQLException {
         String sql = "INSERT INTO Promotions (PromoName, DiscountPercent, StartDate, EndDate) VALUES (?, ?, ?, ?)";
         
@@ -367,7 +372,7 @@ public class PromotionDAO {
         }
     }
     
-    // ✅ Cập nhật khuyến mãi
+    // Cập nhật khuyến mãi
     public boolean updatePromotion(String dbName, PromotionDTO promotion) throws SQLException {
         String sql = "UPDATE Promotions SET PromoName = ?, DiscountPercent = ?, StartDate = ?, EndDate = ? WHERE PromotionID = ?";
         
@@ -392,7 +397,7 @@ public class PromotionDAO {
         }
     }
     
-    // ✅ Xóa khuyến mãi
+    // Xóa khuyến mãi
     public boolean deletePromotion(String dbName, int promotionId) throws SQLException {
         Connection conn = null;
         try {
@@ -448,7 +453,7 @@ public class PromotionDAO {
         }
     }
     
-    // ✅ Helper methods với proper connection handling
+    // Helper methods với proper connection handling
     private int getBranchCount(String dbName, int promotionId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM PromotionBranches WHERE PromotionID = ?";
         
@@ -563,7 +568,7 @@ public class PromotionDAO {
         return productDetailIds;
     }
     
-    // ✅ Test connection method
+    // Test connection method
     public boolean testConnection(String dbName) {
         Connection conn = null;
         try {

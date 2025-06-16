@@ -94,6 +94,7 @@ public class SOPromotionController extends HttpServlet {
     private void handlePageRequest(HttpServletRequest request, HttpServletResponse response,
               String dbName, Integer branchId) throws ServletException, IOException, SQLException {
         List<PromotionDTO> promotions = promotionDAO.getAllPromotions(dbName);
+
         // Đọc search parameters từ request
         String search = request.getParameter("search");
         String status = request.getParameter("status");
@@ -112,6 +113,7 @@ public class SOPromotionController extends HttpServlet {
         if (pageStr != null && !pageStr.trim().isEmpty()) {
             try {
                 currentPage = Integer.parseInt(pageStr);
+
                 if (currentPage < 1) {
                     currentPage = 1;
                 }
@@ -131,6 +133,7 @@ public class SOPromotionController extends HttpServlet {
                 // Ignore invalid category ID
             }
         }
+
 
         //Gọi DAO với search criteria
         int totalPromotions;
@@ -173,6 +176,7 @@ public class SOPromotionController extends HttpServlet {
         request.setAttribute("selectedStatus", status);
         request.setAttribute("selectedDiscount", discount);
         request.setAttribute("selectedCategoryId", categoryId);
+
 
         // Forward đến JSP
         request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/so-promotions.jsp").forward(request, response);
