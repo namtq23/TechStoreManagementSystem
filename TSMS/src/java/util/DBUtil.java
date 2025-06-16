@@ -109,7 +109,7 @@ public class DBUtil {
 //        String url = "jdbc:sqlserver://DESKTOP-LJ3A22Q:1433;databaseName=" + dbName + ";encrypt=false";
 //        return DriverManager.getConnection(url, "sa", "123");
         //Phung
-        String url = "jdbc:sqlserver://PHUNGPDHE189026;instanceName=SQL2019;databaseName=" + dbName + ";encrypt=false";
+        String url = "jdbc:sqlserver://PHUNGPDHE189026:1433;instanceName=SQL2019;databaseName=" + dbName + ";encrypt=false";
         return DriverManager.getConnection(url, "sa", "1");
         //Dat
 //        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=" + dbName + ";encrypt=false";
