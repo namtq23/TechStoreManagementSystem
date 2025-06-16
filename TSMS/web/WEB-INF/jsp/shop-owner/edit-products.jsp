@@ -126,7 +126,7 @@
         <main class="main-content">
             <div class="page-header">
                 <h1>Chi tiết sản phẩm</h1>
-                <a href="so-products" class="btn btn-success">← Quay lại</a>
+                <a href="so-products" class="btn btn-success" style="text-decoration: none">← Quay lại</a>
             </div>
 
             <div class="form-container">
