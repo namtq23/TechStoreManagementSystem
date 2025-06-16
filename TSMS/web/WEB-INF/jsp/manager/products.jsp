@@ -33,30 +33,63 @@
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
+
                     <a href="bm-products?page=1" class="nav-item active">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-exchange-alt"></i>
-                        Giao dịch
-                    </a>
-                    <a href="bm-customer" class="nav-item">
-                        <i class="fas fa-handshake"></i>
-                        Đối tác
-                    </a>
-                    <a href="bm-staff" class="nav-item">
-                        <i class="fas fa-users"></i>
-                        Nhân viên
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-wallet"></i>
-                        Sổ quỹ
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-chart-bar"></i>
-                        Báo cáo
-                    </a>
+
+                    <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-exchange-alt"></i>
+                            Giao dịch
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="#" class="dropdown-item">Đơn hàng</a>
+                            <a href="#" class="dropdown-item">Nhập hàng</a>
+                            <a href="#" class="dropdown-item">Yêu cầu nhập hàng</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-handshake"></i>
+                            Đối tác
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="bm-customer" class="dropdown-item">Khách hàng</a>
+                            <a href="bm-supplier" class="dropdown-item">Nhà cung cấp</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-users"></i>
+                            Nhân viên
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="bm-staff" class="dropdown-item">Danh sách nhân viên</a>
+                            <a href="#" class="dropdown-item">Hoa hồng</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-chart-bar"></i>
+                            Báo cáo
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="#" class="dropdown-item">Tài chính</a>
+                            <a href="#" class="dropdown-item">Đật hàng</a>
+                            <a href="#" class="dropdown-item">Hàng hoá</a>
+                            <a href="#" class="dropdown-item">Khách hàng</a>
+                        </div>
+                    </div>
+
                     <a href="bm-cart" class="nav-item">
                         <i class="fas fa-cash-register"></i>
                         Bán hàng
@@ -65,16 +98,15 @@
 
                 <div class="header-right">
                     <div class="user-dropdown">
-                        <a href="#" class="user-icon gradient" id="dropdownToggle">
+                        <a href="" class="user-icon gradient" id="dropdownToggle">
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
                             <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
-                    </div>
-                </div>        
-            </div>
+                    </div>      
+                </div>
         </header>
 
         <div class="main-container">
@@ -173,60 +205,78 @@
                     <table class="products-table">
                         <thead>
                             <tr>
-                                <th class="checkbox-col">
-                                    <input type="checkbox">
-                                </th>
                                 <th class="image-col"></th>
                                 <th>Mã hàng</th>
                                 <th>Tên hàng</th>
                                 <th>Giá bán</th>
-                                <th>Giá vốn</th>
                                 <th>Tồn kho</th>
-                                <th>Thời gian tạo</th>
                                 <th>Trạng thái</th>
-                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             <% List<ProductDTO> products = (List<ProductDTO>) request.getAttribute("products");
-                            
-                            if (products.size() == 0){
-                            %>
-                        <div>
-                            KHÔNG CÓ SẢN PHẨM NÀO.
-                        </div>
-                        <%
-                            }
-                            
-                        for (ProductDTO product : products) { %>
-                        <tr class="">
-                            <td><input type="checkbox"></td>
-                            <td><div class="product-image phone"></div></td>
-                            <td><%= product.getProductDetailId() %></td>
-                            <td><%= product.getDescription() %></td>
-                            <td><%= Validate.formatCostPriceToVND(product.getRetailPrice())%></td>
-                            <td><%= Validate.formatCostPriceToVND(product.getCostPrice())%></td>
-                            <td><%= product.getQuantity() %></td>
-                            <td><%= Validate.formatDateTime(product.getCreatedAt()) %></td>
-                            <td><%= product.getIsActive() %></td>
-                            <td style="justify-content: center;align-content: center; display: flex;gap: 5px">
-                                <!-- Nút Chi Tiết -->
-                                <a href="./so-products?action=view&productDetailId=<%= product.getProductDetailId() %>" 
-                                   class="btn btn-success" 
-                                   style="text-decoration: none; width: 79px;background:#2196F3">Chi tiết</a>
 
+                            for (ProductDTO product : products) { %>
+                            <tr class="product-row">
+                                <td><img src="<%= product.getImgUrl() %>" alt="product-img"/></td>
+                                <td><%= product.getProductDetailId() %></td>
+                                <td><%= product.getDescription() %></td>
+                                <%
+                                    double retailPrice = Double.parseDouble(product.getRetailPrice());
+                                    double discount = product.getDiscountPercent();
+                                    double priceAfterDiscount = retailPrice * (1 - (discount / 100.0));
+                                %>
+                                <td><%= Validate.formatCostPriceToVND(priceAfterDiscount) %></td>
+                                <td><%= product.getQuantity() %></td>
+                                <td><%= product.getIsActive() %></td>
+                            </tr>
+                            <tr class="detail-row">
+                                <td colspan="9" style="background:#f0f0f0">
+                                    <div class="product-detail-container">
+                                        <div class="left-section">
+                                            <h2><%= product.getProductName() %></h2>
+                                            <div class="product-images">
+                                                <img src="<%= product.getImgUrl() %>" alt="product-img" />
+                                            </div>
+                                        </div>
 
-                                <!-- Nút Xoá -->
-                                <form action="so-products" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xoá sản phẩm này không?');">
-                                    <input type="hidden" name="action" value="delete" />
-                                    <input type="hidden" name="productDetailId" value="<%= product.getProductDetailId() %>" />
-                                    <button type="submit" class="btn btn-success" style="background: #f44336;">Xoá</button>
-                                </form>
-                            </td>
-                        </tr>
-                        <%}%>
+                                        <div class="middle-section">
+                                            <table>
+                                                <tr><td><strong>Mã hàng:</strong></td><td><%= product.getSerialNum() %></td></tr>
+                                                <tr><td><strong>Nhóm hàng:</strong></td><td><%= product.getCategory() %></td></tr>
+                                                <tr><td><strong>Thương hiệu:</strong></td><td><%= product.getBrand() %></td></tr>
+                                                <tr><td><strong>Thời gian tạo:</strong></td><td><%= Validate.formatDateTime(product.getCreatedAt()) %></td></tr>
+                                                <tr><td><strong>Giá vốn:</strong></td><td><%= Validate.formatCostPriceToVND(product.getCostPrice())%></td></tr>
+                                                <tr><td><strong>Giá bán thực:</strong></td><td><%= Validate.formatCostPriceToVND(product.getRetailPrice())%></td></tr>
+                                                <tr><td><strong>Phần trăm giảm(nếu có)</strong></td><td><%= product.getDiscountPercent() %>%</td></tr>
+                                            </table>
+                                        </div>
+
+                                        <div class="right-section">
+                                            <div><strong>Mô tả</strong><br><div class="input-line"><%= product.getDescription() %></div></div>
+                                            <div><strong>Nhà cung cấp</strong><br><div class="input-line"><%= product.getSupplier() %></div></div>
+                                        </div>
+
+                                        <!--                                        <div class="actions">
+                                                                                    <button class="btn green">✅ Cập nhật</button>
+                                                                                    <button class="btn red">🗑️ Xoá</button>
+                                                                                </div>-->
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <%}%>
                         </tbody>
                     </table>
+                    <%
+                    if (products.size() == 0){
+                    %>
+                    <div>
+                        KHÔNG CÓ SẢN PHẨM NÀO.
+                    </div>
+                    <%
+                        }
+                    %>
                 </div>
 
                 <!-- Pagination -->
@@ -277,6 +327,28 @@
             if (!toggle.contains(e.target) && !menu.contains(e.target)) {
                 menu.style.display = "none";
             }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.product-row').forEach(function (row) {
+                row.addEventListener('click', function () {
+                    const detailRow = row.nextElementSibling;
+                    if (detailRow && detailRow.classList.contains('detail-row')) {
+                        // Toggle display: table-row <=> none
+                        if (detailRow.style.display === 'table-row') {
+                            detailRow.style.display = 'none';
+                        } else {
+                            detailRow.style.display = 'table-row';
+                        }
+                    }
+                });
+            });
+
+            // Ẩn tất cả detail-row lúc ban đầu
+            document.querySelectorAll('.detail-row').forEach(function (row) {
+                row.style.display = 'none';
+            });
         });
     </script>
 

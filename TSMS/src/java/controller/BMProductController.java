@@ -44,12 +44,19 @@ public class BMProductController extends HttpServlet {
                 return;
             }
 
-            int userId = Integer.parseInt(userIdObj.toString());
-            int roleId = Integer.parseInt(roleIdObj.toString());
             String dbName = dbNameObj.toString();
             int branchId = Integer.parseInt(branchIdObj.toString());
+            int totalProducts = p.countProductsByBranchId(dbName, branchId);
             int page = 1;
-            int pageSize = 10;
+            int pageSize;
+
+            if (totalProducts < 30) {
+                pageSize = 15;
+            } else if (totalProducts < 100) {
+                pageSize = 40;
+            } else {
+                pageSize = totalProducts / 4;
+            }
 
             if (req.getParameter("page") != null) {
                 page = Integer.parseInt(req.getParameter("page"));
@@ -57,7 +64,6 @@ public class BMProductController extends HttpServlet {
             int offset = (page - 1) * pageSize;
 
 //            List<ProductDTO> products = p.getInventoryProductListByPageByBranchId(dbName, branchId, offset, pageSize);
-//            int totalProducts = p.countProductsByBranchId(dbName, branchId);
 //            int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
             doPost(req, resp, offset, pageSize);
             List<Category> categories = p.getAllCategories(dbName);
@@ -103,7 +109,7 @@ public class BMProductController extends HttpServlet {
         int branchId = Integer.parseInt(branchIdObj.toString());
         List<ProductDTO> products = p.getProductsByFilter(dbName, branchId, offset, limit, filter);
         int totalProducts = p.getTotalProductsByFilter(dbName, branchId, filter);
-        int totalPages = (int) Math.ceil((double) totalProducts / 10);
+        int totalPages = (int) Math.ceil((double) totalProducts / limit);
 
         String pagingURL = "";
         StringBuilder urlBuilder = new StringBuilder("bm-products?");
@@ -121,9 +127,9 @@ public class BMProductController extends HttpServlet {
         if (searchKey != null && !searchKey.isEmpty()) {
             urlBuilder.append("search=").append(filter.getSearchKeyword()).append("&");
         }
-        
+
         urlBuilder.append("page=");
-        
+
         pagingURL = urlBuilder.toString();
         req.setAttribute("pagingUrl", pagingURL);
         req.setAttribute("totalPages", totalPages);

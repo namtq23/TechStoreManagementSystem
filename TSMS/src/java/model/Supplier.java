@@ -1,4 +1,4 @@
-/*
+    /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
@@ -67,5 +67,13 @@ public class Supplier {
         this.email = email;
     }
     
-    
+    public String toString() {
+    return "Supplier{" +
+            "supplierID=" + supplierID +
+            ", supplierName='" + supplierName + '\'' +
+            ", contactName='" + contactName + '\'' +
+            ", phone='" + phone + '\'' +
+            ", email='" + email + '\'' +
+            '}';
+}
 }

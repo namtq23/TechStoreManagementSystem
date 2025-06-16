@@ -385,9 +385,9 @@ body {
 }
 
 .page-btn.active {
-    background: #4caf50;
+    background: #2196F3;
     color: white;
-    border-color: #4caf50;
+    border-color: #2196F3;
 }
 
 .disabled {
@@ -423,6 +423,7 @@ body {
 .filter-actions {
     padding: 20px;
     display: flex;
+    flex-direction: column;
     gap: 10px;
     border-top: 1px solid #eee;
 }
@@ -462,6 +463,137 @@ body {
     background: #0056b3;
 }
 
+.product-detail-container {
+    display: flex;
+    flex-wrap: wrap;
+    font-family: Arial, sans-serif;
+    gap: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+}
+
+.left-section {
+    flex: 1;
+    min-width: 250px;
+}
+
+.left-section h2 {
+    color: #0d47a1;
+    margin-bottom: 10px;
+}
+
+.status {
+    margin-bottom: 15px;
+}
+
+.status-icon {
+    display: inline-block;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.status-icon.available {
+    color: green;
+}
+
+.status-icon.not-pointed {
+    color: red;
+}
+
+.product-images {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.color-options {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.color-swatch {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}
+
+.middle-section {
+    flex: 1;
+    min-width: 280px;
+}
+
+.middle-section table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.middle-section td {
+    padding: 4px 8px;
+    vertical-align: top;
+}
+
+.right-section {
+    flex: 1;
+    min-width: 200px;
+}
+
+.right-section div {
+    margin-bottom: 20px;
+}
+
+.input-line {
+    border-bottom: 1px solid #ccc;
+    height: 20px;
+}
+
+.actions {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn.green {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn.red {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn.dark {
+    background-color: #424242;
+    color: white;
+}
+
+.btn.more {
+    background-color: white;
+    border: 1px solid #ccc;
+}
+
+.detail-row {
+    display: none;
+}
+
+.product-detail-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
 
 /* Responsive Design */
 @media (max-width: 1200px) {
@@ -519,4 +651,9 @@ body {
         gap: 15px;
         text-align: center;
     }
+}
+
+/*CSS hình ảnh sản phẩm*/
+img {
+    width: 60px;
 }
