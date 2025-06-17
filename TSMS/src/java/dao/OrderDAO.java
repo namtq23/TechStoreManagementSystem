@@ -69,4 +69,36 @@ public class OrderDAO {
             return false;
         }
     }
+
+    public static int getLatestOrderId(String dbName, int branchId) {
+        Connection conn;
+        PreparedStatement stmt;
+        ResultSet rs;
+        int latestOrderId = -1;
+
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            String sql = "SELECT TOP 1 OrderID FROM Orders WHERE BranchID = ? ORDER BY OrderID  DESC";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, branchId);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                latestOrderId = rs.getInt("OrderID");
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+
+        return latestOrderId;
+    }
+
+    public static void main(String[] args) {
+        // Example usage
+        String dbName = "DTB_PShop";
+        
+        int result = getLatestOrderId(dbName,  1);
+        System.out.println(result);
+    }
+   
 }

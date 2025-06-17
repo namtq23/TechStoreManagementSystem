@@ -53,7 +53,7 @@ public class ProductDAO {
                         ELSE N'Không kinh doanh'
                     END AS Status,
                     pd.Description,
-                    pd.SerialNumber,
+                    pd.ProductCode,
                     pd.WarrantyPeriod,
                     p.CreatedAt,
 
@@ -283,7 +283,7 @@ public class ProductDAO {
                             ELSE N'Không kinh doanh'
                         END AS Status,
                         pd.Description,
-                        pd.SerialNumber,
+                        pd.ProductCode,
                         pd.WarrantyPeriod,
                         promo.PromoName,
                         promo.DiscountPercent,
@@ -337,7 +337,7 @@ public class ProductDAO {
                                                             ELSE N'Không kinh doanh' 
                                                         END AS Status,
                                                         pd.Description,
-                                                        pd.SerialNumber,
+                                                        pd.ProductCode,
                                                         pd.WarrantyPeriod,
                                                         promo.PromoName,
                                                         promo.DiscountPercent,
@@ -543,7 +543,7 @@ public class ProductDAO {
     public int addProductDetail(String dbName, int productId, String description, String serialNumber,
             String warrantyPeriod) throws SQLException {
         String query = "INSERT INTO " + dbName
-                + ".dbo.ProductDetails (ProductID, Description, SerialNumber, WarrantyPeriod) VALUES (?, ?, ?, ?)";
+                + ".dbo.ProductDetails (ProductID, Description, ProductCode, WarrantyPeriod) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, productId);
             stmt.setString(2, description != null && !description.isEmpty() ? description : null);
@@ -591,7 +591,7 @@ public class ProductDAO {
                     ELSE N'Không kinh doanh' 
                 END AS Status,
                 pd.Description,
-                pd.SerialNumber,
+                pd.ProductCode,
                 pd.WarrantyPeriod,
                 promo.PromoName,
                 promo.DiscountPercent,
@@ -635,7 +635,7 @@ public class ProductDAO {
                         pd.ProductDetailID,
                         ISNULL(ip.Quantity, 0) AS InventoryQuantity,
                         pd.Description,
-                        pd.SerialNumber,
+                        pd.ProductCode,
                         pd.WarrantyPeriod,
                         p.ProductID,
                         p.ProductName,
@@ -696,7 +696,7 @@ public class ProductDAO {
                             p.IsActive,
                             ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity,
                             NULL AS Description,
-                            NULL AS SerialNumber,
+                            NULL AS ProductCode,
                             NULL AS WarrantyPeriod,
                             NULL AS PromoName,
                             NULL AS DiscountPercent,
@@ -737,7 +737,7 @@ public class ProductDAO {
                                         p.IsActive,
                                         ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity,
                                         NULL AS Description,
-                                        NULL AS SerialNumber,
+                                        NULL AS ProductCode,
                                         NULL AS WarrantyPeriod,
                                         NULL AS PromoName,
                                         NULL AS DiscountPercent,
@@ -885,7 +885,7 @@ public class ProductDAO {
                                   ELSE N'Không kinh doanh'
                               END AS Status,
                              pd.Description,
-                             pd.SerialNumber,
+                             pd.ProductCode,
                              pd.WarrantyPeriod,
                              promo.PromoName,
                              promo.DiscountPercent,
@@ -999,7 +999,7 @@ public class ProductDAO {
                         p.IsActive,
                         ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity,
                         pd.Description,
-                        pd.SerialNumber,
+                        pd.ProductCode,
                         pd.WarrantyPeriod,
                         NULL AS PromoName,
                         NULL AS DiscountPercent,
@@ -1018,7 +1018,7 @@ public class ProductDAO {
                         pd.ProductDetailID,
                         p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
                         p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive,
-                        pd.Description, pd.SerialNumber, pd.WarrantyPeriod
+                        pd.Description, pd.ProductCode, pd.WarrantyPeriod
                 """);
 
         if (stockStatus != null && !stockStatus.equals("all")) {
@@ -1117,7 +1117,7 @@ public class ProductDAO {
         sql.append("    p.ImageURL, ");
         sql.append("    CASE WHEN p.IsActive = 1 THEN N'Đang bán' ELSE N'Ngừng bán' END AS Status, ");
         sql.append("    pd.Description, ");
-        sql.append("    pd.SerialNumber, ");
+        sql.append("    pd.ProductCode, ");
         sql.append("    pd.WarrantyPeriod, ");
         sql.append("    p.CreatedAt, ");
         sql.append("    pr.PromotionID, ");
@@ -1174,7 +1174,7 @@ public class ProductDAO {
             String keyword = filter.getSearchKeyword();
             String keywordUnsigned = Validate.normalizeSearch(keyword);
 
-            sql.append("AND (pd.ProductNameUnsigned LIKE ? OR pd.Description LIKE ? OR pd.SerialNumber LIKE ?) ");
+            sql.append("AND (pd.ProductNameUnsigned LIKE ? OR pd.Description LIKE ? OR pd.ProductCode LIKE ?) ");
             String searchPattern = "%" + keywordUnsigned + "%";
             parameters.add(searchPattern);
             parameters.add("%" + keyword + "%");
@@ -1277,7 +1277,7 @@ public class ProductDAO {
             String keyword = filter.getSearchKeyword();
             String keywordUnsigned = Validate.normalizeSearch(keyword);
 
-            sql.append("AND (pd.ProductNameUnsigned LIKE ? OR pd.Description LIKE ? OR pd.SerialNumber LIKE ?) ");
+            sql.append("AND (pd.ProductNameUnsigned LIKE ? OR pd.Description LIKE ? OR pd.ProductCode LIKE ?) ");
             parameters.add("%" + keywordUnsigned + "%");
             parameters.add("%" + keyword + "%");
             parameters.add("%" + keyword + "%");
@@ -1320,12 +1320,11 @@ public class ProductDAO {
     }
 
     // Phuong
-    public static boolean updateProductQuantityOfInventory(String dbName, List<ProductDTO> products, int newQuantity,
-            int branchId) {
+    public static boolean updateProductQuantityOfInventory(String dbName, List<ProductDTO> products, int branchId) {
         String sql = "UPDATE InventoryProducts SET Quantity = ? WHERE ProductDetailID = ? AND InventoryID = ?";
         try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql)) {
             for (ProductDTO product : products) {
-                ps.setInt(1, newQuantity);
+                ps.setInt(1, getNewQuantity(product, dbName, branchId));
                 ps.setInt(2, product.getProductDetailId());
                 ps.setInt(3, branchId);
                 ps.addBatch();
@@ -1343,13 +1342,58 @@ public class ProductDAO {
         }
     }
 
+    public static boolean markSerialAsSold(String dbName, int productDetailId, int orderId) {
+        String query = "WITH RandomSerial AS ( \n"
+                + "    SELECT TOP (1) ProductDetailID, SerialNumber \n"
+                + "    FROM ProductDetailSerialNumber \n"
+                + "    WHERE ProductDetailID = ? AND Status = 1 \n"
+                + "    ORDER BY NEWID() \n"
+                + ") \n"
+                + "UPDATE p SET Status = 0, OrderID = ? \n"
+                + "FROM ProductDetailSerialNumber p \n"
+                + "INNER JOIN RandomSerial r ON p.ProductDetailID = r.ProductDetailID \n"
+                + "    AND p.SerialNumber = r.SerialNumber \n"
+                + "WHERE p.Status = 1";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, productDetailId);
+            stmt.setInt(2, orderId);
+
+            int updatedRows = stmt.executeUpdate();
+            return updatedRows > 0;
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return false;
+    }
+
+    public static int getNewQuantity(ProductDTO product, String dbName, int branchId) {
+        int newQuantity = 0;
+        
+        ProductDTO productDto = ProductDAO.getProductInInventoryByDetailId(dbName, product.getProductDetailId(),
+                branchId);
+        if (productDto != null) {
+            newQuantity = productDto.getQuantity() - product.getQuantity();
+            if (newQuantity < 0) {
+                System.out.println("Số lượng mới không thể âm!");
+            }
+        } else {
+            System.out.println("Không tìm thấy sản phẩm nào!");
+        }
+
+        return newQuantity;
+    }
+
     // KO DONG VAO
     private static ProductDTO extractProductDTOFromResultSet(ResultSet rs) throws SQLException {
         ProductDTO productDTO = new ProductDTO(
                 rs.getInt("ProductDetailId"),
                 rs.getInt("InventoryQuantity"),
                 rs.getString("Description"),
-                rs.getString("SerialNumber"),
+                rs.getString("ProductCode"),
                 rs.getString("WarrantyPeriod"),
                 rs.getString("PromoName"),
                 rs.getDouble("DiscountPercent"),
@@ -1369,7 +1413,7 @@ public class ProductDAO {
     }
 
     public static void main(String[] args) {
-
+        
     }
 
 }
