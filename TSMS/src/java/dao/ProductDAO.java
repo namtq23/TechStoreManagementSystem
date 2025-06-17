@@ -262,7 +262,7 @@ public class ProductDAO {
     }
 
     // Retrieves a ProductDTO by productDetailId
-    public static ProductDTO getProductByDetailId(String dbName, int productDetailId) {
+    public static ProductDTO getProductInWareHouseByDetailId(String dbName, int productDetailId) {
         ProductDTO product = null;
         StringBuilder query = new StringBuilder("""
                     SELECT
@@ -304,6 +304,62 @@ public class ProductDAO {
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             stmt.setInt(1, productDetailId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                product = extractProductDTOFromResultSet(rs);
+                System.out.println("Lấy sản phẩm thành công: ProductDetailID = " + productDetailId);
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi trong getProductByDetailId: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return product;
+    }
+
+    public static ProductDTO getProductInInventoryByDetailId(String dbName, int productDetailId, int branchId) {
+        ProductDTO product = null;
+        StringBuilder query = new StringBuilder("""
+                                    SELECT 
+                                                        inp.InventoryID,
+                                                        p.ProductID,
+                                                        pd.ProductDetailID,
+                                                        inp.Quantity AS InventoryQuantity,
+                                                        p.ProductName,
+                                                        b.BrandName,
+                                                        c.CategoryName,
+                                                        s.SupplierName,
+                                                        CAST(p.CostPrice AS NVARCHAR) AS CostPrice,
+                                                        CAST(p.RetailPrice AS NVARCHAR) AS RetailPrice,
+                                                        p.ImageURL,
+                                                        p.CreatedAt,
+                                                        CASE 
+                                                            WHEN p.IsActive = 1 THEN N'Đang kinh doanh' 
+                                                            ELSE N'Không kinh doanh' 
+                                                        END AS Status,
+                                                        pd.Description,
+                                                        pd.SerialNumber,
+                                                        pd.WarrantyPeriod,
+                                                        promo.PromoName,
+                                                        promo.DiscountPercent,
+                                                        promo.StartDate,
+                                                        promo.EndDate
+                                                    FROM 
+                                                        ProductDetails pd
+                                                        LEFT JOIN Products p ON pd.ProductID = p.ProductID
+                                                        LEFT JOIN InventoryProducts inp ON pd.ProductDetailID = inp.ProductDetailID
+                                                        LEFT JOIN Brands b ON p.BrandID = b.BrandID
+                                                        LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+                                                        LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
+                                                        LEFT JOIN PromotionProducts pp ON pp.ProductDetailID = pd.ProductDetailID
+                                                        LEFT JOIN Promotions promo ON promo.PromotionID = pp.PromotionID
+                                                    WHERE 
+                                                        pd.ProductDetailID = ? AND
+                                        				inp.InventoryID = ?
+                """);
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+            stmt.setInt(1, productDetailId);
+            stmt.setInt(2, branchId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 product = extractProductDTOFromResultSet(rs);

@@ -129,9 +129,13 @@ public class BMSellInStoreController extends HttpServlet {
         int newQuantity = 0;
 
         for (ProductDTO product : cartItems) {
-            ProductDTO productDto = ProductDAO.getProductByDetailId(dbName, product.getProductDetailId());
+            ProductDTO productDto = ProductDAO.getProductInInventoryByDetailId(dbName, product.getProductDetailId(), branchId);
             if (productDto != null) {
                 newQuantity = productDto.getQuantity() - product.getQuantity();
+                System.out.println(productDto.getProductDetailId());
+                System.out.println(productDto.getQuantity());
+                System.out.println(product.getQuantity());
+                System.out.println(newQuantity);
                 if (newQuantity < 0) {
                     resp.sendRedirect(req.getContextPath() + "/bm-cart?error=notEnoughStock");
                     return;

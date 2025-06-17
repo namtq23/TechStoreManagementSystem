@@ -66,7 +66,7 @@ public class SOProductController extends HttpServlet {
             } else if ("view".equals(action)) {
                 try {
                     int productDetailId = Integer.parseInt(req.getParameter("productDetailId"));
-                    ProductDTO product = dao.getProductByDetailId(dbName, productDetailId);
+                    ProductDTO product = dao.getProductInWareHouseByDetailId(dbName, productDetailId);
                     if (product == null) {
                         resp.sendRedirect("so-products?error=notfound");
                         return;
@@ -344,7 +344,7 @@ public class SOProductController extends HttpServlet {
                 String description = req.getParameter("description");
                 String isActive = req.getParameter("isActive");
 
-                ProductDTO existingProduct = dao.getProductByDetailId(dbName, productDetailId);
+                ProductDTO existingProduct = dao.getProductInWareHouseByDetailId(dbName, productDetailId);
                 if (existingProduct == null) {
                     resp.sendRedirect("so-products?error=notfound");
                     return;
