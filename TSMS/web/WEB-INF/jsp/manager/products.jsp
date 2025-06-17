@@ -256,7 +256,7 @@
                             for (ProductDTO product : products) { %>
                             <tr class="product-row">
                                 <td><img src="<%= product.getImgUrl() %>" alt="product-img"/></td>
-                                <td><%= product.getProductDetailId() %></td>
+                                <td style="padding-left: 32px;"><%= product.getProductDetailId() %></td>
                                 <td><%= product.getDescription() %></td>
                                 <%
                                     double retailPrice = Double.parseDouble(product.getRetailPrice());
@@ -287,7 +287,7 @@
 
                                         <div class="middle-section">
                                             <table>
-                                                <tr><td><strong>Mã hàng:</strong></td><td><%= product.getSerialNum() %></td></tr>
+                                                <tr><td><strong>Mã hàng:</strong></td><td><%= product.getProductCode() %></td></tr>
                                                 <tr><td><strong>Nhóm hàng:</strong></td><td><%= product.getCategory() %></td></tr>
                                                 <tr><td><strong>Thương hiệu:</strong></td><td><%= product.getBrand() %></td></tr>
                                                 <tr><td><strong>Thời gian tạo:</strong></td><td><%= Validate.formatDateTime(product.getCreatedAt()) %></td></tr>
