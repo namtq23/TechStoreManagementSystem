@@ -75,7 +75,7 @@ class TSMSCashier {
             }
 
             if (productCard) {
-                const productInfo = productCard.querySelector('.product-info');
+                const productInfo = productCard.querySelector('.product-content');
                 const productId = parseInt(productCard.dataset.productId);
                 const product = this.products.find(p => p.productDetailId === productId);
                 const existingDetail = productCard.querySelector('.product-detail');
