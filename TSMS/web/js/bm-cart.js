@@ -61,6 +61,11 @@ class TSMSCashier {
             const productCard = e.target.closest('.product-card');
 
             if (e.target.closest('.add-to-cart')) {
+                const product = productList.find(p => p.productDetailId === parseInt(productCard.dataset.productId));
+                if (product.quantity === 0) {
+                    this.showNotification(`Không thể thêm: chỉ còn ${product.quantity} sản phẩm trong kho`, 'error');
+                    return;
+                }
                 e.preventDefault();
                 if (productCard) {
                     const productId = parseInt(productCard.dataset.productId);
