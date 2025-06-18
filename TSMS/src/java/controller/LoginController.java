@@ -131,7 +131,7 @@ public class LoginController extends HttpServlet {
                         redirectURL = req.getContextPath() + "/bm-overview";
                         break;
                     case 2: //SALE
-                        redirectURL = req.getContextPath() + "/salepage";
+                        redirectURL = req.getContextPath() + "/sale-products";
                         break;
                     case 3: //WM
                         redirectURL = req.getContextPath() + "/quanlykhotong";
