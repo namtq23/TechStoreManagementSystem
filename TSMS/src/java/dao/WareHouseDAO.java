@@ -19,9 +19,10 @@ import java.sql.ResultSet;
  * @author admin
  */
 public class WareHouseDAO {
-    public static List<Warehouse> getBranchList(String dbName) throws SQLException{
+
+    public static List<Warehouse> getBranchList(String dbName) throws SQLException {
         List<Warehouse> warehouses = new ArrayList<>();
-        
+
         String sql = """
             select * from Warehouses
         """;
@@ -33,17 +34,40 @@ public class WareHouseDAO {
                 warehouses.add(wh);
             }
         }
-        
-        return warehouses;    
+
+        return warehouses;
     }
-    
-     private static Warehouse extractWareHouseFromResultSet(ResultSet rs) throws SQLException {
+
+    public List<String> getAllInventoryAndWarehouseNames(String dbName) throws SQLException {
+        List<String> names = new ArrayList<>();
+
+        String sql = """
+            SELECT WarehouseName AS Name
+            FROM Warehouses
+            UNION
+            SELECT b.BranchName AS Name
+            FROM Inventory i
+            JOIN Branches b ON i.BranchID = b.BranchID
+        """;
+
+        try (
+                Connection conn = DBUtil.getConnectionTo(dbName); 
+                 PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                names.add(rs.getString("Name"));
+            }
+        }
+
+        return names;
+    }
+
+    private static Warehouse extractWareHouseFromResultSet(ResultSet rs) throws SQLException {
         Warehouse wh = new Warehouse(rs.getInt("WarehouseId"), rs.getNString("WarehouseName"), rs.getNString("Address"));
         return wh;
     }
-     
-     public static void main(String[] args) throws SQLException {
+
+    public static void main(String[] args) throws SQLException {
         List<Warehouse> warehouses = WareHouseDAO.getBranchList("DTB_Bm");
-         System.out.println(warehouses);
+        System.out.println(warehouses);
     }
 }

@@ -19,6 +19,7 @@ import util.DBUtil;
 import java.util.logging.Logger;
 import model.BMProductFilter;
 import model.Brand;
+import model.ProductDetailDTO;
 import model.Supplier;
 import util.Validate;
 
@@ -259,61 +260,6 @@ public class ProductDAO {
             System.err.println("Lỗi trong updateProductDetails: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    // Retrieves a ProductDTO by productDetailId
-    public static ProductDTO getProductInWareHouseByDetailId(String dbName, int productDetailId) {
-        ProductDTO product = null;
-        StringBuilder query = new StringBuilder("""
-                    SELECT
-                        wp.WarehouseID,
-                        p.ProductID,
-                        pd.ProductDetailID,
-                        wp.Quantity AS InventoryQuantity,
-                        p.ProductName,
-                        b.BrandName,
-                        c.CategoryName,
-                        s.SupplierName,
-                        CAST(p.CostPrice AS NVARCHAR) AS CostPrice,
-                        CAST(p.RetailPrice AS NVARCHAR) AS RetailPrice,
-                        p.ImageURL,
-                        p.CreatedAt,
-                        CASE
-                            WHEN p.IsActive = 1 THEN N'Đang kinh doanh'
-                            ELSE N'Không kinh doanh'
-                        END AS Status,
-                        pd.Description,
-                        pd.ProductCode,
-                        pd.WarrantyPeriod,
-                        promo.PromoName,
-                        promo.DiscountPercent,
-                        promo.StartDate,
-                        promo.EndDate
-                    FROM
-                        ProductDetails pd
-                        LEFT JOIN Products p ON pd.ProductID = p.ProductID
-                        LEFT JOIN WarehouseProducts wp ON pd.ProductDetailID = wp.ProductDetailID
-                        LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                        LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                        LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                        LEFT JOIN PromotionProducts pp ON pp.ProductDetailID = pd.ProductDetailID
-                        LEFT JOIN Promotions promo ON promo.PromotionID = pp.PromotionID
-                    WHERE
-                        pd.ProductDetailID = ?
-                """);
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
-            stmt.setInt(1, productDetailId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                product = extractProductDTOFromResultSet(rs);
-                System.out.println("Lấy sản phẩm thành công: ProductDetailID = " + productDetailId);
-            }
-        } catch (Exception e) {
-            System.err.println("Lỗi trong getProductByDetailId: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return product;
     }
 
     public static ProductDTO getProductInInventoryByDetailId(String dbName, int productDetailId, int branchId) {
@@ -570,108 +516,6 @@ public class ProductDAO {
         }
     }
 
-    public List<ProductDTO> getAllProducts(String dbName, int warehouseId) {
-        List<ProductDTO> products = new ArrayList<>();
-        String query = """
-            SELECT 
-                wp.WarehouseID,
-                p.ProductID,
-                pd.ProductDetailID,
-                wp.Quantity AS InventoryQuantity,
-                p.ProductName,
-                b.BrandName,
-                c.CategoryName,
-                s.SupplierName,
-                CAST(p.CostPrice AS NVARCHAR) AS CostPrice,
-                CAST(p.RetailPrice AS NVARCHAR) AS RetailPrice,
-                p.ImageURL,
-                p.CreatedAt,
-                CASE 
-                    WHEN p.IsActive = 1 THEN N'Đang kinh doanh' 
-                    ELSE N'Không kinh doanh' 
-                END AS Status,
-                pd.Description,
-                pd.ProductCode,
-                pd.WarrantyPeriod,
-                promo.PromoName,
-                promo.DiscountPercent,
-                promo.StartDate,
-                promo.EndDate
-            FROM 
-                WarehouseProducts wp
-                LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
-                LEFT JOIN Products p ON pd.ProductID = p.ProductID
-                LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                LEFT JOIN PromotionProducts pp ON pp.ProductDetailID = pd.ProductDetailID
-                LEFT JOIN Promotions promo ON promo.PromotionID = pp.PromotionID
-            WHERE 
-                wp.WarehouseID = ?
-        """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, warehouseId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                ProductDTO product = extractProductDTOFromResultSet(rs);
-                products.add(product);
-            }
-            System.out.println("Fetched " + products.size() + " products for warehouseId: " + warehouseId);
-        } catch (SQLException e) {
-            System.err.println("Error in getAllProducts: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return products;
-    }
-
-
-    /* PHÙNG
-      Lấy sản phẩm theo ID
-     */
-    public ProductDTO getProductById(String dbName, int productId) throws SQLException {
-        String sql = """
-                    SELECT
-                        pd.ProductDetailID,
-                        ISNULL(ip.Quantity, 0) AS InventoryQuantity,
-                        pd.Description,
-                        pd.ProductCode,
-                        pd.WarrantyPeriod,
-                        p.ProductID,
-                        p.ProductName,
-                        b.BrandName,
-                        c.CategoryName,
-                        s.SupplierName,
-                        p.CostPrice,
-                        p.RetailPrice,
-                        p.ImageURL,
-                        p.CreatedAt,
-                        CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status
-                    FROM Products p
-                    LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
-                    LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
-                    LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                    LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                    LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                    WHERE p.ProductID = ?
-                """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, productId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return extractProductDTOFromResultSet(rs);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in getProductById: " + e.getMessage());
-            throw e;
-        }
-
-        return null;
-    }
 
     /*
      * PHÙNG
@@ -783,60 +627,6 @@ public class ProductDAO {
         return products;
     }
 
-    /*
-     * Lấy sản phẩm theo danh mục
-     */
-    public List<ProductDTO> getProductsByCategory(String dbName, int branchId, int categoryId) throws SQLException {
-        List<ProductDTO> products = new ArrayList<>();
-        String sql = """
-                    SELECT
-                        p.ProductID,
-                        p.ProductName,
-                        c.CategoryName,
-                        b.BrandName,
-                        s.SupplierName,
-                        p.CostPrice,
-                        p.RetailPrice,
-                        p.ImageURL,
-                        p.CreatedAt,
-                        p.IsActive,
-                        ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity
-                    FROM
-                        Products p
-                        LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                        LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                        LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                        LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
-                        LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
-                        LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID AND i.BranchID = ?
-                    WHERE
-                        p.CategoryID = ?
-                    GROUP BY
-                        p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
-                        p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive
-                    ORDER BY
-                        p.ProductName
-                """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, branchId);
-            ps.setInt(2, categoryId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    ProductDTO product = extractProductDTOFromResultSet(rs);
-                    products.add(product);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in getProductsByCategory: " + e.getMessage());
-            throw e;
-        }
-
-        return products;
-    }
-
     public List<Category> getAllCategories(String dbName) {
         List<Category> categories = new ArrayList<>();
         String query = "SELECT CategoryID, CategoryName FROM Categories";
@@ -852,250 +642,6 @@ public class ProductDAO {
             e.printStackTrace();
         }
         return categories;
-    }
-
-    public List<ProductDTO> getWarehouseProductListByPageAndCategory(String dbName, int warehouseId, int page,
-            int pageSize, String search, Integer categoryId, String inventory) {
-        List<ProductDTO> products = new ArrayList<>();
-
-        // Làm sạch search string: loại bỏ khoảng trắng đầu/cuối, chuẩn hóa dấu cách
-        // thành 1
-        if (search == null) {
-            search = "";
-        } else {
-            search = search.trim().replaceAll("\\s+", "");
-        }
-
-        StringBuilder query = new StringBuilder("""
-                         SELECT
-                             wp.WarehouseID,
-                             p.ProductID,
-                             pd.ProductDetailID,
-                             wp.Quantity AS InventoryQuantity,
-                             p.ProductName,
-                             b.BrandName,
-                             c.CategoryName,
-                             s.SupplierName,
-                             CAST(p.CostPrice AS NVARCHAR) AS CostPrice,
-                             CAST(p.RetailPrice AS NVARCHAR) AS RetailPrice,
-                             p.ImageURL,
-                             p.CreatedAt,
-                             CASE
-                                  WHEN p.IsActive = 1 THEN N'Đang kinh doanh'
-                                  ELSE N'Không kinh doanh'
-                              END AS Status,
-                             pd.Description,
-                             pd.ProductCode,
-                             pd.WarrantyPeriod,
-                             promo.PromoName,
-                             promo.DiscountPercent,
-                             promo.StartDate,
-                             promo.EndDate
-                         FROM
-                             WarehouseProducts wp
-                             LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID
-                             LEFT JOIN Products p ON pd.ProductID = p.ProductID
-                             LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                             LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                             LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                             LEFT JOIN PromotionProducts pp ON pp.ProductDetailID = pd.ProductDetailID
-                             LEFT JOIN Promotions promo ON promo.PromotionID = pp.PromotionID
-                         WHERE
-                             wp.WarehouseID = ?
-                             AND REPLACE(LOWER(p.ProductName), ' ', '') LIKE ?
-                """);
-
-        if (categoryId != null) {
-            query.append(" AND p.CategoryID = ?");
-        }
-        if ("in-stock".equals(inventory)) {
-            query.append(" AND wp.Quantity > 0");
-        } else if ("out-stock".equals(inventory)) {
-            query.append(" AND wp.Quantity = 0");
-        }
-
-        query.append(" ORDER BY p.ProductID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
-            int paramIndex = 1;
-            stmt.setInt(paramIndex++, warehouseId);
-            stmt.setString(paramIndex++, "%" + search.toLowerCase() + "%");
-            if (categoryId != null) {
-                stmt.setInt(paramIndex++, categoryId);
-            }
-            stmt.setInt(paramIndex++, (page - 1) * pageSize);
-            stmt.setInt(paramIndex, pageSize);
-
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                ProductDTO product = extractProductDTOFromResultSet(rs);
-                products.add(product);
-            }
-
-            System.out.println("Sản phẩm lọc theo inventory: " + products.size() + " cho inventory: " + inventory);
-        } catch (Exception e) {
-            System.err.println("Lỗi trong getWarehouseProductListByPageAndCategory: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return products;
-    }
-
-    public int countProductsByWarehouseIdAndCategory(String dbName, int warehouseId, String search, Integer categoryId,
-            String inventory) {
-        int count = 0;
-        StringBuilder query = new StringBuilder(
-                "SELECT COUNT(*) "
-                + "FROM Products p "
-                + "JOIN ProductDetails pd ON p.ProductID = pd.ProductID "
-                + "JOIN WarehouseProducts wp ON pd.ProductDetailID = wp.ProductDetailID "
-                + "WHERE wp.WarehouseID = ? AND p.ProductName LIKE ?");
-        if (categoryId != null) {
-            query.append(" AND p.CategoryID = ?");
-        }
-        if ("in-stock".equals(inventory)) {
-            query.append(" AND wp.Quantity > 0");
-        } else if ("out-stock".equals(inventory)) {
-            query.append(" AND wp.Quantity = 0");
-        }
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
-            stmt.setInt(1, warehouseId);
-            stmt.setString(2, "%" + search + "%");
-            int paramIndex = 3;
-            if (categoryId != null) {
-                stmt.setInt(paramIndex++, categoryId);
-            }
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-            System.out.println("Tổng sản phẩm theo inventory: " + count + " cho inventory: " + inventory);
-        } catch (Exception e) {
-            System.err.println("Lỗi trong countProductsByWarehouseIdAndCategory: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return count;
-    }
-
-    /*
-     * Lấy sản phẩm theo trạng thái tồn kho
-     */
-    public List<ProductDTO> getProductsByStockStatus(String dbName, int branchId, String stockStatus)
-            throws SQLException {
-        List<ProductDTO> products = new ArrayList<>();
-
-        StringBuilder sql = new StringBuilder("""
-                    SELECT
-                        pd.ProductDetailID,
-                        p.ProductID,
-                        p.ProductName,
-                        c.CategoryName,
-                        b.BrandName,
-                        s.SupplierName,
-                        p.CostPrice,
-                        p.RetailPrice,
-                        p.ImageURL,
-                        p.CreatedAt,
-                        p.IsActive,
-                        ISNULL(SUM(ip.Quantity), 0) AS InventoryQuantity,
-                        pd.Description,
-                        pd.ProductCode,
-                        pd.WarrantyPeriod,
-                        NULL AS PromoName,
-                        NULL AS DiscountPercent,
-                        NULL AS StartDate,
-                        NULL AS EndDate,
-                        CASE WHEN p.IsActive = 1 THEN N'Đang kinh doanh' ELSE N'Không kinh doanh' END AS Status
-                    FROM
-                        Products p
-                        LEFT JOIN ProductDetails pd ON p.ProductID = pd.ProductID
-                        LEFT JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID
-                        LEFT JOIN Inventory i ON ip.InventoryID = i.InventoryID WHERE i.BranchID = ?
-                        LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
-                        LEFT JOIN Brands b ON p.BrandID = b.BrandID
-                        LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID
-                    GROUP BY
-                        pd.ProductDetailID,
-                        p.ProductID, p.ProductName, c.CategoryName, b.BrandName, s.SupplierName,
-                        p.CostPrice, p.RetailPrice, p.ImageURL, p.CreatedAt, p.IsActive,
-                        pd.Description, pd.ProductCode, pd.WarrantyPeriod
-                """);
-
-        if (stockStatus != null && !stockStatus.equals("all")) {
-            switch (stockStatus.toLowerCase()) {
-                case "below":
-                    sql.append(" HAVING ISNULL(SUM(ip.Quantity), 0) > 0 AND ISNULL(SUM(ip.Quantity), 0) < 20");
-                    break;
-                case "above":
-                    sql.append(" HAVING ISNULL(SUM(ip.Quantity), 0) > 50");
-                    break;
-                case "in-stock":
-                    sql.append(" HAVING ISNULL(SUM(ip.Quantity), 0) BETWEEN 1 AND 50");
-                    break;
-                case "out-stock":
-                    sql.append(" HAVING ISNULL(SUM(ip.Quantity), 0) = 0");
-                    break;
-            }
-        }
-        sql.append(" ORDER BY p.ProductName");
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            ps.setInt(1, branchId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    ProductDTO product = extractProductDTOFromResultSet(rs);
-                    products.add(product);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in getProductsByStockStatus: " + e.getMessage());
-            throw e;
-        }
-        return products;
-    }
-
-    /*
-     * Lấy thống kê tổng quan về sản phẩm
-     */
-    public ProductStatsDTO getProductStats(String dbName, int branchId) throws SQLException {
-        String sql = """
-                    SELECT
-                        COUNT(DISTINCT p.ProductID) as TotalProducts,
-                        COUNT(CASE WHEN ip.Quantity > 0 THEN 1 END) as InStockProducts,
-                        COUNT(CASE WHEN ip.Quantity <= 0 OR ip.Quantity IS NULL THEN 1 END) as OutOfStockProducts,
-                        COUNT(CASE WHEN ip.Quantity > 0 AND ip.Quantity < 10 THEN 1 END) as LowStockProducts,
-                        SUM(ISNULL(ip.Quantity, 0)) as TotalQuantity,
-                        SUM(ISNULL(ip.Quantity, 0) * CAST(p.RetailPrice AS DECIMAL(18,2))) as TotalValue
-                    FROM
-                        Inventory i
-                        LEFT JOIN InventoryProducts ip ON i.InventoryID = ip.InventoryID
-                        LEFT JOIN ProductDetails pd ON ip.ProductDetailID = pd.ProductDetailID
-                        LEFT JOIN Products p ON pd.ProductID = p.ProductID
-                    WHERE
-                        i.InventoryID = ?
-                """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, branchId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new ProductStatsDTO(
-                            rs.getInt("TotalProducts"),
-                            rs.getInt("InStockProducts"),
-                            rs.getInt("OutOfStockProducts"),
-                            rs.getInt("LowStockProducts"),
-                            rs.getInt("TotalQuantity"),
-                            rs.getBigDecimal("TotalValue"));
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error in getProductStats: " + e.getMessage());
-            throw e;
-        }
-
-        return null;
     }
 
     // Phuong
@@ -1342,6 +888,7 @@ public class ProductDAO {
         }
     }
 
+    //Phuong
     public static boolean markSerialAsSold(String dbName, int productDetailId, int orderId) {
         String query = "WITH RandomSerial AS ( \n"
                 + "    SELECT TOP (1) ProductDetailID, SerialNumber \n"
@@ -1370,9 +917,10 @@ public class ProductDAO {
         return false;
     }
 
+    //Phuong
     public static int getNewQuantity(ProductDTO product, String dbName, int branchId) {
         int newQuantity = 0;
-        
+
         ProductDTO productDto = ProductDAO.getProductInInventoryByDetailId(dbName, product.getProductDetailId(),
                 branchId);
         if (productDto != null) {
@@ -1385,6 +933,233 @@ public class ProductDAO {
         }
 
         return newQuantity;
+    }
+
+    //Phuong
+    public static List<ProductDetailDTO> getAllProductDetailsByFilter(String dbName, int offset, int limit, BMProductFilter filter) throws SQLException {
+        List<ProductDetailDTO> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("""
+        SELECT 
+            pd.ProductDetailID,
+            pd.ProductID,
+            p.ProductName,
+            p.ProductName + ' - ' + pd.ProductCode AS FullName,
+            pd.ProductCode,
+            pd.Description,
+            pd.WarrantyPeriod,
+            p.BrandID,
+            p.CategoryID,
+            p.SupplierID,
+            p.CostPrice,
+            p.RetailPrice,
+            p.VAT,
+            p.ImageURL,
+            p.IsActive,
+            pd.ProductNameUnsigned,
+            p.CreatedAt AS ProductCreatedAt,
+            pd.CreatedAt AS DetailCreatedAt,
+            pd.UpdatedAt
+        FROM ProductDetails pd
+        JOIN Products p ON pd.ProductID = p.ProductID
+        WHERE 1=1
+    """);
+
+        List<Object> parameters = new ArrayList<>();
+
+        // Filter theo category
+        if (filter != null && filter.hasCategories()) {
+            sql.append(" AND p.CategoryID IN (");
+            for (int i = 0; i < filter.getCategories().length; i++) {
+                sql.append("?");
+                if (i < filter.getCategories().length - 1) {
+                    sql.append(",");
+                }
+                parameters.add(filter.getCategories()[i]);
+            }
+            sql.append(") ");
+        }
+
+        // Filter theo trạng thái active/inactive
+        if (filter != null && filter.hasStatusFilter()) {
+            switch (filter.getStatus()) {
+                case "active":
+                    sql.append(" AND p.IsActive = 1 ");
+                    break;
+                case "inactive":
+                    sql.append(" AND p.IsActive = 0 ");
+                    break;
+            }
+        }
+
+        // Filter theo keyword (tìm không dấu ở ProductNameUnsigned, hoặc Description, hoặc ProductCode)
+        if (filter != null && filter.hasSearchKeyword()) {
+            String keyword = filter.getSearchKeyword();
+            String keywordUnsigned = Validate.normalizeSearch(keyword);
+
+            sql.append(" AND (pd.ProductNameUnsigned LIKE ? OR pd.Description LIKE ? OR pd.ProductCode LIKE ?) ");
+            String searchPattern = "%" + keywordUnsigned + "%";
+            parameters.add(searchPattern);
+            parameters.add("%" + keyword + "%");
+            parameters.add("%" + keyword + "%");
+        }
+
+        // Filter theo giá min
+        if (filter != null && filter.getMinPrice() != null) {
+            sql.append(" AND p.RetailPrice >= ? ");
+            parameters.add(filter.getMinPrice());
+        }
+
+        // Filter theo giá max
+        if (filter != null && filter.getMaxPrice() != null) {
+            sql.append(" AND p.RetailPrice <= ? ");
+            parameters.add(filter.getMaxPrice());
+        }
+
+        // Phân trang: ORDER BY + OFFSET ... FETCH NEXT
+        sql.append(" ORDER BY pd.ProductDetailID ");
+        sql.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ");
+        parameters.add(offset);
+        parameters.add(limit);
+
+        try (
+                Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            // Set tham số vào PreparedStatement
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    ProductDetailDTO dto = new ProductDetailDTO(
+                            rs.getInt("ProductDetailID"),
+                            rs.getInt("ProductID"),
+                            rs.getString("ProductName"),
+                            rs.getString("FullName"),
+                            rs.getString("ProductCode"),
+                            rs.getString("Description"),
+                            rs.getString("WarrantyPeriod"),
+                            rs.getInt("BrandID"),
+                            rs.getInt("CategoryID"),
+                            rs.getInt("SupplierID"),
+                            rs.getDouble("CostPrice"),
+                            rs.getDouble("RetailPrice"),
+                            rs.getDouble("VAT"),
+                            rs.getString("ImageURL"),
+                            rs.getBoolean("IsActive"),
+                            rs.getString("ProductNameUnsigned"),
+                            rs.getTimestamp("ProductCreatedAt"),
+                            rs.getTimestamp("DetailCreatedAt"),
+                            rs.getTimestamp("UpdatedAt")
+                    );
+                    list.add(dto);
+                }
+            }
+        }
+
+        return list;
+    }
+
+    public static int getTotalProductDetailByFilter(String dbName, BMProductFilter filter) throws SQLException {
+        int total = 0;
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("""
+        SELECT COUNT(*) AS Total
+        FROM ProductDetails pd
+        JOIN Products p ON pd.ProductID = p.ProductID
+        WHERE 1=1
+    """);
+
+        List<Object> parameters = new ArrayList<>();
+
+        // Filter theo category
+        if (filter != null && filter.hasCategories()) {
+            sql.append(" AND p.CategoryID IN (");
+            for (int i = 0; i < filter.getCategories().length; i++) {
+                sql.append("?");
+                if (i < filter.getCategories().length - 1) {
+                    sql.append(",");
+                }
+                parameters.add(filter.getCategories()[i]);
+            }
+            sql.append(") ");
+        }
+
+        // Filter theo trạng thái active/inactive
+        if (filter != null && filter.hasStatusFilter()) {
+            switch (filter.getStatus()) {
+                case "active":
+                    sql.append(" AND p.IsActive = 1 ");
+                    break;
+                case "inactive":
+                    sql.append(" AND p.IsActive = 0 ");
+                    break;
+            }
+        }
+
+        // Filter theo keyword (tìm không dấu ở ProductNameUnsigned, hoặc Description, hoặc ProductCode)
+        if (filter != null && filter.hasSearchKeyword()) {
+            String keyword = filter.getSearchKeyword();
+            String keywordUnsigned = Validate.normalizeSearch(keyword);
+
+            sql.append(" AND (pd.ProductNameUnsigned LIKE ? OR pd.Description LIKE ? OR pd.ProductCode LIKE ?) ");
+            String searchPattern = "%" + keywordUnsigned + "%";
+            parameters.add(searchPattern);
+            parameters.add("%" + keyword + "%");
+            parameters.add("%" + keyword + "%");
+        }
+
+        // Filter theo giá min
+        if (filter != null && filter.getMinPrice() != null) {
+            sql.append(" AND p.RetailPrice >= ? ");
+            parameters.add(filter.getMinPrice());
+        }
+
+        // Filter theo giá max
+        if (filter != null && filter.getMaxPrice() != null) {
+            sql.append(" AND p.RetailPrice <= ? ");
+            parameters.add(filter.getMaxPrice());
+        }
+
+        try (
+                Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    total = rs.getInt("Total");
+                }
+            }
+        }
+
+        return total;
+    }
+
+    public static int getTotalProduct(String dbName) throws SQLException {
+        int total = 0;
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("""
+        SELECT COUNT(*) AS Total
+        FROM ProductDetails pd
+        JOIN Products p ON pd.ProductID = p.ProductID
+        WHERE 1=1
+    """);
+        try (
+                Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    total = rs.getInt("Total");
+                }
+            }
+        }
+
+        return total;
     }
 
     // KO DONG VAO
@@ -1412,8 +1187,8 @@ public class ProductDAO {
         return productDTO;
     }
 
-    public static void main(String[] args) {
-        
+    public static void main(String[] args) throws SQLException {
+        System.out.println(ProductDAO.getTotalProduct("DTB_P"));
     }
 
 }
