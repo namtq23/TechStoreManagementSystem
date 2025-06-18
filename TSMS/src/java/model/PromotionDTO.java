@@ -15,6 +15,8 @@ public class PromotionDTO {
     private int branchCount;
     private int productCount;
     private String description;
+    private String startDateFormatted;
+    private String endDateFormatted;
 
     // Constructors
     public PromotionDTO() {}
@@ -61,7 +63,21 @@ public class PromotionDTO {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    public String getStartDateFormatted() {
+        return startDateFormatted;
+    }
 
+    public void setStartDateFormatted(String startDateFormatted) {
+        this.startDateFormatted = startDateFormatted;
+    }
+
+    public String getEndDateFormatted() {
+        return endDateFormatted;
+    }
+
+    public void setEndDateFormatted(String endDateFormatted) {
+        this.endDateFormatted = endDateFormatted;
+    }
     // Utility methods
     public String getFormattedDiscountPercent() {
         return String.format("%.1f%%", discountPercent);
