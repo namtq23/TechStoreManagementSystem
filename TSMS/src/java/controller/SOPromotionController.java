@@ -12,7 +12,9 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import static java.lang.System.out;
+import java.net.URLEncoder;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +43,7 @@ public class SOPromotionController extends HttpServlet {
                 response.sendRedirect("login");
                 return;
             }
-
+            
             // Parse thông tin session
             int userId = Integer.parseInt(userIdObj.toString());
             int roleId = Integer.parseInt(roleIdObj.toString());
@@ -93,6 +95,34 @@ public class SOPromotionController extends HttpServlet {
 
     private void handlePageRequest(HttpServletRequest request, HttpServletResponse response,
               String dbName, Integer branchId) throws ServletException, IOException, SQLException {
+        String action = request.getParameter("action");
+        
+        if ("view".equals(action)) {
+        String promotionIdStr = request.getParameter("promotionId");
+        if (promotionIdStr != null && !promotionIdStr.trim().isEmpty()) {
+            try {
+                int promotionId = Integer.parseInt(promotionIdStr);
+                PromotionDTO promotion = promotionDAO.getPromotionById(dbName, promotionId);
+                if (promotion != null) {
+                    request.setAttribute("action", "update");
+                    request.setAttribute("promotion", promotion);
+                    // Định dạng ngày cho input date
+                    promotion.setStartDateFormatted(new SimpleDateFormat("yyyy-MM-dd").format(promotion.getStartDate()));
+                    promotion.setEndDateFormatted(new SimpleDateFormat("yyyy-MM-dd").format(promotion.getEndDate()));
+                    request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
+                    return;
+                } else {
+                    request.setAttribute("error", "Không tìm thấy khuyến mãi!");
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Mã khuyến mãi không hợp lệ!");
+            }
+        }
+    } else if ("create".equals(action)) {
+        request.setAttribute("action", "create");
+        request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
+        return;
+    }
         List<PromotionDTO> promotions = promotionDAO.getAllPromotions(dbName);
 
         // Đọc search parameters từ request
@@ -102,7 +132,7 @@ public class SOPromotionController extends HttpServlet {
         String categoryIdStr = request.getParameter("categoryId");
         String pageStr = request.getParameter("page");
 
-        // ✅ Tạo search criteria object
+        //  Tạo search criteria object
         PromotionSearchCriteria criteria = new PromotionSearchCriteria();
         criteria.setSearchTerm(search);
         criteria.setStatusFilter(status);
@@ -133,8 +163,6 @@ public class SOPromotionController extends HttpServlet {
                 // Ignore invalid category ID
             }
         }
-
-
         //Gọi DAO với search criteria
         int totalPromotions;
 
@@ -271,7 +299,7 @@ public class SOPromotionController extends HttpServlet {
             boolean success = promotionDAO.createPromotion(dbName, promotion);
 
             if (success) {
-                request.setAttribute("success", "Tạo khuyến mãi thành công!");
+                response.sendRedirect("so-promotions?success=" + URLEncoder.encode("Cập nhật khuyến mãi thành công!", "UTF-8"));
             } else {
                 request.setAttribute("error", "Không thể tạo khuyến mãi!");
             }
