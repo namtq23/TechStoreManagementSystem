@@ -154,6 +154,7 @@ public class BMProductController extends HttpServlet {
 
         urlBuilder.append("page=");
         pagingURL = urlBuilder.toString();
+        System.out.println(pagingURL);
         req.setAttribute("pagingUrl", pagingURL);
         req.setAttribute("totalPages", totalPages);
         req.setAttribute("totalProducts", totalProducts);

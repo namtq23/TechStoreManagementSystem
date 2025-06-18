@@ -28,7 +28,7 @@ import util.Validate;
  *
  * @author admin
  */
-@WebServlet(name = "BMSellInStoreController", urlPatterns = {"/bm-cart"})
+@WebServlet(name = "BMSellInStoreController", urlPatterns = { "/bm-cart" })
 public class BMSellInStoreController extends HttpServlet {
 
     @Override
@@ -126,37 +126,34 @@ public class BMSellInStoreController extends HttpServlet {
         Type productListType = new TypeToken<List<ProductDTO>>() {
         }.getType();
         List<ProductDTO> cartItems = gson.fromJson(cartJson, productListType);
-        int newQuantity = 0;
-
-        for (ProductDTO product : cartItems) {
-            ProductDTO productDto = ProductDAO.getProductByDetailId(dbName, product.getProductDetailId());
-            if (productDto != null) {
-                newQuantity = productDto.getQuantity() - product.getQuantity();
-                if (newQuantity < 0) {
-                    resp.sendRedirect(req.getContextPath() + "/bm-cart?error=notEnoughStock");
-                    return;
-                }
-            } else {
-                resp.sendRedirect(req.getContextPath() + "/bm-cart?error=productNotFound");
-                return;
-            }
-        }
-
+        
         Order order;
         Customer customer = new Customer();
 
         if (CustomerDAO.checkCustomerExist(dbName, customerPhone)) {
             int customerId = CustomerDAO.getCustomerId(dbName, customerPhone);
-            order = new Order(0, branchId, userId, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven, changeDue);
-            ProductDAO.updateProductQuantityOfInventory(dbName, cartItems, newQuantity, branchId);
+            order = new Order(0, branchId, userId, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven,
+                    changeDue);
+            ProductDAO.updateProductQuantityOfInventory(dbName, cartItems, branchId);
         } else {
-            customer = new Customer(0, customerName, customerPhone, customerMail, customerAddress, gender, customerDob, null, null);
+            customer = new Customer(0, customerName, customerPhone, customerMail, customerAddress, gender, customerDob,
+                    null, null);
             CustomerDAO.insertCustomer(dbName, customer);
             int customerId = CustomerDAO.getCustomerId(dbName, customerPhone);
-            order = new Order(0, branchId, userId, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven, changeDue);
+            order = new Order(0, branchId, userId, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven,
+                    changeDue);
         }
 
         OrderDAO.insertOrderWithDetails(dbName, order, cartItems);
+
+        int latestOrderId = OrderDAO.getLatestOrderId(dbName, branchId);
+        for (ProductDTO product : cartItems) {
+            for (int i = 0; i < product.getQuantity(); i++) {
+                System.out.println("------");
+                boolean rs = ProductDAO.markSerialAsSold(dbName, product.getProductDetailId(), latestOrderId);
+                System.out.println(rs);
+            }
+        }
 
         System.out.println(customer);
         System.out.println(order);

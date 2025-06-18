@@ -100,7 +100,7 @@ public class RegisterController extends HttpServlet {
             }
             // Tạo đối tượng ShopOwner để lưu vào AdminDB
             String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-            ShopOwner newOwner = new ShopOwner(0, hashedPassword, fullName, shopName, newDbName, email, null, null, null, null, 1);
+            ShopOwner newOwner = new ShopOwner(0, hashedPassword, fullName, shopName, newDbName, email, null, null, null, phone, 1);
 
             // 1. Tạo bản sao TemplateDB thành ShopDB_{username}
             DatabaseUtils.createDatabaseWithSchema(newDbName);

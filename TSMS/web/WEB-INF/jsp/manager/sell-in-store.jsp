@@ -255,42 +255,45 @@ Author     : admin
                     <% List<ProductDTO> products = (List<ProductDTO>) request.getAttribute("products");
                     for (ProductDTO product : products) { %>
                     <div class="product-card" data-product-id="<%= product.getProductDetailId()%>">
-                        <div class="product-image">
-                            <img src="<%= product.getImgUrl()%>" alt="<%= product.getProductName()%>">
-                        </div>
-                        <div class="product-info">
-                            <h3><%= product.getDescription() %></h3>
-                            <%
-                                String retailPriceStr = product.getRetailPrice();
-                                Double discountPercent = product.getDiscountPercent();
-                                double retailPrice = 0;
-                                double discountedPrice = 0;
+                        <div class="product-content" style="display: flex; justify-content: flex-start">
+                            <div class="product-image">
+                                <img src="<%= product.getImgUrl()%>" alt="<%= product.getProductName()%>">
+                            </div>
+                            <div class="product-info">
+                                <h3><%= product.getDescription() %></h3>
+                                <%
+                                    String retailPriceStr = product.getRetailPrice();
+                                    Double discountPercent = product.getDiscountPercent();
+                                    double retailPrice = 0;
+                                    double discountedPrice = 0;
     
 
-                                    if (retailPriceStr != null) {
-                                        retailPrice = Double.parseDouble(retailPriceStr.trim());
+                                        if (retailPriceStr != null) {
+                                            retailPrice = Double.parseDouble(retailPriceStr.trim());
             
-                                        if (discountPercent != null && discountPercent > 0) {
-                                            discountedPrice = retailPrice * (1 - discountPercent / 100.0);
-                            %>
-                            <div class="discount">Giảm <%= String.format("%.1f", discountPercent) %>%</div>
-                            <div class="product-price original-price"><%= Validate.formatCostPriceToVND((int)retailPrice) %></div>
-                            <div class="product-price discounted-price"><%= Validate.formatCostPriceToVND((int)discountedPrice) %></div>
-                            <%
+                                            if (discountPercent != null && discountPercent > 0) {
+                                                discountedPrice = retailPrice * (1 - discountPercent / 100.0);
+                                %>
+                                <div class="discount">Giảm <%= String.format("%.1f", discountPercent) %>%</div>
+                                <div class="product-price original-price"><%= Validate.formatCostPriceToVND((int)retailPrice) %></div>
+                                <div class="product-price discounted-price"><%= Validate.formatCostPriceToVND((int)discountedPrice) %></div>
+                                <%
+                                            } else {
+                                %>
+                                <div class="product-price"><%= Validate.formatCostPriceToVND((int)retailPrice) %></div>
+                                <%
+                                            }
                                         } else {
-                            %>
-                            <div class="product-price"><%= Validate.formatCostPriceToVND((int)retailPrice) %></div>
-                            <%
+                                %>
+                                <div class="product-price">Giá không khả dụng</div>
+                                <%
                                         }
-                                    } else {
-                            %>
-                            <div class="product-price">Giá không khả dụng</div>
-                            <%
-                                    }
-                            %>
+                                %>
 
-                            <div class="product-stock">Còn: <%= product.getQuantity() %></div>
+                                <div class="product-stock">Còn: <%= product.getQuantity() %></div>
+                            </div>
                         </div>
+
                         <button class="add-to-cart">
                             <i class="fas fa-plus"></i>
                         </button>

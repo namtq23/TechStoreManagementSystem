@@ -1,99 +1,195 @@
-<%-- 
-    Document   : products.
-    Created on : May 22, 2025, 11:19:37 AM
-    Author     : admin
---%>
-
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="java.util.*, model.ProductDTO" %>
 <%@ page import="util.Validate" %>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>TSMS - Hàng hóa</title>
+        <title>TSMS - Hệ thống bán hàng</title>
         <link rel="stylesheet" href="css/bm-products.css">
         <link rel="stylesheet" href="css/header.css"/>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <style>
+            /* Responsive CSS cho navbar */
+            .hamburger-menu {
+                display: none;
+                flex-direction: column;
+                cursor: pointer;
+                padding: 10px;
+                margin-left: auto;
+            }
+
+            .hamburger-menu span {
+                width: 25px;
+                height: 3px;
+                background-color: white;
+                margin: 3px 0;
+                transition: 0.3s;
+                border-radius: 2px;
+            }
+
+            .hamburger-menu.active span:nth-child(1) {
+                transform: rotate(-45deg) translate(-5px, 6px);
+            }
+
+            .hamburger-menu.active span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .hamburger-menu.active span:nth-child(3) {
+                transform: rotate(45deg) translate(-5px, -6px);
+            }
+
+            /* Mobile responsive styles */
+            @media (max-width: 768px) {
+                .hamburger-menu {
+                    display: flex;
+                }
+
+                .main-nav {
+                    position: fixed;
+                    top: 70px; /* Chiều cao của header */
+                    left: -100%;
+                    width: 100%;
+                    height: calc(100vh - 70px);
+                    background-color: white;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                    align-items: stretch;
+                    transition: left 0.3s ease;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    z-index: 1000;
+                    padding: 20px 0;
+                }
+
+                .main-nav.active {
+                    left: 0;
+                }
+
+                .main-nav .nav-item {
+                    width: 100%;
+                    padding: 15px 20px;
+                    border-bottom: 1px solid #eee;
+                    justify-content: flex-start;
+                    margin: 0;
+                    color: black;
+                }
+
+                .main-nav .nav-item:hover {
+                    background-color: #f5f5f5;
+                }
+
+                .main-nav .dropdown {
+                    position: static;
+                }
+
+                .main-nav .dropdown-menu {
+                    position: static;
+                    display: none;
+                    box-shadow: none;
+                    border: none;
+                    background-color: #f8f9fa;
+                    padding-left: 20px;
+                }
+
+                .main-nav .dropdown.active .dropdown-menu {
+                    display: block;
+                }
+
+                .header-container {
+                    position: relative;
+                }
+
+                /* Overlay để đóng menu khi click bên ngoài */
+                .mobile-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    z-index: 999;
+                    display: none;
+                }
+
+                .mobile-overlay.active {
+                    display: block;
+                }
+
+                /* Đảm bảo main content không bị che khuất */
+                .main-container {
+                    margin-top: 0;
+                }
+            }
+
+            /* Đảm bảo sidebar cũng responsive */
+            @media (max-width: 768px) {
+                .main-container {
+                    flex-direction: column;
+                }
+
+                .sidebar {
+                    width: 100%;
+                    margin-bottom: 20px;
+                }
+
+                .main-content {
+                    width: 100%;
+                }
+            }
+        </style>
     </head>
     <body>
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+
         <!-- Header -->
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="bm-overview" class="logo">
+                    <a href="sale-products?page=1" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
                 </div>
-                <nav class="main-nav">
-                    <a href="bm-overview" class="nav-item">
-                        <i class="fas fa-chart-line"></i>
-                        Tổng quan
-                    </a>
 
-                    <a href="bm-products?page=1" class="nav-item active">
+                <!-- Hamburger Menu -->
+                <div class="hamburger-menu" id="hamburgerMenu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+                <nav class="main-nav" id="mainNav">
+                    <a href="sale-products?page=1" class="nav-item active">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
 
-                    <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
-                            <i class="fas fa-exchange-alt"></i>
-                            Giao dịch
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">Đơn hàng</a>
-                            <a href="#" class="dropdown-item">Nhập hàng</a>
-                            <a href="#" class="dropdown-item">Tạo yêu cầu nhập</a>
-                        </div>
-                    </div>
+                    <a href="sale-sendnoti" class="nav-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        Gửi yêu cầu 
+                    </a>
 
-                    <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
-                            <i class="fas fa-handshake"></i>
-                            Đối tác
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="bm-customer" class="dropdown-item">Khách hàng</a>
-                            <a href="bm-supplier" class="dropdown-item">Nhà cung cấp</a>
-                        </div>
-                    </div>
+                    <a href="sale-mycustomer" class="nav-item">
+                        <i class="fas fa-users"></i>
+                        Khách hàng của tôi
+                    </a>
 
-                    <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
-                            <i class="fas fa-users"></i>
-                            Nhân viên
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="bm-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="#" class="dropdown-item">Hoa hồng</a>
-                        </div>
-                    </div>
-
-                    <div class="nav-item dropdown">
+                    <div class="nav-item dropdown" id="reportDropdown">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-chart-bar"></i>
                             Báo cáo
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">Tài chính</a>
-                            <a href="#" class="dropdown-item">Đật hàng</a>
-                            <a href="#" class="dropdown-item">Hàng hoá</a>
-                            <a href="#" class="dropdown-item">Khách hàng</a>
+                            <a href="sale-mycommissions" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
 
-                    <a href="bm-cart" class="nav-item">
-                        <i class="fas fa-cash-register"></i>
-                        Bán hàng
-                    </a>
                 </nav>
 
                 <div class="header-right">
@@ -113,7 +209,7 @@
         <div class="main-container">
             <!-- Sidebar -->
             <aside class="sidebar">
-                <form action="bm-products" method="get">
+                <form action="sale-products" method="get">
                     <!-- Category Filter -->
                     <div class="filter-section">
                         <div class="filter-header">
@@ -358,44 +454,86 @@
             <i class="fas fa-headset"></i>
             <span>Hỗ trợ:1900 9999</span>
         </div>
-    </body>
-    <script>
-        const toggle = document.getElementById("dropdownToggle");
-        const menu = document.getElementById("dropdownMenu");
 
-        toggle.addEventListener("click", function (e) {
-            e.preventDefault();
-            menu.style.display = menu.style.display === "block" ? "none" : "block";
-        });
+        <script>
+            // User dropdown functionality
+            const toggle = document.getElementById("dropdownToggle");
+            const menu = document.getElementById("dropdownMenu");
 
-        // Đóng dropdown nếu click ra ngoài
-        document.addEventListener("click", function (e) {
-            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-                menu.style.display = "none";
-            }
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.product-row').forEach(function (row) {
-                row.addEventListener('click', function () {
-                    const detailRow = row.nextElementSibling;
-                    if (detailRow && detailRow.classList.contains('detail-row')) {
-                        // Toggle display: table-row <=> none
-                        if (detailRow.style.display === 'table-row') {
-                            detailRow.style.display = 'none';
-                        } else {
-                            detailRow.style.display = 'table-row';
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                menu.style.display = menu.style.display === "block" ? "none" : "block";
+            });
+
+            // Đóng dropdown nếu click ra ngoài
+            document.addEventListener("click", function (e) {
+                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                    menu.style.display = "none";
+                }
+            });
+
+            // Mobile hamburger menu functionality
+            const hamburgerMenu = document.getElementById("hamburgerMenu");
+            const mainNav = document.getElementById("mainNav");
+            const mobileOverlay = document.getElementById("mobileOverlay");
+            const reportDropdown = document.getElementById("reportDropdown");
+
+            // Toggle mobile menu
+            hamburgerMenu.addEventListener("click", function () {
+                hamburgerMenu.classList.toggle("active");
+                mainNav.classList.toggle("active");
+                mobileOverlay.classList.toggle("active");
+                document.body.style.overflow = mainNav.classList.contains("active") ? "hidden" : "auto";
+            });
+
+            // Close mobile menu when clicking overlay
+            mobileOverlay.addEventListener("click", function () {
+                hamburgerMenu.classList.remove("active");
+                mainNav.classList.remove("active");
+                mobileOverlay.classList.remove("active");
+                document.body.style.overflow = "auto";
+            });
+
+            // Handle dropdown in mobile menu
+            reportDropdown.addEventListener("click", function (e) {
+                if (window.innerWidth <= 768) {
+                    e.preventDefault();
+                    reportDropdown.classList.toggle("active");
+                }
+            });
+
+            // Close mobile menu when window is resized to desktop
+            window.addEventListener("resize", function () {
+                if (window.innerWidth > 768) {
+                    hamburgerMenu.classList.remove("active");
+                    mainNav.classList.remove("active");
+                    mobileOverlay.classList.remove("active");
+                    reportDropdown.classList.remove("active");
+                    document.body.style.overflow = "auto";
+                }
+            });
+
+            // Product detail functionality
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.product-row').forEach(function (row) {
+                    row.addEventListener('click', function () {
+                        const detailRow = row.nextElementSibling;
+                        if (detailRow && detailRow.classList.contains('detail-row')) {
+                            // Toggle display: table-row <=> none
+                            if (detailRow.style.display === 'table-row') {
+                                detailRow.style.display = 'none';
+                            } else {
+                                detailRow.style.display = 'table-row';
+                            }
                         }
-                    }
+                    });
+                });
+
+                // Ẩn tất cả detail-row lúc ban đầu
+                document.querySelectorAll('.detail-row').forEach(function (row) {
+                    row.style.display = 'none';
                 });
             });
-
-            // Ẩn tất cả detail-row lúc ban đầu
-            document.querySelectorAll('.detail-row').forEach(function (row) {
-                row.style.display = 'none';
-            });
-        });
-    </script>
-
+        </script>
+    </body>
 </html>

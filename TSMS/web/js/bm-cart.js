@@ -61,6 +61,11 @@ class TSMSCashier {
             const productCard = e.target.closest('.product-card');
 
             if (e.target.closest('.add-to-cart')) {
+                const product = productList.find(p => p.productDetailId === parseInt(productCard.dataset.productId));
+                if (product.quantity === 0) {
+                    this.showNotification(`Không thể thêm: chỉ còn ${product.quantity} sản phẩm trong kho`, 'error');
+                    return;
+                }
                 e.preventDefault();
                 if (productCard) {
                     const productId = parseInt(productCard.dataset.productId);
@@ -70,7 +75,7 @@ class TSMSCashier {
             }
 
             if (productCard) {
-                const productInfo = productCard.querySelector('.product-info');
+                const productInfo = productCard.querySelector('.product-content');
                 const productId = parseInt(productCard.dataset.productId);
                 const product = this.products.find(p => p.productDetailId === productId);
                 const existingDetail = productCard.querySelector('.product-detail');
@@ -119,7 +124,7 @@ class TSMSCashier {
 
                 // Update cart data
                 const code = row.cells[1].textContent;
-                const productInCart = this.cart.find(p => p.serialNum === code);
+                const productInCart = this.cart.find(p => p.productCode === code);
                 if (productInCart) {
                     productInCart.quantity = quantity;
                 }
@@ -136,7 +141,7 @@ class TSMSCashier {
 
                 this.showDeleteConfirmation(() => {
                     // Remove from cart array
-                    this.cart = this.cart.filter(item => item.serialNum !== code);
+                    this.cart = this.cart.filter(item => item.productCode !== code);
                     row.remove();
                     this.updateSummary();
                 });
@@ -209,7 +214,7 @@ class TSMSCashier {
                 input.value = value;
 
                 const code = row.cells[1].textContent;
-                const productInCart = this.cart.find(p => p.serialNum === code);
+                const productInCart = this.cart.find(p => p.productCode === code);
                 if (productInCart) {
                     productInCart.quantity = value;
                 }
@@ -337,7 +342,7 @@ class TSMSCashier {
 
         const existingRow = Array.from(document.querySelectorAll('.item-row')).find(row => {
             const code = row.cells[1].textContent;
-            return code === product.serialNum;
+            return code === product.productCode;
         });
 
         if (existingRow) {
@@ -346,7 +351,7 @@ class TSMSCashier {
             if (currentQty < product.quantity) {
                 quantitySpan.value = currentQty + 1;
                 this.updateRowTotal(existingRow);
-                const item = this.cart.find(item => item.serialNum === product.serialNum);
+                const item = this.cart.find(item => item.productCode === product.productCode);
                 if (item && (item.quantity < product.quantity)) {
                     item.quantity = currentQty + 1;
                 }
@@ -419,7 +424,7 @@ class TSMSCashier {
 
         row.innerHTML = `
         <td class="productId">${rowCount + 1}</td>
-        <td>${product.serialNum || 'N/A'}</td>
+        <td>${product.productCode || 'N/A'}</td>
         <td>${product.description || 'N/A'}</td>
         <td>
             <div class="quantity-controls">
