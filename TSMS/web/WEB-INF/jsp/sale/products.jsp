@@ -169,12 +169,12 @@
                         Hàng hóa
                     </a>
 
-                    <a href="bm-products?page=1" class="nav-item">
+                    <a href="sale-sendnoti" class="nav-item">
                         <i class="fas fa-exchange-alt"></i>
                         Gửi yêu cầu 
                     </a>
 
-                    <a href="bm-products?page=1" class="nav-item">
+                    <a href="sale-mycustomer" class="nav-item">
                         <i class="fas fa-users"></i>
                         Khách hàng của tôi
                     </a>
@@ -186,7 +186,7 @@
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">Hoa hồng</a>
+                            <a href="sale-mycommissions" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
 
