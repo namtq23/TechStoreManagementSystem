@@ -12,6 +12,8 @@ import java.text.Normalizer;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -151,7 +153,7 @@ public class Validate {
 
         return LocalDate.of(previousMonth.getYear(), previousMonth.getMonth(), day);
     }
-
+    //Format cost theo VND
     public static String formatCostPriceToVND(double costPrice) {
         try {
             NumberFormat vndFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
@@ -159,6 +161,14 @@ public class Validate {
         } catch (Exception e) {
             return "0 ₫";
         }
+    }
+       // Method để format date
+    public static String getFormattedDate(LocalDateTime createdAt) {
+        if (createdAt != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            return createdAt.format(formatter);
+        }
+        return "-";
     }
 
     public static double safeParseDouble(String input) throws NumberFormatException {

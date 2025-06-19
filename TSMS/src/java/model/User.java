@@ -118,7 +118,7 @@ public class User {
         return warehouseId;
     }
 
-    public void setWarehouseId(String warehouseId) {
+    public void setWarehouseId(String warehouseId){
         this.warehouseId = warehouseId;
     }
 
