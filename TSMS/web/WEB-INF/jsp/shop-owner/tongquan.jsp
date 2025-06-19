@@ -55,10 +55,20 @@
                         <i class="fas fa-wallet"></i>
                         Sổ quỹ
                     </a>
-                    <a href="so-invoices" class="nav-item">
-                        <i class="fas fa-chart-bar"></i>
-                        Báo cáo Chi tiết
-                    </a>
+               
+                    
+                      <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-chart-bar"></i>
+                            Báo cáo Chi tiết
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="so-invoices" class="dropdown-item">Đơn hàng</a>
+                            <a href="#" class="dropdown-item">Nhập hàng</a>
+                            <a href="#" class="dropdown-item">Yêu cầu nhập hàng</a>
+                        </div>
+                    </div>
                 </nav>
 
                 <div class="header-right">
