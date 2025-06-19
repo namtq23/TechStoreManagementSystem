@@ -143,4 +143,29 @@ public class SOProductController extends HttpServlet {
         req.setAttribute("products", products);
     }
 
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession(true);
+        Object dbNameObj = session.getAttribute("dbName");
+
+        if (dbNameObj == null) {
+            resp.sendRedirect("login");
+            return;
+        }
+
+        String dbName = dbNameObj.toString();
+        String action = req.getParameter("action");
+        String id = req.getParameter("productDetailId");
+        int productDetailID = Integer.parseInt(id);
+        if ("delete".equals(action)) {
+            try {
+                ProductDAO dat = new ProductDAO();
+                dat.deleteProductAndDetail(dbName, productDetailID);
+                resp.sendRedirect("so-products?page=1");
+            } catch (SQLException ex) {
+                Logger.getLogger(SOProductController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
 }

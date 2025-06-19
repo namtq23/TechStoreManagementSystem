@@ -135,104 +135,115 @@ public class ProductDAO {
 
     // Dat
     public void deleteProductAndDetail(String dbName, int productDetailId) throws SQLException {
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        try {
-            conn = DBUtil.getConnectionTo(dbName);
-            conn.setAutoCommit(false); // Start transaction
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    try {
+        conn = DBUtil.getConnectionTo(dbName);
+        conn.setAutoCommit(false); // Start transaction
 
-            // 1. Get ProductID from ProductDetails first
-            int productId = -1;
-            String getProductIdSql = "SELECT ProductID FROM " + dbName
-                    + ".dbo.ProductDetails WHERE ProductDetailID = ?";
-            pstmt = conn.prepareStatement(getProductIdSql);
-            pstmt.setInt(1, productDetailId);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                productId = rs.getInt("ProductID");
-            }
-            rs.close();
-            pstmt.close();
+        // 1. Get ProductID from ProductDetails first
+        int productId = -1;
+        String getProductIdSql = "SELECT ProductID FROM " + dbName + ".dbo.ProductDetails WHERE ProductDetailID = ?";
+        pstmt = conn.prepareStatement(getProductIdSql);
+        pstmt.setInt(1, productDetailId);
+        rs = pstmt.executeQuery();
+        if (rs.next()) {
+            productId = rs.getInt("ProductID");
+        }
+        rs.close();
+        pstmt.close();
 
-            // If not found, nothing to delete
-            if (productId == -1) {
+        // If not found, nothing to delete
+        if (productId == -1) {
+            conn.rollback();
+            throw new SQLException("Không tìm thấy ProductID từ ProductDetailID: " + productDetailId);
+        }
+
+        // 2. Delete from StockMovementDetail
+        String sql1 = "DELETE FROM " + dbName + ".dbo.StockMovementDetail WHERE ProductDetailID = ?";
+        pstmt = conn.prepareStatement(sql1);
+        pstmt.setInt(1, productDetailId);
+        pstmt.executeUpdate();
+        pstmt.close();
+
+        // 3. Delete from OrderDetails
+        String sql2 = "DELETE FROM " + dbName + ".dbo.OrderDetails WHERE ProductDetailID = ?";
+        pstmt = conn.prepareStatement(sql2);
+        pstmt.setInt(1, productDetailId);
+        pstmt.executeUpdate();
+        pstmt.close();
+
+        // 4. Delete from InventoryProducts
+        String sql3 = "DELETE FROM " + dbName + ".dbo.InventoryProducts WHERE ProductDetailID = ?";
+        pstmt = conn.prepareStatement(sql3);
+        pstmt.setInt(1, productDetailId);
+        pstmt.executeUpdate();
+        pstmt.close();
+
+        // 5. Delete from WarehouseProducts
+        String sql4 = "DELETE FROM " + dbName + ".dbo.WarehouseProducts WHERE ProductDetailID = ?";
+        pstmt = conn.prepareStatement(sql4);
+        pstmt.setInt(1, productDetailId);
+        pstmt.executeUpdate();
+        pstmt.close();
+
+        // 6. Delete from PromotionProducts
+        String sql5 = "DELETE FROM " + dbName + ".dbo.PromotionProducts WHERE ProductDetailID = ?";
+        pstmt = conn.prepareStatement(sql5);
+        pstmt.setInt(1, productDetailId);
+        pstmt.executeUpdate();
+        pstmt.close();
+
+        // 7. Delete from ProductDetailSerialNumber
+        String sql6 = "DELETE FROM " + dbName + ".dbo.ProductDetailSerialNumber WHERE ProductDetailID = ?";
+        pstmt = conn.prepareStatement(sql6);
+        pstmt.setInt(1, productDetailId);
+        pstmt.executeUpdate();
+        pstmt.close();
+
+        // 8. Delete from ProductDetails
+        String sql7 = "DELETE FROM " + dbName + ".dbo.ProductDetails WHERE ProductDetailID = ?";
+        pstmt = conn.prepareStatement(sql7);
+        pstmt.setInt(1, productDetailId);
+        pstmt.executeUpdate();
+        pstmt.close();
+
+        // 9. Delete from Products if no ProductDetail exists for that ProductID
+        String sql8 = "DELETE FROM " + dbName + ".dbo.Products " +
+                      "WHERE ProductID = ? AND NOT EXISTS (SELECT 1 FROM " + dbName + ".dbo.ProductDetails WHERE ProductID = ?)";
+        pstmt = conn.prepareStatement(sql8);
+        pstmt.setInt(1, productId);
+        pstmt.setInt(2, productId);
+        pstmt.executeUpdate();
+        pstmt.close();
+
+        conn.commit(); // Commit transaction if all successful
+    } catch (SQLException e) {
+        if (conn != null) {
+            try {
                 conn.rollback();
-                throw new SQLException("Không tìm thấy ProductID từ ProductDetailID");
-            }
-
-            // 2. Delete from StockMovementDetail (if exists)
-            String sql1 = "DELETE FROM " + dbName + ".dbo.StockMovementDetail WHERE ProductDetailID = ?";
-            pstmt = conn.prepareStatement(sql1);
-            pstmt.setInt(1, productDetailId);
-            pstmt.executeUpdate();
-            pstmt.close();
-
-            // 3. Delete from OrderDetails (theo ProductDetailID, KHÔNG phải ProductID)
-            String sql2 = "DELETE FROM " + dbName + ".dbo.OrderDetails WHERE ProductDetailID = ?";
-            pstmt = conn.prepareStatement(sql2);
-            pstmt.setInt(1, productDetailId);
-            pstmt.executeUpdate();
-            pstmt.close();
-
-            // 4. Delete from InventoryProducts
-            String sql3 = "DELETE FROM " + dbName + ".dbo.InventoryProducts WHERE ProductDetailID = ?";
-            pstmt = conn.prepareStatement(sql3);
-            pstmt.setInt(1, productDetailId);
-            pstmt.executeUpdate();
-            pstmt.close();
-
-            // 5. Delete from WarehouseProducts
-            String sql4 = "DELETE FROM " + dbName + ".dbo.WarehouseProducts WHERE ProductDetailID = ?";
-            pstmt = conn.prepareStatement(sql4);
-            pstmt.setInt(1, productDetailId);
-            pstmt.executeUpdate();
-            pstmt.close();
-
-            // 6. Delete from PromotionProducts (nếu có liên kết foreign key)
-            String sql5a = "DELETE FROM " + dbName + ".dbo.PromotionProducts WHERE ProductDetailID = ?";
-            pstmt = conn.prepareStatement(sql5a);
-            pstmt.setInt(1, productDetailId);
-            pstmt.executeUpdate();
-            pstmt.close();
-
-            // 7. Delete from ProductDetails
-            String sql5 = "DELETE FROM " + dbName + ".dbo.ProductDetails WHERE ProductDetailID = ?";
-            pstmt = conn.prepareStatement(sql5);
-            pstmt.setInt(1, productDetailId);
-            pstmt.executeUpdate();
-            pstmt.close();
-
-            // 8. Delete from Products if no ProductDetail exists for that ProductID
-            String sql6 = "DELETE FROM " + dbName + ".dbo.Products "
-                    + "WHERE ProductID = ? AND NOT EXISTS (SELECT 1 FROM " + dbName
-                    + ".dbo.ProductDetails WHERE ProductID = ?)";
-            pstmt = conn.prepareStatement(sql6);
-            pstmt.setInt(1, productId);
-            pstmt.setInt(2, productId);
-            pstmt.executeUpdate();
-            pstmt.close();
-
-            conn.commit(); // Commit transaction if all successful
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            throw e;
-        } finally {
-            if (pstmt != null)
-                try {
-                pstmt.close();
-            } catch (SQLException ignored) {
-            }
-            if (conn != null) {
-                DBUtil.closeConnection(conn);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
             }
         }
+        throw e;
+    } finally {
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException ignored) {}
+        }
+        if (pstmt != null) {
+            try {
+                pstmt.close();
+            } catch (SQLException ignored) {}
+        }
+        if (conn != null) {
+            DBUtil.closeConnection(conn);
+        }
     }
+}
 
     public void updateProductDetails(String dbName, ProductDTO product) {
         StringBuilder query = new StringBuilder("""
