@@ -192,6 +192,7 @@ Author     : admin
                         <thead>
                             <tr>
                                 <th>STT</th>
+                                <th>ID SP</th>
                                 <th>Mã SP</th>
                                 <th>Tên sản phẩm</th>
                                 <th>SL</th>
@@ -233,14 +234,14 @@ Author     : admin
             <div class="product-panel">
                 <div class="panel-header">
                     <h2>Danh sách sản phẩm</h2>
-                    <div class="product-filters">
+<!--                    <div class="product-filters">
                         <select class="filter-select">
                             <option>Tất cả danh mục</option>
                             <option>Điện thoại</option>
                             <option>Laptop</option>
                             <option>Phụ kiện</option>
                         </select>
-                    </div>
+                    </div>-->
                 </div>
 
                 <div class="search-section">
@@ -361,6 +362,12 @@ Author     : admin
                         <label>Giảm giá (%):</label>
                         <div class="input-percent">
                             <input type="text" id="discountPercent" placeholder="Phần trăm giảm giá...">
+                        </div>
+                    </div>
+                    <div class="form-row vat-wrapper">
+                        <label>VAT (10%):</label>
+                        <div class="input-percent">
+                            <input type="text" id="vat" placeholder="Phần trăm giảm giá..." value="" readonly="">
                         </div>
                     </div>
                     <div class="form-row">
