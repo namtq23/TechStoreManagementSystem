@@ -21,13 +21,10 @@
                 <!-- Category Filter -->
                 <div class="filter-section">
                     <div class="filter-header">
-                        <h3>Khuyến mãi</h3>
-                        <i class="fas fa-chevron-up"></i>
+                        <h3> Lọc khuyến mãi</h3>
                     </div>
                     <div class="filter-content">
                         <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="searchInput" placeholder="Tìm kiếm khuyến mãi" value="${searchTerm}">
                         </div>
                         <div class="category-tree">
                             <c:forEach var="category" items="${categories}">
@@ -115,6 +112,9 @@
                 <div class="page-header">
                     <h1>Khuyến mãi</h1>
                     <div class="header-actions">
+                        <button type="button" id="deleteAllButton" class="btn btn-danger" onclick="deleteAllPromotions()" style="display: none;">
+                            <i class="fas fa-trash-alt"></i> Xóa tất cả
+                        </button>
                         <form action="so-promotions" method="get" class="search-form">
                             <div class="search-input-wrapper">
                                 <i class="fas fa-search"></i>
@@ -126,6 +126,7 @@
                         <a href="so-promotions?action=create" class="btn btn-success">
                             <i class="fas fa-plus"></i> Thêm mới
                         </a>
+
                     </div>
                 </div>
 
@@ -219,9 +220,9 @@
                                                 <i class="fas fa-percentage"></i>
                                                 <h5>Không tìm thấy khuyến mãi nào</h5>
                                                 <p>Hãy thử thay đổi bộ lọc hoặc tạo khuyến mãi mới!</p>
-                                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPromotionModal">
+                                                <a href="so-promotions?action=create" class="btn btn-success">
                                                     Tạo khuyến mãi mới
-                                                </button>
+                                                    </button>
                                             </td>
                                         </tr>
                                     </c:when>
@@ -229,8 +230,12 @@
                                         <c:forEach var="promotion" items="${promotions}">
                                             <tr class="promotion-row" data-status="${promotion.status}">
                                                 <td><input type="checkbox" class="product-checkbox"></td>
-                                                <td><div class="product-image accessory"></div></td>
-                                                <td><strong>${promotion.promotionID}</strong></td>
+                                                <td>
+                                                    <div class = "fas fa-ticket"
+                                                         style = "color: #007bff; font-size: 30px">
+                                                    </div>
+                                                </td>
+                                                <td style="text-align: center;"><strong>${promotion.promotionID}</strong></td>
                                                 <td>
                                                     <div class="promotion-info">
                                                         <h6>${promotion.promoName}</h6>
@@ -285,14 +290,15 @@
                                                                 <i class="fas fa-eye"></i> Chi tiết
                                                             </button>
                                                         </form>
-                                                        <form action="so-promotions" method="post" style="display:inline;
-                                                              " onsubmit="return confirm('Bạn có chắc chắn muốn xoá khuyến mãi \"${promotion.promoName}\" không?');">
-                                                            <input type="hidden" name="action" value="delete" />
-                                                            <input type="hidden" name="promotionId" value="${promotion.promotionID}" />
+                                                        <form action="so-promotions" method="post" style="display:inline;"
+                                                               onsubmit="return confirm('Bạn có chắc chắn muốn xoá khuyến mãi &quot;${promotion.promoName}&quot; không?');">
+                                                            <input type="hidden" name="action" value="delete">
+                                                            <input type="hidden" name="promotionId" value="${promotion.promotionID}">
                                                             <button type="submit" class="btn-delete">
                                                                 <i class="fas fa-trash"></i> Xoá
                                                             </button>
                                                         </form>
+
                                                     </div>
                                                 </td>
                                             </tr>
@@ -309,19 +315,46 @@
                         Hiển thị ${startPromotion} - ${endPromotion} / Tổng số ${totalPromotions} khuyến mãi
                     </div>
                     <div class="pagination">
-                        <a href="so-promotions?page=1" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
+                        <c:set var="baseUrl" value="so-promotions?" />
+                        <c:if test="${not empty searchTerm}">
+                            <c:set var="baseUrl" value="${baseUrl}search=${searchTerm}&" />
+                        </c:if>
+                        <c:if test="${not empty selectedStatus and selectedStatus != 'all'}">
+                            <c:set var="baseUrl" value="${baseUrl}status=${selectedStatus}&" />
+                        </c:if>
+                        <c:if test="${not empty selectedDiscount and selectedDiscount != 'all'}">
+                            <c:set var="baseUrl" value="${baseUrl}discount=${selectedDiscount}&" />
+                        </c:if>
+                        <c:if test="${not empty selectedCategoryId}">
+                            <c:set var="baseUrl" value="${baseUrl}categoryId=${selectedCategoryId}&" />
+                        </c:if>
+
+                        <!-- Thêm điều kiện kiểm tra bounds -->
+                        <c:set var="prevPage" value="${currentPage > 1 ? currentPage - 1 : 1}" />
+                        <c:set var="nextPage" value="${currentPage < totalPages ? currentPage + 1 : totalPages}" />
+
+                        <!-- First Page -->
+                        <a href="${baseUrl}page=1" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
                             <i class="fas fa-angle-double-left"></i>
                         </a>
-                        <a href="so-promotions?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
+
+                        <!-- Previous Page -->
+                        <a href="${baseUrl}page=${prevPage}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
                             <i class="fas fa-angle-left"></i>
                         </a>
+
+                        <!-- Page Numbers -->
                         <c:forEach begin="1" end="${totalPages}" var="i">
-                            <a href="so-promotions?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                            <a href="${baseUrl}page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
                         </c:forEach>
-                        <a href="so-promotions?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
+
+                        <!-- Next Page -->
+                        <a href="${baseUrl}page=${nextPage}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
                             <i class="fas fa-angle-right"></i>
                         </a>
-                        <a href="so-promotions?page=${totalPages}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
+
+                        <!-- Last Page -->
+                        <a href="${baseUrl}page=${totalPages}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
                             <i class="fas fa-angle-double-right"></i>
                         </a>
                     </div>
@@ -332,118 +365,230 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                                                                  // Tab switching functionality
-                                                                  function switchTab(tabName, buttonElement) {
-                                                                      // Remove active class from all tab buttons
-                                                                      document.querySelectorAll('.tab-button').forEach(btn => {
-                                                                          btn.classList.remove('active');
-                                                                      });
+                                                                   // Tab switching functionality
+                                                                   function switchTab(tabName, buttonElement) {
+                                                                       // Remove active class from all tab buttons
+                                                                       document.querySelectorAll('.tab-button').forEach(btn => {
+                                                                           btn.classList.remove('active');
+                                                                       });
 
-                                                                      // Add active class to clicked button
-                                                                      buttonElement.classList.add('active');
+                                                                       // Add active class to clicked button
+                                                                       buttonElement.classList.add('active');
 
-                                                                      // Hide all tab contents
-                                                                      document.querySelectorAll('.tab-content').forEach(content => {
-                                                                          content.classList.remove('active');
-                                                                      });
+                                                                       // Hide all tab contents
+                                                                       document.querySelectorAll('.tab-content').forEach(content => {
+                                                                           content.classList.remove('active');
+                                                                       });
 
-                                                                      // Show selected tab content
-                                                                      document.getElementById('tab-' + tabName).classList.add('active');
+                                                                       // Show selected tab content
+                                                                       document.getElementById('tab-' + tabName).classList.add('active');
 
-                                                                      // Filter table rows based on tab
-                                                                      filterTableByTab(tabName);
-                                                                  }
+                                                                       // Filter table rows based on tab
+                                                                       filterTableByTab(tabName);
+                                                                   }
 
 
 
-                                                                  // Initialize page
-                                                                  document.addEventListener('DOMContentLoaded', function () {
-                                                                      const today = new Date().toISOString().split('T')[0];
-                                                                      document.getElementById('startDate').min = today;
-                                                                      document.getElementById('endDate').min = today;
+                                                                   // Initialize page
+                                                                   document.addEventListener('DOMContentLoaded', function () {
+                                                                       const today = new Date().toISOString().split('T')[0];
+                                                                       document.getElementById('startDate').min = today;
+                                                                       document.getElementById('endDate').min = today;
 
-                                                                      document.getElementById('startDate').addEventListener('change', function () {
-                                                                          document.getElementById('endDate').min = this.value;
-                                                                      });
+                                                                       document.getElementById('startDate').addEventListener('change', function () {
+                                                                           document.getElementById('endDate').min = this.value;
+                                                                       });
 
-                                                                      const form = document.getElementById('createPromotionForm');
-                                                                      form.addEventListener('submit', function (event) {
-                                                                          if (!form.checkValidity()) {
-                                                                              event.preventDefault();
-                                                                              event.stopPropagation();
-                                                                          }
-                                                                          form.classList.add('was-validated');
-                                                                      });
+                                                                       const form = document.getElementById('createPromotionForm');
+                                                                       form.addEventListener('submit', function (event) {
+                                                                           if (!form.checkValidity()) {
+                                                                               event.preventDefault();
+                                                                               event.stopPropagation();
+                                                                           }
+                                                                           form.classList.add('was-validated');
+                                                                       });
 
-                                                                      const sidebarSearch = document.getElementById('searchInput');
-                                                                      const mainSearch = document.querySelector('input[name="search"]');
+                                                                       const sidebarSearch = document.getElementById('searchInput');
+                                                                       const mainSearch = document.querySelector('input[name="search"]');
 
-                                                                      if (sidebarSearch && mainSearch) {
-                                                                          sidebarSearch.addEventListener('input', function () {
-                                                                              mainSearch.value = this.value;
-                                                                          });
+                                                                       if (sidebarSearch && mainSearch) {
+                                                                           sidebarSearch.addEventListener('input', function () {
+                                                                               mainSearch.value = this.value;
+                                                                           });
 
-                                                                          mainSearch.addEventListener('input', function () {
-                                                                              sidebarSearch.value = this.value;
-                                                                          });
-                                                                      }
+                                                                           mainSearch.addEventListener('input', function () {
+                                                                               sidebarSearch.value = this.value;
+                                                                           });
+                                                                       }
 
-                                                                      const selectAll = document.getElementById('selectAll');
-                                                                      if (selectAll) {
-                                                                          selectAll.addEventListener('change', function () {
-                                                                              const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
-                                                                              checkboxes.forEach(checkbox => {
-                                                                                  checkbox.checked = this.checked;
-                                                                              });
-                                                                          });
-                                                                      }
+                                                                       const selectAll = document.getElementById('selectAll');
+                                                                       if (selectAll) {
+                                                                           selectAll.addEventListener('change', function () {
+                                                                               const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+                                                                               checkboxes.forEach(checkbox => {
+                                                                                   checkbox.checked = this.checked;
+                                                                               });
+                                                                           });
+                                                                       }
 
-                                                                      // Initialize first tab as active
-                                                                      filterTableByTab('all');
-                                                                  });
+                                                                       // Initialize first tab as active
+                                                                       filterTableByTab('all');
+                                                                   });
 
-                                                                  // Filter functions
-                                                                  function filterPromotions(categoryId) {
-                                                                      const search = document.getElementById('searchInput').value;
-                                                                      const statusFilter = document.querySelector('input[name="statusFilter"]:checked') ? document.querySelector('input[name="statusFilter"]:checked').value : '';
-                                                                      const discountFilter = document.querySelector('input[name="discountFilter"]:checked') ? document.querySelector('input[name="discountFilter"]:checked').value : '';
-                                                                      let url = 'so-promotions?page=1&search=' + encodeURIComponent(search);
+                                                                   // Filter functions
+                                                                   function filterPromotions(categoryId) {
+                                                                       //Lấy search từ main search input thay vì searchInput không tồn tại
+                                                                       const mainSearchInput = document.querySelector('input[name="search"]');
+                                                                       const search = mainSearchInput ? mainSearchInput.value : '';
 
-                                                                      if (categoryId !== null && categoryId !== undefined) {
-                                                                          url += '&categoryId=' + encodeURIComponent(categoryId);
-                                                                      }
-                                                                      if (statusFilter)
-                                                                          url += '&status=' + statusFilter;
-                                                                      if (discountFilter)
-                                                                          url += '&discount=' + discountFilter;
+                                                                       const statusFilter = document.querySelector('input[name="statusFilter"]:checked') ?
+                                                                               document.querySelector('input[name="statusFilter"]:checked').value : '';
+                                                                       const discountFilter = document.querySelector('input[name="discountFilter"]:checked') ?
+                                                                               document.querySelector('input[name="discountFilter"]:checked').value : '';
 
-                                                                      window.location.href = url;
-                                                                  }
+                                                                       let url = 'so-promotions?page=1';
 
-                                                                  // Auto-hide alerts
-                                                                  document.addEventListener('DOMContentLoaded', function () {
-                                                                      const alerts = document.querySelectorAll('.alert');
-                                                                      alerts.forEach(alert => {
-                                                                          setTimeout(() => {
-                                                                              if (alert.parentNode) {
-                                                                                  alert.style.transition = 'opacity 0.5s';
-                                                                                  alert.style.opacity = '0';
-                                                                                  setTimeout(() => alert.remove(), 500);
-                                                                              }
-                                                                          }, 5000);
-                                                                      });
-                                                                  });
-                                                                  // Điền dữ liệu vào modal chỉnh sửa
-                                                                  document.querySelectorAll('.update-promotion-btn').forEach(button => {
-                                                                      button.addEventListener('click', function () {
-                                                                          const modal = document.getElementById('updatePromotionModal');
-                                                                          modal.querySelector('#updatePromotionId').value = this.getAttribute('data-promotion-id');
-                                                                          modal.querySelector('#updatePromoName').value = this.getAttribute('data-promo-name');
-                                                                          modal.querySelector('#updateDiscountPercent').value = this.getAttribute('data-discount-percent');
-                                                                          modal.querySelector('#updateStartDate').value = this.getAttribute('data-start-date');
-                                                                          modal.querySelector('#updateEndDate').value = this.getAttribute('data-end-date');
-                                                                      });
-                                                                  });
+                                                                       // Kiểm tra search có giá trị trước khi thêm vào URL
+                                                                       if (search && search.trim() !== '') {
+                                                                           url += '&search=' + encodeURIComponent(search.trim());
+                                                                       }
+
+                                                                       if (categoryId !== null && categoryId !== undefined) {
+                                                                           url += '&categoryId=' + encodeURIComponent(categoryId);
+                                                                       }
+                                                                       if (statusFilter && statusFilter !== 'all')
+                                                                           url += '&status=' + statusFilter;
+                                                                       if (discountFilter && discountFilter !== 'all')
+                                                                           url += '&discount=' + discountFilter;
+
+                                                                       window.location.href = url;
+                                                                   }
+                                                                   // Auto-hide alerts
+                                                                   document.addEventListener('DOMContentLoaded', function () {
+                                                                       const alerts = document.querySelectorAll('.alert');
+                                                                       alerts.forEach(alert => {
+                                                                           setTimeout(() => {
+                                                                               if (alert.parentNode) {
+                                                                                   alert.style.transition = 'opacity 0.5s';
+                                                                                   alert.style.opacity = '0';
+                                                                                   setTimeout(() => alert.remove(), 500);
+                                                                               }
+                                                                           }, 5000);
+                                                                       });
+                                                                   });
+                                                                   // Điền dữ liệu vào modal chỉnh sửa
+                                                                   document.querySelectorAll('.update-promotion-btn').forEach(button => {
+                                                                       button.addEventListener('click', function () {
+                                                                           const modal = document.getElementById('updatePromotionModal');
+                                                                           modal.querySelector('#updatePromotionId').value = this.getAttribute('data-promotion-id');
+                                                                           modal.querySelector('#updatePromoName').value = this.getAttribute('data-promo-name');
+                                                                           modal.querySelector('#updateDiscountPercent').value = this.getAttribute('data-discount-percent');
+                                                                           modal.querySelector('#updateStartDate').value = this.getAttribute('data-start-date');
+                                                                           modal.querySelector('#updateEndDate').value = this.getAttribute('data-end-date');
+                                                                       });
+                                                                   });
+
+                                                                   // Chức năng xóa tất cả
+                                                                   function updateDeleteAllButton() {
+                                                                       const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+                                                                       const totalBoxes = document.querySelectorAll('.product-checkbox');
+                                                                       const deleteAllButton = document.getElementById('deleteAllButton');
+
+                                                                       if (deleteAllButton) {
+                                                                           if (checkedBoxes.length === totalBoxes.length && totalBoxes.length > 0) {
+                                                                               // Tất cả được chọn - hiển thị nút "Xóa tất cả"
+                                                                               deleteAllButton.style.display = 'inline-block';
+                                                                               deleteAllButton.innerHTML = '<i class="fas fa-trash-alt"></i> Xóa tất cả (' + totalBoxes.length + ')';
+                                                                           } else if (checkedBoxes.length > 0) {
+                                                                               // Một phần được chọn - hiển thị nút "Xóa được chọn"
+                                                                               deleteAllButton.style.display = 'inline-block';
+                                                                               deleteAllButton.innerHTML = '<i class="fas fa-trash"></i> Xóa đã chọn (' + checkedBoxes.length + ')';
+                                                                           } else {
+                                                                               // Không có gì được chọn - ẩn nút
+                                                                               deleteAllButton.style.display = 'none';
+                                                                           }
+                                                                       }
+                                                                   }
+
+                                                                   // Xử lý xóa tất cả
+                                                                   function deleteAllPromotions() {
+                                                                       const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+                                                                       if (checkedBoxes.length === 0) {
+                                                                           alert('Vui lòng chọn ít nhất một khuyến mãi để xóa!');
+                                                                           return;
+                                                                       }
+
+                                                                       const confirmMessage = `Bạn có chắc chắn muốn xóa khuyến mãi đã chọn?\nHành động này không thể hoàn tác.`;
+                                                                       if (!confirm(confirmMessage))
+                                                                           return;
+
+                                                                       const form = document.createElement('form');
+                                                                       form.method = 'POST';
+                                                                       form.action = 'so-promotions';
+
+                                                                       const actionInput = document.createElement('input');
+                                                                       actionInput.type = 'hidden';
+                                                                       actionInput.name = 'action';
+                                                                       actionInput.value = 'deleteSelected';
+                                                                       form.appendChild(actionInput);
+
+                                                                       checkedBoxes.forEach(checkbox => {
+                                                                           const row = checkbox.closest('tr');
+                                                                           const promotionId = row.querySelector('td:nth-child(3) strong').textContent.trim();
+                                                                           const idInput = document.createElement('input');
+                                                                           idInput.type = 'hidden';
+                                                                           idInput.name = 'promotionIds';
+                                                                           idInput.value = promotionId;
+                                                                           form.appendChild(idInput);
+                                                                       });
+
+                                                                       document.body.appendChild(form);
+                                                                       form.submit();
+                                                                   }
+
+                                                                   // Cập nhật các event listeners hiện tại
+                                                                   document.addEventListener('DOMContentLoaded', function () {
+                                                                       const selectAll = document.getElementById('selectAll');
+                                                                       const promotionCheckboxes = document.querySelectorAll('.product-checkbox');
+
+                                                                       // Cập nhật xử lý select all
+                                                                       if (selectAll) {
+                                                                           selectAll.addEventListener('change', function () {
+                                                                               promotionCheckboxes.forEach(checkbox => {
+                                                                                   checkbox.checked = this.checked;
+                                                                               });
+                                                                               updateDeleteAllButton(); // Thêm dòng này
+                                                                           });
+                                                                       }
+
+                                                                       // Cập nhật xử lý từng checkbox
+                                                                       promotionCheckboxes.forEach(checkbox => {
+                                                                           checkbox.addEventListener('change', function () {
+                                                                               // Cập nhật trạng thái select all
+                                                                               const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+                                                                               const totalBoxes = document.querySelectorAll('.product-checkbox');
+
+                                                                               if (selectAll) {
+                                                                                   if (checkedBoxes.length === 0) {
+                                                                                       selectAll.indeterminate = false;
+                                                                                       selectAll.checked = false;
+                                                                                   } else if (checkedBoxes.length === totalBoxes.length) {
+                                                                                       selectAll.indeterminate = false;
+                                                                                       selectAll.checked = true;
+                                                                                   } else {
+                                                                                       selectAll.indeterminate = true;
+                                                                                       selectAll.checked = false;
+                                                                                   }
+                                                                               }
+
+                                                                               updateDeleteAllButton(); // Thêm dòng này
+                                                                           });
+                                                                       });
+
+                                                                       // Khởi tạo trạng thái ban đầu
+                                                                       updateDeleteAllButton();
+                                                                   });
+
         </script>
 
     </body>
