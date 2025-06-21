@@ -3,6 +3,7 @@ package controller;
 import dao.PromotionDAO;
 import model.PromotionDTO;
 import com.google.gson.Gson;
+import dao.BranchDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,9 +16,11 @@ import static java.lang.System.out;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import model.PromotionSearchCriteria;
 
 @WebServlet(name = "SOPromotionController", urlPatterns = {"/so-promotions", "/api/promotions"})
@@ -43,7 +46,7 @@ public class SOPromotionController extends HttpServlet {
                 response.sendRedirect("login");
                 return;
             }
-            
+
             // Parse thông tin session
             int userId = Integer.parseInt(userIdObj.toString());
             int roleId = Integer.parseInt(roleIdObj.toString());
@@ -51,12 +54,23 @@ public class SOPromotionController extends HttpServlet {
             Integer branchId = branchIdObj != null ? Integer.parseInt(branchIdObj.toString()) : null;
 
             String requestURI = request.getRequestURI();
-
             // Phân biệt API endpoint và JSP page
             if (requestURI.contains("api/promotions")) {
                 handleApiRequest(request, response, dbName, branchId);
             } else {
                 handlePageRequest(request, response, dbName, branchId);
+            }
+
+            String success = (String) session.getAttribute("success");
+            if (success != null) {
+                request.setAttribute("success", success);
+                session.removeAttribute("success");
+            }
+
+            String error = (String) session.getAttribute("error");
+            if (error != null) {
+                request.setAttribute("error", error);
+                session.removeAttribute("error");
             }
 
         } catch (NumberFormatException e) {
@@ -96,33 +110,41 @@ public class SOPromotionController extends HttpServlet {
     private void handlePageRequest(HttpServletRequest request, HttpServletResponse response,
               String dbName, Integer branchId) throws ServletException, IOException, SQLException {
         String action = request.getParameter("action");
-        
+        HttpSession session = request.getSession();
+
         if ("view".equals(action)) {
-        String promotionIdStr = request.getParameter("promotionId");
-        if (promotionIdStr != null && !promotionIdStr.trim().isEmpty()) {
-            try {
-                int promotionId = Integer.parseInt(promotionIdStr);
-                PromotionDTO promotion = promotionDAO.getPromotionById(dbName, promotionId);
-                if (promotion != null) {
-                    request.setAttribute("action", "update");
-                    request.setAttribute("promotion", promotion);
-                    // Định dạng ngày cho input date
-                    promotion.setStartDateFormatted(new SimpleDateFormat("yyyy-MM-dd").format(promotion.getStartDate()));
-                    promotion.setEndDateFormatted(new SimpleDateFormat("yyyy-MM-dd").format(promotion.getEndDate()));
-                    request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
-                    return;
-                } else {
-                    request.setAttribute("error", "Không tìm thấy khuyến mãi!");
+            String promotionIdStr = request.getParameter("promotionId");
+            if (promotionIdStr != null && !promotionIdStr.trim().isEmpty()) {
+                try {
+                    int promotionId = Integer.parseInt(promotionIdStr);
+                    PromotionDTO promotion = promotionDAO.getPromotionById(dbName, promotionId);
+                    if (promotion != null) {
+                        request.setAttribute("action", "update");
+                        request.setAttribute("promotion", promotion);
+                        // Định dạng ngày cho input date
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        promotion.setStartDateFormatted(sdf.format(promotion.getStartDate()));
+                        promotion.setEndDateFormatted(sdf.format(promotion.getEndDate()));
+                        // Lấy tất cả chi nhánh và sản phẩm
+                        request.setAttribute("branches", BranchDAO.getBranchList(dbName));
+                        request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName)); // Lấy tất cả sản phẩm
+                        request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
+                        return;
+                    } else {
+                        request.setAttribute("error", "Không tìm thấy khuyến mãi!");
+                    }
+                } catch (NumberFormatException e) {
+                    request.setAttribute("error", "Mã khuyến mãi không hợp lệ!");
                 }
-            } catch (NumberFormatException e) {
-                request.setAttribute("error", "Mã khuyến mãi không hợp lệ!");
             }
+        } else if ("create".equals(action)) {
+            // Lấy tất cả chi nhánh và sản phẩm cho form tạo mới
+            request.setAttribute("branches", BranchDAO.getBranchList(dbName));
+            request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName)); // Lấy tất cả sản phẩm
+            request.setAttribute("action", "create");
+            request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
+            return;
         }
-    } else if ("create".equals(action)) {
-        request.setAttribute("action", "create");
-        request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
-        return;
-    }
         List<PromotionDTO> promotions = promotionDAO.getAllPromotions(dbName);
 
         // Đọc search parameters từ request
@@ -166,15 +188,8 @@ public class SOPromotionController extends HttpServlet {
         //Gọi DAO với search criteria
         int totalPromotions;
 
-        if (hasSearchCriteria(criteria) || categoryId != null) {
-            // Có search criteria - gọi search method
-            promotions = promotionDAO.searchPromotions(dbName, criteria, categoryId);
-            totalPromotions = promotionDAO.countPromotions(dbName, criteria, categoryId);
-        } else {
-            // Không có search criteria - lấy tất cả
-            promotions = promotionDAO.getAllPromotions(dbName);
-            totalPromotions = promotions.size();
-        }
+        promotions = promotionDAO.searchPromotions(dbName, criteria, categoryId);
+        totalPromotions = promotionDAO.countPromotions(dbName, criteria, categoryId);
 
         // Tính toán thống kê
         int activePromotions = (int) promotions.stream().filter(p -> p.isActive()).count();
@@ -199,21 +214,14 @@ public class SOPromotionController extends HttpServlet {
         request.setAttribute("dbName", dbName);
         request.setAttribute("branchId", branchId);
 
-        // ✅ Preserve search parameters
+        // Preserve search parameters
         request.setAttribute("searchTerm", search);
         request.setAttribute("selectedStatus", status);
         request.setAttribute("selectedDiscount", discount);
         request.setAttribute("selectedCategoryId", categoryId);
 
-
         // Forward đến JSP
         request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/so-promotions.jsp").forward(request, response);
-    }
-
-    private boolean hasSearchCriteria(PromotionSearchCriteria criteria) {
-        return (criteria.getSearchTerm() != null && !criteria.getSearchTerm().trim().isEmpty())
-                  || (criteria.getStatusFilter() != null && !criteria.getStatusFilter().equals("all"))
-                  || (criteria.getDiscountFilter() != null && !criteria.getDiscountFilter().equals("all"));
     }
 
     @Override
@@ -233,14 +241,21 @@ public class SOPromotionController extends HttpServlet {
             String dbName = dbNameObj.toString();
             String action = request.getParameter("action");
 
-            if ("create".equals(action)) {
-                handleCreatePromotion(request, response, dbName);
-            } else if ("update".equals(action)) {
-                handleUpdatePromotion(request, response, dbName);
-            } else if ("delete".equals(action)) {
-                handleDeletePromotion(request, response, dbName);
-            } else {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+            switch (action != null ? action : "") {
+                case "create":
+                    handleCreatePromotion(request, response, dbName);
+                    break;
+                case "update":
+                    handleUpdatePromotion(request, response, dbName);
+                    break;
+                case "delete":
+                    handleDeletePromotion(request, response, dbName);
+                    break;
+                case "deleteSelected":
+                    handleDeleteSelectedPromotions(request, response, dbName);
+                    break;
+                default:
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
             }
 
         } catch (SQLException ex) {
@@ -257,15 +272,21 @@ public class SOPromotionController extends HttpServlet {
         String discountPercentStr = request.getParameter("discountPercent");
         String startDateStr = request.getParameter("startDate");
         String endDateStr = request.getParameter("endDate");
+        String[] branchIds = request.getParameterValues("branchIds"); // Lấy mảng branchIds
+        String[] productDetailIds = request.getParameterValues("productDetailIds"); // Lấy mảng productDetailIds
 
         // Validate dữ liệu
         if (promoName == null || promoName.trim().isEmpty()
                   || discountPercentStr == null || discountPercentStr.trim().isEmpty()
                   || startDateStr == null || startDateStr.trim().isEmpty()
-                  || endDateStr == null || endDateStr.trim().isEmpty()) {
+                  || endDateStr == null || endDateStr.trim().isEmpty()
+                  || branchIds == null || branchIds.length == 0
+                  || productDetailIds == null || productDetailIds.length == 0) {
 
             request.setAttribute("error", "Vui lòng nhập đầy đủ thông tin!");
-            handlePageRequest(request, response, dbName, null);
+            request.setAttribute("branches", BranchDAO.getBranchList(dbName)); // Sử dụng BranchDAO
+            request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName));
+            request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
             return;
         }
 
@@ -278,13 +299,17 @@ public class SOPromotionController extends HttpServlet {
             // Validate business logic
             if (discountPercent < 0 || discountPercent > 100) {
                 request.setAttribute("error", "Tỷ lệ giảm giá phải từ 0 đến 100%!");
-                handlePageRequest(request, response, dbName, null);
+                request.setAttribute("branches", BranchDAO.getBranchList(dbName));
+                request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName));
+                request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
                 return;
             }
 
             if (startDate.after(endDate)) {
                 request.setAttribute("error", "Ngày kết thúc phải sau ngày bắt đầu!");
-                handlePageRequest(request, response, dbName, null);
+                request.setAttribute("branches", BranchDAO.getBranchList(dbName));
+                request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName));
+                request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
                 return;
             }
 
@@ -296,22 +321,28 @@ public class SOPromotionController extends HttpServlet {
             promotion.setEndDate(endDate);
 
             // Lưu vào database
-            boolean success = promotionDAO.createPromotion(dbName, promotion);
+            boolean success = promotionDAO.createPromotion(dbName, promotion, branchIds, productDetailIds);
 
             if (success) {
-                response.sendRedirect("so-promotions?success=" + URLEncoder.encode("Cập nhật khuyến mãi thành công!", "UTF-8"));
+                response.sendRedirect("so-promotions?success=" + URLEncoder.encode("Tạo khuyến mãi thành công!", "UTF-8"));
             } else {
                 request.setAttribute("error", "Không thể tạo khuyến mãi!");
+                request.setAttribute("branches", BranchDAO.getBranchList(dbName));
+                request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName));
+                request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
             }
 
         } catch (NumberFormatException e) {
             request.setAttribute("error", "Dữ liệu không hợp lệ!");
+            request.setAttribute("branches", BranchDAO.getBranchList(dbName));
+            request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName));
+            request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", "Định dạng ngày không hợp lệ!");
+            request.setAttribute("branches", BranchDAO.getBranchList(dbName));
+            request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName));
+            request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
         }
-
-        // Redirect về trang danh sách
-        handlePageRequest(request, response, dbName, null);
     }
 
     private void handleUpdatePromotion(HttpServletRequest request, HttpServletResponse response, String dbName)
@@ -336,10 +367,30 @@ public class SOPromotionController extends HttpServlet {
                 return;
             }
 
-            // Cập nhật thông tin
+            // Lấy dữ liệu từ form
             String promoName = request.getParameter("promoName");
             String discountPercentStr = request.getParameter("discountPercent");
+            String startDateStr = request.getParameter("startDate");
+            String endDateStr = request.getParameter("endDate");
+            String[] branchIds = request.getParameterValues("branchIds"); // Lấy mảng branchIds
+            String[] productDetailIds = request.getParameterValues("productDetailIds"); // Lấy mảng productDetailIds
 
+            // Validate dữ liệu
+            if (promoName == null || promoName.trim().isEmpty()
+                      || discountPercentStr == null || discountPercentStr.trim().isEmpty()
+                      || startDateStr == null || startDateStr.trim().isEmpty()
+                      || endDateStr == null || endDateStr.trim().isEmpty()
+                      || branchIds == null || branchIds.length == 0
+                      || productDetailIds == null || productDetailIds.length == 0) {
+                request.setAttribute("error", "Vui lòng nhập đầy đủ thông tin!");
+                request.setAttribute("promotion", existingPromotion);
+                request.setAttribute("branches", BranchDAO.getBranchList(dbName)); // Sử dụng BranchDAO
+                request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName));
+                request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
+                return;
+            }
+
+            // Cập nhật thông tin
             if (promoName != null && !promoName.trim().isEmpty()) {
                 existingPromotion.setPromoName(promoName);
             }
@@ -348,33 +399,71 @@ public class SOPromotionController extends HttpServlet {
                 double discountPercent = Double.parseDouble(discountPercentStr);
                 if (discountPercent >= 0 && discountPercent <= 100) {
                     existingPromotion.setDiscountPercent(discountPercent);
+                } else {
+                    request.setAttribute("error", "Tỷ lệ giảm giá phải từ 0 đến 100%!");
+                    request.setAttribute("promotion", existingPromotion);
+                    request.setAttribute("branches", BranchDAO.getBranchList(dbName));
+                    request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName));
+                    request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
+                    return;
                 }
             }
 
+            if (startDateStr != null && !startDateStr.trim().isEmpty()) {
+                java.sql.Date startDate = java.sql.Date.valueOf(startDateStr);
+                existingPromotion.setStartDate(startDate);
+            }
+
+            if (endDateStr != null && !endDateStr.trim().isEmpty()) {
+                java.sql.Date endDate = java.sql.Date.valueOf(endDateStr);
+                if (existingPromotion.getStartDate().after(endDate)) {
+                    request.setAttribute("error", "Ngày kết thúc phải sau ngày bắt đầu!");
+                    request.setAttribute("promotion", existingPromotion);
+                    request.setAttribute("branches", BranchDAO.getBranchList(dbName));
+                    request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName));
+                    request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
+                    return;
+                }
+                existingPromotion.setEndDate(endDate);
+            }
+
             // Lưu cập nhật
-            boolean success = promotionDAO.updatePromotion(dbName, existingPromotion);
+            boolean success = promotionDAO.updatePromotion(dbName, existingPromotion, branchIds, productDetailIds);
 
             if (success) {
-                request.setAttribute("success", "Cập nhật khuyến mãi thành công!");
+                response.sendRedirect("so-promotions?success=" + URLEncoder.encode("Cập nhật khuyến mãi thành công!", "UTF-8"));
             } else {
                 request.setAttribute("error", "Không thể cập nhật khuyến mãi!");
+                request.setAttribute("promotion", existingPromotion);
+                request.setAttribute("branches", BranchDAO.getBranchList(dbName));
+                request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName));
+                request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
             }
 
         } catch (NumberFormatException e) {
-            request.setAttribute("error", "Mã khuyến mãi không hợp lệ!");
+            request.setAttribute("error", "Dữ liệu không hợp lệ!");
+            request.setAttribute("promotion", promotionDAO.getPromotionById(dbName, Integer.parseInt(promotionIdStr)));
+            request.setAttribute("branches", BranchDAO.getBranchList(dbName));
+            request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName));
+            request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
+        } catch (IllegalArgumentException e) {
+            request.setAttribute("error", "Định dạng ngày không hợp lệ!");
+            request.setAttribute("promotion", promotionDAO.getPromotionById(dbName, Integer.parseInt(promotionIdStr)));
+            request.setAttribute("branches", BranchDAO.getBranchList(dbName));
+            request.setAttribute("productDetails", promotionDAO.getAllProductDetails(dbName));
+            request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/modal.jsp").forward(request, response);
         }
-
-        handlePageRequest(request, response, dbName, null);
     }
 
     private void handleDeletePromotion(HttpServletRequest request, HttpServletResponse response, String dbName)
               throws SQLException, ServletException, IOException {
 
         String promotionIdStr = request.getParameter("promotionId");
+        HttpSession session = request.getSession();
 
         if (promotionIdStr == null || promotionIdStr.trim().isEmpty()) {
-            request.setAttribute("error", "Mã khuyến mãi không hợp lệ!");
-            handlePageRequest(request, response, dbName, null);
+            session.setAttribute("error", "Mã khuyến mãi không hợp lệ!");
+            response.sendRedirect("so-promotions");
             return;
         }
 
@@ -385,16 +474,118 @@ public class SOPromotionController extends HttpServlet {
             boolean success = promotionDAO.deletePromotion(dbName, promotionId);
 
             if (success) {
-                request.setAttribute("success", "Xóa khuyến mãi thành công!");
+                session.setAttribute("success", "Xóa khuyến mãi thành công!");
             } else {
-                request.setAttribute("error", "Không thể xóa khuyến mãi!");
+                session.setAttribute("error", "Không thể xóa khuyến mãi!");
             }
 
         } catch (NumberFormatException e) {
-            request.setAttribute("error", "Mã khuyến mãi không hợp lệ!");
+            session.setAttribute("error", "Mã khuyến mãi không hợp lệ!");
         }
 
-        handlePageRequest(request, response, dbName, null);
+        response.sendRedirect("so-promotions");
+    }
+
+    private void handleDeleteSelectedPromotions(HttpServletRequest request, HttpServletResponse response, String dbName)
+              throws SQLException, ServletException, IOException {
+        HttpSession session = request.getSession();
+
+        String[] promotionIds = request.getParameterValues("promotionIds");
+        if (promotionIds == null || promotionIds.length == 0) {
+            session.setAttribute("error", "Không có khuyến mãi nào được chọn!");
+            response.sendRedirect("so-promotions");
+            return;
+        }
+
+        List<Integer> ids;
+        try {
+            ids = Arrays.stream(promotionIds).map(Integer::parseInt).collect(Collectors.toList());
+        } catch (NumberFormatException e) {
+            session.setAttribute("error", "Mã khuyến mãi không hợp lệ!");
+            response.sendRedirect("so-promotions");
+            return;
+        }
+
+        boolean success = promotionDAO.deleteSelectedPromotions(dbName, ids);
+        if (success) {
+            session.setAttribute("success", "Xóa khuyến mãi thành công!");
+        } else {
+            session.setAttribute("error", "Không thể xóa khuyến mãi!");
+        }
+        response.sendRedirect("so-promotions");
+    }
+// Dynamic page size calculation based on total records
+
+    private int calculateDynamicPageSize(int totalRecords) {
+        if (totalRecords <= 10) {
+            return totalRecords; // Hiển thị tất cả trên 1 trang
+        } else if (totalRecords <= 50) {
+            return 5; // 5 records per page
+        } else if (totalRecords <= 100) {
+            return 10; // 10 records per page
+        } else if (totalRecords <= 500) {
+            return 20; // 20 records per page
+        } else {
+            return 50; // 50 records per page for large datasets
+        }
+    }
+
+// Dynamic pagination info calculation
+    private PaginationInfo calculateDynamicPagination(int totalRecords, int currentPage) {
+        int dynamicPageSize = calculateDynamicPageSize(totalRecords);
+        int totalPages = (int) Math.ceil((double) totalRecords / dynamicPageSize);
+
+        // Ensure current page is valid
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+
+        int startRecord = (currentPage - 1) * dynamicPageSize + 1;
+        int endRecord = Math.min(currentPage * dynamicPageSize, totalRecords);
+
+        return new PaginationInfo(dynamicPageSize, totalPages, currentPage, startRecord, endRecord);
+    }
+
+// Helper class for pagination info
+    public static class PaginationInfo {
+
+        private int pageSize;
+        private int totalPages;
+        private int currentPage;
+        private int startRecord;
+        private int endRecord;
+
+        public PaginationInfo(int pageSize, int totalPages, int currentPage, int startRecord, int endRecord) {
+            this.pageSize = pageSize;
+            this.totalPages = totalPages;
+            this.currentPage = currentPage;
+            this.startRecord = startRecord;
+            this.endRecord = endRecord;
+        }
+
+        // Getters
+        public int getPageSize() {
+            return pageSize;
+        }
+
+        public int getTotalPages() {
+            return totalPages;
+        }
+
+        public int getCurrentPage() {
+            return currentPage;
+        }
+
+        public int getStartRecord() {
+            return startRecord;
+        }
+
+        public int getEndRecord() {
+            return endRecord;
+        }
     }
 
     // Response classes
