@@ -233,11 +233,12 @@
                             </form>
                         </div>
 
-                        <a href="url" style="text-decoration: none;">
-                            <button type="submit" class="btn btn-success" style="padding: 10px 18px;">
+                        <form action="so-add-product" method="get" style="display: inline; margin-left: 10px;">
+                            <button type="submit" class="btn btn-success" 
+                                    style="padding: 10px 18px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                                 <i class="fas fa-plus"></i> Thêm mới
                             </button>
-                        </a>
+                        </form>
                     </div>
                 </div>
 
