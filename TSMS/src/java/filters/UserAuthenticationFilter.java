@@ -19,7 +19,11 @@ import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 import model.User;
 
-@WebFilter(filterName = "UserAuthenticationFilter", urlPatterns = {"/bm-products", "/bm-overview", "/bm-staff", "/bm-customer"})
+@WebFilter(filterName = "UserAuthenticationFilter", urlPatterns = {"/bm-products",
+    "/bm-overview", "/bm-staff", "/bm-customer", "/bm-cart", "/products-json",
+    "/customers-json", "/bm-supplier", "/so-bill", "/so-invoices", "/so-orders",
+    "/so-overview", "/so-products", "/so-promotions", "/api/promotions", "/sale-products", "/wh-products"
+})
 public class UserAuthenticationFilter implements Filter {
 
     @Override

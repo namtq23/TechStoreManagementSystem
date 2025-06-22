@@ -55,6 +55,12 @@ public class BMSellInStoreController extends HttpServlet {
             int roleId = Integer.parseInt(roleIdObj.toString());
             String dbName = dbNameObj.toString();
             int branchId = Integer.parseInt(branchIdObj.toString());
+
+            if (roleId != 1) {
+                resp.sendRedirect("login");
+                return;
+            }
+
             int page = 1;
             int pageSize = 100;
 

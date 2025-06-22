@@ -38,7 +38,7 @@ public class ForgotPasswordServlet extends HttpServlet {
             ShopOwner user = UserDAO.getShopOwnwerByEmail(email);
 
             if (!UserDAO.isAccountTaken(email, null)) {
-                request.setAttribute("error", "Email không tồn tại!");
+                request.setAttribute("error", "Có vẻ bạn không phải là chủ chuỗi cửa hàng!");
                 request.getRequestDispatcher("/WEB-INF/jsp/common/forgot-password.jsp").forward(request, response);
             }
 

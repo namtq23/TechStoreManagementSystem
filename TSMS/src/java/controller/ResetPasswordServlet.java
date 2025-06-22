@@ -73,7 +73,7 @@ public class ResetPasswordServlet extends HttpServlet {
                     request.setAttribute("success", "Đặt lại mật khẩu thành công!");
                     request.getRequestDispatcher("/WEB-INF/jsp/common/reset-password.jsp").forward(request, response);
                 } else {
-                    request.setAttribute("error", "Token không hợp lệ hoặc đã hết hạn.");
+                    request.setAttribute("error", "Phiên đổi mật khẩu đã hết hạn, vui lòng thực hiện lại yêu cầu!");
                     request.getRequestDispatcher("/WEB-INF/jsp/common/reset-password.jsp").forward(request, response);
                 }
             } catch (SQLException e) {
