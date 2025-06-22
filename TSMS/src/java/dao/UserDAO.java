@@ -257,7 +257,7 @@ public class UserDAO {
             PasswordHash, FullName, Email, Phone,
             BranchID, WarehouseID, RoleID, IsActive,
             Gender, AvaUrl
-        ) VALUES (?, ?, ?, ?, ?, null, ?, ?, ?, ?);
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     """;
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -266,10 +266,11 @@ public class UserDAO {
             stmt.setString(3, user.getEmail());
             stmt.setString(4, user.getPhone());
             stmt.setString(5, user.getBranchId());
-            stmt.setInt(6, user.getRoleId());
-            stmt.setInt(7, user.getIsActive());
-            stmt.setString(8, user.getGender());
-            stmt.setString(9, user.getAvaUrl());
+            stmt.setString(6, user.getWarehouseId());
+            stmt.setInt(7, user.getRoleId());
+            stmt.setInt(8, user.getIsActive());
+            stmt.setString(9, user.getGender());
+            stmt.setString(10, user.getAvaUrl());
 
             int rs = stmt.executeUpdate();
             if (rs > 0) {

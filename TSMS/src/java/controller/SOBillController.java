@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author Kawaii
  */
-@WebServlet(name="SOBillController", urlPatterns={"/SOBillController"}) //so-bill
+@WebServlet(name="SOBillController", urlPatterns={"/so-bill"}) //so-bill
 public class SOBillController extends HttpServlet {
    
     /** 

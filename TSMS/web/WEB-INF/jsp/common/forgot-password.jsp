@@ -19,7 +19,7 @@
         <!-- Header -->
         <header class="header" id="header">
             <div class="header-content">
-                <a href="starting" class="logo">
+                <a href="login" class="logo">
                     <div class="logo-icon">T</div>
                     <span class="logo-text">TSMS</span>
                 </a>
@@ -73,10 +73,10 @@
             </div>
         </main>
 
-
-
-        <p style="color:red;">${error}</p>
-        <p style="color:green;">${message}</p>
+        <div class="message" style="text-align: center; margin-bottom: 10px;">
+            <p style="color:red;">${error}</p>
+            <p style="color:green;">${message}</p>
+        </div>
 
         <!-- Footer -->
         <footer class="footer">

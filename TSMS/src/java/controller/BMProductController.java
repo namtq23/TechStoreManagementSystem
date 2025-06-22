@@ -44,6 +44,13 @@ public class BMProductController extends HttpServlet {
                 return;
             }
 
+            int roleId = Integer.parseInt(roleIdObj.toString());
+            System.out.println("roleID-authen: " + roleId);
+            if (roleId != 1) {
+                resp.sendRedirect("login");
+                return;
+            }
+
             String dbName = dbNameObj.toString();
             int branchId = Integer.parseInt(branchIdObj.toString());
             int totalProducts = p.countProductsByBranchId(dbName, branchId);

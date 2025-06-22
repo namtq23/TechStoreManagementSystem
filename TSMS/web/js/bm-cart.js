@@ -33,8 +33,6 @@ class TSMSCashier {
 
             const data = await response.json();
             this.products = data;
-
-            console.log("Loaded products:", this.products);
         } catch (error) {
             console.error("Error fetching products:", error);
         }
@@ -48,8 +46,6 @@ class TSMSCashier {
 
             const data = await response.json();
             this.customers = data;
-
-            console.log("Loaded customers:", this.customers);
         } catch (error) {
             console.error("Error fetching customers:", error);
         }
@@ -318,6 +314,8 @@ class TSMSCashier {
     }
 
     bindCreateCustomerEvents() {
+        const customersList = JSON.parse(JSON.stringify(this.customers));
+
         const addBtn = document.getElementById("addCustomerBtn");
         const createForm = document.getElementById("createCustomerForm");
         const closeBtn = document.getElementById("closeCustomerSubmit");
@@ -344,6 +342,13 @@ class TSMSCashier {
             const address = createForm.querySelector("input[name='address']").value;
             const email = createForm.querySelector("input[name='email']").value;
             const dob = createForm.querySelector("input[name='dob']").value;
+
+            for (const customer of customersList) {
+                if (phone === customer.phoneNumber) {
+                    this.showNotification('Khách hàng đã tồn tại trong hệ thống!', 'error');
+                    return; 
+                }
+            }
 
             input.value = fullName;
 
@@ -509,6 +514,7 @@ class TSMSCashier {
 
         const discountInput = document.querySelector('#discountPercent');
         const discountPercent = parseFloat(discountInput.value) || 0;
+        const total = (subtotal * (110 / 100));
         const discountTotal = (subtotal * (1 - discountPercent / 100) * (110 / 100));
         const vatValue = discountTotal * (10 / 100);
 
@@ -527,8 +533,8 @@ class TSMSCashier {
         if (summaryRows[1]) {
             summaryRows[1].querySelector('.summary-value').textContent = this.formatCurrency(subtotal);
         }
-        if (summaryRows[3]) {
-            summaryRows[3].querySelector('.summary-value').textContent = this.formatCurrency(subtotal);
+        if (summaryRows[2]) {
+            summaryRows[2].querySelector('.summary-value').textContent = this.formatCurrency(total);
         }
 
         const totalAmountEl = document.querySelector('#totalAmount');

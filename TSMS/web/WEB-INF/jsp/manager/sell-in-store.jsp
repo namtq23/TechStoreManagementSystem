@@ -217,7 +217,7 @@ Author     : admin
                         <span class="summary-value"></span>
                     </div>
                     <div class="summary-row total-row">
-                        <span>Tổng cộng:</span>
+                        <span>Tổng cộng (10% VAT):</span>
                         <span class="summary-value"></span>
                     </div>
                 </div>

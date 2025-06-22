@@ -1232,4 +1232,36 @@ public BigDecimal getTotalOutcomeAmount(String dbName, String dateFrom, String d
 
 
 
+    //Phuong: Add order detail to cashflow
+    public static boolean insertCashFlow(
+            String dbName,
+            String flowType,
+            double amount,
+            String category,
+            String description,
+            String paymentMethod,
+            Integer relatedOrderID,
+            Integer branchID,
+            String createdBy) throws SQLException {
+
+        String sql = "INSERT INTO dbo.CashFlows (FlowType, Amount, Category, Description, PaymentMethod, RelatedOrderID, BranchID, CreatedBy) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, flowType);
+            stmt.setDouble(2, amount);
+            stmt.setString(3, category);
+            stmt.setString(4, description != null ? description : "");
+            stmt.setString(5, paymentMethod != null ? paymentMethod : "");
+            stmt.setObject(6, relatedOrderID, java.sql.Types.INTEGER); // NULL nếu relatedOrderID là null
+            stmt.setObject(7, branchID, java.sql.Types.INTEGER); // NULL nếu branchID là null
+            stmt.setString(8, createdBy != null ? createdBy : "");
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            throw new SQLException("Error inserting cash flow: " + e.getMessage(), e);
+        }
+    }
+
+
 }

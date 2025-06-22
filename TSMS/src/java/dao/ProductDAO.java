@@ -10,7 +10,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.sql.Statement;
 import model.Category;
 import model.ProductDTO;
@@ -137,17 +139,17 @@ public class ProductDAO {
     public void deleteProductAndDetail(String dbName, int productDetailId) throws SQLException {
         Connection conn = null;
         PreparedStatement pstmt = null;
+        ResultSet rs = null;
         try {
             conn = DBUtil.getConnectionTo(dbName);
             conn.setAutoCommit(false); // Start transaction
 
             // 1. Get ProductID from ProductDetails first
             int productId = -1;
-            String getProductIdSql = "SELECT ProductID FROM " + dbName
-                    + ".dbo.ProductDetails WHERE ProductDetailID = ?";
+            String getProductIdSql = "SELECT ProductID FROM " + dbName + ".dbo.ProductDetails WHERE ProductDetailID = ?";
             pstmt = conn.prepareStatement(getProductIdSql);
             pstmt.setInt(1, productDetailId);
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
             if (rs.next()) {
                 productId = rs.getInt("ProductID");
             }
@@ -157,17 +159,17 @@ public class ProductDAO {
             // If not found, nothing to delete
             if (productId == -1) {
                 conn.rollback();
-                throw new SQLException("Không tìm thấy ProductID từ ProductDetailID");
+                throw new SQLException("Không tìm thấy ProductID từ ProductDetailID: " + productDetailId);
             }
 
-            // 2. Delete from StockMovementDetail (if exists)
+            // 2. Delete from StockMovementDetail
             String sql1 = "DELETE FROM " + dbName + ".dbo.StockMovementDetail WHERE ProductDetailID = ?";
             pstmt = conn.prepareStatement(sql1);
             pstmt.setInt(1, productDetailId);
             pstmt.executeUpdate();
             pstmt.close();
 
-            // 3. Delete from OrderDetails (theo ProductDetailID, KHÔNG phải ProductID)
+            // 3. Delete from OrderDetails
             String sql2 = "DELETE FROM " + dbName + ".dbo.OrderDetails WHERE ProductDetailID = ?";
             pstmt = conn.prepareStatement(sql2);
             pstmt.setInt(1, productDetailId);
@@ -188,25 +190,31 @@ public class ProductDAO {
             pstmt.executeUpdate();
             pstmt.close();
 
-            // 6. Delete from PromotionProducts (nếu có liên kết foreign key)
-            String sql5a = "DELETE FROM " + dbName + ".dbo.PromotionProducts WHERE ProductDetailID = ?";
-            pstmt = conn.prepareStatement(sql5a);
-            pstmt.setInt(1, productDetailId);
-            pstmt.executeUpdate();
-            pstmt.close();
-
-            // 7. Delete from ProductDetails
-            String sql5 = "DELETE FROM " + dbName + ".dbo.ProductDetails WHERE ProductDetailID = ?";
+            // 6. Delete from PromotionProducts
+            String sql5 = "DELETE FROM " + dbName + ".dbo.PromotionProducts WHERE ProductDetailID = ?";
             pstmt = conn.prepareStatement(sql5);
             pstmt.setInt(1, productDetailId);
             pstmt.executeUpdate();
             pstmt.close();
 
-            // 8. Delete from Products if no ProductDetail exists for that ProductID
-            String sql6 = "DELETE FROM " + dbName + ".dbo.Products "
-                    + "WHERE ProductID = ? AND NOT EXISTS (SELECT 1 FROM " + dbName
-                    + ".dbo.ProductDetails WHERE ProductID = ?)";
+            // 7. Delete from ProductDetailSerialNumber
+            String sql6 = "DELETE FROM " + dbName + ".dbo.ProductDetailSerialNumber WHERE ProductDetailID = ?";
             pstmt = conn.prepareStatement(sql6);
+            pstmt.setInt(1, productDetailId);
+            pstmt.executeUpdate();
+            pstmt.close();
+
+            // 8. Delete from ProductDetails
+            String sql7 = "DELETE FROM " + dbName + ".dbo.ProductDetails WHERE ProductDetailID = ?";
+            pstmt = conn.prepareStatement(sql7);
+            pstmt.setInt(1, productDetailId);
+            pstmt.executeUpdate();
+            pstmt.close();
+
+            // 9. Delete from Products if no ProductDetail exists for that ProductID
+            String sql8 = "DELETE FROM " + dbName + ".dbo.Products "
+                    + "WHERE ProductID = ? AND NOT EXISTS (SELECT 1 FROM " + dbName + ".dbo.ProductDetails WHERE ProductID = ?)";
+            pstmt = conn.prepareStatement(sql8);
             pstmt.setInt(1, productId);
             pstmt.setInt(2, productId);
             pstmt.executeUpdate();
@@ -223,42 +231,21 @@ public class ProductDAO {
             }
             throw e;
         } finally {
-            if (pstmt != null)
+            if (rs != null) {
                 try {
-                pstmt.close();
-            } catch (SQLException ignored) {
+                    rs.close();
+                } catch (SQLException ignored) {
+                }
+            }
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException ignored) {
+                }
             }
             if (conn != null) {
                 DBUtil.closeConnection(conn);
             }
-        }
-    }
-
-    public void updateProductDetails(String dbName, ProductDTO product) {
-        StringBuilder query = new StringBuilder("""
-                    BEGIN TRANSACTION;
-                    UPDATE Products
-                    SET RetailPrice = ?, CostPrice = ?, IsActive = ?
-                    WHERE ProductID = ?;
-                    UPDATE ProductDetails
-                    SET Description = ?, UpdatedAt = GETDATE()
-                    WHERE ProductDetailID = ?;
-                    COMMIT;
-                """);
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
-            int paramIndex = 1;
-            stmt.setBigDecimal(paramIndex++, new java.math.BigDecimal(product.getRetailPrice()));
-            stmt.setBigDecimal(paramIndex++, new java.math.BigDecimal(product.getCostPrice()));
-            stmt.setBoolean(paramIndex++, product.isActive());
-            stmt.setInt(paramIndex++, product.getProductId());
-            stmt.setString(paramIndex++, product.getDescription());
-            stmt.setInt(paramIndex, product.getProductDetailId());
-            stmt.executeUpdate();
-            System.out.println("Cập nhật sản phẩm thành công: ProductDetailID = " + product.getProductDetailId());
-        } catch (Exception e) {
-            System.err.println("Lỗi trong updateProductDetails: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -318,201 +305,182 @@ public class ProductDAO {
         return product;
     }
 
-    public List<Category> getAllCategory(String dbName) {
-        List<Category> categories = new ArrayList<>();
-        String query = "SELECT CategoryID, CategoryName FROM " + dbName + ".dbo.Categories";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                Category category = new Category();
-                category.setCategoryID(rs.getInt("CategoryID"));
-                category.setCategoryName(rs.getString("CategoryName"));
-                categories.add(category);
+    public static ProductDetailDTO getProductDetailById(String dbName, int productDetailId) throws SQLException {
+        String sql = """
+            SELECT 
+                pd.ProductDetailID,
+                pd.ProductID,
+                p.ProductName,
+                p.ProductName + ' - ' + pd.ProductCode AS FullName,
+                pd.ProductCode,
+                pd.Description,
+                pd.WarrantyPeriod,
+                p.BrandID,
+                p.CategoryID,
+                p.SupplierID,
+                p.CostPrice,
+                p.RetailPrice,
+                p.VAT,
+                p.ImageURL,
+                p.IsActive,
+                pd.ProductNameUnsigned,
+                p.CreatedAt AS ProductCreatedAt,
+                pd.CreatedAt AS DetailCreatedAt,
+                pd.UpdatedAt
+            FROM ProductDetails pd
+            JOIN Products p ON pd.ProductID = p.ProductID
+            WHERE pd.ProductDetailID = ?
+        """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, productDetailId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new ProductDetailDTO(
+                            rs.getInt("ProductDetailID"),
+                            rs.getInt("ProductID"),
+                            rs.getString("ProductName"),
+                            rs.getString("FullName"),
+                            rs.getString("ProductCode"),
+                            rs.getString("Description"),
+                            rs.getString("WarrantyPeriod"),
+                            rs.getInt("BrandID"),
+                            rs.getInt("CategoryID"),
+                            rs.getInt("SupplierID"),
+                            rs.getDouble("CostPrice"),
+                            rs.getDouble("RetailPrice"),
+                            rs.getDouble("VAT"),
+                            rs.getString("ImageURL"),
+                            rs.getBoolean("IsActive"),
+                            rs.getString("ProductNameUnsigned"),
+                            rs.getTimestamp("ProductCreatedAt"),
+                            rs.getTimestamp("DetailCreatedAt"),
+                            rs.getTimestamp("UpdatedAt")
+                    );
+                }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return categories;
+        return null;
     }
 
-    public List<Brand> getAllBrands(String dbName) {
+    // Method để lấy tên Brand theo ID
+    public static String getBrandNameById(String dbName, int brandId) throws SQLException {
+        String sql = "SELECT BrandName FROM Brands WHERE BrandID = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, brandId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("BrandName");
+                }
+            }
+        }
+        return "Không xác định";
+    }
+
+    // Method để lấy tên Category theo ID
+    public static String getCategoryNameById(String dbName, int categoryId) throws SQLException {
+        String sql = "SELECT CategoryName FROM Categories WHERE CategoryID = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, categoryId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("CategoryName");
+                }
+            }
+        }
+        return "Không xác định";
+    }
+
+    // Method để lấy tên Supplier theo ID
+    public static String getSupplierNameById(String dbName, int supplierId) throws SQLException {
+        String sql = "SELECT SupplierName FROM Suppliers WHERE SupplierID = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, supplierId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("SupplierName");
+                }
+            }
+        }
+        return "Không xác định";
+    }
+
+    // Method để lấy tất cả Brands
+    public List<Brand> getAllBrands(String dbName) throws SQLException {
         List<Brand> brands = new ArrayList<>();
-        String query = "SELECT BrandID, BrandName FROM " + dbName + ".dbo.Brands";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
+        String sql = "SELECT BrandID, BrandName FROM Brands ORDER BY BrandName";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 Brand brand = new Brand();
                 brand.setBrandID(rs.getInt("BrandID"));
                 brand.setBrandName(rs.getString("BrandName"));
                 brands.add(brand);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return brands;
     }
 
-    public List<Supplier> getAllSuppliers(String dbName) {
+    // Method để lấy tất cả Suppliers
+    public List<Supplier> getAllSuppliers(String dbName) throws SQLException {
         List<Supplier> suppliers = new ArrayList<>();
-        String query = "SELECT SupplierID, SupplierName, ContactName, Phone, Email FROM " + dbName + ".dbo.Suppliers";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
+        String sql = "SELECT SupplierID, SupplierName FROM Suppliers ORDER BY SupplierName";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 Supplier supplier = new Supplier();
                 supplier.setSupplierID(rs.getInt("SupplierID"));
                 supplier.setSupplierName(rs.getString("SupplierName"));
-                supplier.setContactName(rs.getString("ContactName"));
-                supplier.setPhone(rs.getString("Phone"));
-                supplier.setEmail(rs.getString("Email"));
                 suppliers.add(supplier);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return suppliers;
     }
 
-    public boolean brandExists(String dbName, String brandName) throws SQLException {
-        String query = "SELECT COUNT(*) FROM " + dbName + ".dbo.Brands WHERE LOWER(BrandName) = LOWER(?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, brandName);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
+    // Method để update sản phẩm (chỉ những trường được phép)
+    public boolean updateProductDetailLimited(String dbName, int productDetailId, String description,
+            double costPrice, double retailPrice, boolean isActive) throws SQLException {
+
+        String updateProductSql = """
+            UPDATE Products 
+            SET CostPrice = ?, RetailPrice = ?, IsActive = ?
+            WHERE ProductID = (SELECT ProductID FROM ProductDetails WHERE ProductDetailID = ?)
+        """;
+
+        String updateDetailSql = """
+            UPDATE ProductDetails 
+            SET Description = ?, UpdatedAt = GETDATE()
+            WHERE ProductDetailID = ?
+        """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName)) {
+            conn.setAutoCommit(false);
+
+            try {
+                // Update Products table
+                try (PreparedStatement stmt1 = conn.prepareStatement(updateProductSql)) {
+                    stmt1.setDouble(1, costPrice);
+                    stmt1.setDouble(2, retailPrice);
+                    stmt1.setBoolean(3, isActive);
+                    stmt1.setInt(4, productDetailId);
+                    stmt1.executeUpdate();
+                }
+
+                // Update ProductDetails table
+                try (PreparedStatement stmt2 = conn.prepareStatement(updateDetailSql)) {
+                    stmt2.setString(1, description);
+                    stmt2.setInt(2, productDetailId);
+                    stmt2.executeUpdate();
+                }
+
+                conn.commit();
+                return true;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
             }
-        }
-        return false;
-    }
-
-    public boolean productNameExists(String dbName, String productName) throws SQLException {
-        String query = "SELECT COUNT(*) FROM " + dbName + ".dbo.Products WHERE LOWER(ProductName) = LOWER(?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, productName);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-        }
-        return false;
-    }
-
-    public int addBrand(String dbName, String brandName) throws SQLException {
-        String query = "INSERT INTO " + dbName + ".dbo.Brands (BrandName) VALUES (?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, brandName);
-            stmt.executeUpdate();
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        }
-        throw new SQLException("Không thể thêm thương hiệu");
-    }
-
-    public boolean categoryExists(String dbName, String categoryName) throws SQLException {
-        String query = "SELECT COUNT(*) FROM " + dbName + ".dbo.Categories WHERE LOWER(CategoryName) = LOWER(?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, categoryName);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-        }
-        return false;
-    }
-
-    public int addCategory(String dbName, String categoryName) throws SQLException {
-        String query = "SELECT ISNULL(MAX(CategoryID), 0) + 1 AS NextID FROM " + dbName + ".dbo.Categories";
-        int categoryId;
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
-            rs.next();
-            categoryId = rs.getInt("NextID");
-        }
-        query = "INSERT INTO " + dbName + ".dbo.Categories (CategoryID, CategoryName) VALUES (?, ?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, categoryId);
-            stmt.setString(2, categoryName);
-            stmt.executeUpdate();
-            return categoryId;
-        }
-    }
-
-    public boolean supplierExists(String dbName, String supplierName) throws SQLException {
-        String query = "SELECT COUNT(*) FROM " + dbName + ".dbo.Suppliers WHERE LOWER(SupplierName) = LOWER(?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, supplierName);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-        }
-        return false;
-    }
-
-    public int addSupplier(String dbName, String supplierName, String contactName, String phone, String email)
-            throws SQLException {
-        String query = "INSERT INTO " + dbName
-                + ".dbo.Suppliers (SupplierName, ContactName, Phone, Email) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, supplierName);
-            stmt.setString(2, contactName != null && !contactName.isEmpty() ? contactName : null);
-            stmt.setString(3, phone != null && !phone.isEmpty() ? phone : null);
-            stmt.setString(4, email != null && !email.isEmpty() ? email : null);
-            stmt.executeUpdate();
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        }
-        throw new SQLException("Không thể thêm nhà cung cấp");
-    }
-
-    public int addProduct(String dbName, String productName, int brandId, int categoryId, int supplierId,
-            double costPrice, double retailPrice, String imageURL, boolean isActive) throws SQLException {
-        String query = "INSERT INTO " + dbName
-                + ".dbo.Products (ProductName, BrandID, CategoryID, SupplierID, CostPrice, RetailPrice, ImageURL, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, productName);
-            stmt.setInt(2, brandId);
-            stmt.setInt(3, categoryId);
-            stmt.setInt(4, supplierId);
-            stmt.setDouble(5, costPrice);
-            stmt.setDouble(6, retailPrice);
-            stmt.setString(7, imageURL != null && !imageURL.isEmpty() ? imageURL : null);
-            stmt.setBoolean(8, isActive);
-            stmt.executeUpdate();
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        }
-        throw new SQLException("Không thể thêm sản phẩm");
-    }
-
-    public int addProductDetail(String dbName, int productId, String description, String serialNumber,
-            String warrantyPeriod) throws SQLException {
-        String query = "INSERT INTO " + dbName
-                + ".dbo.ProductDetails (ProductID, Description, ProductCode, WarrantyPeriod) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            stmt.setInt(1, productId);
-            stmt.setString(2, description != null && !description.isEmpty() ? description : null);
-            stmt.setString(3, serialNumber != null && !serialNumber.isEmpty() ? serialNumber : null);
-            stmt.setString(4, warrantyPeriod != null && !warrantyPeriod.isEmpty() ? warrantyPeriod : null);
-            stmt.executeUpdate();
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        }
-        throw new SQLException("Không thể thêm chi tiết sản phẩm");
-    }
-
-    public void addWarehouseProduct(String dbName, int warehouseId, int productDetailId, int quantity)
-            throws SQLException {
-        String query = "INSERT INTO " + dbName
-                + ".dbo.WarehouseProducts (WarehouseID, ProductDetailID, Quantity) VALUES (?, ?, ?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, warehouseId);
-            stmt.setInt(2, productDetailId);
-            stmt.setInt(3, quantity);
-            stmt.executeUpdate();
         }
     }
 
@@ -642,6 +610,278 @@ public class ProductDAO {
             e.printStackTrace();
         }
         return categories;
+    }
+
+    public List<Supplier> getAllSupplier(String dbName) throws SQLException {
+        List<Supplier> suppliers = new ArrayList<>();
+        String sql = "SELECT SupplierID, SupplierName, ContactName, Phone, Email FROM Suppliers";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Supplier supplier = new Supplier();
+                supplier.setSupplierID(rs.getInt("SupplierID"));
+                supplier.setSupplierName(rs.getString("SupplierName"));
+                supplier.setContactName(rs.getString("ContactName"));
+                supplier.setPhone(rs.getString("Phone"));
+                supplier.setEmail(rs.getString("Email"));
+                suppliers.add(supplier);
+            }
+        }
+        return suppliers;
+    }
+
+    public boolean isCategoryNameExists(String dbName, String categoryName) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Categories WHERE CategoryName = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, categoryName);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isBrandNameExists(String dbName, String brandName) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Brands WHERE BrandName = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, brandName);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isSupplierNameExists(String dbName, String supplierName) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Suppliers WHERE SupplierName = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, supplierName);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isProductCodeExists(String dbName, String productCode) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM ProductDetails WHERE ProductCode = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, productCode);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isSerialNumberExists(String dbName, String serialNumber) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM ProductDetailSerialNumber WHERE SerialNumber = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, serialNumber);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean addCategory(String dbName, String categoryName) throws SQLException {
+        String maxIdSql = "SELECT MAX(CategoryID) FROM Categories";
+        int newId;
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement psMax = conn.prepareStatement(maxIdSql); ResultSet rs = psMax.executeQuery()) {
+            newId = rs.next() ? rs.getInt(1) + 1 : 1;
+        }
+
+        String sql = "INSERT INTO Categories (CategoryID, CategoryName) VALUES (?, ?)";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, newId);
+            ps.setString(2, categoryName);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    public boolean addBrand(String dbName, String brandName) throws SQLException {
+        String sql = "INSERT INTO Brands (BrandName) VALUES (?)";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, brandName);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    public boolean addSupplier(String dbName, String supplierName, String contactName, String phone, String email) throws SQLException {
+        String sql = "INSERT INTO Suppliers (SupplierName, ContactName, Phone, Email) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, supplierName);
+            ps.setString(2, contactName.isEmpty() ? null : contactName);
+            ps.setString(3, phone.isEmpty() ? null : phone);
+            ps.setString(4, email.isEmpty() ? null : email);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    public boolean addProduct(String dbName, String productName, String fullName, String productCode,
+            String description, double costPrice, double retailPrice, int brandId,
+            int categoryId, int supplierId, String warrantyPeriod, double vat,
+            boolean isActive, String serialNumbers) throws SQLException {
+        Connection conn = null;
+        PreparedStatement psProduct = null;
+        PreparedStatement psProductDetail = null;
+        PreparedStatement psSerialNumber = null;
+        ResultSet rs = null;
+        boolean success = false;
+
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            conn.setAutoCommit(false); // Start transaction
+
+            // Insert into Products table (removed FullName)
+            String sqlProduct = "INSERT INTO Products (ProductName, BrandID, CategoryID, SupplierID, "
+                    + "CostPrice, RetailPrice, ImageURL, VAT, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            psProduct = conn.prepareStatement(sqlProduct, Statement.RETURN_GENERATED_KEYS);
+            psProduct.setString(1, productName);
+            psProduct.setInt(2, brandId);
+            psProduct.setInt(3, categoryId);
+            psProduct.setInt(4, supplierId);
+            psProduct.setDouble(5, costPrice);
+            psProduct.setDouble(6, retailPrice);
+            psProduct.setNull(7, java.sql.Types.NVARCHAR); // ImageURL is optional
+            psProduct.setDouble(8, vat);
+            psProduct.setBoolean(9, isActive);
+            int productRows = psProduct.executeUpdate();
+
+            if (productRows > 0) {
+                // Get generated ProductID
+                rs = psProduct.getGeneratedKeys();
+                if (rs.next()) {
+                    int productId = rs.getInt(1);
+
+                    // Get next available ProductDetailID
+                    int productDetailId = getNextAvailableProductDetailId(dbName, conn);
+
+                    // Enable IDENTITY_INSERT for ProductDetails
+                    conn.createStatement().execute("SET IDENTITY_INSERT ProductDetails ON");
+
+                    // Insert into ProductDetails table with manual ProductDetailID
+                    String sqlProductDetail = "INSERT INTO ProductDetails (ProductDetailID, ProductID, Description, ProductCode, "
+                            + "WarrantyPeriod, ProductNameUnsigned) VALUES (?, ?, ?, ?, ?, ?)";
+                    psProductDetail = conn.prepareStatement(sqlProductDetail);
+                    psProductDetail.setInt(1, productDetailId);
+                    psProductDetail.setInt(2, productId);
+                    psProductDetail.setString(3, description);
+                    psProductDetail.setString(4, productCode);
+                    psProductDetail.setString(5, warrantyPeriod.isEmpty() ? null : warrantyPeriod);
+                    psProductDetail.setString(6, standardizeName(productName));
+                    int detailRows = psProductDetail.executeUpdate();
+
+                    // Disable IDENTITY_INSERT
+                    conn.createStatement().execute("SET IDENTITY_INSERT ProductDetails OFF");
+
+                    if (detailRows > 0) {
+                        // Insert serial numbers if provided
+                        if (serialNumbers != null && !serialNumbers.trim().isEmpty()) {
+                            String sqlSerialNumber = "INSERT INTO ProductDetailSerialNumber (ProductDetailID, SerialNumber, Status) VALUES (?, ?, 0)";
+                            psSerialNumber = conn.prepareStatement(sqlSerialNumber);
+                            List<String> serialNumberList = Arrays.stream(serialNumbers.split(","))
+                                    .map(String::trim)
+                                    .filter(s -> !s.isEmpty())
+                                    .distinct()
+                                    .collect(Collectors.toList());
+
+                            for (String serial : serialNumberList) {
+                                if (isSerialNumberExists(dbName, serial)) {
+                                    // START MODIFICATION
+                                    throw new SQLException("Serial number '" + serial + "' đã tồn tại.");
+                                    // END MODIFICATION
+                                }
+                                psSerialNumber.setInt(1, productDetailId);
+                                psSerialNumber.setString(2, serial);
+                                psSerialNumber.addBatch();
+                            }
+                            psSerialNumber.executeBatch();
+                        }
+                        conn.commit();
+                        success = true;
+                    } else {
+                        // START MODIFICATION
+                        throw new SQLException("Không thể chèn vào ProductDetails.");
+                        // END MODIFICATION
+                    }
+                } else {
+                    // START MODIFICATION
+                    throw new SQLException("Không thể lấy ProductID sau khi chèn vào Products.");
+                    // END MODIFICATION
+                }
+            } else {
+                // START MODIFICATION
+                throw new SQLException("Không thể chèn vào Products.");
+                // END MODIFICATION
+            }
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    throw new SQLException("Rollback thất bại: " + ex.getMessage(), ex);
+                }
+            }
+            throw e;
+        } finally {
+            if (rs != null) try {
+                rs.close();
+            } catch (SQLException ignored) {
+            }
+            if (psSerialNumber != null) try {
+                psSerialNumber.close();
+            } catch (SQLException ignored) {
+            }
+            if (psProductDetail != null) try {
+                psProductDetail.close();
+            } catch (SQLException ignored) {
+            }
+            if (psProduct != null) try {
+                psProduct.close();
+            } catch (SQLException ignored) {
+            }
+            if (conn != null) try {
+                conn.setAutoCommit(true);
+                DBUtil.closeConnection(conn);
+            } catch (SQLException ignored) {
+            }
+        }
+        return success;
+    }
+
+    private int getNextAvailableProductDetailId(String dbName, Connection conn) throws SQLException {
+        String sql = "SELECT ProductDetailID FROM ProductDetails ORDER BY ProductDetailID";
+        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            int expectedId = 1;
+            while (rs.next()) {
+                int currentId = rs.getInt("ProductDetailID");
+                if (currentId > expectedId) {
+                    return expectedId;
+                }
+                expectedId++;
+            }
+            return expectedId;
+        }
+    }
+
+    private String standardizeName(String name) {
+        // Placeholder for name standardization logic
+        // Replace with actual implementation from util.Validate if available
+        return name.toLowerCase().replaceAll("[^a-z0-9 ]", "");
     }
 
     // Phuong
@@ -889,23 +1129,27 @@ public class ProductDAO {
     }
 
     //Phuong
-    public static boolean markSerialAsSold(String dbName, int productDetailId, int orderId) {
-        String query = "WITH RandomSerial AS ( \n"
-                + "    SELECT TOP (1) ProductDetailID, SerialNumber \n"
-                + "    FROM ProductDetailSerialNumber \n"
-                + "    WHERE ProductDetailID = ? AND Status = 1 \n"
-                + "    ORDER BY NEWID() \n"
-                + ") \n"
-                + "UPDATE p SET Status = 0, OrderID = ? \n"
-                + "FROM ProductDetailSerialNumber p \n"
-                + "INNER JOIN RandomSerial r ON p.ProductDetailID = r.ProductDetailID \n"
-                + "    AND p.SerialNumber = r.SerialNumber \n"
-                + "WHERE p.Status = 1";
+    public static boolean markSerialAsSold(String dbName, int productDetailId, int orderId, int branchId) {
+        String query = "WITH RandomSerial AS (\n"
+                + "    SELECT TOP (1) ProductDetailID, SerialNumber\n"
+                + "    FROM ProductDetailSerialNumber\n"
+                + "    WHERE ProductDetailID = ? AND Status = 1 AND BranchID = ?\n"
+                + "    ORDER BY NEWID()\n"
+                + ")\n"
+                + "UPDATE p\n"
+                + "SET Status = 0, OrderID = ?\n"
+                + "FROM ProductDetailSerialNumber p\n"
+                + "INNER JOIN RandomSerial r \n"
+                + "    ON p.ProductDetailID = r.ProductDetailID \n"
+                + "    AND p.SerialNumber = r.SerialNumber\n"
+                + "WHERE p.Status = 1 AND p.BranchID = ?";
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, productDetailId);
-            stmt.setInt(2, orderId);
+            stmt.setInt(2, branchId);
+            stmt.setInt(3, orderId);
+            stmt.setInt(4, branchId);
 
             int updatedRows = stmt.executeUpdate();
             return updatedRows > 0;
@@ -1162,6 +1406,227 @@ public class ProductDAO {
         return total;
     }
 
+    //Phuong
+    public List<ProductDTO> getWareHouseProductsByFilter(String dbName, int warehouseId, int offset, int limit,
+            BMProductFilter filter) throws SQLException {
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ");
+        sql.append("    w.WarehouseID, ");
+        sql.append("    p.ProductID, ");
+        sql.append("    wp.ProductDetailID, ");
+        sql.append("    wp.Quantity AS WarehouseQuantity, ");
+        sql.append("    p.ProductName, ");
+        sql.append("    b.BrandName, ");
+        sql.append("    c.CategoryName, ");
+        sql.append("    s.SupplierName, ");
+        sql.append("    p.CostPrice, ");
+        sql.append("    p.RetailPrice, ");
+        sql.append("    p.ImageURL, ");
+        sql.append("    CASE WHEN p.IsActive = 1 THEN N'Đang bán' ELSE N'Ngừng bán' END AS Status, ");
+        sql.append("    pd.Description, ");
+        sql.append("    pd.ProductCode, ");
+        sql.append("    pd.WarrantyPeriod, ");
+        sql.append("    p.CreatedAt, ");
+        sql.append("    pr.PromotionID, ");
+        sql.append("    pr.PromoName, ");
+        sql.append("    pr.DiscountPercent, ");
+        sql.append("    pr.StartDate, ");
+        sql.append("    pr.EndDate, ");
+        sql.append("    pb.BranchID ");
+        sql.append("FROM Warehouses w ");
+        sql.append("    LEFT JOIN WarehouseProducts wp ON w.WarehouseID = wp.WarehouseID ");
+        sql.append("    LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID ");
+        sql.append("    LEFT JOIN Products p ON pd.ProductID = p.ProductID ");
+        sql.append("    LEFT JOIN Brands b ON p.BrandID = b.BrandID ");
+        sql.append("    LEFT JOIN Categories c ON p.CategoryID = c.CategoryID ");
+        sql.append("    LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID ");
+        sql.append("    LEFT JOIN PromotionProducts pp ON pd.ProductDetailID = pp.ProductDetailID ");
+        sql.append("    LEFT JOIN Promotions pr ON pp.PromotionID = pr.PromotionID ");
+        sql.append("        AND (pr.StartDate IS NULL OR pr.StartDate <= GETDATE()) ");
+        sql.append("        AND (pr.EndDate IS NULL OR pr.EndDate >= GETDATE()) ");
+        sql.append("    LEFT JOIN PromotionBranches pb ON pr.PromotionID = pb.PromotionID ");
+        sql.append("WHERE 1=1 ");
+
+        List<Object> parameters = new ArrayList<>();
+
+        if (warehouseId > 0) {
+            sql.append("AND w.WarehouseID = ? ");
+            parameters.add(warehouseId);
+        }
+
+        if (filter.hasCategories()) {
+            sql.append("AND p.CategoryID IN (");
+            for (int i = 0; i < filter.getCategories().length; i++) {
+                sql.append("?");
+                if (i < filter.getCategories().length - 1) {
+                    sql.append(",");
+                }
+                parameters.add(filter.getCategories()[i]);
+            }
+            sql.append(") ");
+        }
+
+        if (filter.hasInventoryFilter()) {
+            switch (filter.getInventoryStatus()) {
+                case "in-stock":
+                    sql.append("AND wp.Quantity > 0 ");
+                    break;
+                case "out-stock":
+                    sql.append("AND wp.Quantity = 0 ");
+                    break;
+            }
+        }
+
+        if (filter.hasSearchKeyword()) {
+            String keyword = filter.getSearchKeyword();
+            String keywordUnsigned = Validate.normalizeSearch(keyword);
+
+            sql.append("AND (pd.ProductNameUnsigned LIKE ? OR pd.Description LIKE ? OR pd.ProductCode LIKE ?) ");
+            String searchPattern = "%" + keywordUnsigned + "%";
+            parameters.add(searchPattern);
+            parameters.add("%" + keyword + "%");
+            parameters.add("%" + keyword + "%");
+        }
+
+        if (filter.getMinPrice() != null) {
+            sql.append("AND p.RetailPrice >= ? ");
+            parameters.add(filter.getMinPrice());
+        }
+
+        if (filter.getMaxPrice() != null) {
+            sql.append("AND p.RetailPrice <= ? ");
+            parameters.add(filter.getMaxPrice());
+        }
+
+        if (filter.hasStatusFilter()) {
+            switch (filter.getStatus()) {
+                case "active":
+                    sql.append("AND p.IsActive = 1 ");
+                    break;
+                case "inactive":
+                    sql.append("AND p.IsActive = 0 ");
+                    break;
+            }
+        }
+
+        sql.append("ORDER BY wp.ProductDetailID ");
+        sql.append("OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ");
+        parameters.add(offset);
+        parameters.add(limit);
+
+        List<ProductDTO> products = new ArrayList<>();
+
+        try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < parameters.size(); i++) {
+                ps.setObject(i + 1, parameters.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductDTO product = extractWarehouseProductDTOFromResultSet(rs);
+                    products.add(product);
+                }
+            }
+        }
+
+        return products;
+    }
+
+    //Phuong
+    public int getTotalWarehouseProductsByFilter(String dbName, int warehouseId, BMProductFilter filter) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(DISTINCT wp.ProductDetailID) ");
+        sql.append("FROM Warehouses w ");
+        sql.append("    LEFT JOIN WarehouseProducts wp ON w.WarehouseID = wp.WarehouseID ");
+        sql.append("    LEFT JOIN ProductDetails pd ON wp.ProductDetailID = pd.ProductDetailID ");
+        sql.append("    LEFT JOIN Products p ON pd.ProductID = p.ProductID ");
+        sql.append("    LEFT JOIN Brands b ON p.BrandID = b.BrandID ");
+        sql.append("    LEFT JOIN Categories c ON p.CategoryID = c.CategoryID ");
+        sql.append("    LEFT JOIN Suppliers s ON p.SupplierID = s.SupplierID ");
+        sql.append("    LEFT JOIN PromotionProducts pp ON pd.ProductDetailID = pp.ProductDetailID ");
+        sql.append("    LEFT JOIN Promotions pr ON pp.PromotionID = pr.PromotionID ");
+        sql.append("        AND (pr.StartDate IS NULL OR pr.StartDate <= GETDATE()) ");
+        sql.append("        AND (pr.EndDate IS NULL OR pr.EndDate >= GETDATE()) ");
+        sql.append("    LEFT JOIN PromotionBranches pb ON pr.PromotionID = pb.PromotionID ");
+        sql.append("WHERE 1=1 ");
+
+        List<Object> parameters = new ArrayList<>();
+
+        if (warehouseId > 0) {
+            sql.append("AND w.WarehouseID = ? ");
+            parameters.add(warehouseId);
+        }
+
+        if (filter.hasCategories()) {
+            sql.append("AND p.CategoryID IN (");
+            for (int i = 0; i < filter.getCategories().length; i++) {
+                sql.append("?");
+                if (i < filter.getCategories().length - 1) {
+                    sql.append(",");
+                }
+                parameters.add(filter.getCategories()[i]);
+            }
+            sql.append(") ");
+        }
+
+        if (filter.hasInventoryFilter()) {
+            switch (filter.getInventoryStatus()) {
+                case "in-stock":
+                    sql.append("AND wp.Quantity > 0 ");
+                    break;
+                case "out-stock":
+                    sql.append("AND wp.Quantity = 0 ");
+                    break;
+            }
+        }
+
+        if (filter.hasSearchKeyword()) {
+            String keyword = filter.getSearchKeyword();
+            String keywordUnsigned = Validate.normalizeSearch(keyword);
+
+            sql.append("AND (pd.ProductNameUnsigned LIKE ? OR pd.Description LIKE ? OR pd.ProductCode LIKE ?) ");
+            parameters.add("%" + keywordUnsigned + "%");
+            parameters.add("%" + keyword + "%");
+            parameters.add("%" + keyword + "%");
+        }
+
+        if (filter.getMinPrice() != null) {
+            sql.append("AND p.RetailPrice >= ? ");
+            parameters.add(filter.getMinPrice());
+        }
+
+        if (filter.getMaxPrice() != null) {
+            sql.append("AND p.RetailPrice <= ? ");
+            parameters.add(filter.getMaxPrice());
+        }
+
+        if (filter.hasStatusFilter()) {
+            switch (filter.getStatus()) {
+                case "active":
+                    sql.append("AND p.IsActive = 1 ");
+                    break;
+                case "inactive":
+                    sql.append("AND p.IsActive = 0 ");
+                    break;
+            }
+        }
+
+        try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < parameters.size(); i++) {
+                ps.setObject(i + 1, parameters.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+
+        return 0;
+    }
+
     // KO DONG VAO
     private static ProductDTO extractProductDTOFromResultSet(ResultSet rs) throws SQLException {
         ProductDTO productDTO = new ProductDTO(
@@ -1187,8 +1652,31 @@ public class ProductDAO {
         return productDTO;
     }
 
-    public static void main(String[] args) throws SQLException {
-        System.out.println(ProductDAO.getTotalProduct("DTB_P"));
+    private static ProductDTO extractWarehouseProductDTOFromResultSet(ResultSet rs) throws SQLException {
+        ProductDTO productDTO = new ProductDTO(
+                rs.getInt("ProductDetailId"),
+                rs.getInt("WarehouseQuantity"), // Đã đổi tên từ InventoryQuantity
+                rs.getString("Description"),
+                rs.getString("ProductCode"),
+                rs.getString("WarrantyPeriod"),
+                rs.getString("PromoName"),
+                rs.getDouble("DiscountPercent"),
+                rs.getDate("StartDate"),
+                rs.getDate("EndDate"),
+                rs.getInt("ProductID"),
+                rs.getString("ProductName"),
+                rs.getString("BrandName"),
+                rs.getString("CategoryName"),
+                rs.getString("SupplierName"),
+                rs.getString("CostPrice"),
+                rs.getString("RetailPrice"),
+                rs.getString("ImageURL"),
+                rs.getDate("CreatedAt"),
+                rs.getString("Status"));
+        return productDTO;
+    }
+
+    public static void main(String[] args) {
     }
 
 }
