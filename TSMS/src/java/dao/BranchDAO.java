@@ -41,6 +41,29 @@ public class BranchDAO {
         return branch;
     }
      
+     //Lấy ra list
+    public List<Branch> getAllBranches(String dbName) throws SQLException {
+        List<Branch> branches = new ArrayList<>();
+        
+        String sql = """
+            SELECT * FROM Branches WHERE isActive = 1
+            ORDER BY BranchName
+        """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); 
+             PreparedStatement stmt = conn.prepareStatement(sql); 
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Branch branch = extractBranchFromResultSet(rs);
+                branches.add(branch);
+            }
+        }
+        
+        return branches;    
+    }
+     
+     
      public static void main(String[] args) throws SQLException {
         List<Branch> branches = BranchDAO.getBranchList("DTB_Bm");
          System.out.println(branches);

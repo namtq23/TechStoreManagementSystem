@@ -410,8 +410,8 @@ body {
 .total-summary {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 20px;
-  padding: 15px;
+  margin-bottom: 10px;
+  padding: 5px;
   background: #f8f9fa;
   border-radius: 4px;
 }
@@ -579,4 +579,114 @@ body {
     width: 100%;
     justify-content: center;
   }
+  .pagination-container {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .pagination-left {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .records-per-page {
+    justify-content: center;
+  }
+}
+.nav-item.dropdown {
+    position: relative;
+}
+
+.nav-item.dropdown .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    min-width: 160px;
+    z-index: 999;
+    display: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.nav-item.dropdown .dropdown-menu a {
+    display: block;
+    padding: 10px 16px;
+    color: #333;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.nav-item.dropdown .dropdown-menu a:hover {
+    background-color: #f0f0f0;
+}
+
+.dropdown-toggle {
+    text-decoration: none;  
+    color: white;
+}
+
+/* Hover để hiển thị menu */
+.nav-item.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.fa-caret-down {
+    margin-left: 3px;
+}
+
+
+
+/* Pagination */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.records-per-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.records-per-page label {
+  font-weight: 500;
+}
+
+.records-select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.records-select:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+.records-select:hover {
+  border-color: #4caf50;
+}
+.records-per-page-form {
+  display: contents;
 }
