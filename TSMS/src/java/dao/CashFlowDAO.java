@@ -23,6 +23,7 @@ import model.CashFlow;
 import model.CashFlowReportDTO;
 import model.ProductDTO;
 import model.ProductSaleDTO;
+import model.User;
 import util.DBUtil;
 import util.Validate;
 
@@ -829,7 +830,7 @@ public class CashFlowDAO {
     }
 
 //Hàm lấy dữ liệu với phân trang
-    public List<CashFlowReportDTO> getIncomeCashFlowReports(String dbName, int offset, int recordsPerPage,
+public List<CashFlowReportDTO> getIncomeCashFlowReports(String dbName, int offset, int recordsPerPage,
             String dateFrom, String dateTo, String branchId, String employeeId) throws SQLException {
         StringBuilder sql = new StringBuilder("""
     SELECT 
@@ -840,41 +841,48 @@ public class CashFlowDAO {
         cf.CreatedAt,
         cf.Description,
         b.BranchName,
-        u.FullName AS CreatedByName,
+        cf.CreatedBy AS CreatedByName,
         c.CustomerID,
         c.FullName AS CustomerName
     FROM CashFlows cf
     LEFT JOIN Branches b ON cf.BranchID = b.BranchID
-    LEFT JOIN Users u ON cf.CreatedBy = CAST(u.UserID AS NVARCHAR)
     LEFT JOIN Orders o ON cf.RelatedOrderID = o.OrderID
     LEFT JOIN Customers c ON o.CustomerID = c.CustomerID
-    WHERE cf.FlowType = 'income'
+    WHERE cf.FlowType = 'INCOME'
     """);
 
         List<Object> params = new ArrayList<>();
 
-        // Thêm điều kiện filter theo ngày bắt đầu
         if (dateFrom != null && !dateFrom.trim().isEmpty()) {
             sql.append(" AND cf.CreatedAt >= ?");
             params.add(dateFrom + " 00:00:00");
         }
 
-        // Thêm điều kiện filter theo ngày kết thúc
         if (dateTo != null && !dateTo.trim().isEmpty()) {
             sql.append(" AND cf.CreatedAt <= ?");
             params.add(dateTo + " 23:59:59");
         }
 
-        // Thêm điều kiện filter theo chi nhánh
         if (branchId != null && !branchId.trim().isEmpty()) {
             sql.append(" AND cf.BranchID = ?");
             params.add(Integer.parseInt(branchId));
         }
 
-        // Thêm điều kiện filter theo nhân viên
+        // SỬA LẠI: Chuyển đổi employeeId thành tên nhân viên
         if (employeeId != null && !employeeId.trim().isEmpty()) {
-            sql.append(" AND cf.CreatedBy = ?");
-            params.add(employeeId);
+            try {
+                int userIdFilter = Integer.parseInt(employeeId);
+                // Lấy tên nhân viên từ UserID
+                User user = UserDAO.getUserById(userIdFilter, dbName);
+                if (user != null) {
+                    sql.append(" AND cf.CreatedBy = ?");
+                    params.add(user.getFullName());
+                }
+            } catch (NumberFormatException e) {
+                // Nếu employeeId không phải số, tìm theo tên
+                sql.append(" AND cf.CreatedBy LIKE ?");
+                params.add("%" + employeeId + "%");
+            }
         }
 
         sql.append(" ORDER BY cf.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
@@ -882,9 +890,9 @@ public class CashFlowDAO {
         params.add(recordsPerPage);
 
         List<CashFlowReportDTO> list = new ArrayList<>();
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); 
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
-            // Set tất cả parameters
             for (int i = 0; i < params.size(); i++) {
                 stmt.setObject(i + 1, params.get(i));
             }
@@ -897,7 +905,13 @@ public class CashFlowDAO {
                     BigDecimal amount = rs.getBigDecimal("Amount");
                     dto.setAmount(amount);
                     dto.setPaymentMethod(rs.getString("PaymentMethod"));
-                    dto.setRelatedOrderID(rs.getInt("RelatedOrderID"));
+                    
+                    Object orderIdObj = rs.getObject("RelatedOrderID");
+                    if (orderIdObj != null) {
+                        dto.setRelatedOrderID(rs.getInt("RelatedOrderID"));
+                    } else {
+                        dto.setRelatedOrderID(0);
+                    }
 
                     Timestamp ts = rs.getTimestamp("CreatedAt");
                     LocalDateTime createdAt = ts != null ? ts.toLocalDateTime() : null;
@@ -907,11 +921,11 @@ public class CashFlowDAO {
                     dto.setBranchName(rs.getString("BranchName"));
                     dto.setCreatedByName(rs.getString("CreatedByName"));
 
-                    int customerID = rs.getInt("CustomerID");
-                    if (rs.wasNull()) {
-                        dto.setCustomerID(0);
+                    Object customerIdObj = rs.getObject("CustomerID");
+                    if (customerIdObj != null) {
+                        dto.setCustomerID(rs.getInt("CustomerID"));
                     } else {
-                        dto.setCustomerID(customerID);
+                        dto.setCustomerID(0);
                     }
 
                     dto.setCustomerName(rs.getString("CustomerName"));
@@ -936,16 +950,86 @@ public class CashFlowDAO {
         return list;
     }
 
+
 //Hàm đếm tổng số bản ghi
-    public int getTotalIncomeCashFlowCount(String dbName, String dateFrom, String dateTo, String branchId, String employeeId) throws SQLException {
-        StringBuilder sql = new StringBuilder("""
+   public int getTotalIncomeCashFlowCount(String dbName, String dateFrom, String dateTo, String branchId, String employeeId) throws SQLException {
+    StringBuilder sql = new StringBuilder("""
     SELECT COUNT(*) as total
     FROM CashFlows cf
     LEFT JOIN Branches b ON cf.BranchID = b.BranchID
-    LEFT JOIN Users u ON cf.CreatedBy = CAST(u.UserID AS NVARCHAR)
     LEFT JOIN Orders o ON cf.RelatedOrderID = o.OrderID
     LEFT JOIN Customers c ON o.CustomerID = c.CustomerID
-    WHERE cf.FlowType = 'income'
+    WHERE cf.FlowType = 'INCOME'
+    """);
+
+    List<Object> params = new ArrayList<>();
+
+    if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+        sql.append(" AND cf.CreatedAt >= ?");
+        params.add(dateFrom + " 00:00:00");
+    }
+
+    if (dateTo != null && !dateTo.trim().isEmpty()) {
+        sql.append(" AND cf.CreatedAt <= ?");
+        params.add(dateTo + " 23:59:59");
+    }
+
+    if (branchId != null && !branchId.trim().isEmpty()) {
+        sql.append(" AND cf.BranchID = ?");
+        params.add(Integer.parseInt(branchId));
+    }
+
+   
+   // SỬA LẠI: Chuyển đổi employeeId thành tên nhân viên
+if (employeeId != null && !employeeId.trim().isEmpty()) {
+    try {
+        int userIdFilter = Integer.parseInt(employeeId);
+        // Lấy tên nhân viên từ UserID
+        User user = UserDAO.getUserById(userIdFilter, dbName);
+        if (user != null) {
+            sql.append(" AND cf.CreatedBy = ?");
+            params.add(user.getFullName());
+        }
+    } catch (NumberFormatException e) {
+        // Nếu employeeId không phải số, tìm theo tên
+        sql.append(" AND cf.CreatedBy LIKE ?");
+        params.add("%" + employeeId + "%");
+    }
+}
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            stmt.setObject(i + 1, params.get(i));
+        }
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        }
+    }
+    return 0;
+}
+   // Thêm vào CashFlowDAO.java
+
+public List<CashFlowReportDTO> getOutcomeCashFlowReports(String dbName, int offset, int recordsPerPage,
+            String dateFrom, String dateTo, String branchId, String employeeId) throws SQLException {
+        StringBuilder sql = new StringBuilder("""
+    SELECT 
+        cf.CashFlowID,
+        cf.Amount,
+        cf.PaymentMethod,
+        cf.RelatedOrderID,
+        cf.CreatedAt,
+        cf.Description,
+        cf.Category,
+        b.BranchName,
+        cf.CreatedBy AS CreatedByName
+    FROM CashFlows cf
+    LEFT JOIN Branches b ON cf.BranchID = b.BranchID
+    WHERE cf.FlowType = 'OUTCOME'
     """);
 
         List<Object> params = new ArrayList<>();
@@ -966,24 +1050,186 @@ public class CashFlowDAO {
         }
 
         if (employeeId != null && !employeeId.trim().isEmpty()) {
-            sql.append(" AND cf.CreatedBy = ?");
-            params.add(employeeId);
+            try {
+                int userIdFilter = Integer.parseInt(employeeId);
+                User user = UserDAO.getUserById(userIdFilter, dbName);
+                if (user != null) {
+                    sql.append(" AND cf.CreatedBy = ?");
+                    params.add(user.getFullName());
+                }
+            } catch (NumberFormatException e) {
+                sql.append(" AND cf.CreatedBy LIKE ?");
+                params.add("%" + employeeId + "%");
+            }
         }
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+        sql.append(" ORDER BY cf.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        params.add(offset);
+        params.add(recordsPerPage);
 
-            // Set tất cả parameters
+        List<CashFlowReportDTO> list = new ArrayList<>();
+        try (Connection conn = DBUtil.getConnectionTo(dbName); 
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
             for (int i = 0; i < params.size(); i++) {
                 stmt.setObject(i + 1, params.get(i));
             }
 
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("total");
+                while (rs.next()) {
+                    CashFlowReportDTO dto = new CashFlowReportDTO();
+
+                    dto.setCashFlowID(rs.getInt("CashFlowID"));
+                    BigDecimal amount = rs.getBigDecimal("Amount");
+                    dto.setAmount(amount);
+                    dto.setPaymentMethod(rs.getString("PaymentMethod"));
+                    dto.setRelatedOrderID(0);
+
+                    Timestamp ts = rs.getTimestamp("CreatedAt");
+                    LocalDateTime createdAt = ts != null ? ts.toLocalDateTime() : null;
+                    dto.setCreatedAt(createdAt);
+
+                    dto.setDescription(rs.getString("Description"));
+                    dto.setCategory(rs.getString("Category")); // THÊM LẠI CATEGORY
+                    dto.setBranchName(rs.getString("BranchName"));
+                    dto.setCreatedByName(rs.getString("CreatedByName"));
+
+                    dto.setCustomerID(0);
+                    dto.setCustomerName(null);
+
+                    // Format dữ liệu
+                    if (amount != null) {
+                        dto.setFormattedAmount(Validate.formatCostPriceToVND(amount.doubleValue()));
+                    } else {
+                        dto.setFormattedAmount("0 ₫");
+                    }
+
+                    if (createdAt != null) {
+                        dto.setFormattedCreatedAt(Validate.getFormattedDate(createdAt));
+                    } else {
+                        dto.setFormattedCreatedAt("-");
+                    }
+
+                    list.add(dto);
                 }
             }
         }
-        return 0;
+        return list;
     }
+
+
+public int getTotalOutcomeCashFlowCount(String dbName, String dateFrom, String dateTo, String branchId, String employeeId) throws SQLException {
+    StringBuilder sql = new StringBuilder("""
+    SELECT COUNT(*) as total
+    FROM CashFlows cf
+    LEFT JOIN Branches b ON cf.BranchID = b.BranchID
+    WHERE cf.FlowType = 'OUTCOME'
+    """);
+
+    List<Object> params = new ArrayList<>();
+
+    if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+        sql.append(" AND cf.CreatedAt >= ?");
+        params.add(dateFrom + " 00:00:00");
+    }
+
+    if (dateTo != null && !dateTo.trim().isEmpty()) {
+        sql.append(" AND cf.CreatedAt <= ?");
+        params.add(dateTo + " 23:59:59");
+    }
+
+    if (branchId != null && !branchId.trim().isEmpty()) {
+        sql.append(" AND cf.BranchID = ?");
+        params.add(Integer.parseInt(branchId));
+    }
+
+    if (employeeId != null && !employeeId.trim().isEmpty()) {
+        try {
+            int userIdFilter = Integer.parseInt(employeeId);
+            User user = UserDAO.getUserById(userIdFilter, dbName);
+            if (user != null) {
+                sql.append(" AND cf.CreatedBy = ?");
+                params.add(user.getFullName());
+            }
+        } catch (NumberFormatException e) {
+            sql.append(" AND cf.CreatedBy LIKE ?");
+            params.add("%" + employeeId + "%");
+        }
+    }
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            stmt.setObject(i + 1, params.get(i));
+        }
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        }
+    }
+    return 0;
+}
+
+
+// Thêm method này vào CashFlowDAO
+public BigDecimal getTotalOutcomeAmount(String dbName, String dateFrom, String dateTo, String branchId, String employeeId) throws SQLException {
+    StringBuilder sql = new StringBuilder("""
+    SELECT COALESCE(SUM(cf.Amount), 0) as totalAmount
+    FROM CashFlows cf
+    LEFT JOIN Branches b ON cf.BranchID = b.BranchID
+    WHERE cf.FlowType = 'OUTCOME'
+    """);
+
+    List<Object> params = new ArrayList<>();
+
+    if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+        sql.append(" AND cf.CreatedAt >= ?");
+        params.add(dateFrom + " 00:00:00");
+    }
+
+    if (dateTo != null && !dateTo.trim().isEmpty()) {
+        sql.append(" AND cf.CreatedAt <= ?");
+        params.add(dateTo + " 23:59:59");
+    }
+
+    if (branchId != null && !branchId.trim().isEmpty()) {
+        sql.append(" AND cf.BranchID = ?");
+        params.add(Integer.parseInt(branchId));
+    }
+
+    if (employeeId != null && !employeeId.trim().isEmpty()) {
+        try {
+            int userIdFilter = Integer.parseInt(employeeId);
+            User user = UserDAO.getUserById(userIdFilter, dbName);
+            if (user != null) {
+                sql.append(" AND cf.CreatedBy = ?");
+                params.add(user.getFullName());
+            }
+        } catch (NumberFormatException e) {
+            sql.append(" AND cf.CreatedBy LIKE ?");
+            params.add("%" + employeeId + "%");
+        }
+    }
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            stmt.setObject(i + 1, params.get(i));
+        }
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getBigDecimal("totalAmount");
+            }
+        }
+    }
+    return BigDecimal.ZERO;
+}
+
+
 
 }

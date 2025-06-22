@@ -64,10 +64,10 @@
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="so-invoices" class="dropdown-item">Đơn hàng</a>
-                            <a href="#" class="dropdown-item">Nhập hàng</a>
-                            <a href="#" class="dropdown-item">Yêu cầu nhập hàng</a>
-                        </div>
+    <a href="so-invoices?reportType=income" class="dropdown-item">Doanh Thu thuần</a>
+    <a href="so-invoices?reportType=outcome" class="dropdown-item">Khoảng chi</a>
+</div>
+
                     </div>
                 </nav>
 

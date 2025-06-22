@@ -9,15 +9,17 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import model.Branch;
 import model.CashFlowReportDTO;
 import model.User;
+import util.Validate;
 
-@WebServlet(name = "SOInvoicesController", urlPatterns = {"/so-invoices"})
-public class SOInvoicesController extends HttpServlet {
+@WebServlet(name = "SOOutcomeController", urlPatterns = {"/so-outcome"})
+public class SOOutcomeController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -36,14 +38,11 @@ public class SOInvoicesController extends HttpServlet {
             // Load danh sách chi nhánh
             List<Branch> branchList = branchDAO.getAllBranches(dbName);
             List<User> employeeList = new ArrayList<>();
-            
-            // Sửa lại: Sử dụng hàm có sẵn trong UserDAO
+
             if (branchId != null && !branchId.isEmpty() && !branchId.equals("")) {
-                employeeList = userDAO.getStaffsByBranchID(Integer.parseInt(branchId), dbName);
+                employeeList = userDAO.getStaffsByBranchIDForOutcome(Integer.parseInt(branchId), dbName);
             }
             request.setAttribute("branchList", branchList);
-            
-           
 
             // Phân trang
             int currentPage = 1;
@@ -66,27 +65,30 @@ public class SOInvoicesController extends HttpServlet {
             // Tính offset
             int offset = (currentPage - 1) * recordsPerPage;
 
-            // Lấy dữ liệu với filter
-            List<CashFlowReportDTO> incomeList = dao.getIncomeCashFlowReports(dbName, offset, recordsPerPage,
+            // Lấy dữ liệu outcome
+            List<CashFlowReportDTO> outcomeList = dao.getOutcomeCashFlowReports(dbName, offset, recordsPerPage,
                     dateFrom, dateTo, branchId, employeeId);
 
             // Lấy tổng số bản ghi
-            int totalRecords = dao.getTotalIncomeCashFlowCount(dbName, dateFrom, dateTo, branchId, employeeId);
+            int totalRecords = dao.getTotalOutcomeCashFlowCount(dbName, dateFrom, dateTo, branchId, employeeId);
+
+            // Lấy tổng amount của tất cả các trang
+      
+            String totalOutcomeAmount  = String.valueOf(dao.getTotalOutcomeAmount(dbName, dateFrom, dateTo, branchId, employeeId));
 
             // Tính toán phân trang
             int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
             int startRecord = offset + 1;
             int endRecord = Math.min(offset + recordsPerPage, totalRecords);
-            
-            
-             
-            System.out.println("Nhan vien theo chi nhanh");
+
+            System.out.println("Outcome Controller - Nhan vien theo chi nhanh");
             for (User user : employeeList) {
                 System.out.println(user.toString());
             }
+            
 
             // Set attributes
-            request.setAttribute("incomeList", incomeList);
+            request.setAttribute("outcomeList", outcomeList);
             request.setAttribute("currentPage", currentPage);
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("totalRecords", totalRecords);
@@ -95,6 +97,7 @@ public class SOInvoicesController extends HttpServlet {
             request.setAttribute("endRecord", endRecord);
 
             // Set filter parameters
+            request.setAttribute("totalOutcomeAmount", Validate.formatCostPriceToVND(totalOutcomeAmount));
             request.setAttribute("employeeList", employeeList);
             request.setAttribute("branchId", branchId);
             request.setAttribute("employeeId", employeeId);
@@ -109,10 +112,9 @@ public class SOInvoicesController extends HttpServlet {
             request.setAttribute("error", "Tham số không hợp lệ: " + e.getMessage());
         }
 
-        request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/invoices.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/outcome-report.jsp").forward(request, response);
     }
 
-    // THÊM CÁC PHƯƠNG THỨC NÀY ĐỂ SỬA LỖI
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -127,6 +129,6 @@ public class SOInvoicesController extends HttpServlet {
 
     @Override
     public String getServletInfo() {
-        return "SO Invoices Controller";
+        return "SO Outcome Controller";
     }
 }

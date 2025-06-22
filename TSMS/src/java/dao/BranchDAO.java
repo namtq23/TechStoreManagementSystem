@@ -62,7 +62,42 @@ public class BranchDAO {
         
         return branches;    
     }
-     
+        
+        
+      //lấy ra thông tin BracnhByID  
+     public Branch getBranchById(int branchId, String dbName) throws SQLException {
+    String sql = """
+        SELECT 
+            BranchID,
+            BranchName,
+            Address,
+            Phone,
+            IsActive
+        FROM Branches 
+        WHERE BranchID = ? 
+          AND IsActive = 1
+    """;
+    
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+        
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                Branch branch = new Branch();
+                branch.setBranchId(rs.getInt("BranchID"));
+                branch.setBranchName(rs.getString("BranchName"));
+                branch.setAddress(rs.getString("Address"));
+                branch.setPhone(rs.getString("Phone"));
+                branch.setIsActive(rs.getInt("IsActive"));
+                return branch;
+            }
+        }
+    }
+    return null; // Không tìm thấy chi nhánh
+}
+
      
      public static void main(String[] args) throws SQLException {
         List<Branch> branches = BranchDAO.getBranchList("DTB_Bm");
