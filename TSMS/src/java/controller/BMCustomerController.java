@@ -28,7 +28,7 @@ public class BMCustomerController extends HttpServlet {
             return;
         }
 
-        int roleId = Integer.parseInt(userIdObj.toString());
+        int roleId = Integer.parseInt(roleIdObj.toString());
         if (roleId != 1) {
             resp.sendRedirect("login");
             return;
