@@ -9,13 +9,6 @@
 <%@ page import="util.Validate" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
-
-
-
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -28,7 +21,7 @@
     </head>
     <body>
         <!-- Header -->
-         <header class="header">
+        <header class="header">
             <div class="header-container">
                 <div class="logo">
                     <a href="bm-overview" class="logo">
@@ -37,16 +30,16 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="bm-overview" class="nav-item ">
+                    <a href="bm-overview" class="nav-item">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
-                    
+
                     <a href="bm-products?page=1" class="nav-item">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
-                    
+
                     <div class="nav-item dropdown">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
@@ -59,7 +52,7 @@
                             <a href="#" class="dropdown-item">Yêu cầu nhập hàng</a>
                         </div>
                     </div>
-                    
+
                     <div class="nav-item dropdown active">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-handshake"></i>
@@ -71,7 +64,7 @@
                             <a href="bm-supplier" class="dropdown-item">Nhà cung cấp</a>
                         </div>
                     </div>
-                    
+
                     <div class="nav-item dropdown">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-users"></i>
@@ -83,7 +76,7 @@
                             <a href="#" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
-                    
+
                     <div class="nav-item dropdown">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-chart-bar"></i>
@@ -97,7 +90,7 @@
                             <a href="#" class="dropdown-item">Khách hàng</a>
                         </div>
                     </div>
-                    
+
                     <a href="bm-cart" class="nav-item">
                         <i class="fas fa-cash-register"></i>
                         Bán hàng
@@ -126,26 +119,26 @@
                         <h3>Trạng thái khách hàng</h3>
                         <i class="fas fa-chevron-up"></i>
                     </div>
-                    
+
                     <div class="filter-content">
 
                         <form action="bm-customer" method="get">
-                          <label class="checkbox-item">
-                          <input type="radio" name="top" value="" 
-                   <%= request.getParameter("top") == null ? "checked" : "" %>>
-                 <span>Tổng hợp</span><br>
-                  </label>
-                  <label class="checkbox-item">
-                  <input type="radio" name="top" value="true" 
-               <%= "true".equals(request.getParameter("top")) ? "checked" : "" %>>
-                     <span>Tiềm năng</span><br>
-                 </label>
-    
-                       <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
-                </form>
+                            <label class="checkbox-item">
+                                <input type="radio" name="top" value="" 
+                                       <%= request.getParameter("top") == null ? "checked" : "" %>>
+                                <span>Tổng hợp</span><br>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="top" value="true" 
+                                       <%= "true".equals(request.getParameter("top")) ? "checked" : "" %>>
+                                <span>Tiềm năng</span><br>
+                            </label>
+
+                            <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
+                        </form>
 
                     </div>
-                                
+
                 </div>
                 <div class="filter-section">
                     <div class="filter-header">
@@ -201,168 +194,162 @@
                         </button>
                     </div>
                 </div>
-<!-- Products Table -->
-<div class="table-container">
-    <table class="products-table table table-bordered">
-        <thead class="table-light">
-            <tr>
-                <th>Mã Khách Hàng</th>
-                <th>Tên Khách hàng</th>
-                <th>Số Điện Thoại</th>
-                <th>Gmail</th>
-                <th>Địa Chỉ</th>
-                <th>Giới Tính</th>
-                <th>Tổng tiền đã chi</th>
-                <th>Ngày tạo thông tin</th>
-            </tr>
-        </thead>
-        <tbody>
-        <c:forEach var="customer" items="${customers}" varStatus="loop">
-            <!-- Dòng chính -->
-            <tr onclick="toggleDetails(${loop.index})" style="cursor: pointer;">
-                <td>${customer.customerId}</td>
-                <td>${customer.fullName}</td>
-                <td>${customer.phoneNumber}</td>
-                <td>${customer.email}</td>
-                <td>${customer.address}</td>
-                <td>${customer.gender ? 'Nam' : 'Nữ'}</td>
-                <td><fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true"/> ₫</td>
-                <td>${customer.createdAt}</td>
-            </tr>
+                <!-- Products Table -->
+                <div class="table-container">
+                    <table class="products-table table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã Khách Hàng</th>
+                                <th>Tên Khách hàng</th>
+                                <th>Số Điện Thoại</th>
+                                <th>Gmail</th>
+                                <th>Địa Chỉ</th>
+                                <th>Giới Tính</th>
+                                <th>Tổng tiền đã chi</th>
+                                <th>Ngày tạo thông tin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="customer" items="${customers}" varStatus="loop">
+                                <!-- Dòng chính -->
+                                <tr onclick="toggleDetails(${loop.index})" style="cursor: pointer;">
+                                    <td>${customer.customerId}</td>
+                                    <td>${customer.fullName}</td>
+                                    <td>${customer.phoneNumber}</td>
+                                    <td>${customer.email}</td>
+                                    <td>${customer.address}</td>
+                                    <td>${customer.gender ? 'Nam' : 'Nữ'}</td>
+                                    <td><fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true"/> ₫</td>
+                                    <td>${customer.createdAt}</td>
+                                </tr>
 
-            <!-- Dòng chi tiết ẩn -->
-            <tr id="details-${loop.index}" class="detail-row" style="display: none;">
-                <td colspan="8">
-                    <div class="border rounded p-3 bg-light">
-                        <!-- Tabs -->
-                        <ul class="nav nav-tabs mb-3">
-                            <li class="nav-item">
-                                <a class="nav-link active" data-bs-toggle="tab" href="#info-${loop.index}">Thông tin</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-bs-toggle="tab" href="#address-${loop.index}">Địa chỉ nhận hàng</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-bs-toggle="tab" href="#debt-${loop.index}">Nợ cần thu từ khách</a>
-                            </li>
-                        </ul>
+                                <!-- Dòng chi tiết ẩn -->
+                                <tr id="details-${loop.index}" class="detail-row" style="display: none;">
+                                    <td colspan="8">
+                                        <div class="border rounded p-3 bg-light">
+                                            <!-- Tabs -->
+                                            <ul class="nav nav-tabs mb-3">
+                                                <li class="nav-item">
+                                                    <a class="nav-link active" data-bs-toggle="tab" href="#info-${loop.index}">Thông tin</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" data-bs-toggle="tab" href="#address-${loop.index}">Địa chỉ nhận hàng</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" data-bs-toggle="tab" href="#debt-${loop.index}">Nợ cần thu từ khách</a>
+                                                </li>
+                                            </ul>
 
-                        <div class="tab-content">
-                            <!-- Tab Thông tin -->
-                            <div class="tab-pane fade show active" id="info-${loop.index}">
-                                <div class="row">
-                                    <!-- Ảnh -->
-                                    <div class="col-md-3 text-center">
-                                        <img src="https://via.placeholder.com/250x250?text=Ảnh" class="img-fluid border rounded" alt="Avatar" />
-                                    </div>
-                                    <!-- Thông tin -->
-                                    <div class="col-md-9">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <p><strong>Mã KH:</strong> ${customer.customerId}</p>
-                                                <p><strong>Tên khách:</strong> ${customer.fullName}</p>
-                                                <p><strong>Email:</strong> ${customer.email}</p>
-                                                <p><strong>Giới tính:</strong> ${customer.gender ? 'Nam' : 'Nữ'}</p>
+                                            <div class="tab-content">
+                                                <!-- Tab Thông tin -->
+                                                <div class="tab-pane fade show active" id="info-${loop.index}">
+                                                    <div class="row">
+                                                        <!-- Ảnh -->
+                                                        <div class="col-md-3 text-center">
+                                                            <img src="https://via.placeholder.com/250x250?text=Ảnh" class="img-fluid border rounded" alt="Avatar" />
+                                                        </div>
+                                                        <!-- Thông tin -->
+                                                        <div class="col-md-9">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <p><strong>Mã KH:</strong> ${customer.customerId}</p>
+                                                                    <p><strong>Tên khách:</strong> ${customer.fullName}</p>
+                                                                    <p><strong>Email:</strong> ${customer.email}</p>
+                                                                    <p><strong>Giới tính:</strong> ${customer.gender ? 'Nam' : 'Nữ'}</p>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <p><strong>SĐT:</strong> ${customer.phoneNumber}</p>
+                                                                    <p><strong>Địa chỉ:</strong> ${customer.address}</p>
+                                                                    <p><strong>Ngày tạo:</strong> ${customer.createdAt}</p>
+                                                                    <p><strong>Tổng chi tiêu:</strong> <fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true"/> ₫</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Tab Địa chỉ -->
+                                                <div class="tab-pane fade" id="address-${loop.index}">
+                                                    <p>Chưa có dữ liệu địa chỉ nhận hàng.</p>
+                                                </div>
+
+                                                <!-- Tab Nợ -->
+                                                <div class="tab-pane fade" id="debt-${loop.index}">
+                                                    <p>Chưa có dữ liệu công nợ.</p>
+                                                </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <p><strong>SĐT:</strong> ${customer.phoneNumber}</p>
-                                                <p><strong>Địa chỉ:</strong> ${customer.address}</p>
-                                                <p><strong>Ngày tạo:</strong> ${customer.createdAt}</p>
-                                                <p><strong>Tổng chi tiêu:</strong> <fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true"/> ₫</p>
+
+                                            <!-- Nút hành động -->
+                                            <div class="mt-3 d-flex gap-2 justify-content-start flex-wrap">
+                                                <button class="btn btn-success">
+                                                    <i class="bi bi-check-circle"></i> Cập nhật
+                                                </button>
+                                                <button class="btn btn-danger">
+                                                    <i class="bi bi-lock-fill"></i> Ngừng hoạt động
+                                                </button>
+                                                <button class="btn btn-danger">
+                                                    <i class="bi bi-trash"></i> Xóa
+                                                </button>
                                             </div>
+
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </div>
 
-                            <!-- Tab Địa chỉ -->
-                            <div class="tab-pane fade" id="address-${loop.index}">
-                                <p>Chưa có dữ liệu địa chỉ nhận hàng.</p>
-                            </div>
-
-                            <!-- Tab Nợ -->
-                            <div class="tab-pane fade" id="debt-${loop.index}">
-                                <p>Chưa có dữ liệu công nợ.</p>
-                            </div>
-                        </div>
-
-                        <!-- Nút hành động -->
-<div class="mt-3 d-flex gap-2 justify-content-start flex-wrap">
-    <button class="btn btn-success">
-        <i class="bi bi-check-circle"></i> Cập nhật
-    </button>
-    <button class="btn btn-danger">
-        <i class="bi bi-lock-fill"></i> Ngừng hoạt động
-    </button>
-    <button class="btn btn-danger">
-        <i class="bi bi-trash"></i> Xóa
-    </button>
-</div>
-
+                <!-- Pagination -->
+                <div class="pagination-container mt-3 d-flex justify-content-between align-items-center">
+                    <div class="pagination-info">
+                        Hiển thị ${startCustomer} - ${endCustomer} / Tổng số ${totalProducts} Khách hàng
                     </div>
-                </td>
-            </tr>
-        </c:forEach>
-        </tbody>
-    </table>
-</div>
+                    <div class="pagination">
+                        <a href="bm-customer?page=1" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="bm-customer?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <a href="bm-customer?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                        </c:forEach>
+                        <a href="bm-customer?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="bm-customer?page=${totalPages}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </div>
+                </div>
 
-<!-- Pagination -->
-<div class="pagination-container mt-3 d-flex justify-content-between align-items-center">
-    <div class="pagination-info">
-        Hiển thị ${startCustomer} - ${endCustomer} / Tổng số ${totalProducts} Khách hàng
-    </div>
-    <div class="pagination">
-        <a href="bm-customer?page=1" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
-            <i class="fas fa-angle-double-left"></i>
-        </a>
-        <a href="bm-customer?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
-            <i class="fas fa-angle-left"></i>
-        </a>
-        <c:forEach begin="1" end="${totalPages}" var="i">
-            <a href="bm-customer?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
-        </c:forEach>
-        <a href="bm-customer?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
-            <i class="fas fa-angle-right"></i>
-        </a>
-        <a href="bm-customer?page=${totalPages}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
-            <i class="fas fa-angle-double-right"></i>
-        </a>
-    </div>
-</div>
+                <!-- Scripts -->
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <script>
+                                    function toggleDetails(index) {
+                                        $(".detail-row").not("#details-" + index).hide(); // Ẩn các dòng chi tiết khác
+                                        $("#details-" + index).fadeToggle(200);
+                                    }
 
-<!-- Support Chat Button -->
-<div class="support-chat mt-4">
-    <i class="fas fa-headset"></i>
-    <span>Hỗ trợ: 1900 9999</span>
-</div>
+                                    // Dropdown xử lý menu (giữ nguyên)
+                                    const toggle = document.getElementById("dropdownToggle");
+                                    const menu = document.getElementById("dropdownMenu");
 
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    function toggleDetails(index) {
-        $(".detail-row").not("#details-" + index).hide(); // Ẩn các dòng chi tiết khác
-        $("#details-" + index).fadeToggle(200);
-    }
+                                    toggle?.addEventListener("click", function (e) {
+                                        e.preventDefault();
+                                        menu.style.display = menu.style.display === "block" ? "none" : "block";
+                                    });
 
-    // Dropdown xử lý menu (giữ nguyên)
-    const toggle = document.getElementById("dropdownToggle");
-    const menu = document.getElementById("dropdownMenu");
-
-    toggle?.addEventListener("click", function (e) {
-        e.preventDefault();
-        menu.style.display = menu.style.display === "block" ? "none" : "block";
-    });
-
-    document.addEventListener("click", function (e) {
-        if (!toggle?.contains(e.target) && !menu?.contains(e.target)) {
-            menu.style.display = "none";
-        }
-    });
-</script>
+                                    document.addEventListener("click", function (e) {
+                                        if (!toggle?.contains(e.target) && !menu?.contains(e.target)) {
+                                            menu.style.display = "none";
+                                        }
+                                    });
+                </script>
 
 
-       
 
-</html>
+
+                </html>
 
