@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-
 package controller;
 
 import dao.UserDAO;
@@ -21,7 +20,7 @@ import model.User;
  *
  * @author admin
  */
-@WebServlet(name="BMEmployeeController", urlPatterns={"/bm-staff"})
+@WebServlet(name = "BMEmployeeController", urlPatterns = {"/bm-staff"})
 public class BMStaffController extends HttpServlet {
 
     @Override
@@ -43,6 +42,11 @@ public class BMStaffController extends HttpServlet {
             String dbName = dbNameObj.toString();
             int branchId = Integer.parseInt(branchIdObj.toString());
 
+            if (roleId != 1) {
+                resp.sendRedirect("login");
+                return;
+            }
+
             UserDAO userDAO = new UserDAO();
             List<User> staffs = userDAO.getStaffsByBranchID(branchId, dbName);
             req.setAttribute("staffs", staffs);
@@ -51,7 +55,5 @@ public class BMStaffController extends HttpServlet {
             System.out.println(e);
         }
     }
-    
-    
 
 }
