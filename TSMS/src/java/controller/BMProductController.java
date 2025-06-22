@@ -44,7 +44,8 @@ public class BMProductController extends HttpServlet {
                 return;
             }
 
-            int roleId = Integer.parseInt(userIdObj.toString());
+            int roleId = Integer.parseInt(roleIdObj.toString());
+            System.out.println("roleID-authen: " + roleId);
             if (roleId != 1) {
                 resp.sendRedirect("login");
                 return;
