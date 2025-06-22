@@ -16,6 +16,15 @@ public class CashFlowReportDTO {
     private String createdByName;
     private int customerID;
     private String customerName;
+    private String category;
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
     
     // Thêm các field formatted (tùy chọn)
     private String formattedAmount;

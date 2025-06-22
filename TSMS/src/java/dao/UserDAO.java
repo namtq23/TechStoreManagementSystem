@@ -384,29 +384,27 @@ public class UserDAO {
         return user;
     }
     
-    // Thêm vào UserDAO.java
-public List<User> getSalesStaffByBranch(String dbName, int branchId) throws SQLException {
-    List<User> salesStaff = new ArrayList<>();
-    String sql = """
-        SELECT u.*, r.RoleName
-        FROM Users u
-        JOIN Roles r ON u.RoleID = r.RoleID
-        WHERE u.RoleID = 2 AND u.BranchID = ? AND u.IsActive = 1
-        ORDER BY u.FullName
+   
+  public List<User> getStaffsByBranchIDForOutcome(int branchId, String dbName) throws SQLException {
+        List<User> staffs = new ArrayList<>();
+
+        String sql = """
+        SELECT * FROM Users 
+        WHERE BranchID = ? AND RoleID IN (1, 2,0) AND IsActive = 1
+        ORDER BY RoleID, FullName
     """;
-    
-    try (Connection conn = DBUtil.getConnectionTo(dbName);
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-        stmt.setInt(1, branchId);
-        try (ResultSet rs = stmt.executeQuery()) {
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, branchId);
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                User user = extractUserFromResultSet(rs);
-                salesStaff.add(user);
+                User staff = extractUserFromResultSet(rs);
+                staffs.add(staff);
             }
         }
+
+        return staffs;
     }
-    return salesStaff;
-}
 
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
