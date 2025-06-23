@@ -1,5 +1,6 @@
 package controller;
 
+import dao.CategoryDAO;
 import dao.ProductDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -22,6 +23,7 @@ import util.Validate;
 public class SalepageController extends HttpServlet {
 
     ProductDAO p = new ProductDAO();
+    CategoryDAO c = new CategoryDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -58,7 +60,7 @@ public class SalepageController extends HttpServlet {
 
             doPost(req, resp, offset, pageSize);
 
-            List<Category> categories = p.getAllCategories(dbName);
+            List<Category> categories = c.getAllCategories(dbName);
             req.setAttribute("categories", categories);
             req.setAttribute("currentPage", page);
             req.getRequestDispatcher("/WEB-INF/jsp/sale/products.jsp").forward(req, resp);
