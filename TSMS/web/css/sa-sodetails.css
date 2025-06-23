@@ -36,10 +36,11 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
 }
 
 .details-container {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
   margin-top: 24px;
+}
+
+.details-card{
+    margin-bottom: 24px;
 }
 
 .details-card,

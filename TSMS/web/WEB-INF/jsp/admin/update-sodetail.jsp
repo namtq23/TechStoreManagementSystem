@@ -1,6 +1,6 @@
 <%-- 
-    Document   : sa-sodetails
-    Created on : Jun 1, 2025, 5:18:16 PM
+    Document   : update-sodetail
+    Created on : Jun 22, 2025, 11:19:55 PM
     Author     : admin
 --%>
 
@@ -16,8 +16,12 @@
         <title>Chi tiết chủ cửa hàng - TSMS</title>
         <link rel="stylesheet" type="text/css" href="css/sa-home.css">
         <link rel="stylesheet" type="text/css" href="css/sa-sodetails.css">
+        <link rel="stylesheet" type="text/css" href="css/sa-update-so-detail.css">
     </head>
     <body>
+        <%
+        ShopOwnerDTO shopOwner = (ShopOwnerDTO) request.getAttribute("shopOwner");
+        %>
         <div class="container">
             <!-- Header -->
             <div class="header">
@@ -33,13 +37,14 @@
                     <div class="breadcrumb">
                         <a href="sa-home" class="breadcrumb-link">Quản lý người dùng</a>
                         <span class="breadcrumb-separator">></span>
-                        <span class="breadcrumb-current">Chi tiết chủ cửa hàng</span>
+                        <a href="sa-sodetails?id=<%= shopOwner.getOwnerId() %>" class="breadcrumb-link">Chi tiết chủ cửa hàng</a>
+                        <span class="breadcrumb-separator">></span>
+                        <span class="breadcrumb-current">Chỉnh sửa thông tin chủ cửa hàng</span>
                     </div>
                     <h1 class="page-title">Chi tiết chủ cửa hàng</h1>
                 </div>
 
                 <%
-                ShopOwnerDTO shopOwner = (ShopOwnerDTO) request.getAttribute("shopOwner");
                 if (shopOwner != null) {
                     boolean isActive = shopOwner.getIsActive() == 1;
                     String statusText = isActive ? "Hoạt động" : "Không hoạt động";
@@ -57,52 +62,30 @@
                         <div class="card-content">
                             <div class="info-grid">
                                 <div class="info-item">
-                                    <label class="info-label">ID:</label>
-                                    <span class="info-value"><%= shopOwner.getOwnerId() %></span>
-                                </div>
-                                <div class="info-item">
                                     <label class="info-label">Họ và tên:</label>
-                                    <span class="info-value"><%= shopOwner.getFullName() %></span>
+                                    <input class="info-value" value="<%= shopOwner.getFullName() %>">
                                 </div>
                                 <div class="info-item">
                                     <label class="info-label">Tên cửa hàng:</label>
-                                    <span class="info-value"><%= shopOwner.getShopName() %></span>
-                                </div>
-                                <div class="info-item">
-                                    <label class="info-label">Tên Database:</label>
-                                    <span class="info-value"><%= shopOwner.getDatabaseName() %></span>
+                                    <input class="info-value" value="<%= shopOwner.getShopName() %>">
                                 </div>
                                 <div class="info-item">
                                     <label class="info-label">Email:</label>
-                                    <span class="info-value"><%= shopOwner.getEmail() != null ? shopOwner.getEmail() : "Chưa cập nhật" %></span>
+                                    <input class="info-value" value="<%= shopOwner.getEmail() != null ? shopOwner.getEmail() : "Chưa cập nhật" %>">
                                 </div>
                                 <div class="info-item">
                                     <label class="info-label">Số điện thoại:</label>
-                                    <span class="info-value"><%= shopOwner.getPhone() != null ? shopOwner.getPhone() : "Chưa cập nhật" %></span>
-                                </div>
-                                <div class="info-item">
-                                    <label class="info-label">Ngày tạo:</label>
-                                    <span class="info-value"><%= shopOwner.getCreatedAt() != null ? Validate.formatDateTime(shopOwner.getCreatedAt()) : "Chưa cập nhật" %></span>
-                                </div>
-                                <div class="info-item">
-                                    <label class="info-label">Tình trạng tài khoản:</label>
-                                    <span class="info-value"><%= shopOwner.getStatus() %></span>
-                                </div>
-                                <div class="info-item">
-                                    <label class="info-label">Ngày thử:</label>
-                                    <span class="info-value"><%= shopOwner.getTrial() != null ? Validate.formatDateTime(shopOwner.getTrial()) : "Chưa cập nhật" %></span>
+                                    <input class="info-value" value="<%= shopOwner.getPhone() != null ? shopOwner.getPhone() : "Chưa cập nhật" %>">
                                 </div>
                                 <div class="info-item">
                                     <label class="info-label">Gói đăng ký:</label>
-                                    <span class="info-value"><%= shopOwner.getSubscription() %></span>
-                                </div>
-                                <div class="info-item">
-                                    <label class="info-label">Ngày đăng ký:</label>
-                                    <span class="info-value"><%= shopOwner.getSubscriptionStart() != null ? Validate.formatDateTime(shopOwner.getSubscriptionStart()) : "Chưa cập nhật" %></span>
-                                </div>
-                                <div class="info-item">
-                                    <label class="info-label">Ngày hết hạn:</label>
-                                    <span class="info-value"><%= shopOwner.getSubscriptionEnd() != null ? Validate.formatDateTime(shopOwner.getSubscriptionEnd()) : "Chưa cập nhật" %></span>
+                                    <select name="subscription" id="subscription">
+                                        <option disabled selected><%= shopOwner.getSubscription() %> tháng</option>
+                                        <option value="1">3 tháng</option>
+                                        <option value="2">6 tháng</option>
+                                        <option value="3">12 tháng</option>
+                                        <option value="4">24 tháng</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -114,9 +97,18 @@
                         </div>
                         <div class="card-content">
                             <div class="action-buttons">
-                                <a href="sa-soUpdate?id=<%= shopOwner.getOwnerId() %>" class="action-btn primary" style="text-decoration: none">
-                                    Chỉnh sửa thông tin
-                                </a>
+                                <% if (isActive) { %>
+                                <button class="action-btn danger" onclick="toggleStatus(<%= shopOwner.getOwnerId() %>, false)">
+                                    Chặn tài khoản
+                                </button>
+                                <% } else { %>
+                                <button class="action-btn success" onclick="toggleStatus(<%= shopOwner.getOwnerId() %>, true)">
+                                    Bỏ chặn tài khoản
+                                </button>
+                                <% } %>
+                                <button class="action-btn primary" onclick="editShopOwner(<%= shopOwner.getOwnerId() %>)" style="background-color: green">
+                                    Cập nhật
+                                </button>
                             </div>
                         </div>
                     </div>

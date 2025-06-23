@@ -26,14 +26,8 @@
             <!-- Header -->
             <div class="header">
                 <div class="logo">
-                    <a href="sa-home" style="text-decoration: none; color: #4285f4">TechStore Management System</a>
+                    <a href="sa-home" style="text-decoration: none; color: black; font-weight: bold">ADMIN</a>
                 </div>
-                <!--<div class="user-avatar">👤</div>-->
-            </div>
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <button class="sidebar-item active">Quản lý người dùng</button>
-                <button class="sidebar-item">Thông kê người dùng</button>
                 <a href="sa-logout" style="text-decoration: none"><button class="sidebar-item" style="color: red">Đăng xuất</button></a>
             </div>
 
