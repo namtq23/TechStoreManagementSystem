@@ -12,11 +12,98 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TSMS - Đơn hàng</title>
         <link rel="stylesheet" href="css/so-products.css">
+        <link rel="stylesheet" href="css/header.css">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     </head>
     <body>
-        <!-- Header -->
-        <jsp:include page="../common/header-so.jsp" />
+        <header class="header">
+            <div class="header-container">
+                <div class="logo">
+                    <a href="so-overview" class="logo">
+                        <div class="logo-icon">T</div>
+                        <span class="logo-text">TSMS</span>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="so-overview" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        Tổng quan
+                    </a>
+
+                    <a href="so-products?page=1" class="nav-item">
+                        <i class="fas fa-box"></i>
+                        Hàng hóa
+                    </a>
+
+                    <div class="nav-item dropdown active">
+                        <a href="#" class="dropdown-toggle">
+                            <i class="fas fa-exchange-alt"></i>
+                            Giao dịch
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="so-orders" class="dropdown-item">Đơn hàng</a>
+                            <a href="so-createimport" class="dropdown-item">Tạo đơn nhập hàng</a>
+                            <a href="so-ienoti" class="dropdown-item">Thông báo nhập/xuất</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="#" class="dropdown-toggle">
+                            <i class="fas fa-handshake"></i>
+                            Đối tác
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="so-customer" class="dropdown-item">Khách hàng</a>
+                            <a href="so-supplier" class="dropdown-item">Nhà cung cấp</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="#" class="dropdown-toggle">
+                            <i class="fas fa-users"></i>
+                            Nhân viên
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="so-staff" class="dropdown-item">Danh sách nhân viên</a>
+                            <a href="so-commission" class="dropdown-item">Hoa hồng</a>
+                        </div>
+                    </div>
+
+                    <a href="so-promotions" class="nav-item">
+                        <i class="fas fa-gift"></i>
+                        Khuyến mãi
+                    </a>
+
+                    <div class="nav-item dropdown">
+                        <a href="#" class="dropdown-toggle">
+                            <i class="fas fa-chart-bar"></i>
+                            Báo cáo
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="so-invoices?reportType=income" class="dropdown-item">Doanh Thu thuần</a>
+                            <a href="so-invoices?reportType=outcome" class="dropdown-item">Khoảng chi</a>
+                        </div>
+                    </div>
+
+                </nav>
+
+                <div class="header-right">
+                    <div class="user-dropdown">
+                        <a href="#" class="user-icon gradient" id="dropdownToggle">
+                            <i class="fas fa-user-circle fa-2x"></i>
+                        </a>
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="logout" class="dropdown-item">Đăng xuất</a>
+                        </div>
+                    </div>      
+                </div>
+            </div>
+        </header>
 
         <div class="main-container">
             <!-- Sidebar -->
@@ -171,23 +258,23 @@
                     <div class="pagination-info">
                         Hiển thị ${startOrder} - ${endOrder} / Tổng số ${totalOrders} đơn hàng
                     </div>
-                        <div class="pagination">
-                            <a href="so-orders?page=1${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
-                                <i class="fas fa-angle-double-left"></i>
-                            </a>
-                            <a href="so-orders?page=${currentPage - 1}${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
-                                <i class="fas fa-angle-left"></i>
-                            </a>
-                            <c:forEach begin="1" end="${totalPages}" var="i">
-                                <a href="so-orders?page=${i}${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
-                            </c:forEach>
-                            <a href="so-orders?page=${currentPage + 1}${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
-                                <i class="fas fa-angle-right"></i>
-                            </a>
-                            <a href="so-orders?page=${totalPages}${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
-                                <i class="fas fa-angle-double-right"></i>
-                            </a>
-                        </div>
+                    <div class="pagination">
+                        <a href="so-orders?page=1${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="so-orders?page=${currentPage - 1}${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <a href="so-orders?page=${i}${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                        </c:forEach>
+                        <a href="so-orders?page=${currentPage + 1}${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="so-orders?page=${totalPages}${selectedBranchID != null ? '&branchID=' += selectedBranchID : ''}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </div>
                 </div>
             </main>
         </div>

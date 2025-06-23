@@ -192,7 +192,6 @@ public class BMProductController extends HttpServlet {
             String dbName = dbNameObj.toString();
             int branchId = Integer.parseInt(branchIdObj.toString());
 
-            // --- Xử lý paging ---
             int page = 1;
             int pageSize = 10;
 
@@ -207,7 +206,6 @@ public class BMProductController extends HttpServlet {
 
             int offset = (page - 1) * pageSize;
 
-            // --- Xử lý filter ---
             String[] filterCate = req.getParameterValues("categories");
             String stockStatus = req.getParameter("inventory");
             String searchKeyStr = req.getParameter("search");
@@ -236,7 +234,6 @@ public class BMProductController extends HttpServlet {
             int totalProducts = p.getTotalProductsByFilter(dbName, branchId, filter);
             int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
 
-            // --- Build paging URL giữ lại filter ---
             StringBuilder urlBuilder = new StringBuilder("bm-products?");
             if (filterCate != null) {
                 for (String cateId : filterCate) {
@@ -267,7 +264,6 @@ public class BMProductController extends HttpServlet {
             urlBuilder.append("page=");
             String pagingURL = urlBuilder.toString();
 
-            // --- Gửi data về JSP ---
             req.setAttribute("pagingUrl", pagingURL);
             req.setAttribute("totalPages", totalPages);
             req.setAttribute("totalProducts", totalProducts);
@@ -279,12 +275,10 @@ public class BMProductController extends HttpServlet {
             req.setAttribute("recordsPerPage", pageSize);
             req.setAttribute("currentPage", page);
 
-            // Truyền filter lại để giữ giá trị input trong form
             req.setAttribute("filter", filter);
 
             req.getRequestDispatcher("/WEB-INF/jsp/manager/products.jsp").forward(req, resp);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ServletException | IOException | NumberFormatException | SQLException e) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Something went wrong.");
         }
     }
