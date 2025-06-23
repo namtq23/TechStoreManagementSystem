@@ -12,7 +12,6 @@
         <link rel="stylesheet" href="css/so-promotion.css">
         <link rel="stylesheet" href="css/header.css">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     </head>
     <body>
         <header class="header">
@@ -103,7 +102,7 @@
                 </div>
             </div>
         </header>
-        
+
         <div class="main-container">
             <!-- Sidebar -->
             <aside class="sidebar">
@@ -454,231 +453,247 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                                                                   // Tab switching functionality
-                                                                   function switchTab(tabName, buttonElement) {
-                                                                       // Remove active class from all tab buttons
-                                                                       document.querySelectorAll('.tab-button').forEach(btn => {
-                                                                           btn.classList.remove('active');
-                                                                       });
+                                                                  // Tab switching functionality
+                                                                  function switchTab(tabName, buttonElement) {
+                                                                      // Remove active class from all tab buttons
+                                                                      document.querySelectorAll('.tab-button').forEach(btn => {
+                                                                          btn.classList.remove('active');
+                                                                      });
 
-                                                                       // Add active class to clicked button
-                                                                       buttonElement.classList.add('active');
+                                                                      // Add active class to clicked button
+                                                                      buttonElement.classList.add('active');
 
-                                                                       // Hide all tab contents
-                                                                       document.querySelectorAll('.tab-content').forEach(content => {
-                                                                           content.classList.remove('active');
-                                                                       });
+                                                                      // Hide all tab contents
+                                                                      document.querySelectorAll('.tab-content').forEach(content => {
+                                                                          content.classList.remove('active');
+                                                                      });
 
-                                                                       // Show selected tab content
-                                                                       document.getElementById('tab-' + tabName).classList.add('active');
+                                                                      // Show selected tab content
+                                                                      document.getElementById('tab-' + tabName).classList.add('active');
 
-                                                                       // Filter table rows based on tab
-                                                                       filterTableByTab(tabName);
-                                                                   }
+                                                                      // Filter table rows based on tab
+                                                                      filterTableByTab(tabName);
+                                                                  }
 
 
 
-                                                                   // Initialize page
-                                                                   document.addEventListener('DOMContentLoaded', function () {
-                                                                       const today = new Date().toISOString().split('T')[0];
-                                                                       document.getElementById('startDate').min = today;
-                                                                       document.getElementById('endDate').min = today;
+                                                                  // Initialize page
+                                                                  document.addEventListener('DOMContentLoaded', function () {
+                                                                      const today = new Date().toISOString().split('T')[0];
+                                                                      document.getElementById('startDate').min = today;
+                                                                      document.getElementById('endDate').min = today;
 
-                                                                       document.getElementById('startDate').addEventListener('change', function () {
-                                                                           document.getElementById('endDate').min = this.value;
-                                                                       });
+                                                                      document.getElementById('startDate').addEventListener('change', function () {
+                                                                          document.getElementById('endDate').min = this.value;
+                                                                      });
 
-                                                                       const form = document.getElementById('createPromotionForm');
-                                                                       form.addEventListener('submit', function (event) {
-                                                                           if (!form.checkValidity()) {
-                                                                               event.preventDefault();
-                                                                               event.stopPropagation();
-                                                                           }
-                                                                           form.classList.add('was-validated');
-                                                                       });
+                                                                      const form = document.getElementById('createPromotionForm');
+                                                                      form.addEventListener('submit', function (event) {
+                                                                          if (!form.checkValidity()) {
+                                                                              event.preventDefault();
+                                                                              event.stopPropagation();
+                                                                          }
+                                                                          form.classList.add('was-validated');
+                                                                      });
 
-                                                                       const sidebarSearch = document.getElementById('searchInput');
-                                                                       const mainSearch = document.querySelector('input[name="search"]');
+                                                                      const sidebarSearch = document.getElementById('searchInput');
+                                                                      const mainSearch = document.querySelector('input[name="search"]');
 
-                                                                       if (sidebarSearch && mainSearch) {
-                                                                           sidebarSearch.addEventListener('input', function () {
-                                                                               mainSearch.value = this.value;
-                                                                           });
+                                                                      if (sidebarSearch && mainSearch) {
+                                                                          sidebarSearch.addEventListener('input', function () {
+                                                                              mainSearch.value = this.value;
+                                                                          });
 
-                                                                           mainSearch.addEventListener('input', function () {
-                                                                               sidebarSearch.value = this.value;
-                                                                           });
-                                                                       }
+                                                                          mainSearch.addEventListener('input', function () {
+                                                                              sidebarSearch.value = this.value;
+                                                                          });
+                                                                      }
 
-                                                                       const selectAll = document.getElementById('selectAll');
-                                                                       if (selectAll) {
-                                                                           selectAll.addEventListener('change', function () {
-                                                                               const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
-                                                                               checkboxes.forEach(checkbox => {
-                                                                                   checkbox.checked = this.checked;
-                                                                               });
-                                                                           });
-                                                                       }
+                                                                      const selectAll = document.getElementById('selectAll');
+                                                                      if (selectAll) {
+                                                                          selectAll.addEventListener('change', function () {
+                                                                              const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+                                                                              checkboxes.forEach(checkbox => {
+                                                                                  checkbox.checked = this.checked;
+                                                                              });
+                                                                          });
+                                                                      }
 
-                                                                       // Initialize first tab as active
-                                                                       filterTableByTab('all');
-                                                                   });
+                                                                      // Initialize first tab as active
+                                                                      filterTableByTab('all');
+                                                                  });
 
-                                                                   // Filter functions
-                                                                   function filterPromotions(categoryId) {
-                                                                       //Lấy search từ main search input thay vì searchInput không tồn tại
-                                                                       const mainSearchInput = document.querySelector('input[name="search"]');
-                                                                       const search = mainSearchInput ? mainSearchInput.value : '';
+                                                                  // Filter functions
+                                                                  function filterPromotions(categoryId) {
+                                                                      //Lấy search từ main search input thay vì searchInput không tồn tại
+                                                                      const mainSearchInput = document.querySelector('input[name="search"]');
+                                                                      const search = mainSearchInput ? mainSearchInput.value : '';
 
-                                                                       const statusFilter = document.querySelector('input[name="statusFilter"]:checked') ?
-                                                                               document.querySelector('input[name="statusFilter"]:checked').value : '';
-                                                                       const discountFilter = document.querySelector('input[name="discountFilter"]:checked') ?
-                                                                               document.querySelector('input[name="discountFilter"]:checked').value : '';
+                                                                      const statusFilter = document.querySelector('input[name="statusFilter"]:checked') ?
+                                                                              document.querySelector('input[name="statusFilter"]:checked').value : '';
+                                                                      const discountFilter = document.querySelector('input[name="discountFilter"]:checked') ?
+                                                                              document.querySelector('input[name="discountFilter"]:checked').value : '';
 
-                                                                       let url = 'so-promotions?page=1';
+                                                                      let url = 'so-promotions?page=1';
 
-                                                                       // Kiểm tra search có giá trị trước khi thêm vào URL
-                                                                       if (search && search.trim() !== '') {
-                                                                           url += '&search=' + encodeURIComponent(search.trim());
-                                                                       }
+                                                                      // Kiểm tra search có giá trị trước khi thêm vào URL
+                                                                      if (search && search.trim() !== '') {
+                                                                          url += '&search=' + encodeURIComponent(search.trim());
+                                                                      }
 
-                                                                       if (categoryId !== null && categoryId !== undefined) {
-                                                                           url += '&categoryId=' + encodeURIComponent(categoryId);
-                                                                       }
-                                                                       if (statusFilter && statusFilter !== 'all')
-                                                                           url += '&status=' + statusFilter;
-                                                                       if (discountFilter && discountFilter !== 'all')
-                                                                           url += '&discount=' + discountFilter;
+                                                                      if (categoryId !== null && categoryId !== undefined) {
+                                                                          url += '&categoryId=' + encodeURIComponent(categoryId);
+                                                                      }
+                                                                      if (statusFilter && statusFilter !== 'all')
+                                                                          url += '&status=' + statusFilter;
+                                                                      if (discountFilter && discountFilter !== 'all')
+                                                                          url += '&discount=' + discountFilter;
 
-                                                                       window.location.href = url;
-                                                                   }
-                                                                   // Auto-hide alerts
-                                                                   document.addEventListener('DOMContentLoaded', function () {
-                                                                       const alerts = document.querySelectorAll('.alert');
-                                                                       alerts.forEach(alert => {
-                                                                           setTimeout(() => {
-                                                                               if (alert.parentNode) {
-                                                                                   alert.style.transition = 'opacity 0.5s';
-                                                                                   alert.style.opacity = '0';
-                                                                                   setTimeout(() => alert.remove(), 500);
-                                                                               }
-                                                                           }, 5000);
-                                                                       });
-                                                                   });
-                                                                   // Điền dữ liệu vào modal chỉnh sửa
-                                                                   document.querySelectorAll('.update-promotion-btn').forEach(button => {
-                                                                       button.addEventListener('click', function () {
-                                                                           const modal = document.getElementById('updatePromotionModal');
-                                                                           modal.querySelector('#updatePromotionId').value = this.getAttribute('data-promotion-id');
-                                                                           modal.querySelector('#updatePromoName').value = this.getAttribute('data-promo-name');
-                                                                           modal.querySelector('#updateDiscountPercent').value = this.getAttribute('data-discount-percent');
-                                                                           modal.querySelector('#updateStartDate').value = this.getAttribute('data-start-date');
-                                                                           modal.querySelector('#updateEndDate').value = this.getAttribute('data-end-date');
-                                                                       });
-                                                                   });
+                                                                      window.location.href = url;
+                                                                  }
+                                                                  // Auto-hide alerts
+                                                                  document.addEventListener('DOMContentLoaded', function () {
+                                                                      const alerts = document.querySelectorAll('.alert');
+                                                                      alerts.forEach(alert => {
+                                                                          setTimeout(() => {
+                                                                              if (alert.parentNode) {
+                                                                                  alert.style.transition = 'opacity 0.5s';
+                                                                                  alert.style.opacity = '0';
+                                                                                  setTimeout(() => alert.remove(), 500);
+                                                                              }
+                                                                          }, 5000);
+                                                                      });
+                                                                  });
+                                                                  // Điền dữ liệu vào modal chỉnh sửa
+                                                                  document.querySelectorAll('.update-promotion-btn').forEach(button => {
+                                                                      button.addEventListener('click', function () {
+                                                                          const modal = document.getElementById('updatePromotionModal');
+                                                                          modal.querySelector('#updatePromotionId').value = this.getAttribute('data-promotion-id');
+                                                                          modal.querySelector('#updatePromoName').value = this.getAttribute('data-promo-name');
+                                                                          modal.querySelector('#updateDiscountPercent').value = this.getAttribute('data-discount-percent');
+                                                                          modal.querySelector('#updateStartDate').value = this.getAttribute('data-start-date');
+                                                                          modal.querySelector('#updateEndDate').value = this.getAttribute('data-end-date');
+                                                                      });
+                                                                  });
 
-                                                                   // Chức năng xóa tất cả
-                                                                   function updateDeleteAllButton() {
-                                                                       const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
-                                                                       const totalBoxes = document.querySelectorAll('.product-checkbox');
-                                                                       const deleteAllButton = document.getElementById('deleteAllButton');
+                                                                  // Chức năng xóa tất cả
+                                                                  function updateDeleteAllButton() {
+                                                                      const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+                                                                      const totalBoxes = document.querySelectorAll('.product-checkbox');
+                                                                      const deleteAllButton = document.getElementById('deleteAllButton');
 
-                                                                       if (deleteAllButton) {
-                                                                           if (checkedBoxes.length === totalBoxes.length && totalBoxes.length > 0) {
-                                                                               // Tất cả được chọn - hiển thị nút "Xóa tất cả"
-                                                                               deleteAllButton.style.display = 'inline-block';
-                                                                               deleteAllButton.innerHTML = '<i class="fas fa-trash-alt"></i> Xóa tất cả (' + totalBoxes.length + ')';
-                                                                           } else if (checkedBoxes.length > 0) {
-                                                                               // Một phần được chọn - hiển thị nút "Xóa được chọn"
-                                                                               deleteAllButton.style.display = 'inline-block';
-                                                                               deleteAllButton.innerHTML = '<i class="fas fa-trash"></i> Xóa đã chọn (' + checkedBoxes.length + ')';
-                                                                           } else {
-                                                                               // Không có gì được chọn - ẩn nút
-                                                                               deleteAllButton.style.display = 'none';
-                                                                           }
-                                                                       }
-                                                                   }
+                                                                      if (deleteAllButton) {
+                                                                          if (checkedBoxes.length === totalBoxes.length && totalBoxes.length > 0) {
+                                                                              // Tất cả được chọn - hiển thị nút "Xóa tất cả"
+                                                                              deleteAllButton.style.display = 'inline-block';
+                                                                              deleteAllButton.innerHTML = '<i class="fas fa-trash-alt"></i> Xóa tất cả (' + totalBoxes.length + ')';
+                                                                          } else if (checkedBoxes.length > 0) {
+                                                                              // Một phần được chọn - hiển thị nút "Xóa được chọn"
+                                                                              deleteAllButton.style.display = 'inline-block';
+                                                                              deleteAllButton.innerHTML = '<i class="fas fa-trash"></i> Xóa đã chọn (' + checkedBoxes.length + ')';
+                                                                          } else {
+                                                                              // Không có gì được chọn - ẩn nút
+                                                                              deleteAllButton.style.display = 'none';
+                                                                          }
+                                                                      }
+                                                                  }
 
-                                                                   // Xử lý xóa tất cả
-                                                                   function deleteAllPromotions() {
-                                                                       const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
-                                                                       if (checkedBoxes.length === 0) {
-                                                                           alert('Vui lòng chọn ít nhất một khuyến mãi để xóa!');
-                                                                           return;
-                                                                       }
+                                                                  // Xử lý xóa tất cả
+                                                                  function deleteAllPromotions() {
+                                                                      const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+                                                                      if (checkedBoxes.length === 0) {
+                                                                          alert('Vui lòng chọn ít nhất một khuyến mãi để xóa!');
+                                                                          return;
+                                                                      }
 
-                                                                       const confirmMessage = `Bạn có chắc chắn muốn xóa khuyến mãi đã chọn?\nHành động này không thể hoàn tác.`;
-                                                                       if (!confirm(confirmMessage))
-                                                                           return;
+                                                                      const confirmMessage = `Bạn có chắc chắn muốn xóa khuyến mãi đã chọn?\nHành động này không thể hoàn tác.`;
+                                                                      if (!confirm(confirmMessage))
+                                                                          return;
 
-                                                                       const form = document.createElement('form');
-                                                                       form.method = 'POST';
-                                                                       form.action = 'so-promotions';
+                                                                      const form = document.createElement('form');
+                                                                      form.method = 'POST';
+                                                                      form.action = 'so-promotions';
 
-                                                                       const actionInput = document.createElement('input');
-                                                                       actionInput.type = 'hidden';
-                                                                       actionInput.name = 'action';
-                                                                       actionInput.value = 'deleteSelected';
-                                                                       form.appendChild(actionInput);
+                                                                      const actionInput = document.createElement('input');
+                                                                      actionInput.type = 'hidden';
+                                                                      actionInput.name = 'action';
+                                                                      actionInput.value = 'deleteSelected';
+                                                                      form.appendChild(actionInput);
 
-                                                                       checkedBoxes.forEach(checkbox => {
-                                                                           const row = checkbox.closest('tr');
-                                                                           const promotionId = row.querySelector('td:nth-child(3) strong').textContent.trim();
-                                                                           const idInput = document.createElement('input');
-                                                                           idInput.type = 'hidden';
-                                                                           idInput.name = 'promotionIds';
-                                                                           idInput.value = promotionId;
-                                                                           form.appendChild(idInput);
-                                                                       });
+                                                                      checkedBoxes.forEach(checkbox => {
+                                                                          const row = checkbox.closest('tr');
+                                                                          const promotionId = row.querySelector('td:nth-child(3) strong').textContent.trim();
+                                                                          const idInput = document.createElement('input');
+                                                                          idInput.type = 'hidden';
+                                                                          idInput.name = 'promotionIds';
+                                                                          idInput.value = promotionId;
+                                                                          form.appendChild(idInput);
+                                                                      });
 
-                                                                       document.body.appendChild(form);
-                                                                       form.submit();
-                                                                   }
+                                                                      document.body.appendChild(form);
+                                                                      form.submit();
+                                                                  }
 
-                                                                   // Cập nhật các event listeners hiện tại
-                                                                   document.addEventListener('DOMContentLoaded', function () {
-                                                                       const selectAll = document.getElementById('selectAll');
-                                                                       const promotionCheckboxes = document.querySelectorAll('.product-checkbox');
+                                                                  // Cập nhật các event listeners hiện tại
+                                                                  document.addEventListener('DOMContentLoaded', function () {
+                                                                      const selectAll = document.getElementById('selectAll');
+                                                                      const promotionCheckboxes = document.querySelectorAll('.product-checkbox');
 
-                                                                       // Cập nhật xử lý select all
-                                                                       if (selectAll) {
-                                                                           selectAll.addEventListener('change', function () {
-                                                                               promotionCheckboxes.forEach(checkbox => {
-                                                                                   checkbox.checked = this.checked;
-                                                                               });
-                                                                               updateDeleteAllButton(); // Thêm dòng này
-                                                                           });
-                                                                       }
+                                                                      // Cập nhật xử lý select all
+                                                                      if (selectAll) {
+                                                                          selectAll.addEventListener('change', function () {
+                                                                              promotionCheckboxes.forEach(checkbox => {
+                                                                                  checkbox.checked = this.checked;
+                                                                              });
+                                                                              updateDeleteAllButton(); // Thêm dòng này
+                                                                          });
+                                                                      }
 
-                                                                       // Cập nhật xử lý từng checkbox
-                                                                       promotionCheckboxes.forEach(checkbox => {
-                                                                           checkbox.addEventListener('change', function () {
-                                                                               // Cập nhật trạng thái select all
-                                                                               const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
-                                                                               const totalBoxes = document.querySelectorAll('.product-checkbox');
+                                                                      // Cập nhật xử lý từng checkbox
+                                                                      promotionCheckboxes.forEach(checkbox => {
+                                                                          checkbox.addEventListener('change', function () {
+                                                                              // Cập nhật trạng thái select all
+                                                                              const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+                                                                              const totalBoxes = document.querySelectorAll('.product-checkbox');
 
-                                                                               if (selectAll) {
-                                                                                   if (checkedBoxes.length === 0) {
-                                                                                       selectAll.indeterminate = false;
-                                                                                       selectAll.checked = false;
-                                                                                   } else if (checkedBoxes.length === totalBoxes.length) {
-                                                                                       selectAll.indeterminate = false;
-                                                                                       selectAll.checked = true;
-                                                                                   } else {
-                                                                                       selectAll.indeterminate = true;
-                                                                                       selectAll.checked = false;
-                                                                                   }
-                                                                               }
+                                                                              if (selectAll) {
+                                                                                  if (checkedBoxes.length === 0) {
+                                                                                      selectAll.indeterminate = false;
+                                                                                      selectAll.checked = false;
+                                                                                  } else if (checkedBoxes.length === totalBoxes.length) {
+                                                                                      selectAll.indeterminate = false;
+                                                                                      selectAll.checked = true;
+                                                                                  } else {
+                                                                                      selectAll.indeterminate = true;
+                                                                                      selectAll.checked = false;
+                                                                                  }
+                                                                              }
 
-                                                                               updateDeleteAllButton(); // Thêm dòng này
-                                                                           });
-                                                                       });
+                                                                              updateDeleteAllButton(); // Thêm dòng này
+                                                                          });
+                                                                      });
 
-                                                                       // Khởi tạo trạng thái ban đầu
-                                                                       updateDeleteAllButton();
-                                                                   });
+                                                                      // Khởi tạo trạng thái ban đầu
+                                                                      updateDeleteAllButton();
+                                                                  });
 
         </script>
+        <script>
+            const toggle = document.getElementById("dropdownToggle");
+            const menu = document.getElementById("dropdownMenu");
 
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                menu.style.display = menu.style.display === "block" ? "none" : "block";
+            });
+
+            // Đóng dropdown nếu click ra ngoài
+            document.addEventListener("click", function (e) {
+                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                    menu.style.display = "none";
+                }
+            });
+        </script>
     </body>
 
+</html>
