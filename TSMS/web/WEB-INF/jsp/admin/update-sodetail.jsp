@@ -41,7 +41,7 @@
                         <span class="breadcrumb-separator">></span>
                         <span class="breadcrumb-current">Chỉnh sửa thông tin chủ cửa hàng</span>
                     </div>
-                    <h1 class="page-title">Chi tiết chủ cửa hàng</h1>
+                    <h1 class="page-title">Chỉnh sửa thông tin chủ cửa hàng</h1>
                 </div>
 
                 <%
@@ -68,14 +68,6 @@
                                 <div class="info-item">
                                     <label class="info-label">Tên cửa hàng:</label>
                                     <input class="info-value" value="<%= shopOwner.getShopName() %>">
-                                </div>
-                                <div class="info-item">
-                                    <label class="info-label">Email:</label>
-                                    <input class="info-value" value="<%= shopOwner.getEmail() != null ? shopOwner.getEmail() : "Chưa cập nhật" %>">
-                                </div>
-                                <div class="info-item">
-                                    <label class="info-label">Số điện thoại:</label>
-                                    <input class="info-value" value="<%= shopOwner.getPhone() != null ? shopOwner.getPhone() : "Chưa cập nhật" %>">
                                 </div>
                                 <div class="info-item">
                                     <label class="info-label">Gói đăng ký:</label>
