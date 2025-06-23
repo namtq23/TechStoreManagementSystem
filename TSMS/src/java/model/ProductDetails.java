@@ -86,7 +86,7 @@ public class ProductDetails {
         return "ProductDetail{" +
                 "productDetailID=" + productDetailID +
                 ", description='" + description + '\'' +
-                ", ProductCode='" + ProductCode + '\'' +
+                ", ProductCode='" + productCode + '\'' +
                 ", warrantyPeriod='" + warrantyPeriod + '\'' +
                 ", detailCreatedAt=" + detailCreatedAt +
                 ", updatedAt=" + updatedAt +
