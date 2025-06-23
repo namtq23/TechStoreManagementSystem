@@ -75,6 +75,11 @@ Author     : admin
                             <a href="#" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
+                    
+                    <a href="bm-promotions" class="nav-item">
+                        <i class="fas fa-ticket"></i>
+                        Khuyến mãi
+                    </a>
 
                     <div class="nav-item dropdown">
                         <a href="" class="dropdown-toggle">
