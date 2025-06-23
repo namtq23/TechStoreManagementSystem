@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-
 package controller;
 
 import com.google.gson.Gson;
@@ -25,10 +24,10 @@ import model.Customer;
  *
  * @author admin
  */
-@WebServlet(name="BMCustomerJson", urlPatterns={"/customers-json"})
+@WebServlet(name = "BMCustomerJson", urlPatterns = {"/customers-json"})
 public class BMCustomerJson extends HttpServlet {
-   
-     @Override
+
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             HttpSession session = req.getSession(true);
@@ -36,6 +35,12 @@ public class BMCustomerJson extends HttpServlet {
             Object branchIdObj = session.getAttribute("branchId");
 
             if (branchIdObj == null || dbNameObj == null) {
+                resp.sendRedirect("login");
+                return;
+            }
+
+            int roleId = Integer.parseInt(session.getAttribute("roleId").toString());
+            if (roleId != 1) {
                 resp.sendRedirect("login");
                 return;
             }
@@ -51,14 +56,14 @@ public class BMCustomerJson extends HttpServlet {
             List<Customer> customers = c.getCustomers(dbName);
 
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
-            
+
             String json = gson.toJson(customers);
             resp.getWriter().write(json);
 
         } catch (IOException | NumberFormatException e) {
             System.out.println(e.getMessage());
         } catch (SQLException ex) {
-             Logger.getLogger(BMCustomerJson.class.getName()).log(Level.SEVERE, null, ex);
-         }
+            Logger.getLogger(BMCustomerJson.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

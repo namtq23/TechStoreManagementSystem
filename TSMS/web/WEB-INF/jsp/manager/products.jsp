@@ -6,6 +6,7 @@
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ page import="java.util.*, model.ProductDTO" %>
 <%@ page import="util.Validate" %>
 <!DOCTYPE html>
@@ -119,72 +120,65 @@
             <!-- Sidebar -->
             <aside class="sidebar">
                 <form action="bm-products" method="get">
-                    <!-- Category Filter -->
                     <div class="filter-section">
                         <div class="filter-header">
                             <h3>Nhóm hàng</h3>
                         </div>
-                        <div class="filter-content">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="searchInput" placeholder="Tìm kiếm nhóm hàng">
-                            </div>
-                            <div class="category-tree">
+                        <div class="category-tree">
+                            <c:forEach var="category" items="${categories}">
                                 <div class="category-item">
-                                    <input type="checkbox" id="all-categories" name="categories" value="all">
-                                    <label for="all-categories" class="category-label">
-                                        <span>Tất cả</span>
+                                    <c:set var="selectedCategories" value="${paramValues.categories}" />
+                                    <input type="checkbox" name="categories" value="${category.categoryID}"
+                                           <c:if test="${selectedCategories != null}">
+                                               <c:forEach var="catId" items="${selectedCategories}">
+                                                   <c:if test="${catId == category.categoryID}">checked</c:if>
+                                               </c:forEach>
+                                           </c:if>>
+                                    <label class="category-label">
+                                        <span>${category.categoryName}</span>
                                     </label>
                                 </div>
-                                <c:forEach var="category" items="${categories}">
-                                    <div class="category-item">
-                                        <input type="checkbox" name="categories" value="${category.categoryID}">
-                                        <label class="category-label">
-                                            <span>${category.categoryName}</span>
-                                        </label>
-                                    </div>
-                                </c:forEach>
-                            </div>
+                            </c:forEach>
                         </div>
                     </div>
 
-                    <!-- Inventory Filter -->
                     <div class="filter-section">
                         <div class="filter-header">
                             <h3>Tồn kho</h3>
                         </div>
                         <div class="filter-content">
                             <label class="radio-item">
-                                <input type="radio" name="inventory" value="all" checked>
-                                <span class="radio-mark"></span>
-                                <span class="status-indicator all"></span>
-                                Tất cả
-                            </label>                        
-                            <label class="radio-item">
-                                <input type="radio" name="inventory" value="in-stock">
-                                <span class="radio-mark"></span>
-                                <span class="status-indicator in-stock"></span>
-                                Còn hàng trong kho
-                            </label>
-                            <label class="radio-item">
-                                <input type="radio" name="inventory" value="out-stock">
-                                <span class="radio-mark"></span>
-                                <span class="status-indicator out-stock"></span>
-                                Hết hàng trong kho
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Price Range Filter -->
-                    <div class="filter-section">
-                        <div class="filter-header">
-                            <h3>Khoảng giá</h3>
-                        </div>
-                        <div class="filter-content">
-                            <div class="price-range">
-                                <input type="number" name="minPrice" placeholder="Giá từ" min="0" class="price-input">
-                                <input type="number" name="maxPrice" placeholder="Giá đến" min="0" class="price-input">
+                                <input type="radio" name="inventory" value="all"
+                                       <c:if test="${param.inventory == 'all' || param.inventory == null}">checked</c:if>>
+                                       <span class="radio-mark"></span>
+                                       <span class="status-indicator all"></span>
+                                       Tất cả
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="inventory" value="in-stock"
+                                    <c:if test="${param.inventory == 'in-stock'}">checked</c:if>>
+                                    <span class="radio-mark"></span>
+                                    <span class="status-indicator in-stock"></span>
+                                    Còn hàng trong kho
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="inventory" value="out-stock"
+                                    <c:if test="${param.inventory == 'out-stock'}">checked</c:if>>
+                                    <span class="radio-mark"></span>
+                                    <span class="status-indicator out-stock"></span>
+                                    Hết hàng trong kho
+                                </label>
                             </div>
+                        </div>
+
+                        <!-- Price Range Filter -->
+                        <div class="filter-section">
+                            <div class="filter-header">
+                                <h3>Khoảng giá</h3>
+                            </div>
+                            <div class="price-range">
+                                <input type="number" name="minPrice" placeholder="Giá từ" min="0" class="price-input" value="${param.minPrice}">
+                            <input type="number" name="maxPrice" placeholder="Giá đến" min="0" class="price-input" value="${param.maxPrice}">
                         </div>
                     </div>
 
@@ -195,49 +189,55 @@
                         </div>
                         <div class="filter-content">
                             <label class="radio-item">
-                                <input type="radio" name="status" value="all" checked>
-                                <span class="radio-mark"></span>
-                                Tất cả
-                            </label>
-                            <label class="radio-item">
-                                <input type="radio" name="status" value="active">
-                                <span class="radio-mark"></span>
-                                Đang bán
-                            </label>
-                            <label class="radio-item">
-                                <input type="radio" name="status" value="inactive">
-                                <span class="radio-mark"></span>
-                                Ngừng bán
-                            </label>
+                                <input type="radio" name="status" value="all" <c:if test="${param.status == 'all' || param.status == null}">checked</c:if>>
+                                    <span class="radio-mark"></span>
+                                    Tất cả
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="status" value="active" <c:if test="${param.status == 'active'}">checked</c:if>>
+                                    <span class="radio-mark"></span>
+                                    Đang bán
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="status" value="inactive" <c:if test="${param.status == 'inactive'}">checked</c:if>>
+                                    <span class="radio-mark"></span>
+                                    Ngừng bán
+                                </label>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Action Buttons -->
-                    <div class="filter-actions">
-                        <a href="bm-products?page=1" class="btn-clear">
-                            <i class="fas fa-eraser"></i>
-                            Xóa bộ lọc
-                        </a>
-                        <button type="submit" class="btn-apply">
-                            <i class="fas fa-filter"></i>
-                            Áp dụng lọc
-                        </button>
-                    </div>
-                </form>
+                        <div class="filter-actions">
+                            <a href="bm-products?page=1" class="btn-clear">
+                                <i class="fas fa-eraser"></i>
+                                Xóa bộ lọc
+                            </a>
+                            <button type="submit" class="btn-apply">
+                                <i class="fas fa-filter"></i>
+                                Áp dụng lọc
+                            </button>
+                        </div>
+                    </form>
+                </aside>
 
-            </aside>
-
-            <!-- Main Content -->
-            <main class="main-content">
-                <div class="page-header">
-                    <h1>Hàng hóa</h1>
-                    <div class="header-actions">
-                        <form action="bm-products" method="get" class="search-form" style="display: flex; align-items: center; gap: 8px;">
-                            <div style="position: relative; flex: 1;">
-                                <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
-                                <input type="text" name="search" placeholder="Theo tên hàng"
+                <!-- Main Content -->
+                <main class="main-content">
+                    <div class="page-header">
+                        <h1>Hàng hóa</h1>
+                        <div class="header-actions">
+                            <form action="bm-products" method="get" class="search-form" style="display: flex; align-items: center; gap: 8px;">
+                                <div style="position: relative; flex: 1;">
+                                    <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
+                                    <input type="text" name="search" placeholder="Theo tên hàng" value="${param.search}"
                                        style="padding: 10px 10px 10px 35px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
                             </div>
+                            <c:forEach var="catId" items="${paramValues.categories}">
+                                <input type="hidden" name="categories" value="${catId}" />
+                            </c:forEach>
+                            <input type="hidden" name="inventory" value="${param.inventory}" />
+                            <input type="hidden" name="minPrice" value="${param.minPrice}" />
+                            <input type="hidden" name="maxPrice" value="${param.maxPrice}" />
+                            <input type="hidden" name="status" value="${param.status}" />
+                            <input type="hidden" name="recordsPerPage" value="${recordsPerPage}" />
                             <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
                         </form>
                     </div>
@@ -331,38 +331,53 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="pagination-container">
-                    <div class="pagination-info">
-                        Hiển thị ${startProduct} - ${endProduct} / Tổng số ${totalProducts} hàng hóa
-                    </div>
-                    <div class="pagination">
-                        <a href="${pagingUrl}1" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
-                            <i class="fas fa-angle-double-left"></i>
-                        </a>
-                        <a href="${pagingUrl}${currentPage - 1}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
-                            <i class="fas fa-angle-left"></i>
-                        </a>
-                        <c:forEach begin="1" end="${totalPages}" var="i">
-                            <a href="${pagingUrl}${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                <form method="GET" action="bm-products">
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            Hiển thị ${startProduct} - ${endProduct} / Tổng số ${totalProducts} hàng hóa
+                        </div>
+
+                        <c:forEach var="catId" items="${paramValues.categories}">
+                            <input type="hidden" name="categories" value="${catId}" />
                         </c:forEach>
-                        <a href="${pagingUrl}${currentPage + 1}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
-                            <i class="fas fa-angle-right"></i>
-                        </a>
-                        <a href="${pagingUrl}${totalPages}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
-                            <i class="fas fa-angle-double-right"></i>
-                        </a>
+                        <input type="hidden" name="inventory" value="${param.inventory}" />
+                        <input type="hidden" name="minPrice" value="${param.minPrice}" />
+                        <input type="hidden" name="maxPrice" value="${param.maxPrice}" />
+                        <input type="hidden" name="status" value="${param.status}" />
+                        <input type="hidden" name="search" value="${param.search}" />
+                        <div class="records-per-page">
+                            <label for="recordsPerPage">Hiển thị:</label>
+                            <select id="recordsPerPage" name="recordsPerPage" class="records-select" onchange="this.form.submit()">
+                                <option value="10" ${recordsPerPage == 10 ? 'selected' : ''}>10</option>
+                                <option value="25" ${recordsPerPage == 25 ? 'selected' : ''}>25</option>
+                                <option value="50" ${recordsPerPage == 50 ? 'selected' : ''}>50</option>
+                                <option value="100" ${recordsPerPage == 100 ? 'selected' : ''}>100</option>
+                            </select>
+                            <span>bản ghi/trang</span>
+                        </div>
+
+                        <div class="pagination">
+                            <a href="${pagingUrl}1" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                            <a href="${pagingUrl}${currentPage - 1}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <a href="${pagingUrl}${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                            </c:forEach>
+                            <a href="${pagingUrl}${currentPage + 1}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                            <a href="${pagingUrl}${totalPages}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </div>
                     </div>
-                </div>
-
-
+                </form>
             </main>
         </div>
 
-        <!-- Support Chat Button -->
-        <div class="support-chat">
-            <i class="fas fa-headset"></i>
-            <span>Hỗ trợ:1900 9999</span>
-        </div>
     </body>
     <script>
         const toggle = document.getElementById("dropdownToggle");

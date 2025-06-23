@@ -1,6 +1,6 @@
 <%-- 
-    Document   : invoices
-    Created on : May 22, 2025, 2:30:00 PM
+    Document   : outcome-report
+    Created on : June 20, 2025, 3:38:00 PM
     Author     : admin
 --%>
 
@@ -11,7 +11,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>TSMS - Báo cáo đơn bán hàng</title>
+        <title>TSMS - Báo cáo chi phí</title>
         <link rel="stylesheet" href="css/so-invoices.css">
         <link rel="stylesheet" href="css/header.css"/>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -27,7 +27,7 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="so-overview"" class="nav-item">
+                    <a href="so-overview" class="nav-item">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
@@ -62,9 +62,7 @@
                             <a href="so-invoices" class="dropdown-item">Doanh Thu thuần</a>
                             <a href="so-outcome" class="dropdown-item">Khoảng chi</a>
                         </div>
-
                     </div>
-
                 </nav>
 
                 <div class="header-right">
@@ -84,7 +82,7 @@
         <div class="main-container">
             <!-- Sidebar -->
             <aside class="sidebar">
-                <form action="so-invoices" method="get" class="filter-form">
+                <form action="so-outcome" method="get" class="filter-form">
                     <fieldset>
                         <legend>Bộ lọc</legend>
 
@@ -147,33 +145,26 @@
                 </form>
             </aside>
 
-
             <!-- Main Content -->
             <main class="main-content">
                 <div class="page-header">
-                    <h1>Báo cáo chi tiết</h1>
-                    <!-- Sửa lại nút Export Excel -->
+                    <h1>Báo cáo chi phí</h1>
                     <div class="header-actions">
                         <button class="btn btn-success" onclick="exportToExcel()">
                             <i class="fas fa-file-excel"></i>
                             Export Excel
                         </button>
                     </div>
-
                 </div>
 
-
-
-
-                <!-- Invoices Table -->
+                <!-- Outcome Table -->
                 <div class="table-container">
                     <table class="invoices-table">
                         <thead>
                             <tr>
-
                                 <th>STT</th>
-                                <th>Mã đơn hàng</th>
-                                <th>Tên khách hàng</th>
+                                <th>Mã giao dịch</th>
+                                <th>Danh mục</th>
                                 <th>Phương thức TT</th>
                                 <th>Ngày tạo</th>
                                 <th>Chi nhánh</th>
@@ -183,64 +174,64 @@
                         </thead>
                         <tbody>
                             <c:choose>
-                                <c:when test="${not empty incomeList}">
-                                    <c:forEach var="income" items="${incomeList}" varStatus="status">
+                                <c:when test="${not empty outcomeList}">
+                                    <c:forEach var="outcome" items="${outcomeList}" varStatus="status">
                                         <tr>
-
                                             <td><c:out value="${status.index + 1}"/></td>
                                             <td>
                                                 <c:choose>
-                                                    <c:when test="${income.relatedOrderID > 0}">
-                                                        ${income.relatedOrderID} 
+                                                    <c:when test="${outcome.cashFlowID > 0}">
+                                                        ${outcome.cashFlowID} 
                                                     </c:when>
                                                     <c:otherwise>-</c:otherwise>
                                                 </c:choose>
                                             </td>
                                             <td>
                                                 <c:choose>
-                                                    <c:when test="${not empty income.customerName}">
-                                                        <c:out value="${income.customerName}"/>
+                                                    <c:when test="${not empty outcome.category}">
+                                                        <span class="badge bg-warning text-dark">
+                                                            <c:out value="${outcome.category}"/>
+                                                        </span>
                                                     </c:when>
                                                     <c:otherwise>-</c:otherwise>
                                                 </c:choose>
                                             </td>
                                             <td>
                                                 <c:choose>
-                                                    <c:when test="${not empty income.paymentMethod}">
-                                                        <c:out value="${income.paymentMethod}"/>
-                                                    </c:when>
-                                                    <c:otherwise>-</c:otherwise>
-                                                </c:choose>
-                                            </td>
-
-                                            <td>
-                                                <c:choose>
-                                                    <c:when test="${income.createdAt != null}">
-                                                        <c:out value="${income.formattedDate}"/>
+                                                    <c:when test="${not empty outcome.paymentMethod}">
+                                                        <c:out value="${outcome.paymentMethod}"/>
                                                     </c:when>
                                                     <c:otherwise>-</c:otherwise>
                                                 </c:choose>
                                             </td>
                                             <td>
                                                 <c:choose>
-                                                    <c:when test="${income.createdAt != null}">
-                                                        <c:out value="${income.branchName}"/>
+                                                    <c:when test="${outcome.createdAt != null}">
+                                                        <c:out value="${outcome.formattedCreatedAt}"/>
                                                     </c:when>
                                                     <c:otherwise>-</c:otherwise>
                                                 </c:choose>
                                             </td>
                                             <td>
                                                 <c:choose>
-                                                    <c:when test="${not empty income.description}">
-                                                        <c:out value="${income.createdByName}"/>
+                                                    <c:when test="${not empty outcome.branchName}">
+                                                        <c:out value="${outcome.branchName}"/>
                                                     </c:when>
                                                     <c:otherwise>-</c:otherwise>
                                                 </c:choose>
                                             </td>
                                             <td>
                                                 <c:choose>
-                                                    <c:when test="${income.amount != null}">
-                                                        <c:out value="${income.formattedAmountVND}"/>
+                                                    <c:when test="${not empty outcome.createdByName}">
+                                                        <c:out value="${outcome.createdByName}"/>
+                                                    </c:when>
+                                                    <c:otherwise>-</c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td class="text-danger">
+                                                <c:choose>
+                                                    <c:when test="${outcome.amount != null}">
+                                                        <c:out value="${outcome.formattedAmount}"/>
                                                     </c:when>
                                                     <c:otherwise>-</c:otherwise>
                                                 </c:choose>
@@ -256,28 +247,34 @@
                             </c:choose>
                         </tbody>
                     </table>
-
-
                 </div>
 
                 <!-- Total Summary -->
                 <div class="total-summary">
-
                     <div class="summary-item">
-                        <span class="summary-label">Tổng thu tất cả:</span>
-                        <span class="summary-value">250.506.000đ</span>
+                        <span class="summary-label">Tổng chi phí:</span>
+                        <span class="summary-value text-danger">
+                            <c:choose>
+                                <c:when test="${totalOutcomeAmount != null}">
+                                    ${totalOutcomeAmount}
+                                </c:when>
+                                <c:otherwise>
+                                    0 ₫
+                                </c:otherwise>
+                            </c:choose>
+                        </span>
                     </div>
                 </div>
 
                 <!-- Pagination -->
-                <form method="GET" action="so-invoices">
+                <form method="GET" action="so-outcome">
                     <input type="hidden" name="branchId" value="${branchId}">
                     <input type="hidden" name="employeeId" value="${employeeId}">
                     <input type="hidden" name="fromDate" value="${dateFrom}">
                     <input type="hidden" name="toDate" value="${dateTo}">
                     <div class="pagination-container">
                         <div class="pagination-info">
-                            Hiển thị ${startRecord} - ${endRecord} / Tổng số ${totalRecords} hóa đơn
+                            Hiển thị ${startRecord} - ${endRecord} / Tổng số ${totalRecords} giao dịch
                         </div>
 
                         <div class="records-per-page">
@@ -292,11 +289,10 @@
                         </div>
 
                         <div class="pagination">
-
                             <!-- Trang đầu -->
                             <c:choose>
                                 <c:when test="${currentPage > 1}">
-                                    <a href="so-invoices?page=1&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">
+                                    <a href="so-outcome?page=1&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">
                                         <i class="fas fa-angle-double-left"></i>
                                     </a>
                                 </c:when>
@@ -310,7 +306,7 @@
                             <!-- Trang trước -->
                             <c:choose>
                                 <c:when test="${currentPage > 1}">
-                                    <a href="so-invoices?page=${currentPage - 1}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">
+                                    <a href="so-outcome?page=${currentPage - 1}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">
                                         <i class="fas fa-angle-left"></i>
                                     </a>
                                 </c:when>
@@ -329,7 +325,7 @@
                                         <span class="page-btn active">${i}</span>
                                     </c:when>
                                     <c:otherwise>
-                                        <a href="so-invoices?page=${i}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">${i}</a>
+                                        <a href="so-outcome?page=${i}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">${i}</a>
                                     </c:otherwise>
                                 </c:choose>
                             </c:forEach>
@@ -337,7 +333,7 @@
                             <!-- Trang sau -->
                             <c:choose>
                                 <c:when test="${currentPage < totalPages}">
-                                    <a href="so-invoices?page=${currentPage + 1}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">
+                                    <a href="so-outcome?page=${currentPage + 1}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">
                                         <i class="fas fa-angle-right"></i>
                                     </a>
                                 </c:when>
@@ -351,7 +347,7 @@
                             <!-- Trang cuối -->
                             <c:choose>
                                 <c:when test="${currentPage < totalPages}">
-                                    <a href="so-invoices?page=${totalPages}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">
+                                    <a href="so-outcome?page=${totalPages}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">
                                         <i class="fas fa-angle-double-right"></i>
                                     </a>
                                 </c:when>
@@ -361,19 +357,11 @@
                                     </span>
                                 </c:otherwise>
                             </c:choose>
-
                         </div>
                     </div>
                 </form>
-
             </main>
         </div>
-
-        <!-- Support Chat Button -->
-        <!--        <div class="support-chat">
-                    <i class="fas fa-headset"></i>
-                    <span>Hỗ trợ: 1900 9999</span>
-                </div>-->
 
         <script>
             const toggle = document.getElementById("dropdownToggle");
@@ -399,67 +387,23 @@
                 });
             });
 
-
-
-// Reset all filters
+            // Reset all filters
             function resetFilters() {
                 // Redirect về trang gốc, loại bỏ tất cả parameters
                 window.location.href = window.location.pathname;
             }
-        </script>
 
-        <script>
-            function setQuickTime(period) {
-                const today = new Date();
-                const fromDate = document.getElementById('fromDate');
-                const toDate = document.getElementById('toDate');
 
-                // Remove active class from all quick buttons
-                document.querySelectorAll('.quick-btn').forEach(btn => btn.classList.remove('active'));
 
-                // Add active class to clicked button
-                event.target.classList.add('active');
 
-                let startDate = new Date();
-                let endDate = new Date(today);
-
-                switch (period) {
-                    case 'today':
-                        startDate = new Date(today);
-                        endDate = new Date(today);
-                        break;
-                    case 'week':
-                        startDate = new Date(today);
-                        startDate.setDate(today.getDate() - 6);
-                        endDate = new Date(today);
-                        break;
-                    case 'month':
-                        startDate = new Date(today);
-                        startDate.setDate(today.getDate() - 29);
-                        endDate = new Date(today);
-                        break;
-                    case 'quarter':
-                        startDate = new Date(today);
-                        startDate.setMonth(today.getMonth() - 3);
-                        endDate = new Date(today);
-                        break;
-                }
-
-                // Chỉ set giá trị cho input, không submit form
-                fromDate.value = formatDateForInput(startDate);
-                toDate.value = formatDateForInput(endDate);
-            }
-
-// Hàm helper để format date cho input HTML
+            // Hàm helper để format date cho input HTML
             function formatDateForInput(date) {
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const day = String(date.getDate()).padStart(2, '0');
                 return `${year}-${month}-${day}`;
                     }
-
         </script>
-
 
         <script>
             function exportToExcel() {
@@ -470,7 +414,7 @@
                 var toDate = document.getElementById('toDate').value || '';
 
                 // Build URL với cách nối chuỗi truyền thống
-                var url = 'export-excel?type=income&branchId=' + branchId +
+                var url = 'export-excel?type=outcome&branchId=' + branchId +
                         '&employeeId=' + employeeId +
                         '&fromDate=' + fromDate +
                         '&toDate=' + toDate;
@@ -481,7 +425,7 @@
                 // Tạo link download
                 var link = document.createElement('a');
                 link.href = url;
-                link.download = 'income_report.xlsx';
+                link.download = 'outcome_report.xlsx';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);

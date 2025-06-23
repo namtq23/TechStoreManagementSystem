@@ -840,7 +840,7 @@ public class PromotionDAO {
     public List<ProductDetails> getProductDetailsByPromotionId(String dbName, int promotionId) throws SQLException {
         List<ProductDetails> productDetails = new ArrayList<>();
 
-        String sql = "SELECT pd.ProductDetailID, pd.Description, pd.SerialNumber, pd.WarrantyPeriod, "
+        String sql = "SELECT pd.ProductDetailID, pd.Description, pd.ProductCode, pd.WarrantyPeriod, "
                   + "pd.CreatedAt AS DetailCreatedAt, pd.UpdatedAt "
                   + "FROM ProductDetails pd "
                   + "JOIN PromotionProducts pp ON pd.ProductDetailID = pp.ProductDetailID "
@@ -855,7 +855,7 @@ public class PromotionDAO {
                     ProductDetails pd = new ProductDetails(
                               rs.getInt("ProductDetailID"),
                               rs.getString("Description"),
-                              rs.getString("SerialNumber"),
+                              rs.getString("ProductCode"),
                               rs.getString("WarrantyPeriod"),
                               rs.getTimestamp("DetailCreatedAt"),
                               rs.getTimestamp("UpdatedAt")
@@ -894,7 +894,7 @@ public class PromotionDAO {
 
     public List<ProductDetails> getAllProductDetails(String dbName) throws SQLException {
         List<ProductDetails> productDetails = new ArrayList<>();
-        String sql = "SELECT ProductDetailID, Description, SerialNumber, WarrantyPeriod, "
+        String sql = "SELECT ProductDetailID, Description, ProductCode, WarrantyPeriod, "
                   + "CreatedAt, UpdatedAt "
                   + "FROM ProductDetails";
 
@@ -903,7 +903,7 @@ public class PromotionDAO {
                 productDetails.add(new ProductDetails(
                           rs.getInt("ProductDetailID"),
                           rs.getString("Description"),
-                          rs.getString("SerialNumber"),
+                          rs.getString("ProductCode"),
                           rs.getString("WarrantyPeriod"),
                           rs.getTimestamp("CreatedAt"),
                           rs.getTimestamp("UpdatedAt")

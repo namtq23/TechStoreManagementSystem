@@ -1,6 +1,9 @@
 package controller;
 
+import dao.BrandDAO;
+import dao.CategoryDAO;
 import dao.ProductDAO;
+import dao.SuppliersDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -27,6 +30,9 @@ import java.util.UUID;
 public class SOAddProductController extends HttpServlet {
 
     private final ProductDAO productDAO = new ProductDAO();
+    private final CategoryDAO categoryDAO = new CategoryDAO();
+    private final SuppliersDAO suppliersDAO = new SuppliersDAO();
+    private final BrandDAO brandDAO = new BrandDAO();
     private static final String UPLOAD_DIR = "uploads";
     private static final String[] ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg"};
 
@@ -44,9 +50,9 @@ public class SOAddProductController extends HttpServlet {
             }
 
             String dbName = dbNameObj.toString();
-            List<Category> categories = productDAO.getAllCategories(dbName);
-            List<Supplier> suppliers = productDAO.getAllSupplier(dbName);
-            List<Brand> brands = productDAO.getAllBrands(dbName);
+            List<Category> categories = categoryDAO.getAllCategories(dbName);
+            List<Supplier> suppliers = suppliersDAO.getAllSupplier(dbName);
+            List<Brand> brands = brandDAO.getAllBrands(dbName);
 
             req.setAttribute("categories", categories);
             req.setAttribute("suppliers", suppliers);
@@ -107,14 +113,14 @@ public class SOAddProductController extends HttpServlet {
             return;
         }
 
-        if (productDAO.isCategoryNameExists(dbName, categoryName)) {
+        if (categoryDAO.isCategoryNameExists(dbName, categoryName)) {
             req.setAttribute("categoryNameError", "Tên danh mục đã tồn tại.");
             req.setAttribute("showCategoryModal", "true");
             forwardToForm(req, resp, dbName);
             return;
         }
 
-        if (productDAO.addCategory(dbName, categoryName)) {
+        if (categoryDAO.addCategory(dbName, categoryName)) {
             req.setAttribute("successMessage", "Thêm danh mục thành công.");
         } else {
             req.setAttribute("errorMessage", "Không thể thêm danh mục.");
@@ -139,14 +145,14 @@ public class SOAddProductController extends HttpServlet {
             return;
         }
 
-        if (productDAO.isBrandNameExists(dbName, brandName)) {
+        if (brandDAO.isBrandNameExists(dbName, brandName)) {
             req.setAttribute("brandNameError", "Tên thương hiệu đã tồn tại.");
             req.setAttribute("showBrandModal", "true");
             forwardToForm(req, resp, dbName);
             return;
         }
 
-        if (productDAO.addBrand(dbName, brandName)) {
+        if (brandDAO.addBrand(dbName, brandName)) {
             req.setAttribute("successMessage", "Thêm thương hiệu thành công.");
         } else {
             req.setAttribute("errorMessage", "Không thể thêm thương hiệu.");
@@ -175,7 +181,7 @@ public class SOAddProductController extends HttpServlet {
             return;
         }
 
-        if (productDAO.isSupplierNameExists(dbName, supplierName)) {
+        if (suppliersDAO.isSupplierNameExists(dbName, supplierName)) {
             req.setAttribute("supplierNameError", "Tên nhà cung cấp đã tồn tại.");
             req.setAttribute("showSupplierModal", "true");
             forwardToForm(req, resp, dbName);
@@ -231,7 +237,7 @@ public class SOAddProductController extends HttpServlet {
             return;
         }
 
-        if (productDAO.addSupplier(dbName, supplierName, contactName, phone, email)) {
+        if (suppliersDAO.addSupplier(dbName, supplierName, contactName, phone, email)) {
             req.setAttribute("successMessage", "Thêm nhà cung cấp thành công.");
         } else {
             req.setAttribute("errorMessage", "Không thể thêm nhà cung cấp.");
@@ -467,9 +473,9 @@ public class SOAddProductController extends HttpServlet {
 
     private void forwardToForm(HttpServletRequest req, HttpServletResponse resp, String dbName) throws ServletException, IOException {
         try {
-            List<Category> categories = productDAO.getAllCategories(dbName);
-            List<Supplier> suppliers = productDAO.getAllSupplier(dbName);
-            List<Brand> brands = productDAO.getAllBrands(dbName);
+            List<Category> categories = categoryDAO.getAllCategories(dbName);
+            List<Supplier> suppliers = suppliersDAO.getAllSupplier(dbName);
+            List<Brand> brands = brandDAO.getAllBrands(dbName);
             req.setAttribute("categories", categories);
             req.setAttribute("suppliers", suppliers);
             req.setAttribute("brands", brands);

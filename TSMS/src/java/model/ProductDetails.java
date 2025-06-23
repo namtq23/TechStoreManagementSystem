@@ -27,6 +27,7 @@ public class ProductDetails {
         this.productDetailID = productDetailID;
         this.description = description;
         this.productCode = productCode;
+
         this.warrantyPeriod = warrantyPeriod;
         this.detailCreatedAt = detailCreatedAt;
         this.updatedAt = updatedAt;

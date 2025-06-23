@@ -164,7 +164,7 @@
                                         <label class="dropdown-item-custom">
                                             <input type="checkbox" name="productDetailIds" value="${productDetail.productDetailID}"
                                                    <c:if test="${action == 'update' && promotion.productDetailIDs.contains(productDetail.productDetailID)}">checked</c:if>>
-                                            ${productDetail.serialNumber} - ${productDetail.description}
+                                            ${productDetail.productCode} - ${productDetail.description}
                                         </label>
                                     </c:forEach>
                                 </div>

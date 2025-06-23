@@ -45,6 +45,49 @@ public class SuppliersDAO {
 
         return suppliers;
     }
+    public List<Supplier> getAllSupplier(String dbName) throws SQLException {
+        List<Supplier> suppliers = new ArrayList<>();
+        String sql = "SELECT SupplierID, SupplierName, ContactName, Phone, Email FROM Suppliers";
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Supplier supplier = new Supplier();
+                supplier.setSupplierID(rs.getInt("SupplierID"));
+                supplier.setSupplierName(rs.getString("SupplierName"));
+                supplier.setContactName(rs.getString("ContactName"));
+                supplier.setPhone(rs.getString("Phone"));
+                supplier.setEmail(rs.getString("Email"));
+                suppliers.add(supplier);
+            }
+        }
+        return suppliers;
+    }
+    public boolean isSupplierNameExists(String dbName, String supplierName) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Suppliers WHERE SupplierName = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, supplierName);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+    public boolean addSupplier(String dbName, String supplierName, String contactName, String phone, String email) throws SQLException {
+        String sql = "INSERT INTO Suppliers (SupplierName, ContactName, Phone, Email) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, supplierName);
+            ps.setString(2, contactName.isEmpty() ? null : contactName);
+            ps.setString(3, phone.isEmpty() ? null : phone);
+            ps.setString(4, email.isEmpty() ? null : email);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
 
     // Tìm kiếm nhà cung cấp theo tên
     public List<Supplier> searchSuppliersByName(String dbName, String keyword) {

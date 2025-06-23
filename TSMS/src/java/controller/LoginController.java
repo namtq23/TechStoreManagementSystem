@@ -47,7 +47,7 @@ public class LoginController extends HttpServlet {
                     resp.sendRedirect(req.getContextPath() + "/sale-product");
                     break;
                 case 3:
-                    resp.sendRedirect(req.getContextPath() + "/quanlykhotong");
+                    resp.sendRedirect(req.getContextPath() + "/wh-products");
                     break;
                 default:
                     throw new AssertionError();
@@ -104,6 +104,7 @@ public class LoginController extends HttpServlet {
                 System.out.println("userId set: " + session.getAttribute("userId"));
                 System.out.println("roleId set: " + session.getAttribute("roleId"));
                 System.out.println("dbName set: " + session.getAttribute("dbName"));
+                System.out.println("warehouseId set: " + session.getAttribute("warehouseId"));
 
                 session.setMaxInactiveInterval(1000 * 60 * 60 * 24);
 
@@ -134,7 +135,7 @@ public class LoginController extends HttpServlet {
                         redirectURL = req.getContextPath() + "/sale-products";
                         break;
                     case 3: //WM
-                        redirectURL = req.getContextPath() + "/quanlykhotong";
+                        redirectURL = req.getContextPath() + "/wh-products";
                         break;
                     default:
                         session.setAttribute("role", "Invalid");

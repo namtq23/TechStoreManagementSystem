@@ -21,7 +21,7 @@
     </head>
     <body>
         <!-- Header -->
-         <header class="header">
+        <header class="header">
             <div class="header-container">
                 <div class="logo">
                     <a href="bm-overview" class="logo">
@@ -34,12 +34,12 @@
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
-                    
+
                     <a href="bm-products?page=1" class="nav-item">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
-                    
+
                     <div class="nav-item dropdown">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
@@ -52,7 +52,7 @@
                             <a href="#" class="dropdown-item">Yêu cầu nhập hàng</a>
                         </div>
                     </div>
-                    
+
                     <div class="nav-item dropdown active">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-handshake"></i>
@@ -64,7 +64,7 @@
                             <a href="bm-supplier" class="dropdown-item">Nhà cung cấp</a>
                         </div>
                     </div>
-                    
+
                     <div class="nav-item dropdown">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-users"></i>
@@ -81,7 +81,7 @@
                         <i class="fas fa-ticket"></i>
                         Khuyến mãi
                     </a>
-                    
+                
                     <div class="nav-item dropdown">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-chart-bar"></i>
@@ -95,7 +95,7 @@
                             <a href="#" class="dropdown-item">Khách hàng</a>
                         </div>
                     </div>
-                    
+
                     <a href="bm-cart" class="nav-item">
                         <i class="fas fa-cash-register"></i>
                         Bán hàng
@@ -124,26 +124,26 @@
                         <h3>Trạng thái nhà cung cấp</h3>
                         <i class="fas fa-chevron-up"></i>
                     </div>
-                    
+
                     <div class="filter-content">
 
                         <form action="bm-supplier" method="get">
-                          <label class="checkbox-item">
-                          <input type="radio" name="top" value="" 
-                   <%= request.getParameter("top") == null ? "checked" : "" %>>
-                 <span>Tổng hợp</span><br>
-                  </label>
-                  <label class="checkbox-item">
-                  <input type="radio" name="top" value="true" 
-               <%= "true".equals(request.getParameter("top")) ? "checked" : "" %>>
-                     <span>Tiềm năng</span><br>
-                 </label>
-    
-                       <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
-                </form>
+                            <label class="checkbox-item">
+                                <input type="radio" name="top" value="" 
+                                       <%= request.getParameter("top") == null ? "checked" : "" %>>
+                                <span>Tổng hợp</span><br>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="top" value="true" 
+                                       <%= "true".equals(request.getParameter("top")) ? "checked" : "" %>>
+                                <span>Tiềm năng</span><br>
+                            </label>
+
+                            <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
+                        </form>
 
                     </div>
-                                
+
                 </div>
                 <div class="filter-section">
                     <div class="filter-header">
@@ -185,8 +185,8 @@
 
                         <form action="bm-supplier" method="get" class="search-container">
                             <i class="fas fa-search"></i>
-<input type="text" name="keyword" placeholder="Theo tên nhà cung cấp" class="search-input"
-       value="${param.keyword != null ? param.keyword : ''}" />
+                            <input type="text" name="keyword" placeholder="Theo tên nhà cung cấp" class="search-input"
+                                   value="${param.keyword != null ? param.keyword : ''}" />
 
                             <button type="submit" style="border: none; background: none;">
                                 <i class="fas fa-chevron-down"></i>
@@ -211,33 +211,28 @@
                                 <th>Người giao dịch</th>
                                 <th>Số điện thoại</th>
                                 <th>Gmail</th>
-<!--                                <th>Địa Chỉ</th>
-                                <th>Giới Tính</th>
-                                <th>Tổng tiền đã chi</th>
-                                <th>Ngày tạo thông tin</th>-->
-                                
                             </tr>
                         </thead>
-<tbody>
-<c:forEach var="supplier" items="${suppliers}">
-    <tr>
-        <td>${supplier.supplierID}</td>
-        <td>${supplier.supplierName}</td>
-        <td>${supplier.contactName}</td>
-        <td>${supplier.phone}</td>
-        <td>${supplier.email}</td>
-    </tr>
-</c:forEach>
-</tbody>
+                        <tbody>
+                            <c:forEach var="supplier" items="${suppliers}">
+                                <tr>
+                                    <td>${supplier.supplierID}</td>
+                                    <td>${supplier.supplierName}</td>
+                                    <td>${supplier.contactName}</td>
+                                    <td>${supplier.phone}</td>
+                                    <td>${supplier.email}</td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
 
                     </table>
                 </div>
 
                 <!-- Pagination -->
                 <div class="pagination-container">
-<div class="pagination-info">
-    Hiển thị ${startSupplier} - ${endSupplier} / Tổng số ${totalSuppliers} Nhà cung cấp
-</div>
+                    <div class="pagination-info">
+                        Hiển thị ${startSupplier} - ${endSupplier} / Tổng số ${totalSuppliers} Nhà cung cấp
+                    </div>
 
                     <div class="pagination">
                         <a href="bm-customer?page=1" class="page-btn ${currentPage == 1 ? "disabled" : ""}"> 
@@ -258,11 +253,7 @@
                         </a>
                     </div>
                 </div>
-                <!-- Support Chat Button -->
-                <div class="support-chat">
-                    <i class="fas fa-headset"></i>
-                    <span>Hỗ trợ:1900 9999</span>
-                </div>
+            </main>
         </div>
     </body>
     <script>

@@ -157,9 +157,9 @@ public class Validate {
     public static String formatCostPriceToVND(double costPrice) {
         try {
             NumberFormat vndFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
-            return vndFormat.format(costPrice) + " ₫";
+            return vndFormat.format(costPrice) ;
         } catch (Exception e) {
-            return "0 ₫";
+            return "0";
         }
     }
        // Method để format date

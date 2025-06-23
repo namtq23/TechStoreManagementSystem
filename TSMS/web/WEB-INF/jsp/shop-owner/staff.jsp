@@ -108,7 +108,6 @@
                         <button class="btn btn-success">
                             <i class="fas fa-plus"></i>
                             Thêm mới
-                            <i class="fas fa-chevron-down"></i>
                         </button>
                     </div>
                 </div>
