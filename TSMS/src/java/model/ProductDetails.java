@@ -18,13 +18,16 @@ public class ProductDetails {
     private String warrantyPeriod;
     private Timestamp detailCreatedAt;
     private Timestamp updatedAt;
-
+    private String productNameUnsigned;  
+    private int quantity;  
+    
     // Constructor
-    public ProductDetails(int productDetailID, String description, String ProductCode,
+    public ProductDetails(int productDetailID, String description, String productCode,
                          String warrantyPeriod, Timestamp detailCreatedAt, Timestamp updatedAt) {
         this.productDetailID = productDetailID;
         this.description = description;
-        this.productCode = ProductCode;
+        this.productCode = productCode;
+
         this.warrantyPeriod = warrantyPeriod;
         this.detailCreatedAt = detailCreatedAt;
         this.updatedAt = updatedAt;
@@ -54,6 +57,16 @@ public class ProductDetails {
     public Timestamp getUpdatedAt() {
         return updatedAt;
     }
+    
+    public String getProductNameUnsigned() {
+        return productNameUnsigned;
+    }
+    
+    public int getQuantity() {
+        return quantity;
+    }
+
+    
 
     // Setter
     public void setProductDetailID(int productDetailID) {
@@ -64,8 +77,8 @@ public class ProductDetails {
         this.description = description;
     }
 
-    public void setProductCode(String ProductCode) {
-        this.productCode = ProductCode;
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
     }
 
     public void setWarrantyPeriod(String warrantyPeriod) {
@@ -79,14 +92,22 @@ public class ProductDetails {
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
-
+    
+    public void setProductNameUnsigned(String productNameUnsigned) {
+        this.productNameUnsigned = productNameUnsigned;
+    }
+    
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+    
     // toString()
     @Override
     public String toString() {
         return "ProductDetail{" +
                 "productDetailID=" + productDetailID +
                 ", description='" + description + '\'' +
-                ", ProductCode='" + productCode + '\'' +
+                ", productCode='" + productCode + '\'' +
                 ", warrantyPeriod='" + warrantyPeriod + '\'' +
                 ", detailCreatedAt=" + detailCreatedAt +
                 ", updatedAt=" + updatedAt +

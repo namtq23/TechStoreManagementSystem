@@ -1,5 +1,6 @@
 package controller;
 
+import dao.CategoryDAO;
 import dao.ProductDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -21,6 +22,7 @@ import util.Validate;
 public class SOProductController extends HttpServlet {
 
     ProductDAO p = new ProductDAO();
+    CategoryDAO c = new CategoryDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -34,8 +36,18 @@ public class SOProductController extends HttpServlet {
                 resp.sendRedirect("login");
                 return;
             }
+            
+            
+
+            int roleId = Integer.parseInt(roleIdObj.toString());
+            if (roleId != 0) {
+                resp.sendRedirect("login");
+                return;
+            }
 
             String dbName = dbNameObj.toString();
+            
+            //action
             String action = req.getParameter("action");
             if ("view".equals(action)) {
                 String productDetailIdStr = req.getParameter("productDetailId");
@@ -43,43 +55,107 @@ public class SOProductController extends HttpServlet {
                     try {
                         int productDetailId = Integer.parseInt(productDetailIdStr);
                         ProductDetailDTO product = ProductDAO.getProductDetailById(dbName, productDetailId);
-                            String brandName = ProductDAO.getBrandNameById(dbName, product.getBrandID());
-                            String categoryName = ProductDAO.getCategoryNameById(dbName, product.getCategoryID());
-                            String supplierName = ProductDAO.getSupplierNameById(dbName, product.getSupplierID());                           
-                            req.setAttribute("product", product);
-                            req.setAttribute("brandName", brandName);
-                            req.setAttribute("categoryName", categoryName);
-                            req.setAttribute("supplierName", supplierName);
-                            req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/product-detail.jsp").forward(req, resp);
-                            return;
+                        String brandName = ProductDAO.getBrandNameById(dbName, product.getBrandID());
+                        String categoryName = ProductDAO.getCategoryNameById(dbName, product.getCategoryID());
+                        String supplierName = ProductDAO.getSupplierNameById(dbName, product.getSupplierID());
+                        req.setAttribute("product", product);
+                        req.setAttribute("brandName", brandName);
+                        req.setAttribute("categoryName", categoryName);
+                        req.setAttribute("supplierName", supplierName);
+                        req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/product-detail.jsp").forward(req, resp);
+                        return;
                     } catch (NumberFormatException e) {
                         resp.sendRedirect("so-products?page=1&error=invalid");
                         return;
                     }
                 }
             }
-            int totalProducts = ProductDAO.getTotalProduct(dbName);
-            int page = 1;
-            int pageSize;
 
-            if (totalProducts < 30) {
-                pageSize = 15;
-            } else if (totalProducts < 100) {
-                pageSize = 40;
-            } else {
-                pageSize = totalProducts / 4;
-            }
+            //Phan trang
+            int page = 1;
+            int pageSize = 10;
 
             if (req.getParameter("page") != null) {
                 page = Integer.parseInt(req.getParameter("page"));
             }
+
+            String recordsParam = req.getParameter("recordsPerPage");
+            if (recordsParam != null && !recordsParam.isEmpty()) {
+                pageSize = Integer.parseInt(recordsParam);
+            }
+
             int offset = (page - 1) * pageSize;
 
-            doPost(req, resp, offset, pageSize);
+            String[] filterCate = req.getParameterValues("categories");
+            String stockStatus = req.getParameter("inventory");
+            String searchKeyStr = req.getParameter("search");
+            String minPriceStr = req.getParameter("minPrice");
+            String maxPriceStr = req.getParameter("maxPrice");
+            String status = req.getParameter("status");
 
-            List<Category> categories = p.getAllCategories(dbName);
-            req.setAttribute("categories", categories);
+            Double minPrice = 0.0;
+            if (minPriceStr != null && !minPriceStr.trim().isEmpty()) {
+                minPrice = Double.parseDouble(minPriceStr);
+            }
+
+            Double maxPrice = 1_000_000_000_000.0;
+            if (maxPriceStr != null && !maxPriceStr.trim().isEmpty()) {
+                maxPrice = Double.parseDouble(maxPriceStr);
+            }
+
+            String searchKey = "";
+            if (searchKeyStr != null) {
+                searchKey = Validate.standardizeName(searchKeyStr);
+            }
+
+            BMProductFilter filter = new BMProductFilter(filterCate, stockStatus, searchKey, minPrice, maxPrice, status);
+
+            List<ProductDetailDTO> products = ProductDAO.getAllProductDetailsByFilter(dbName, offset, pageSize, filter);
+            int totalProducts = ProductDAO.getTotalProductDetailByFilter(dbName, filter);
+            int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
+
+            StringBuilder urlBuilder = new StringBuilder("so-products?");
+            if (filterCate != null) {
+                for (String cateId : filterCate) {
+                    urlBuilder.append("categories=").append(cateId).append("&");
+                }
+            }
+
+            if (stockStatus != null && !stockStatus.isEmpty()) {
+                urlBuilder.append("inventory=").append(stockStatus).append("&");
+            }
+
+            if (searchKeyStr != null && !searchKeyStr.isEmpty()) {
+                urlBuilder.append("search=").append(searchKeyStr).append("&");
+            }
+
+            if (minPriceStr != null && !minPriceStr.trim().isEmpty()) {
+                urlBuilder.append("minPrice=").append(minPriceStr.trim()).append("&");
+            }
+
+            if (maxPriceStr != null && !maxPriceStr.trim().isEmpty()) {
+                urlBuilder.append("maxPrice=").append(maxPriceStr.trim()).append("&");
+            }
+
+            if (status != null && !status.trim().isEmpty()) {
+                urlBuilder.append("status=").append(status.trim()).append("&");
+            }
+
+            urlBuilder.append("page=");
+            String pagingURL = urlBuilder.toString();
+
+            req.setAttribute("pagingUrl", pagingURL);
+            req.setAttribute("totalPages", totalPages);
+            req.setAttribute("totalProducts", totalProducts);
+            req.setAttribute("startProduct", offset + 1);
+            req.setAttribute("endProduct", Math.min(offset + pageSize, totalProducts));
+            req.setAttribute("products", products);
+
+            req.setAttribute("categories", c.getAllCategories(dbName));
+            req.setAttribute("recordsPerPage", pageSize);
             req.setAttribute("currentPage", page);
+
+            req.setAttribute("filter", filter);
             req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/products.jsp").forward(req, resp);
         } catch (ServletException | IOException | NumberFormatException e) {
             System.out.println(e.getMessage());
@@ -88,82 +164,82 @@ public class SOProductController extends HttpServlet {
         }
     }
 
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp, int offset, int limit) throws ServletException, IOException, SQLException {
-        String[] filterCate = req.getParameterValues("categories");
-        String stockStatus = req.getParameter("inventory");
-        String searchKeyStr = req.getParameter("search");
-
-        String minPriceStr = req.getParameter("minPrice");
-        String maxPriceStr = req.getParameter("maxPrice");
-        String status = req.getParameter("status");
-
-        Double minPrice = 0.0;
-        if (minPriceStr != null && !minPriceStr.trim().isEmpty()) {
-            minPrice = Double.parseDouble(minPriceStr);
-        }
-        Double maxPrice = 1000000000000000.0;
-        if (maxPriceStr != null && !maxPriceStr.trim().isEmpty()) {
-            maxPrice = Double.parseDouble(maxPriceStr);
-        }
-
-        String searchKey = "";
-        if (searchKeyStr != null) {
-            searchKey = Validate.standardizeName(searchKeyStr);
-        }
-
-        BMProductFilter filter = new BMProductFilter(filterCate, stockStatus, searchKey, minPrice, maxPrice, status);
-        HttpSession session = req.getSession(true);
-        Object dbNameObj = session.getAttribute("dbName");
-
-        if (dbNameObj == null) {
-            resp.sendRedirect("login");
-            return;
-        }
-
-        String dbName = dbNameObj.toString();
-        List<ProductDetailDTO> products = ProductDAO.getAllProductDetailsByFilter(dbName, offset, limit, filter);
-        int totalProducts = ProductDAO.getTotalProductDetailByFilter(dbName, filter);
-        int totalPages = (int) Math.ceil((double) totalProducts / limit);
-
-        String pagingURL = "";
-        StringBuilder urlBuilder = new StringBuilder("so-products?");
-
-        if (filterCate != null) {
-            for (String cateId : filter.getCategories()) {
-                urlBuilder.append("categories=").append(cateId).append("&");
-            }
-        }
-
-        if (stockStatus != null && !stockStatus.isEmpty()) {
-            urlBuilder.append("inventory=").append(filter.getInventoryStatus()).append("&");
-        }
-
-        if (searchKey != null && !searchKey.isEmpty()) {
-            urlBuilder.append("search=").append(filter.getSearchKeyword()).append("&");
-        }
-
-        if (minPriceStr != null && !minPriceStr.trim().isEmpty()) {
-            urlBuilder.append("minPrice=").append(minPriceStr.trim()).append("&");
-        }
-
-        if (maxPriceStr != null && !maxPriceStr.trim().isEmpty()) {
-            urlBuilder.append("maxPrice=").append(maxPriceStr.trim()).append("&");
-        }
-
-        if (status != null && !status.trim().isEmpty()) {
-            urlBuilder.append("status=").append(status.trim()).append("&");
-        }
-
-        urlBuilder.append("page=");
-        pagingURL = urlBuilder.toString();
-        System.out.println(pagingURL);
-        req.setAttribute("pagingUrl", pagingURL);
-        req.setAttribute("totalPages", totalPages);
-        req.setAttribute("totalProducts", totalProducts);
-        req.setAttribute("startProduct", offset + 1);
-        req.setAttribute("endProduct", Math.min(offset + 10, totalProducts));
-        req.setAttribute("products", products);
-    }
+//    protected void doPost(HttpServletRequest req, HttpServletResponse resp, int offset, int limit) throws ServletException, IOException, SQLException {
+//        String[] filterCate = req.getParameterValues("categories");
+//        String stockStatus = req.getParameter("inventory");
+//        String searchKeyStr = req.getParameter("search");
+//
+//        String minPriceStr = req.getParameter("minPrice");
+//        String maxPriceStr = req.getParameter("maxPrice");
+//        String status = req.getParameter("status");
+//
+//        Double minPrice = 0.0;
+//        if (minPriceStr != null && !minPriceStr.trim().isEmpty()) {
+//            minPrice = Double.parseDouble(minPriceStr);
+//        }
+//        Double maxPrice = 1000000000000000.0;
+//        if (maxPriceStr != null && !maxPriceStr.trim().isEmpty()) {
+//            maxPrice = Double.parseDouble(maxPriceStr);
+//        }
+//
+//        String searchKey = "";
+//        if (searchKeyStr != null) {
+//            searchKey = Validate.standardizeName(searchKeyStr);
+//        }
+//
+//        BMProductFilter filter = new BMProductFilter(filterCate, stockStatus, searchKey, minPrice, maxPrice, status);
+//        HttpSession session = req.getSession(true);
+//        Object dbNameObj = session.getAttribute("dbName");
+//
+//        if (dbNameObj == null) {
+//            resp.sendRedirect("login");
+//            return;
+//        }
+//
+//        String dbName = dbNameObj.toString();
+//        List<ProductDetailDTO> products = ProductDAO.getAllProductDetailsByFilter(dbName, offset, limit, filter);
+//        int totalProducts = ProductDAO.getTotalProductDetailByFilter(dbName, filter);
+//        int totalPages = (int) Math.ceil((double) totalProducts / limit);
+//
+//        String pagingURL = "";
+//        StringBuilder urlBuilder = new StringBuilder("so-products?");
+//
+//        if (filterCate != null) {
+//            for (String cateId : filter.getCategories()) {
+//                urlBuilder.append("categories=").append(cateId).append("&");
+//            }
+//        }
+//
+//        if (stockStatus != null && !stockStatus.isEmpty()) {
+//            urlBuilder.append("inventory=").append(filter.getInventoryStatus()).append("&");
+//        }
+//
+//        if (searchKey != null && !searchKey.isEmpty()) {
+//            urlBuilder.append("search=").append(filter.getSearchKeyword()).append("&");
+//        }
+//
+//        if (minPriceStr != null && !minPriceStr.trim().isEmpty()) {
+//            urlBuilder.append("minPrice=").append(minPriceStr.trim()).append("&");
+//        }
+//
+//        if (maxPriceStr != null && !maxPriceStr.trim().isEmpty()) {
+//            urlBuilder.append("maxPrice=").append(maxPriceStr.trim()).append("&");
+//        }
+//
+//        if (status != null && !status.trim().isEmpty()) {
+//            urlBuilder.append("status=").append(status.trim()).append("&");
+//        }
+//
+//        urlBuilder.append("page=");
+//        pagingURL = urlBuilder.toString();
+//        System.out.println(pagingURL);
+//        req.setAttribute("pagingUrl", pagingURL);
+//        req.setAttribute("totalPages", totalPages);
+//        req.setAttribute("totalProducts", totalProducts);
+//        req.setAttribute("startProduct", offset + 1);
+//        req.setAttribute("endProduct", Math.min(offset + 10, totalProducts));
+//        req.setAttribute("products", products);
+//    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -187,14 +263,14 @@ public class SOProductController extends HttpServlet {
             } catch (SQLException ex) {
                 Logger.getLogger(SOProductController.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }else if ("update".equals(action)) {
+        } else if ("update".equals(action)) {
             try {
                 String description = req.getParameter("description");
                 String costPriceStr = req.getParameter("costPrice");
                 String retailPriceStr = req.getParameter("retailPrice");
                 String isActiveStr = req.getParameter("isActive");
                 StringBuilder errors = new StringBuilder();
-                
+
                 if (description == null || description.trim().isEmpty()) {
                     errors.append("Mô tả không được để trống. ");
                 } else if (description.trim().length() < 10) {
@@ -202,7 +278,7 @@ public class SOProductController extends HttpServlet {
                 } else if (description.trim().length() > 1000) {
                     errors.append("Mô tả không được vượt quá 1000 ký tự. ");
                 }
-                
+
                 double costPrice = 0;
                 double retailPrice = 0;
                 description = description.trim();
@@ -220,7 +296,7 @@ public class SOProductController extends HttpServlet {
                 } catch (NumberFormatException e) {
                     errors.append("Giá vốn không hợp lệ. ");
                 }
-                
+
                 try {
                     if (retailPriceStr == null || retailPriceStr.trim().isEmpty()) {
                         errors.append("Giá bán không được để trống. ");
@@ -235,17 +311,17 @@ public class SOProductController extends HttpServlet {
                 } catch (NumberFormatException e) {
                     errors.append("Giá bán không hợp lệ. ");
                 }
-                
+
                 // Validate retail price > cost price
                 if (costPrice > 0 && retailPrice > 0 && retailPrice <= costPrice) {
                     errors.append("Giá bán phải lớn hơn giá vốn. ");
                 }
-                
+
                 // Validate status
                 if (isActiveStr == null || (!isActiveStr.equals("0") && !isActiveStr.equals("1"))) {
                     errors.append("Trạng thái không hợp lệ. ");
                 }
-                
+
                 if (errors.length() > 0) {
                     // Có lỗi validation - lưu lại dữ liệu và lỗi để hiển thị
                     req.setAttribute("errorMessage", errors.toString().trim());
@@ -253,39 +329,39 @@ public class SOProductController extends HttpServlet {
                     req.setAttribute("inputCostPrice", costPriceStr);
                     req.setAttribute("inputRetailPrice", retailPriceStr);
                     req.setAttribute("inputIsActive", isActiveStr);
-                    
+
                     ProductDetailDTO product = ProductDAO.getProductDetailById(dbName, productDetailID);
                     String brandName = ProductDAO.getBrandNameById(dbName, product.getBrandID());
                     String categoryName = ProductDAO.getCategoryNameById(dbName, product.getCategoryID());
                     String supplierName = ProductDAO.getSupplierNameById(dbName, product.getSupplierID());
-                    
+
                     req.setAttribute("product", product);
                     req.setAttribute("brandName", brandName);
                     req.setAttribute("categoryName", categoryName);
-                    req.setAttribute("supplierName", supplierName);                    
+                    req.setAttribute("supplierName", supplierName);
                     req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/product-detail.jsp").forward(req, resp);
                     return;
                 }
-                
-                boolean isActive = "1".equals(isActiveStr);                
+
+                boolean isActive = "1".equals(isActiveStr);
                 ProductDAO dao = new ProductDAO();
-                boolean success = dao.updateProductDetailLimited(dbName, productDetailID, description, 
-                    costPrice, retailPrice, isActive);
-                
+                boolean success = dao.updateProductDetailLimited(dbName, productDetailID, description,
+                        costPrice, retailPrice, isActive);
+
                 if (success) {
                     session.setAttribute("successMessage", "Cập nhật thông tin sản phẩm thành công!");
                     resp.sendRedirect("so-products?action=view&productDetailId=" + productDetailID);
                 } else {
                     req.setAttribute("errorMessage", "Không thể cập nhật sản phẩm. Vui lòng thử lại!");
-                    
+
                     ProductDetailDTO product = ProductDAO.getProductDetailById(dbName, productDetailID);
                     String brandName = ProductDAO.getBrandNameById(dbName, product.getBrandID());
                     String categoryName = ProductDAO.getCategoryNameById(dbName, product.getCategoryID());
-                    String supplierName = ProductDAO.getSupplierNameById(dbName, product.getSupplierID());                    
+                    String supplierName = ProductDAO.getSupplierNameById(dbName, product.getSupplierID());
                     req.setAttribute("product", product);
                     req.setAttribute("brandName", brandName);
                     req.setAttribute("categoryName", categoryName);
-                    req.setAttribute("supplierName", supplierName);                    
+                    req.setAttribute("supplierName", supplierName);
                     req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/product-detail.jsp").forward(req, resp);
                 }
             } catch (SQLException ex) {
