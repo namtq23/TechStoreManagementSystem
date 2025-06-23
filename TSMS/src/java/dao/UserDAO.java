@@ -13,6 +13,7 @@ import java.util.List;
 import model.ShopOwner;
 import model.ShopOwnerDTO;
 import model.User;
+import model.UserDTO;
 import util.DBUtil;
 
 /**
@@ -383,8 +384,96 @@ public class UserDAO {
 
         return user;
     }
-    
-   
+ public List<UserDTO> getStaffListByPage(String dbName, int page, int pageSize, Integer status, Integer role) {
+        List<UserDTO> staffList = new ArrayList<>();
+        StringBuilder query = new StringBuilder("""
+            SELECT 
+                u.UserID,
+                u.FullName,
+                u.Phone,
+                u.IsActive,
+                r.RoleName,
+                b.BranchName,
+                w.WarehouseName
+            FROM 
+                Users u
+                JOIN Roles r ON u.RoleID = r.RoleID
+                LEFT JOIN Branches b ON u.BranchID = b.BranchID
+                LEFT JOIN Warehouses w ON u.WarehouseID = w.WarehouseID
+            WHERE 
+                u.RoleID != 0
+        """);
+
+        if (status != null) {
+            query.append(" AND u.IsActive = ?");
+        }
+        if (role != null) {
+            query.append(" AND u.RoleID = ?");
+        }
+
+        query.append(" ORDER BY u.UserID ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+            int paramIndex = 1;
+            if (status != null) {
+                stmt.setInt(paramIndex++, status);
+            }
+            if (role != null) {
+                stmt.setInt(paramIndex++, role);
+            }
+            stmt.setInt(paramIndex++, (page - 1) * pageSize);
+            stmt.setInt(paramIndex, pageSize);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                UserDTO user = new UserDTO();
+                user.setUserID(rs.getInt("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                user.setPhone(rs.getString("Phone"));
+                user.setIsActive(rs.getInt("IsActive"));
+                user.setRoleName(rs.getString("RoleName"));
+                user.setBranchName(rs.getString("BranchName"));
+                user.setWarehouseName(rs.getString("WarehouseName"));
+                staffList.add(user);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getStaffListByPage: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return staffList;
+    }
+
+    public int countStaff(String dbName, Integer status, Integer role) {
+        int count = 0;
+        StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM Users u WHERE u.RoleID != 0");
+
+        if (status != null) {
+            query.append(" AND u.IsActive = ?");
+        }
+        if (role != null) {
+            query.append(" AND u.RoleID = ?");
+        }
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+            int paramIndex = 1;
+            if (status != null) {
+                stmt.setInt(paramIndex++, status);
+            }
+            if (role != null) {
+                stmt.setInt(paramIndex++, role);
+            }
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in countStaff: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return count;
+    }
   public List<User> getStaffsByBranchIDForOutcome(int branchId, String dbName) throws SQLException {
         List<User> staffs = new ArrayList<>();
 

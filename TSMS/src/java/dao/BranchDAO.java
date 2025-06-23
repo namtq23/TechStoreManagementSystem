@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import model.Branch;
+import model.Branches;
 import util.DBUtil;
 
 /**
@@ -61,6 +62,25 @@ public class BranchDAO {
         }
         
         return branches;    
+    }
+    public List<Branches> getAllBranch(String dbName) {
+        List<Branches> branches = new ArrayList<>();
+        String query = "SELECT BranchID, BranchName FROM Branches WHERE IsActive = 1";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Branches branch = new Branches();
+                branch.setBranchID(rs.getInt("BranchID"));
+                branch.setBranchName(rs.getString("BranchName"));
+                branches.add(branch);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getAllBranches: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return branches;
     }
         
         

@@ -19,6 +19,10 @@ public class Warehouse {
         this.wareHouseAddress = wareHouseAddress;
     }
 
+    public Warehouse() {
+    }
+    
+
     public int getWareHouseId() {
         return wareHouseId;
     }

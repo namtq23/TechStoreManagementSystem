@@ -60,6 +60,25 @@ public class WareHouseDAO {
 
         return names;
     }
+    public List<Warehouse> getAllWarehouses(String dbName) {
+        List<Warehouse> warehouses = new ArrayList<>();
+        String query = "SELECT WarehouseID, WarehouseName FROM Warehouses";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Warehouse warehouse = new Warehouse();
+                warehouse.setWareHouseId(rs.getInt("WarehouseID"));
+                warehouse.setWareHouseName(rs.getString("WarehouseName"));
+                warehouses.add(warehouse);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getAllWarehouses: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return warehouses;
+    }
 
     private static Warehouse extractWareHouseFromResultSet(ResultSet rs) throws SQLException {
         Warehouse wh = new Warehouse(rs.getInt("WarehouseId"), rs.getNString("WarehouseName"), rs.getNString("Address"));
