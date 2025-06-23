@@ -912,6 +912,315 @@ public class PromotionDAO {
         }
         return productDetails;
     }
+    // Lấy thông tin chi nhánh theo ID
+
+    public Branch getBranchById(String dbName, int branchId) throws SQLException {
+        String sql = "SELECT BranchID, BranchName, Address, Phone, IsActive FROM Branches WHERE BranchID = ?";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, branchId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Branch(
+                              rs.getInt("BranchID"),
+                              rs.getString("BranchName"),
+                              rs.getString("Address"),
+                              rs.getString("Phone"),
+                              rs.getInt("IsActive")
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
+// Lấy sản phẩm áp dụng khuyến mãi có trong chi nhánh cụ thể
+    public List<ProductDetails> getProductDetailsByPromotionAndBranch(String dbName, int promotionId, int branchId) throws SQLException {
+    List<ProductDetails> productDetails = new ArrayList<>();
+
+    // Query đúng theo schema thực tế
+    String sql = "SELECT DISTINCT pd.ProductDetailID, pd.Description, pd.ProductCode, pd.WarrantyPeriod, "
+              + "pd.CreatedAt, pd.UpdatedAt, pd.ProductNameUnsigned, "
+              + "ip.Quantity "
+              + "FROM ProductDetails pd "
+              + "JOIN PromotionProducts pp ON pd.ProductDetailID = pp.ProductDetailID "
+              + "JOIN InventoryProducts ip ON pd.ProductDetailID = ip.ProductDetailID "
+              + "JOIN Inventory i ON ip.InventoryID = i.InventoryID "
+              + "WHERE pp.PromotionID = ? AND i.BranchID = ? AND ip.Quantity > 0";
+
+    System.out.println("DEBUG SQL: " + sql);
+    System.out.println("DEBUG Params: promotionId=" + promotionId + ", branchId=" + branchId);
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setInt(1, promotionId);
+        stmt.setInt(2, branchId);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                ProductDetails pd = new ProductDetails(
+                    rs.getInt("ProductDetailID"),  // ✅ Đúng tên cột
+                    rs.getString("Description"),
+                    rs.getString("ProductCode"),
+                    rs.getString("WarrantyPeriod"),
+                    rs.getTimestamp("CreatedAt"),
+                    rs.getTimestamp("UpdatedAt")
+                );
+                
+                // Thêm thông tin quantity từ InventoryProducts
+                pd.setQuantity(rs.getInt("Quantity"));
+                
+                productDetails.add(pd);
+                System.out.println("DEBUG: Found product: " + pd.getProductCode() + " - Qty: " + pd.getQuantity());
+            }
+        }
+    } catch (SQLException e) {
+        System.out.println("ERROR in getProductDetailsByPromotionAndBranch: " + e.getMessage());
+        e.printStackTrace();
+        throw e;
+    }
+
+    return productDetails;
+}
+// Method tìm kiếm promotions theo chi nhánh
+
+    public List<PromotionDTO> searchPromotionsByBranch(String dbName, PromotionSearchCriteria criteria, int branchId) throws SQLException {
+        List<PromotionDTO> promotions = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT DISTINCT p.PromotionID, p.PromoName, p.DiscountPercent, p.StartDate, p.EndDate ");
+        sql.append("FROM Promotions p ");
+        sql.append("INNER JOIN PromotionBranches pb ON p.PromotionID = pb.PromotionID ");
+        sql.append("WHERE pb.BranchID = ? ");
+
+        List<Object> parameters = new ArrayList<>();
+        parameters.add(branchId);
+
+        // Thêm search term condition
+        if (criteria.getSearchTerm() != null && !criteria.getSearchTerm().trim().isEmpty()) {
+            sql.append("AND p.PromoName LIKE ? ");
+            parameters.add("%" + criteria.getSearchTerm().trim() + "%");
+        }
+
+        // Thêm status filter
+        if (criteria.getStatusFilter() != null && !criteria.getStatusFilter().equals("all")) {
+            Date currentDate = new Date(System.currentTimeMillis());
+            switch (criteria.getStatusFilter()) {
+                case "active":
+                    sql.append("AND p.StartDate <= ? AND p.EndDate >= ? ");
+                    parameters.add(currentDate);
+                    parameters.add(currentDate);
+                    break;
+                case "scheduled":
+                    sql.append("AND p.StartDate > ? ");
+                    parameters.add(currentDate);
+                    break;
+                case "expired":
+                    sql.append("AND p.EndDate < ? ");
+                    parameters.add(currentDate);
+                    break;
+            }
+        }
+
+        // Thêm discount filter
+        if (criteria.getDiscountFilter() != null && !criteria.getDiscountFilter().equals("all")) {
+            switch (criteria.getDiscountFilter()) {
+                case "low":
+                    sql.append("AND p.DiscountPercent < 15 ");
+                    break;
+                case "medium":
+                    sql.append("AND p.DiscountPercent >= 15 AND p.DiscountPercent <= 25 ");
+                    break;
+                case "high":
+                    sql.append("AND p.DiscountPercent > 25 ");
+                    break;
+            }
+        }
+
+        // Thêm sorting và pagination
+        sql.append("ORDER BY p.").append(criteria.getSortBy()).append(" ").append(criteria.getSortOrder()).append(" ");
+        sql.append("OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+        int offset = (criteria.getPage() - 1) * criteria.getPageSize();
+        parameters.add(offset);
+        parameters.add(criteria.getPageSize());
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            stmt = conn.prepareStatement(sql.toString());
+
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                PromotionDTO promotion = new PromotionDTO();
+                promotion.setPromotionID(rs.getInt("PromotionID"));
+                promotion.setPromoName(rs.getString("PromoName"));
+                promotion.setDiscountPercent(rs.getDouble("DiscountPercent"));
+                promotion.setStartDate(rs.getDate("StartDate"));
+                promotion.setEndDate(rs.getDate("EndDate"));
+
+                // Tính toán status
+                promotion.setStatus(calculatePromotionStatus(promotion.getStartDate(), promotion.getEndDate()));
+
+                // Lấy thông tin branch và product count
+                try {
+                    promotion.setBranchCount(getBranchCount(dbName, promotion.getPromotionID()));
+                    promotion.setProductCount(getProductCount(dbName, promotion.getPromotionID()));
+                } catch (Exception e) {
+                    promotion.setBranchCount(0);
+                    promotion.setProductCount(0);
+                }
+
+                promotions.add(promotion);
+            }
+
+        } finally {
+            if (rs != null) try {
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            if (stmt != null) try {
+                stmt.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            DBUtil.closeConnection(conn);
+        }
+
+        return promotions;
+    }
+
+// Method đếm số lượng promotions theo chi nhánh
+    public int countPromotionsByBranch(String dbName, PromotionSearchCriteria criteria, int branchId) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(DISTINCT p.PromotionID) ");
+        sql.append("FROM Promotions p ");
+        sql.append("INNER JOIN PromotionBranches pb ON p.PromotionID = pb.PromotionID ");
+        sql.append("WHERE pb.BranchID = ? ");
+
+        List<Object> parameters = new ArrayList<>();
+        parameters.add(branchId);
+
+        // Thêm các conditions giống như searchPromotionsByBranch
+        if (criteria.getSearchTerm() != null && !criteria.getSearchTerm().trim().isEmpty()) {
+            sql.append("AND p.PromoName LIKE ? ");
+            parameters.add("%" + criteria.getSearchTerm().trim() + "%");
+        }
+
+        if (criteria.getStatusFilter() != null && !criteria.getStatusFilter().equals("all")) {
+            Date currentDate = new Date(System.currentTimeMillis());
+            switch (criteria.getStatusFilter()) {
+                case "active":
+                    sql.append("AND p.StartDate <= ? AND p.EndDate >= ? ");
+                    parameters.add(currentDate);
+                    parameters.add(currentDate);
+                    break;
+                case "scheduled":
+                    sql.append("AND p.StartDate > ? ");
+                    parameters.add(currentDate);
+                    break;
+                case "expired":
+                    sql.append("AND p.EndDate < ? ");
+                    parameters.add(currentDate);
+                    break;
+            }
+        }
+
+        if (criteria.getDiscountFilter() != null && !criteria.getDiscountFilter().equals("all")) {
+            switch (criteria.getDiscountFilter()) {
+                case "low":
+                    sql.append("AND p.DiscountPercent < 15 ");
+                    break;
+                case "medium":
+                    sql.append("AND p.DiscountPercent >= 15 AND p.DiscountPercent <= 25 ");
+                    break;
+                case "high":
+                    sql.append("AND p.DiscountPercent > 25 ");
+                    break;
+            }
+        }
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            stmt = conn.prepareStatement(sql.toString());
+
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } finally {
+            if (rs != null) try {
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            if (stmt != null) try {
+                stmt.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            DBUtil.closeConnection(conn);
+        }
+
+        return 0;
+    }
+
+// Method kiểm tra promotion có áp dụng cho chi nhánh không
+    public boolean isPromotionApplicableToBranch(String dbName, int promotionId, int branchId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM PromotionBranches WHERE PromotionID = ? AND BranchID = ?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnectionTo(dbName);
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, promotionId);
+            stmt.setInt(2, branchId);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } finally {
+            if (rs != null) try {
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            if (stmt != null) try {
+                stmt.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            DBUtil.closeConnection(conn);
+        }
+
+        return false;
+    }
 
     // Test connection method
     public boolean testConnection(String dbName) {

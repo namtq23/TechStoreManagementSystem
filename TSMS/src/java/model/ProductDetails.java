@@ -14,17 +14,19 @@ import java.sql.Timestamp;
 public class ProductDetails {
     private int productDetailID;
     private String description;
-    private String serialNumber;
+    private String productCode;
     private String warrantyPeriod;
     private Timestamp detailCreatedAt;
     private Timestamp updatedAt;
-
+    private String productNameUnsigned;  
+    private int quantity;  
+    
     // Constructor
-    public ProductDetails(int productDetailID, String description, String serialNumber,
+    public ProductDetails(int productDetailID, String description, String productCode,
                          String warrantyPeriod, Timestamp detailCreatedAt, Timestamp updatedAt) {
         this.productDetailID = productDetailID;
         this.description = description;
-        this.serialNumber = serialNumber;
+        this.productCode = productCode;
         this.warrantyPeriod = warrantyPeriod;
         this.detailCreatedAt = detailCreatedAt;
         this.updatedAt = updatedAt;
@@ -39,8 +41,8 @@ public class ProductDetails {
         return description;
     }
 
-    public String getSerialNumber() {
-        return serialNumber;
+    public String getProductCode() {
+        return productCode;
     }
 
     public String getWarrantyPeriod() {
@@ -54,6 +56,16 @@ public class ProductDetails {
     public Timestamp getUpdatedAt() {
         return updatedAt;
     }
+    
+    public String getProductNameUnsigned() {
+        return productNameUnsigned;
+    }
+    
+    public int getQuantity() {
+        return quantity;
+    }
+
+    
 
     // Setter
     public void setProductDetailID(int productDetailID) {
@@ -64,8 +76,8 @@ public class ProductDetails {
         this.description = description;
     }
 
-    public void setSerialNumber(String serialNumber) {
-        this.serialNumber = serialNumber;
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
     }
 
     public void setWarrantyPeriod(String warrantyPeriod) {
@@ -79,14 +91,22 @@ public class ProductDetails {
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
-
+    
+    public void setProductNameUnsigned(String productNameUnsigned) {
+        this.productNameUnsigned = productNameUnsigned;
+    }
+    
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+    
     // toString()
     @Override
     public String toString() {
         return "ProductDetail{" +
                 "productDetailID=" + productDetailID +
                 ", description='" + description + '\'' +
-                ", serialNumber='" + serialNumber + '\'' +
+                ", productCode='" + productCode + '\'' +
                 ", warrantyPeriod='" + warrantyPeriod + '\'' +
                 ", detailCreatedAt=" + detailCreatedAt +
                 ", updatedAt=" + updatedAt +

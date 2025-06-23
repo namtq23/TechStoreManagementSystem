@@ -77,6 +77,11 @@
                         </div>
                     </div>
                     
+                    <a href="bm-promotions" class="nav-item">
+                        <i class="fas fa-ticket"></i>
+                        Khuyến mãi
+                    </a>
+                    
                     <div class="nav-item dropdown">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-chart-bar"></i>
