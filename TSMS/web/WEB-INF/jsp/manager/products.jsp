@@ -6,7 +6,6 @@
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ page import="java.util.*, model.ProductDTO" %>
 <%@ page import="util.Validate" %>
 <!DOCTYPE html>
@@ -229,19 +228,19 @@
                                     <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
                                     <input type="text" name="search" placeholder="Theo tên hàng" value="${param.search}"
                                        style="padding: 10px 10px 10px 35px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
-                            </div>
+                                </div>
                             <c:forEach var="catId" items="${paramValues.categories}">
                                 <input type="hidden" name="categories" value="${catId}" />
                             </c:forEach>
-                            <input type="hidden" name="inventory" value="${param.inventory}" />
-                            <input type="hidden" name="minPrice" value="${param.minPrice}" />
-                            <input type="hidden" name="maxPrice" value="${param.maxPrice}" />
-                            <input type="hidden" name="status" value="${param.status}" />
-                            <input type="hidden" name="recordsPerPage" value="${recordsPerPage}" />
-                            <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
-                        </form>
+                                <input type="hidden" name="inventory" value="${param.inventory}" />
+                                <input type="hidden" name="minPrice" value="${param.minPrice}" />
+                                <input type="hidden" name="maxPrice" value="${param.maxPrice}" />
+                                <input type="hidden" name="status" value="${param.status}" />
+                                <input type="hidden" name="recordsPerPage" value="${recordsPerPage}" />
+                                <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
+                            </form>
+                        </div>
                     </div>
-                </div>
 
                 <!-- Products Table -->
                 <div class="table-container">

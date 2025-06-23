@@ -21,40 +21,76 @@
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="so-overview"" class="logo">
+                    <a href="so-overview" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="so-overview"" class="nav-item">
+                    <a href="so-overview" class="nav-item">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
-                    <a href="so-products" class="nav-item">
+
+                    <a href="so-products?page=1" class="nav-item">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
-                    <a href="so-orders" class="nav-item">
-                        <i class="fas fa-exchange-alt"></i>
-                        Giao dịch
+
+                    <div class="nav-item dropdown">
+                        <a href="#" class="dropdown-toggle">
+                            <i class="fas fa-exchange-alt"></i>
+                            Giao dịch
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="so-orders" class="dropdown-item">Đơn hàng</a>
+                            <a href="so-createimport" class="dropdown-item">Tạo đơn nhập hàng</a>
+                            <a href="so-ienoti" class="dropdown-item">Thông báo nhập/xuất</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="#" class="dropdown-toggle">
+                            <i class="fas fa-handshake"></i>
+                            Đối tác
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="so-customer" class="dropdown-item">Khách hàng</a>
+                            <a href="so-supplier" class="dropdown-item">Nhà cung cấp</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item dropdown active">
+                        <a href="#" class="dropdown-toggle">
+                            <i class="fas fa-users"></i>
+                            Nhân viên
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="so-staff" class="dropdown-item">Danh sách nhân viên</a>
+                            <a href="so-commission" class="dropdown-item">Hoa hồng</a>
+                        </div>
+                    </div>
+
+                    <a href="so-promotions" class="nav-item">
+                        <i class="fas fa-gift"></i>
+                        Khuyến mãi
                     </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-handshake"></i>
-                        Đối tác
-                    </a>
-                    <a href="so-staff" class="nav-item">
-                        <i class="fas fa-users"></i>
-                        Nhân viên
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-wallet"></i>
-                        Sổ quỹ
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-chart-bar"></i>
-                        Báo cáo
-                    </a>
+
+                    <div class="nav-item dropdown">
+                        <a href="#" class="dropdown-toggle">
+                            <i class="fas fa-chart-bar"></i>
+                            Báo cáo
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="so-invoices?reportType=income" class="dropdown-item">Doanh Thu thuần</a>
+                            <a href="so-invoices?reportType=outcome" class="dropdown-item">Khoảng chi</a>
+                        </div>
+                    </div>
+
                 </nav>
 
                 <div class="header-right">
@@ -66,8 +102,8 @@
                             <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
-                    </div>
-                </div>        
+                    </div>      
+                </div>
             </div>
         </header>
 
