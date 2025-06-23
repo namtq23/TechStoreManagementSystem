@@ -1141,3 +1141,7 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3) !important;
 }
+
+.dropdown-toggle::after {
+    display: none !important;
+}

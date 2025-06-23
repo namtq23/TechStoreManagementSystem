@@ -9,14 +9,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TSMS - Khuyến mãi chi nhánh</title>
         <link rel="stylesheet" href="css/so-promotion.css">
+        <link rel="stylesheet" href="css/header.css">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <style>
             /* Custom styles for Branch Manager */
             .page-header h1::before {
                 margin-right: 8px;
             }
-            
+
             .readonly-indicator {
                 background: linear-gradient(45deg, #6c757d, #495057);
                 color: white;
@@ -26,13 +26,13 @@
                 font-weight: bold;
                 margin-left: 10px;
             }
-            
+
             .action-buttons .btn {
                 background: #17a2b8;
                 border-color: #17a2b8;
                 color: white;
             }
-            
+
             .action-buttons .btn:hover {
                 background: #138496;
                 border-color: #117a8b;
@@ -40,7 +40,100 @@
         </style>
     </head>
     <body>
-        <jsp:include page="../common/header-bm.jsp" />
+        <header class="header">
+            <div class="header-container">
+                <div class="logo">
+                    <a href="bm-overview" class="logo">
+                        <div class="logo-icon">T</div>
+                        <span class="logo-text">TSMS</span>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <a href="bm-overview" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        Tổng quan
+                    </a>
+
+                    <a href="bm-products?page=1" class="nav-item">
+                        <i class="fas fa-box"></i>
+                        Hàng hóa
+                    </a>
+
+                    <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-exchange-alt"></i>
+                            Giao dịch
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="#" class="dropdown-item">Đơn hàng</a>
+                            <a href="#" class="dropdown-item">Nhập hàng</a>
+                            <a href="#" class="dropdown-item">Tạo yêu cầu nhập</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-handshake"></i>
+                            Đối tác
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="bm-customer" class="dropdown-item">Khách hàng</a>
+                            <a href="bm-supplier" class="dropdown-item">Nhà cung cấp</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-users"></i>
+                            Nhân viên
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="bm-staff" class="dropdown-item">Danh sách nhân viên</a>
+                            <a href="#" class="dropdown-item">Hoa hồng</a>
+                        </div>
+                    </div>
+
+                    <a href="bm-promotions" class="nav-item active">
+                        <i class="fas fa-ticket"></i>
+                        Khuyến mãi
+                    </a>
+
+                    <div class="nav-item dropdown">
+                        <a href="" class="dropdown-toggle">
+                            <i class="fas fa-chart-bar"></i>
+                            Báo cáo
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="#" class="dropdown-item">Tài chính</a>
+                            <a href="#" class="dropdown-item">Đật hàng</a>
+                            <a href="#" class="dropdown-item">Hàng hoá</a>
+                            <a href="#" class="dropdown-item">Khách hàng</a>
+                        </div>
+                    </div>
+
+                    <a href="bm-cart" class="nav-item">
+                        <i class="fas fa-cash-register"></i>
+                        Bán hàng
+                    </a>
+                </nav>
+
+                <div class="header-right">
+                    <div class="user-dropdown">
+                        <a href="" class="user-icon gradient" id="dropdownToggle">
+                            <i class="fas fa-user-circle fa-2x"></i>
+                        </a>
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="logout" class="dropdown-item">Đăng xuất</a>
+                        </div>
+                    </div>      
+                </div>
+            </div>
+        </header>
         <div class="main-container">
             <!-- Sidebar -->
             <aside class="sidebar">
@@ -338,29 +431,29 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            // Filter functions
-            function filterPromotions() {
-                const mainSearchInput = document.querySelector('input[name="search"]');
-                const search = mainSearchInput ? mainSearchInput.value : '';
+                                // Filter functions
+                                function filterPromotions() {
+                                    const mainSearchInput = document.querySelector('input[name="search"]');
+                                    const search = mainSearchInput ? mainSearchInput.value : '';
 
-                const statusFilter = document.querySelector('input[name="statusFilter"]:checked') ?
-                        document.querySelector('input[name="statusFilter"]:checked').value : '';
-                const discountFilter = document.querySelector('input[name="discountFilter"]:checked') ?
-                        document.querySelector('input[name="discountFilter"]:checked').value : '';
+                                    const statusFilter = document.querySelector('input[name="statusFilter"]:checked') ?
+                                            document.querySelector('input[name="statusFilter"]:checked').value : '';
+                                    const discountFilter = document.querySelector('input[name="discountFilter"]:checked') ?
+                                            document.querySelector('input[name="discountFilter"]:checked').value : '';
 
-                let url = 'bm-promotions?page=1';
+                                    let url = 'bm-promotions?page=1';
 
-                if (search && search.trim() !== '') {
-                    url += '&search=' + encodeURIComponent(search.trim());
-                }
+                                    if (search && search.trim() !== '') {
+                                        url += '&search=' + encodeURIComponent(search.trim());
+                                    }
 
-                if (statusFilter && statusFilter !== 'all')
-                    url += '&status=' + statusFilter;
-                if (discountFilter && discountFilter !== 'all')
-                    url += '&discount=' + discountFilter;
+                                    if (statusFilter && statusFilter !== 'all')
+                                        url += '&status=' + statusFilter;
+                                    if (discountFilter && discountFilter !== 'all')
+                                        url += '&discount=' + discountFilter;
 
-                window.location.href = url;
-            }
+                                    window.location.href = url;
+                                }
         </script>
     </body>
 </html>

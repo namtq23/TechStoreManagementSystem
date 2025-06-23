@@ -63,6 +63,10 @@ class TSMSCashier {
                     this.showNotification(`Không thể thêm: chỉ còn ${product.quantity} sản phẩm trong kho`, 'error');
                     return;
                 }
+                if (product.isActive === "Không kinh doanh"){
+                    this.showNotification(`Sản phẩm đã ngừng kinh doanh!`, 'error');
+                    return;
+                }
                 e.preventDefault();
                 if (productCard) {
                     const productId = parseInt(productCard.dataset.productId);
