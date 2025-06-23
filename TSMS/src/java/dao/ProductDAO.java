@@ -408,40 +408,6 @@ public static ProductDetailDTO getProductDetailById(String dbName, int productDe
         return "Không xác định";
     }
 
-    // Method để lấy tất cả Brands
-    public List<Brand> getAllBrands(String dbName) throws SQLException {
-        List<Brand> brands = new ArrayList<>();
-        String sql = "SELECT BrandID, BrandName FROM Brands ORDER BY BrandName";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                Brand brand = new Brand();
-                brand.setBrandID(rs.getInt("BrandID"));
-                brand.setBrandName(rs.getString("BrandName"));
-                brands.add(brand);
-            }
-        }
-        return brands;
-    }
-
-
-    // Method để lấy tất cả Suppliers
-    public List<Supplier> getAllSuppliers(String dbName) throws SQLException {
-        List<Supplier> suppliers = new ArrayList<>();
-        String sql = "SELECT SupplierID, SupplierName FROM Suppliers ORDER BY SupplierName";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                Supplier supplier = new Supplier();
-                supplier.setSupplierID(rs.getInt("SupplierID"));
-                supplier.setSupplierName(rs.getString("SupplierName"));
-                suppliers.add(supplier);
-            }
-        }
-        return suppliers;
-    }
 
     // Method để update sản phẩm (chỉ những trường được phép)
     public boolean updateProductDetailLimited(String dbName, int productDetailId, String description, 
@@ -601,85 +567,6 @@ public static ProductDetailDTO getProductDetailById(String dbName, int productDe
         return products;
     }
 
-    public List<Category> getAllCategories(String dbName) {
-        List<Category> categories = new ArrayList<>();
-        String query = "SELECT CategoryID, CategoryName FROM Categories";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Category category = new Category();
-                category.setCategoryID(rs.getInt("CategoryID"));
-                category.setCategoryName(rs.getString("CategoryName"));
-                categories.add(category);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return categories;
-    }
-
-
-    public List<Supplier> getAllSupplier(String dbName) throws SQLException {
-        List<Supplier> suppliers = new ArrayList<>();
-        String sql = "SELECT SupplierID, SupplierName, ContactName, Phone, Email FROM Suppliers";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Supplier supplier = new Supplier();
-                supplier.setSupplierID(rs.getInt("SupplierID"));
-                supplier.setSupplierName(rs.getString("SupplierName"));
-                supplier.setContactName(rs.getString("ContactName"));
-                supplier.setPhone(rs.getString("Phone"));
-                supplier.setEmail(rs.getString("Email"));
-                suppliers.add(supplier);
-            }
-        }
-        return suppliers;
-    }
-
-    public boolean isCategoryNameExists(String dbName, String categoryName) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM Categories WHERE CategoryName = ?";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, categoryName);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean isBrandNameExists(String dbName, String brandName) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM Brands WHERE BrandName = ?";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, brandName);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean isSupplierNameExists(String dbName, String supplierName) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM Suppliers WHERE SupplierName = ?";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, supplierName);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                }
-            }
-        }
-        return false;
-    }
-
     public boolean isProductCodeExists(String dbName, String productCode) throws SQLException {
         String sql = "SELECT COUNT(*) FROM ProductDetails WHERE ProductCode = ?";
         try (Connection conn = DBUtil.getConnectionTo(dbName);
@@ -706,48 +593,6 @@ public static ProductDetailDTO getProductDetailById(String dbName, int productDe
             }
         }
         return false;
-    }
-
-    public boolean addCategory(String dbName, String categoryName) throws SQLException {
-    String maxIdSql = "SELECT MAX(CategoryID) FROM Categories";
-    int newId;
-    try (Connection conn = DBUtil.getConnectionTo(dbName);
-         PreparedStatement psMax = conn.prepareStatement(maxIdSql);
-         ResultSet rs = psMax.executeQuery()) {
-        newId = rs.next() ? rs.getInt(1) + 1 : 1;
-    }
-
-    String sql = "INSERT INTO Categories (CategoryID, CategoryName) VALUES (?, ?)";
-    try (Connection conn = DBUtil.getConnectionTo(dbName);
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, newId);
-        ps.setString(2, categoryName);
-        int rowsAffected = ps.executeUpdate();
-        return rowsAffected > 0;
-    }
-}
-
-    public boolean addBrand(String dbName, String brandName) throws SQLException {
-        String sql = "INSERT INTO Brands (BrandName) VALUES (?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, brandName);
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
-        }
-    }
-
-    public boolean addSupplier(String dbName, String supplierName, String contactName, String phone, String email) throws SQLException {
-        String sql = "INSERT INTO Suppliers (SupplierName, ContactName, Phone, Email) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, supplierName);
-            ps.setString(2, contactName.isEmpty() ? null : contactName);
-            ps.setString(3, phone.isEmpty() ? null : phone);
-            ps.setString(4, email.isEmpty() ? null : email);
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
-        }
     }
 
     public boolean addProduct(String dbName, String productName, String fullName, String productCode,
