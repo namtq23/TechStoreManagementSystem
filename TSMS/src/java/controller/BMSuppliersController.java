@@ -25,6 +25,12 @@ public class BMSuppliersController extends HttpServlet {
             resp.sendRedirect("login");
             return;
         }
+        
+        int roleId = Integer.parseInt(session.getAttribute("roleId").toString());
+        if (roleId != 1) {
+            resp.sendRedirect("login");
+            return;
+        }
 
         String dbName = session.getAttribute("dbName").toString();
         String keyword = req.getParameter("keyword");

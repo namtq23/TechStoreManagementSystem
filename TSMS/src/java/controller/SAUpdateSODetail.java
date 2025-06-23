@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+ */
 package controller;
 
 import dao.UserDAO;
@@ -14,8 +18,8 @@ import model.ShopOwnerDTO;
  *
  * @author admin
  */
-@WebServlet(name = "SAShopOwnerDetailController", urlPatterns = {"/sa-sodetails"})
-public class SAShopOwnerDetailController extends HttpServlet {
+@WebServlet(name = "SAUpdateSODetail", urlPatterns = {"/sa-soUpdate"})
+public class SAUpdateSODetail extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -34,7 +38,7 @@ public class SAShopOwnerDetailController extends HttpServlet {
             ShopOwnerDTO shopOwner = UserDAO.getShopOwnerById(ownerId);
 
             request.setAttribute("shopOwner", shopOwner);
-            request.getRequestDispatcher("/WEB-INF/jsp/admin/sa-sodetails.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/admin/update-sodetail.jsp").forward(request, response);
 
         } catch (NumberFormatException | ServletException | IOException | SQLException e) {
             System.out.println("error");

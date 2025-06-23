@@ -87,7 +87,7 @@ public class SOStaffController extends HttpServlet {
             String roleId = req.getParameter("role");
             String password = req.getParameter("password");
             String confirmedPassword = req.getParameter("confirmPassword");
-
+            
             HttpSession session = req.getSession(true);
             Object dbNameObj = session.getAttribute("dbName");
 

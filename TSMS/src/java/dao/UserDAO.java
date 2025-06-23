@@ -257,7 +257,7 @@ public class UserDAO {
             PasswordHash, FullName, Email, Phone,
             BranchID, WarehouseID, RoleID, IsActive,
             Gender, AvaUrl
-        ) VALUES (?, ?, ?, ?, ?, null, ?, ?, ?, ?);
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     """;
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -266,10 +266,11 @@ public class UserDAO {
             stmt.setString(3, user.getEmail());
             stmt.setString(4, user.getPhone());
             stmt.setString(5, user.getBranchId());
-            stmt.setInt(6, user.getRoleId());
-            stmt.setInt(7, user.getIsActive());
-            stmt.setString(8, user.getGender());
-            stmt.setString(9, user.getAvaUrl());
+            stmt.setString(6, user.getWarehouseId());
+            stmt.setInt(7, user.getRoleId());
+            stmt.setInt(8, user.getIsActive());
+            stmt.setString(9, user.getGender());
+            stmt.setString(10, user.getAvaUrl());
 
             int rs = stmt.executeUpdate();
             if (rs > 0) {
@@ -382,6 +383,28 @@ public class UserDAO {
 
         return user;
     }
+    
+   
+  public List<User> getStaffsByBranchIDForOutcome(int branchId, String dbName) throws SQLException {
+        List<User> staffs = new ArrayList<>();
+
+        String sql = """
+        SELECT * FROM Users 
+        WHERE BranchID = ? AND RoleID IN (1, 2,0) AND IsActive = 1
+        ORDER BY RoleID, FullName
+    """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, branchId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                User staff = extractUserFromResultSet(rs);
+                staffs.add(staff);
+            }
+        }
+
+        return staffs;
+    }
 
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
@@ -392,4 +415,7 @@ public class UserDAO {
         ShopOwner so = ud.getShopOwnwerByEmail("ndpp.work@gmail.com");
         System.out.println(so.getPassword());
     }
+    
+    
+    
 }

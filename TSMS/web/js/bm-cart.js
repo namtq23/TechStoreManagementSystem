@@ -33,8 +33,6 @@ class TSMSCashier {
 
             const data = await response.json();
             this.products = data;
-
-            console.log("Loaded products:", this.products);
         } catch (error) {
             console.error("Error fetching products:", error);
         }
@@ -48,15 +46,14 @@ class TSMSCashier {
 
             const data = await response.json();
             this.customers = data;
-
-            console.log("Loaded customers:", this.customers);
         } catch (error) {
             console.error("Error fetching customers:", error);
         }
     }
 
     bindEvents() {
-        const productList = this.products;
+        const productList = JSON.parse(JSON.stringify(this.products));
+
         document.addEventListener('click', (e) => {
             const productCard = e.target.closest('.product-card');
 
@@ -69,7 +66,40 @@ class TSMSCashier {
                 e.preventDefault();
                 if (productCard) {
                     const productId = parseInt(productCard.dataset.productId);
-                    this.addToCart(productId);
+                    const existInCart = this.cart.find(p => p.productDetailId === productId);
+
+                    if (existInCart === undefined) {
+                        this.addToCart(productId);
+                    } else {
+                        const product = this.products.find(p => p.productDetailId === productId);
+                        const row = Array.from(document.querySelectorAll('.item-row')).find(row => {
+                            const code = row.cells[1].textContent;
+                            return code === String(product.productDetailId);
+                        });
+
+                        if (row) {
+                            const quantityInput = row.querySelector('.quantity');
+                            console.log(quantityInput);
+                            let quantity = parseInt(quantityInput.value);
+                            const maxQty = parseInt(product.quantity);
+
+                            if (quantity < maxQty) {
+                                quantity++;
+                                quantityInput.value = quantity;
+                                this.updateRowTotal(row);
+
+                                // Update cart data
+                                const productInCart = this.cart.find(p => p.productCode === product.productCode);
+                                if (productInCart) {
+                                    productInCart.quantity = quantity;
+                                }
+                                this.updateSummary();
+                                this.showNotification(`Đã tăng số lượng ${product.description}`);
+                            } else {
+                                this.showNotification(`Không thể thêm: chỉ còn ${product.quantity} sản phẩm trong kho`, 'error');
+                            }
+                        }
+                    }
                 }
                 return;
             }
@@ -101,12 +131,11 @@ class TSMSCashier {
             if (e.target.classList.contains('qty-btn')) {
                 const isIncrement = e.target.textContent === '+';
                 const row = e.target.closest('.item-row');
-                console.log(row);
                 const quantityInput = row.querySelector('.quantity');
                 let quantity = parseInt(quantityInput.value);
-
                 const product = productList.find(p => p.productDetailId === parseInt(row.querySelector('.productId').textContent));
                 const maxQty = parseInt(product.quantity);
+
 
                 if (isNaN(quantity))
                     quantity = 1;
@@ -123,7 +152,7 @@ class TSMSCashier {
                 this.updateRowTotal(row);
 
                 // Update cart data
-                const code = row.cells[1].textContent;
+                const code = row.cells[2].textContent;
                 const productInCart = this.cart.find(p => p.productCode === code);
                 if (productInCart) {
                     productInCart.quantity = quantity;
@@ -137,13 +166,15 @@ class TSMSCashier {
         document.addEventListener('click', (e) => {
             if (e.target.closest('.delete-btn')) {
                 const row = e.target.closest('.item-row');
-                const code = row.cells[1].textContent;
+                const code = row.cells[2].textContent; // Fixed: Should be cells[2] for productCode
 
                 this.showDeleteConfirmation(() => {
-                    // Remove from cart array
-                    this.cart = this.cart.filter(item => item.productCode !== code);
+                    // Remove from cart array using productDetailId instead
+                    const productId = parseInt(row.cells[1].textContent); // productDetailId
+                    this.cart = this.cart.filter(item => item.productDetailId !== productId);
                     row.remove();
                     this.updateSummary();
+                    this.showNotification('Đã xóa sản phẩm khỏi hóa đơn', 'error');
                 });
             }
         });
@@ -283,6 +314,8 @@ class TSMSCashier {
     }
 
     bindCreateCustomerEvents() {
+        const customersList = JSON.parse(JSON.stringify(this.customers));
+
         const addBtn = document.getElementById("addCustomerBtn");
         const createForm = document.getElementById("createCustomerForm");
         const closeBtn = document.getElementById("closeCustomerSubmit");
@@ -309,6 +342,13 @@ class TSMSCashier {
             const address = createForm.querySelector("input[name='address']").value;
             const email = createForm.querySelector("input[name='email']").value;
             const dob = createForm.querySelector("input[name='dob']").value;
+
+            for (const customer of customersList) {
+                if (phone === customer.phoneNumber) {
+                    this.showNotification('Khách hàng đã tồn tại trong hệ thống!', 'error');
+                    return; 
+                }
+            }
 
             input.value = fullName;
 
@@ -361,11 +401,11 @@ class TSMSCashier {
                 this.showNotification(`Không thể thêm: chỉ còn ${product.quantity} sản phẩm trong kho`, 'error');
             }
         } else {
-            const productToAdd = {
+            const productCart = {
                 ...product,
                 quantity: 1
             };
-            this.addNewInvoiceRow(productToAdd);
+            this.addNewInvoiceRow(productCart);
             this.updateSummary();
             this.showNotification(`Đã thêm ${product.description} vào hóa đơn`);
         }
@@ -373,6 +413,7 @@ class TSMSCashier {
 
     addNewInvoiceRow(product) {
         this.cart.push(product);
+        const productInCart = this.cart.find(p => p.productDetailId === product.productDetailId);
         const tbody = document.querySelector('.invoice-table tbody');
         const rowCount = tbody.children.length;
         const row = document.createElement('tr');
@@ -423,13 +464,14 @@ class TSMSCashier {
         }
 
         row.innerHTML = `
-        <td class="productId">${rowCount + 1}</td>
+        <td style="">${rowCount + 1}</td>
+        <td class="productId">${product.productDetailId}</td>
         <td>${product.productCode || 'N/A'}</td>
         <td>${product.description || 'N/A'}</td>
         <td>
             <div class="quantity-controls">
                 <button class="qty-btn"">-</button>
-                <input type="text" class="quantity" value="1" min="1" max="${product.quantity}">
+                <input type="text" class="quantity" value="1" min="1" max="${productInCart.quantity}">
                 <button class="qty-btn"">+</button>
             </div>
         </td>
@@ -456,7 +498,6 @@ class TSMSCashier {
     updateSummary() {
         let totalQuantity = 0;
         let subtotal = 0;
-
         this.cart.forEach(item => {
             totalQuantity += item.quantity;
 
@@ -473,7 +514,9 @@ class TSMSCashier {
 
         const discountInput = document.querySelector('#discountPercent');
         const discountPercent = parseFloat(discountInput.value) || 0;
-        const discountTotal = subtotal * (1 - discountPercent / 100);
+        const total = (subtotal * (110 / 100));
+        const discountTotal = (subtotal * (1 - discountPercent / 100) * (110 / 100));
+        const vatValue = discountTotal * (10 / 100);
 
         const cashGiven = getCashGivenValue();
         let changeDue = 0;
@@ -490,13 +533,15 @@ class TSMSCashier {
         if (summaryRows[1]) {
             summaryRows[1].querySelector('.summary-value').textContent = this.formatCurrency(subtotal);
         }
-        if (summaryRows[3]) {
-            summaryRows[3].querySelector('.summary-value').textContent = this.formatCurrency(subtotal);
+        if (summaryRows[2]) {
+            summaryRows[2].querySelector('.summary-value').textContent = this.formatCurrency(total);
         }
 
         const totalAmountEl = document.querySelector('#totalAmount');
         const amountDueEl = document.querySelector('#amountDue');
         const changeDueEl = document.querySelector('#changeDue');
+        const vat = document.querySelector('#vat');
+
 
         if (totalAmountEl)
             totalAmountEl.value = this.formatCurrency(subtotal);
@@ -504,6 +549,8 @@ class TSMSCashier {
             amountDueEl.value = this.formatCurrency(discountTotal);
         if (changeDueEl)
             changeDueEl.value = this.formatCurrency(changeDue);
+        if (vat)
+            vat.value = this.formatCurrency(vatValue);
     }
 
     searchProducts(query) {
