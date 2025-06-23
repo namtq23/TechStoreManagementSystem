@@ -14,17 +14,17 @@ import java.sql.Timestamp;
 public class ProductDetails {
     private int productDetailID;
     private String description;
-    private String serialNumber;
+    private String productCode;
     private String warrantyPeriod;
     private Timestamp detailCreatedAt;
     private Timestamp updatedAt;
 
     // Constructor
-    public ProductDetails(int productDetailID, String description, String serialNumber,
+    public ProductDetails(int productDetailID, String description, String ProductCode,
                          String warrantyPeriod, Timestamp detailCreatedAt, Timestamp updatedAt) {
         this.productDetailID = productDetailID;
         this.description = description;
-        this.serialNumber = serialNumber;
+        this.productCode = ProductCode;
         this.warrantyPeriod = warrantyPeriod;
         this.detailCreatedAt = detailCreatedAt;
         this.updatedAt = updatedAt;
@@ -39,8 +39,8 @@ public class ProductDetails {
         return description;
     }
 
-    public String getSerialNumber() {
-        return serialNumber;
+    public String getProductCode() {
+        return productCode;
     }
 
     public String getWarrantyPeriod() {
@@ -64,8 +64,8 @@ public class ProductDetails {
         this.description = description;
     }
 
-    public void setSerialNumber(String serialNumber) {
-        this.serialNumber = serialNumber;
+    public void setProductCode(String ProductCode) {
+        this.productCode = ProductCode;
     }
 
     public void setWarrantyPeriod(String warrantyPeriod) {
@@ -86,7 +86,7 @@ public class ProductDetails {
         return "ProductDetail{" +
                 "productDetailID=" + productDetailID +
                 ", description='" + description + '\'' +
-                ", serialNumber='" + serialNumber + '\'' +
+                ", ProductCode='" + ProductCode + '\'' +
                 ", warrantyPeriod='" + warrantyPeriod + '\'' +
                 ", detailCreatedAt=" + detailCreatedAt +
                 ", updatedAt=" + updatedAt +
