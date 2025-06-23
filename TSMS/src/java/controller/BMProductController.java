@@ -275,7 +275,7 @@ public class BMProductController extends HttpServlet {
             req.setAttribute("endProduct", Math.min(offset + pageSize, totalProducts));
             req.setAttribute("products", products);
 
-            req.setAttribute("categories", p.getAllCategories(dbName));
+            req.setAttribute("categories", c.getAllCategories(dbName));
             req.setAttribute("recordsPerPage", pageSize);
             req.setAttribute("currentPage", page);
 
