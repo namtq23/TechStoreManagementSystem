@@ -92,7 +92,7 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
         UserDAO userDAO = new UserDAO();
         BranchDAO branchDAO = new BranchDAO();
         WareHouseDAO warehouseDAO = new WareHouseDAO();
-        List<Branches> branchesList = branchDAO.getAllBranch(dbName);
+        List<Branch> branchesList = branchDAO.getAllBranches(dbName);
         List<Warehouse> warehousesList = warehouseDAO.getAllWarehouses(dbName);
         List<UserDTO> staffList = userDAO.getStaffListByPage(dbName, page, pageSize, status, role, search);
         int totalStaff = userDAO.countStaff(dbName, status, role, search);
