@@ -20,15 +20,15 @@
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
         <title>JSP Page</title>
         <style>
-.btn-successs {
-    background-color: #2196F3;
-}
+            .btn-successs {
+                background-color: #2196F3;
+            }
 
-.btn-successs:hover {
-    background-color: #1976D2;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
-}
+            .btn-successs:hover {
+                background-color: #1976D2;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+            }
         </style>
     </head>
     <body>
@@ -124,83 +124,83 @@
         <div class="main-container">
             <!-- Sidebar -->
             <aside class="sidebar">
-            <form action="so-staff" method="get" id="filterForm">
-            <!-- Status Filter -->
-            <div class="filter-section">
-                <div class="filter-header">
-                    <h3>Trạng thái nhân viên</h3>
-                    <i class="fas fa-chevron-up"></i>
-                </div>
-                <div class="filter-content">
-                    <div class="category-tree">
-                        <div class="category-item">
-                            <input type="radio" id="status-all" name="status" value="" ${selectedStatus == null ? 'checked' : ''}>
-                            <label for="status-all" class="category-label">
-                                <span>Tất cả</span>
-                            </label>
+                <form action="so-staff" method="get" id="filterForm">
+                    <!-- Status Filter -->
+                    <div class="filter-section">
+                        <div class="filter-header">
+                            <h3>Trạng thái nhân viên</h3>
+                            <i class="fas fa-chevron-up"></i>
                         </div>
-                        <div class="category-item">
-                            <input type="radio" id="status-1" name="status" value="1" ${selectedStatus == 1 ? 'checked' : ''}>
-                            <label for="status-1" class="category-label">
-                                <span>Đang làm việc</span>
-                            </label>
-                        </div>
-                        <div class="category-item">
-                            <input type="radio" id="status-0" name="status" value="0" ${selectedStatus == 0 ? 'checked' : ''}>
-                            <label for="status-0" class="category-label">
-                                <span>Nghỉ việc</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Role Filter -->
-            <div class="filter-section">
-                <div class="filter-header">
-                    <h3>Chức danh</h3>
-                </div>
-                <div class="filter-content">
-                    <div class="category-tree">
-                        <div class="category-item ${selectedRole == null ? 'selected' : ''}">
-                            <input type="radio" id="role-all" name="role" value="" ${selectedRole == null ? 'checked' : ''}>
-                            <label for="role-all" class="category-label">
-                                <span>Tất cả</span>
-                            </label>
-                        </div>
-                        <div class="category-item ${selectedRole == 1 ? 'selected' : ''}">
-                            <input type="radio" id="role-1" name="role" value="1" ${selectedRole == 1 ? 'checked' : ''}>
-                            <label for="role-1" class="category-label">
-                                <span>Quản lý chi nhánh</span>
-                            </label>
-                        </div>
-                        <div class="category-item ${selectedRole == 2 ? 'selected' : ''}">
-                            <input type="radio" id="role-2" name="role" value="2" ${selectedRole == 2 ? 'checked' : ''}>
-                            <label for="role-2" class="category-label">
-                                <span>Nhân viên bán hàng</span>
-                            </label>
-                        </div>
-                        <div class="category-item ${selectedRole == 3 ? 'selected' : ''}">
-                            <input type="radio" id="role-3" name="role" value="3" ${selectedRole == 3 ? 'checked' : ''}>
-                            <label for="role-3" class="category-label">
-                                <span>Quản lý kho</span>
-                            </label>
+                        <div class="filter-content">
+                            <div class="category-tree">
+                                <div class="category-item">
+                                    <input type="radio" id="status-all" name="status" value="" ${selectedStatus == null ? 'checked' : ''}>
+                                    <label for="status-all" class="category-label">
+                                        <span>Tất cả</span>
+                                    </label>
+                                </div>
+                                <div class="category-item">
+                                    <input type="radio" id="status-1" name="status" value="1" ${selectedStatus == 1 ? 'checked' : ''}>
+                                    <label for="status-1" class="category-label">
+                                        <span>Đang làm việc</span>
+                                    </label>
+                                </div>
+                                <div class="category-item">
+                                    <input type="radio" id="status-0" name="status" value="0" ${selectedStatus == 0 ? 'checked' : ''}>
+                                    <label for="status-0" class="category-label">
+                                        <span>Nghỉ việc</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <!-- Action Buttons -->
-            <div class="filter-actions">
-                <a href="so-staff?page=1" class="btn-clear">
-                    <i class="fas fa-eraser"></i>
-                    Xóa bộ lọc
-                </a>
-                <button type="submit" class="btn-apply">
-                    <i class="fas fa-filter"></i>
-                    Áp dụng lọc
-                </button>
-            </div>             
-            </form>
-        </aside>
+                    <!-- Role Filter -->
+                    <div class="filter-section">
+                        <div class="filter-header">
+                            <h3>Chức danh</h3>
+                        </div>
+                        <div class="filter-content">
+                            <div class="category-tree">
+                                <div class="category-item ${selectedRole == null ? 'selected' : ''}">
+                                    <input type="radio" id="role-all" name="role" value="" ${selectedRole == null ? 'checked' : ''}>
+                                    <label for="role-all" class="category-label">
+                                        <span>Tất cả</span>
+                                    </label>
+                                </div>
+                                <div class="category-item ${selectedRole == 1 ? 'selected' : ''}">
+                                    <input type="radio" id="role-1" name="role" value="1" ${selectedRole == 1 ? 'checked' : ''}>
+                                    <label for="role-1" class="category-label">
+                                        <span>Quản lý chi nhánh</span>
+                                    </label>
+                                </div>
+                                <div class="category-item ${selectedRole == 2 ? 'selected' : ''}">
+                                    <input type="radio" id="role-2" name="role" value="2" ${selectedRole == 2 ? 'checked' : ''}>
+                                    <label for="role-2" class="category-label">
+                                        <span>Nhân viên bán hàng</span>
+                                    </label>
+                                </div>
+                                <div class="category-item ${selectedRole == 3 ? 'selected' : ''}">
+                                    <input type="radio" id="role-3" name="role" value="3" ${selectedRole == 3 ? 'checked' : ''}>
+                                    <label for="role-3" class="category-label">
+                                        <span>Quản lý kho</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="filter-actions">
+                        <a href="so-staff?page=1" class="btn-clear">
+                            <i class="fas fa-eraser"></i>
+                            Xóa bộ lọc
+                        </a>
+                        <button type="submit" class="btn-apply">
+                            <i class="fas fa-filter"></i>
+                            Áp dụng lọc
+                        </button>
+                    </div>             
+                </form>
+            </aside>
 
 
             <!-- Main Content -->
@@ -209,107 +209,107 @@
                     <h1>Nhân viên</h1>
                     <div class="header-actions">
                         <form class="search-input" action="so-staff" method="get" style="display: flex; align-items: center; gap: 20px;">
-                        <div style="position: relative; flex: 1;">
-                            <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
-                            <input type="text" name="search" placeholder="Theo mã, tên nhân viên"  value="${search}"
-                                   style="padding: 10px 10px 10px 60px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
-                            <c:if test="${selectedStatus != null}">
-                                <input type="hidden" name="status" value="${selectedStatus}">
-                            </c:if>
-                            <c:if test="${selectedRole != null}">
-                                <input type="hidden" name="role" value="${selectedRole}">
-                            </c:if>
-                        </div>
+                            <div style="position: relative; flex: 1;">
+                                <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
+                                <input type="text" name="search" placeholder="Theo mã, tên nhân viên"  value="${search}"
+                                       style="padding: 10px 10px 10px 60px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
+                                <c:if test="${selectedStatus != null}">
+                                    <input type="hidden" name="status" value="${selectedStatus}">
+                                </c:if>
+                                <c:if test="${selectedRole != null}">
+                                    <input type="hidden" name="role" value="${selectedRole}">
+                                </c:if>
+                            </div>
                             <button type="submit" class="btn btn-successs">Tìm Kiếm</button>
-                    </form>
+                        </form>
                         <div>
-                        <button class="btn btn-success">
-                            <i class="fas fa-plus"></i>
-                            Thêm mới
-                        </button>
+                            <button class="btn btn-success">
+                                <i class="fas fa-plus"></i>
+                                Thêm mới
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                
-            <!-- Staff Table -->
-            <div class="table-container">
-                <table class="products-table">
-                    <thead>
-                        <tr>
-                            <th class="checkbox-col"><input type="checkbox" id="selectAll"></th>
-                            <th>Mã nhân viên</th>
-                            <th>Tên nhân viên</th>
-                            <th>Chức danh</th>
-                            <th>Chi nhánh/Kho</th>
-                            <th>Số điện thoại</th>
-                            <th>Trạng thái</th>
-                            <th style="justify-content: center; text-align: center">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <%
-                            List<UserDTO> staffList = (List<UserDTO>) request.getAttribute("staffList");
-                            if (staffList != null && !staffList.isEmpty()) {
-                                for (UserDTO staff : staffList) {
-                        %>
-                        <tr>
-                            <td class="checkbox-col">
-                                <input type="checkbox" name="selectedStaff" value="<%=staff.getUserID()%>">
-                            </td>
-                            <td><%=staff.getUserID()%></td>
-                            <td><%=staff.getFullName()%></td>
-                            <td><%=staff.getRoleName()%></td>
-                            <td><%=staff.getBranchName() != null ? staff.getBranchName() : (staff.getWarehouseName() != null ? staff.getWarehouseName() : "")%></td>
-                            <td><%=staff.getPhone() != null ? staff.getPhone() : ""%></td>
-                            <td><%=staff.getIsActive() == 1 ? "Đang làm việc" : "Nghỉ việc"%></td>
-                            <td class="actions-col" style="justify-content: center; display: flex; gap: 5px">
-                                <form action="so-staff" method="get" style="display:inline;">
-                                    <input type="hidden" name="action" value="view"/>
-                                    <input type="hidden" name="userID" value="<%=staff.getUserID()%>"/>
-                                    <button type="submit" class="btn btn-success" style="text-decoration: none; width: 79px; background:#2196F3">Chi tiết</button>
-                                </form>
-                            </td>
-                        </tr>
-                        <%
-                                }
-                            } else {
-                        %>
-                        <tr>
-                            <td colspan="8" style="text-align:center;">Không có nhân viên nào!</td>
-                        </tr>
-                        <%
-                            }
-                        %>
-                    </tbody>
-                </table>
-            </div>
 
-            <!-- Pagination -->
-            <div class="pagination-container">
-                <div class="pagination-info">
-                    Hiển thị ${startStaff} - ${endStaff} / Tổng số ${totalStaff} nhân viên
+                <!-- Staff Table -->
+                <div class="table-container">
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th class="checkbox-col"><input type="checkbox" id="selectAll"></th>
+                                <th>Mã nhân viên</th>
+                                <th>Tên nhân viên</th>
+                                <th>Chức danh</th>
+                                <th>Chi nhánh/Kho</th>
+                                <th>Số điện thoại</th>
+                                <th>Trạng thái</th>
+                                <th style="justify-content: center; text-align: center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <%
+                                List<UserDTO> staffList = (List<UserDTO>) request.getAttribute("staffList");
+                                if (staffList != null && !staffList.isEmpty()) {
+                                    for (UserDTO staff : staffList) {
+                            %>
+                            <tr>
+                                <td class="checkbox-col">
+                                    <input type="checkbox" name="selectedStaff" value="<%=staff.getUserID()%>">
+                                </td>
+                                <td><%=staff.getUserID()%></td>
+                                <td><%=staff.getFullName()%></td>
+                                <td><%=staff.getRoleName()%></td>
+                                <td><%=staff.getBranchName() != null ? staff.getBranchName() : (staff.getWarehouseName() != null ? staff.getWarehouseName() : "")%></td>
+                                <td><%=staff.getPhone() != null ? staff.getPhone() : ""%></td>
+                                <td><%=staff.getIsActive() == 1 ? "Đang làm việc" : "Nghỉ việc"%></td>
+                                <td class="actions-col" style="justify-content: center; display: flex; gap: 5px">
+                                    <form action="so-staff" method="get" style="display:inline;">
+                                        <input type="hidden" name="action" value="view"/>
+                                        <input type="hidden" name="userID" value="<%=staff.getUserID()%>"/>
+                                        <button type="submit" class="btn btn-success" style="text-decoration: none; width: 79px; background:#2196F3">Chi tiết</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <%
+                                    }
+                                } else {
+                            %>
+                            <tr>
+                                <td colspan="8" style="text-align:center;">Không có nhân viên nào!</td>
+                            </tr>
+                            <%
+                                }
+                            %>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="pagination">
-                    <a href="so-staff?page=1${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (currentPage == 1 ? 'disabled' : '')}">
-                        <i class="fas fa-angle-double-left"></i>
-                    </a>
-                    <a href="so-staff?page=${currentPage - 1}${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (currentPage == 1 ? 'disabled' : '')}">
-                        <i class="fas fa-angle-left"></i>
-                    </a>
-                    <c:forEach begin="1" end="${totalPages}" var="i">
-                        <a href="so-staff?page=${i}${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (i == currentPage ? 'active' : '')}">${i}</a>
-                    </c:forEach>
-                    <a href="so-staff?page=${currentPage + 1}${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (currentPage == totalPages ? 'disabled' : '')}">
-                        <i class="fas fa-angle-right"></i>
-                    </a>
-                    <a href="so-staff?page=${totalPages}${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (currentPage == totalPages ? 'disabled' : '')}">
-                        <i class="fas fa-angle-double-right"></i>
-                    </a>
+
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        Hiển thị ${startStaff} - ${endStaff} / Tổng số ${totalStaff} nhân viên
+                    </div>
+                    <div class="pagination">
+                        <a href="so-staff?page=1${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (currentPage == 1 ? 'disabled' : '')}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="so-staff?page=${currentPage - 1}${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (currentPage == 1 ? 'disabled' : '')}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <a href="so-staff?page=${i}${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (i == currentPage ? 'active' : '')}">${i}</a>
+                        </c:forEach>
+                        <a href="so-staff?page=${currentPage + 1}${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (currentPage == totalPages ? 'disabled' : '')}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="so-staff?page=${totalPages}${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (currentPage == totalPages ? 'disabled' : '')}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </div>
                 </div>
-            </div>
-        </main>
-    </div>
+            </main>
+        </div>
 
 
         <c:if test="${not empty success}">
@@ -379,7 +379,7 @@
                     <div class="form-row" id="branchDiv">
                         <label>Chi nhánh:</label>
                         <select name="branch" id="branch">
-                            <c:forEach var="branch" items="${branches}">
+                            <c:forEach var="branch" items="${branchesList}">
                                 <option value="${branch.branchId}">${branch.branchName}</option>
                             </c:forEach>
                         </select>
@@ -389,7 +389,7 @@
                     <div class="form-row" id="whDiv">
                         <label>Chọn kho tổng:</label>
                         <select name="wh" id="wh">
-                            <c:forEach var="wh" items="${whs}">
+                            <c:forEach var="wh" items="${warehousesList}">
                                 <option value="${wh.wareHouseId}">${wh.wareHouseName}</option>
                             </c:forEach>
                         </select>
