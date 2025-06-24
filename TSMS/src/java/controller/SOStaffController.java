@@ -37,86 +37,87 @@ import util.Validate;
 public class SOStaffController extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            HttpSession session = req.getSession(false);
-            Object userIdObj = session.getAttribute("userId");
-            Object roleIdObj = session.getAttribute("roleId");
-            Object dbNameObj = session.getAttribute("dbName");
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    try {
+        HttpSession session = req.getSession(false);
+        Object userIdObj = session.getAttribute("userId");
+        Object roleIdObj = session.getAttribute("roleId");
+        Object dbNameObj = session.getAttribute("dbName");
 
-            if (userIdObj == null || roleIdObj == null || dbNameObj == null || Integer.parseInt(roleIdObj.toString()) != 0) {
-                resp.sendRedirect("login");
-                return;
-            }
+        if (userIdObj == null || roleIdObj == null || dbNameObj == null || Integer.parseInt(roleIdObj.toString()) != 0) {
+            resp.sendRedirect("login");
+            return;
+        }
 
-            String dbName = dbNameObj.toString();
-            int page = 1;
-            int pageSize = 10;
-            Integer status = null; // null for all, 1 for active, 0 for inactive
-            Integer role = null; // null for all roles
+        String dbName = dbNameObj.toString();
+        int page = 1;
+        int pageSize = 10;
+        Integer status = null;
+        Integer role = null;
+        String search = req.getParameter("search");
 
-            if (req.getParameter("page") != null) {
-                try {
-                    page = Integer.parseInt(req.getParameter("page"));
-                    if (page < 1) {
-                        page = 1;
-                    }
-                } catch (NumberFormatException e) {
+        if (req.getParameter("page") != null) {
+            try {
+                page = Integer.parseInt(req.getParameter("page"));
+                if (page < 1) {
                     page = 1;
                 }
+            } catch (NumberFormatException e) {
+                page = 1;
             }
+        }
 
-            // Only apply filters if they are explicitly submitted via the form
-            if (req.getParameter("status") != null && !req.getParameter("status").isEmpty()) {
-                try {
-                    status = Integer.parseInt(req.getParameter("status"));
-                    if (status != 0 && status != 1) {
-                        status = null;
-                    }
-                } catch (NumberFormatException e) {
+        if (req.getParameter("status") != null && !req.getParameter("status").isEmpty()) {
+            try {
+                status = Integer.parseInt(req.getParameter("status"));
+                if (status != 0 && status != 1) {
                     status = null;
                 }
+            } catch (NumberFormatException e) {
+                status = null;
             }
+        }
 
-            if (req.getParameter("role") != null && !req.getParameter("role").isEmpty()) {
-                try {
-                    role = Integer.parseInt(req.getParameter("role"));
-                    if (role < 1 || role > 3) {
-                        role = null;
-                    }
-                } catch (NumberFormatException e) {
+        if (req.getParameter("role") != null && !req.getParameter("role").isEmpty()) {
+            try {
+                role = Integer.parseInt(req.getParameter("role"));
+                if (role < 1 || role > 3) {
                     role = null;
                 }
+            } catch (NumberFormatException e) {
+                role = null;
             }
-
-            UserDAO userDAO = new UserDAO();
-            BranchDAO branchDAO = new BranchDAO();
-            WareHouseDAO warehouseDAO = new WareHouseDAO();
-            RoleDAO roleDAO = new RoleDAO();
-            List<Branches> branchesList = branchDAO.getAllBranch(dbName);
-            List<Warehouse> warehousesList = warehouseDAO.getAllWarehouses(dbName);
-            List<UserDTO> staffList = userDAO.getStaffListByPage(dbName, page, pageSize, status, role);
-            int totalStaff = userDAO.countStaff(dbName, status, role);
-            int totalPages = (int) Math.ceil((double) totalStaff / pageSize);
-            int startStaff = (page - 1) * pageSize + 1;
-            int endStaff = Math.min(page * pageSize, totalStaff);
-
-            req.setAttribute("branchesList", branchesList);
-            req.setAttribute("warehousesList", warehousesList);
-            req.setAttribute("staffList", staffList);
-            req.setAttribute("currentPage", page);
-            req.setAttribute("totalPages", totalPages);
-            req.setAttribute("totalStaff", totalStaff);
-            req.setAttribute("startStaff", startStaff);
-            req.setAttribute("endStaff", endStaff);
-            req.setAttribute("selectedStatus", status);
-            req.setAttribute("selectedRole", role);
-
-            req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/staff.jsp").forward(req, resp);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+
+        UserDAO userDAO = new UserDAO();
+        BranchDAO branchDAO = new BranchDAO();
+        WareHouseDAO warehouseDAO = new WareHouseDAO();
+        List<Branches> branchesList = branchDAO.getAllBranch(dbName);
+        List<Warehouse> warehousesList = warehouseDAO.getAllWarehouses(dbName);
+        List<UserDTO> staffList = userDAO.getStaffListByPage(dbName, page, pageSize, status, role, search);
+        int totalStaff = userDAO.countStaff(dbName, status, role, search);
+        int totalPages = (int) Math.ceil((double) totalStaff / pageSize);
+        int startStaff = (page - 1) * pageSize + 1;
+        int endStaff = Math.min(page * pageSize, totalStaff);
+
+        req.setAttribute("branchesList", branchesList);
+        req.setAttribute("warehousesList", warehousesList);
+        req.setAttribute("staffList", staffList);
+        req.setAttribute("currentPage", page);
+        req.setAttribute("totalPages", totalPages);
+        req.setAttribute("totalStaff", totalStaff);
+        req.setAttribute("startStaff", startStaff);
+        req.setAttribute("endStaff", endStaff);
+        req.setAttribute("selectedStatus", status);
+        req.setAttribute("selectedRole", role);
+        req.setAttribute("search", search);
+
+        req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/staff.jsp").forward(req, resp);
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
+
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
