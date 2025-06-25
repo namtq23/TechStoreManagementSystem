@@ -27,15 +27,7 @@ public class SAHomeController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            UserDAO userDAO = new UserDAO();
-            List<ShopOwner> shopOwners = userDAO.getShopOwners();
-            
-            req.setAttribute("shopOwners", shopOwners);
-            req.getRequestDispatcher("/WEB-INF/jsp/admin/sa-home.jsp").forward(req, resp);
-        } catch (SQLException ex) {
-            Logger.getLogger(SAHomeController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        req.getRequestDispatcher("/WEB-INF/jsp/admin/sa-home.jsp").forward(req, resp);
     }
 
 }

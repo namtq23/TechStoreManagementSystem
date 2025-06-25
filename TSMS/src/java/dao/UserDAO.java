@@ -142,17 +142,20 @@ public class UserDAO {
     }
 
     //Phuong
-    public List<ShopOwner> getShopOwners() throws SQLException {
-        List<ShopOwner> shopOwners = new ArrayList<>();
+    public List<ShopOwnerDTO> getShopOwners() throws SQLException {
+        List<ShopOwnerDTO> shopOwners = new ArrayList<>();
 
         String sql = """
-            select * from ShopOwner
+            SELECT * 
+            FROM ShopOwner 
+            JOIN UserServiceMethod 
+            ON ShopOwner.OwnerID = UserServiceMethod.OwnerID
         """;
 
         try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                ShopOwner shopOwner = extractShopOwnerFromResultSet(rs);
+                ShopOwnerDTO shopOwner = extractShopOwnerDTOFromResultSet(rs);
                 shopOwners.add(shopOwner);
             }
         }
@@ -246,8 +249,7 @@ public class UserDAO {
             return affected > 0;
         }
     }
-    
-    
+
     //Phuong
     public static boolean updateSOPasswordInTheirDTB(String dbName, String hashedPassword) throws SQLException {
         String sql = "UPDATE Users SET PasswordHash = ? WHERE UserID = 1";
@@ -257,7 +259,7 @@ public class UserDAO {
             return affected > 0;
         }
     }
-    
+
     //Phuong
     public static boolean updateUserPasswordInTheirDTB(String dbName, String hashedPassword, int userId) throws SQLException {
         String sql = "UPDATE Users SET PasswordHash = ? WHERE UserID = ?";
@@ -619,8 +621,8 @@ public class UserDAO {
 //        List<User> users = ud.getStaffsByBranchID(1, "DTB_StoreTemp");
 //        User o = ud.getUserByEmail("an.nguyen@email.com", "DTB_StoreTemp");
 
-        ShopOwner so = ud.getShopOwnwerByEmail("ndpp.work@gmail.com");
-        System.out.println(so.getPassword());
+        List<ShopOwnerDTO> so = ud.getShopOwners();
+        System.out.println(so);
     }
 
 }
