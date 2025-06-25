@@ -17,7 +17,7 @@ import util.DBUtil;
 public class CustomerDAO {
 
     // Lấy danh sách tất cả khách hàng
-    public List<CustomerDTO> getAllCustomers(String dbName) throws SQLException {
+    public List<CustomerDTO> totalCustomers(String dbName) throws SQLException {
         List<CustomerDTO> customers = new ArrayList<>();
         String sql = """
         SELECT 
@@ -81,14 +81,14 @@ public class CustomerDAO {
     public static void main(String[] args) throws SQLException {
         CustomerDAO dao = new CustomerDAO();
 
-        List<CustomerDTO> customers = dao.getAllCustomers("DTB_Test3");
+        List<CustomerDTO> customers = dao.totalCustomers("DTB_Test3");
         for (Customer c : customers) {
             System.out.println(c);
         }
     }
 
     // Tìm kiếm khách hàng theo tên (FullName)
-    public List<CustomerDTO> searchCustomersByName(String dbName, String keyword, String genderFilter) throws SQLException {
+    public List<CustomerDTO> filterCustomers(String dbName, String keyword, String genderFilter) throws SQLException {
         List<CustomerDTO> customers = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
         SELECT 
@@ -234,11 +234,11 @@ public class CustomerDAO {
     }
 
     //  Lấy 10 khách hàng có GrandTotal cao nhất
-    public List<CustomerDTO> getTop10CustomersBySpending(String dbName) {
-        List<CustomerDTO> customers = new ArrayList<>();
+public List<CustomerDTO> getTopCustomersBySpending(double minTotal, double maxTotal, String dbName) {
+    List<CustomerDTO> customers = new ArrayList<>();
 
-        String sql = """
-        SELECT TOP 10 
+    String sql = """
+        SELECT 
             c.CustomerID,
             c.FullName,
             c.PhoneNumber,
@@ -248,29 +248,80 @@ public class CustomerDAO {
             c.DateOfBirth,
             c.CreatedAt,
             c.UpdatedAt,
-            o.BranchID,
-            o.GrandTotal
+            MAX(o.BranchID) AS BranchID,
+            SUM(o.GrandTotal) AS TotalSpent
         FROM Customers c
-        JOIN (
-            SELECT CustomerID, MIN(OrderID) AS FirstOrderID
-            FROM Orders
-            GROUP BY CustomerID
-        ) fo ON c.CustomerID = fo.CustomerID
-        JOIN Orders o ON fo.FirstOrderID = o.OrderID
-        ORDER BY o.GrandTotal DESC
+        JOIN Orders o ON c.CustomerID = o.CustomerID
+        GROUP BY 
+            c.CustomerID, c.FullName, c.PhoneNumber, c.Email, c.Address,
+            c.Gender, c.DateOfBirth, c.CreatedAt, c.UpdatedAt
+        HAVING SUM(o.GrandTotal) BETWEEN ? AND ?
+        ORDER BY TotalSpent DESC
+        
     """;
 
-        try (
-                Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                customers.add((CustomerDTO) extractCustomerFromResultSet(rs));
-            }
-        } catch (Exception e) {
-            System.out.println("Lỗi khi lấy top 10 khách hàng chi tiêu nhiều nhất: " + e.getMessage());
-        }
+    try (
+        Connection conn = DBUtil.getConnectionTo(dbName);
+        PreparedStatement stmt = conn.prepareStatement(sql)
+    ) {
+        stmt.setDouble(1, minTotal);
+        stmt.setDouble(2, maxTotal);
 
-        return customers;
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                // Map với TotalSpent thay vì GrandTotal
+                int customerId = rs.getInt("CustomerID");
+                String fullName = rs.getString("FullName");
+                String phoneNumber = rs.getString("PhoneNumber");
+                String email = rs.getString("Email");
+                String address = rs.getString("Address");
+
+                Boolean gender = null;
+                boolean genderValue = rs.getBoolean("Gender");
+                if (!rs.wasNull()) {
+                    gender = genderValue;
+                }
+
+                Date dateOfBirth = rs.getDate("DateOfBirth");
+                Date createdAt = rs.getTimestamp("CreatedAt");
+                Date updatedAt = rs.getTimestamp("UpdatedAt");
+                int branchId = rs.getInt("BranchID");
+                double totalSpent = rs.getDouble("TotalSpent");
+
+                CustomerDTO customer = new CustomerDTO(
+                    customerId, fullName, phoneNumber, email, address,
+                    gender, dateOfBirth, createdAt, updatedAt, branchId, totalSpent
+                );
+
+                customers.add(customer);
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Lỗi khi lọc khách theo khoảng chi tiêu: " + e.getMessage());
     }
+
+    return customers;
+}
+
+
+// ✅ Cập nhật đầy đủ thông tin khách hàng
+public boolean updateCustomer(int id, String fullName, String email, boolean gender, String phoneNumber, String address, String dbName) throws SQLException {
+    String sql = "UPDATE Customers SET FullName = ?, Email = ?, Gender = ?, PhoneNumber = ?, Address = ? WHERE CustomerID = ?";
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);  // ✅ Kết nối đúng DB
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, fullName);
+        ps.setString(2, email);
+        ps.setBoolean(3, gender);
+        ps.setString(4, phoneNumber);
+        ps.setString(5, address);
+        ps.setInt(6, id);
+
+        int rowsUpdated = ps.executeUpdate();
+        return rowsUpdated > 0;
+    }
+}
 
     //Phuong
     public static boolean insertCustomer(String dbName, Customer customer) {

@@ -142,17 +142,20 @@ public class UserDAO {
     }
 
     //Phuong
-    public List<ShopOwner> getShopOwners() throws SQLException {
-        List<ShopOwner> shopOwners = new ArrayList<>();
+    public List<ShopOwnerDTO> getShopOwners() throws SQLException {
+        List<ShopOwnerDTO> shopOwners = new ArrayList<>();
 
         String sql = """
-            select * from ShopOwner
+            SELECT * 
+            FROM ShopOwner 
+            JOIN UserServiceMethod 
+            ON ShopOwner.OwnerID = UserServiceMethod.OwnerID
         """;
 
         try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                ShopOwner shopOwner = extractShopOwnerFromResultSet(rs);
+                ShopOwnerDTO shopOwner = extractShopOwnerDTOFromResultSet(rs);
                 shopOwners.add(shopOwner);
             }
         }
@@ -246,8 +249,7 @@ public class UserDAO {
             return affected > 0;
         }
     }
-    
-    
+
     //Phuong
     public static boolean updateSOPasswordInTheirDTB(String dbName, String hashedPassword) throws SQLException {
         String sql = "UPDATE Users SET PasswordHash = ? WHERE UserID = 1";
@@ -257,7 +259,7 @@ public class UserDAO {
             return affected > 0;
         }
     }
-    
+
     //Phuong
     public static boolean updateUserPasswordInTheirDTB(String dbName, String hashedPassword, int userId) throws SQLException {
         String sql = "UPDATE Users SET PasswordHash = ? WHERE UserID = ?";
@@ -505,6 +507,7 @@ public class UserDAO {
         return count;
     }
 
+
     public UserDTO getStaffById(String dbName, int userId) {
         UserDTO user = null;
         String query = """
@@ -566,6 +569,7 @@ public class UserDAO {
         }
     }
 
+
     public List<User> getStaffsByBranchIDForOutcome(int branchId, String dbName) throws SQLException {
         List<User> staffs = new ArrayList<>();
 
@@ -587,14 +591,38 @@ public class UserDAO {
         return staffs;
     }
 
+    public List<UserDTO> getAllCreators(String dbName) {
+        List<UserDTO> creators = new ArrayList<>();
+        String query = """
+        SELECT DISTINCT u.UserID, u.FullName 
+        FROM Users u 
+        INNER JOIN Orders o ON u.UserID = o.CreatedBy 
+        ORDER BY u.FullName
+        """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                UserDTO user = new UserDTO();
+                user.setUserID(rs.getInt("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                creators.add(user);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getAllCreators: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return creators;
+    }
+
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
 //        List<ShopOwner> shopOwners = ud.getShopOwners();  
 //        List<User> users = ud.getStaffsByBranchID(1, "DTB_StoreTemp");
 //        User o = ud.getUserByEmail("an.nguyen@email.com", "DTB_StoreTemp");
 
-        ShopOwner so = ud.getShopOwnwerByEmail("ndpp.work@gmail.com");
-        System.out.println(so.getPassword());
+        List<ShopOwnerDTO> so = ud.getShopOwners();
+        System.out.println(so);
     }
 
 }
