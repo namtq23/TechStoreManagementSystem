@@ -41,7 +41,7 @@ public class SOOrderController extends HttpServlet {
             String dbName = dbNameObj.toString();
             int page = 1;
             int pageSize = 10;
-            Integer branchID = null;
+            Integer branchId = null;
             if (req.getParameter("page") != null) {
                 try {
                     page = Integer.parseInt(req.getParameter("page"));
@@ -52,14 +52,14 @@ public class SOOrderController extends HttpServlet {
                     page = 1;
                 }
             }
-            if (req.getParameter("branchID") != null) {
+            if (req.getParameter("branchId") != null) {
                 try {
-                    branchID = Integer.parseInt(req.getParameter("branchID"));
-                    if (branchID < 1) {
-                        branchID = null;
+                    branchId = Integer.parseInt(req.getParameter("branchId"));
+                    if (branchId < 1) {
+                        branchId = null;
                     }
                 } catch (NumberFormatException e) {
-                    branchID = null;
+                    branchId = null;
                 }
             }
             OrdersDAO orderDAO = new OrdersDAO();
@@ -82,8 +82,8 @@ public class SOOrderController extends HttpServlet {
             List<Branch> branchesList = orderDAO.getAllBranches(dbName);
             req.setAttribute("branchesList", branchesList);
             // Fetch orders based on branch filter
-            List<OrdersDTO> ordersList = orderDAO.getOrdersListByPage(dbName, page, pageSize, branchID);
-            int totalOrders = orderDAO.countOrderDetails(dbName, branchID);
+            List<OrdersDTO> ordersList = orderDAO.getOrdersListByPage(dbName, page, pageSize, branchId);
+            int totalOrders = orderDAO.countOrderDetails(dbName, branchId);
             int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
             int startOrder = (page - 1) * pageSize + 1;
             int endOrder = Math.min(page * pageSize, totalOrders);
@@ -94,7 +94,7 @@ public class SOOrderController extends HttpServlet {
             req.setAttribute("totalOrders", totalOrders);
             req.setAttribute("startOrder", startOrder);
             req.setAttribute("endOrder", endOrder);
-            req.setAttribute("selectedBranchID", branchID);
+            req.setAttribute("selectedBranchID", branchId);
 
             req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/orderpage.jsp").forward(req, resp);
         } catch (Exception e) {
