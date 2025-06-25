@@ -101,7 +101,7 @@ public class SOOrderController extends HttpServlet {
             }
 
             // Fetch all branches and creators for filter options
-            List<Branches> branchesList = orderDAO.getAllBranches(dbName);
+            List<Branch> branchesList = orderDAO.getAllBranches(dbName);
             List<UserDTO> creatorsList = userDAO.getAllCreators(dbName);
 
             // Fetch filtered orders

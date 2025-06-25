@@ -424,15 +424,15 @@ public class OrdersDAO {
         }
     }
                                                 
-    public List<Branches> getAllBranches(String dbName) {
-        List<Branches> branches = new ArrayList<>();
+    public List<Branch> getAllBranches(String dbName) {
+        List<Branch> branches = new ArrayList<>();
         String query = "SELECT BranchID, BranchName FROM Branches WHERE IsActive = 1 ORDER BY BranchName";
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                Branches branch = new Branches();
-                branch.setBranchID(rs.getInt("BranchID"));
+                Branch branch = new Branch();
+                branch.setBranchId(rs.getInt("BranchID"));
                 branch.setBranchName(rs.getString("BranchName"));
                 branches.add(branch);
             }
