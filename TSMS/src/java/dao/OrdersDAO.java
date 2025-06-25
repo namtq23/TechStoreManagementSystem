@@ -425,23 +425,30 @@ public class OrdersDAO {
     }
                                                 
     public List<Branch> getAllBranches(String dbName) {
-        List<Branch> branches = new ArrayList<>();
-        String query = "SELECT BranchID, BranchName FROM Branches WHERE IsActive = 1 ORDER BY BranchName";
+    List<Branch> branches = new ArrayList<>();
+    // Fixed SQL query to include all fields that we're trying to access
+    String query = "SELECT BranchID, BranchName, Address, Phone, IsActive FROM Branches WHERE IsActive = 1 ORDER BY BranchName";
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Branch branch = new Branch();
-                branch.setBranchId(rs.getInt("BranchID"));
-                branch.setBranchName(rs.getString("BranchName"));
-                branches.add(branch);
-            }
-        } catch (SQLException e) {
-            System.err.println("Error in getAllBranches: " + e.getMessage());
-            e.printStackTrace();
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            Branch branch = new Branch();
+            branch.setBranchId(rs.getInt("BranchID"));
+            branch.setBranchName(rs.getString("BranchName"));
+            branch.setAddress(rs.getString("Address"));
+            branch.setPhone(rs.getString("Phone"));
+            branch.setIsActive(rs.getInt("IsActive"));
+            branches.add(branch);
         }
-        return branches;
+    } catch (SQLException e) {
+        System.err.println("Error in getAllBranches: " + e.getMessage());
+        e.printStackTrace();
     }
+    return branches;
+}
+
 
     private static OrdersDTO extractOrderDTOFromResultSet(ResultSet rs) throws SQLException {
         int orderDetailID = rs.getInt("OrderDetailID");
