@@ -14,39 +14,39 @@
         <div class="container">
             <!-- Sidebar -->
             <div class="sidebar">
-                <div class="sidebar-header">
-                    <h2>Admin Panel</h2>
+                <div class="logo">
+                    <a href="bm-overview" class="logo">
+                        <div class="logo-icon">T</div>
+                        <span class="logo-text">Admin</span>
+                    </a>
                 </div>
                 <nav class="sidebar-nav">
                     <ul>
-                        <li><a href="#" class="active">
+                        <li><a href="sa-home">
                                 <span class="sidebar-icon"><i class="fas fa-chart-bar"></i></span>
                                 <span>Dashboard</span>
-                            </a></li>
-                        <li><a href="#">
+                            </a>
+                        </li>
+                        <li><a href="sa-accounts">
                                 <span class="sidebar-icon"><i class="fas fa-users"></i></span>
                                 <span>Quản lý tài khoản</span>
-                            </a></li>
+                            </a>
+                        </li>
                         <li><a href="#">
                                 <span class="sidebar-icon"><i class="fas fa-dollar-sign"></i></span>
                                 <span>Doanh thu</span>
-                            </a></li>
+                            </a>
+                        </li>
                         <li><a href="#">
                                 <span class="sidebar-icon"><i class="fas fa-clipboard-list"></i></span>
                                 <span>Subscription</span>
-                            </a></li>
-                        <li><a href="#">
-                                <span class="sidebar-icon"><i class="fas fa-chart-line"></i></span>
-                                <span>Báo cáo</span>
-                            </a></li>
-                        <li><a href="#">
-                                <span class="sidebar-icon"><i class="fas fa-cog"></i></span>
-                                <span>Cài đặt</span>
-                            </a></li>
-                        <li><a href="#">
+                            </a>
+                        </li>
+                        <li><a href="sa-logout">
                                 <span class="sidebar-icon"><i class="fas fa-sign-out-alt"></i></span>
                                 <span>Đăng xuất</span>
-                            </a></li>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
             </div>
@@ -138,96 +138,6 @@
                     </div>
                 </div>
 
-                <!-- Account Management -->
-                <div class="card full-width-card">
-                    <div class="card-header">
-                        <h2>Quản lý tài khoản</h2>
-                        
-                    </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Tên người dùng</th>
-                                    <th>Email</th>
-                                    <th>Gói subscription</th>
-                                    <th>Trạng thái</th>
-                                    <th>Ngày đăng ký</th>
-                                    <th>Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>#001</td>
-                                    <td>Nguyễn Văn A</td>
-                                    <td>nguyenvana@email.com</td>
-                                    <td>Premium</td>
-                                    <td><span class="status active">Hoạt động</span></td>
-                                    <td>15/01/2024</td>
-                                    <td>
-                                        <button class="btn btn-primary">Xem</button>
-                                        <button class="btn btn-warning">Sửa</button>
-                                        <button class="btn btn-danger">Khóa</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>#002</td>
-                                    <td>Trần Thị B</td>
-                                    <td>tranthib@email.com</td>
-                                    <td>Basic</td>
-                                    <td><span class="status active">Hoạt động</span></td>
-                                    <td>12/01/2024</td>
-                                    <td>
-                                        <button class="btn btn-primary">Xem</button>
-                                        <button class="btn btn-warning">Sửa</button>
-                                        <button class="btn btn-danger">Khóa</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>#003</td>
-                                    <td>Lê Văn C</td>
-                                    <td>levanc@email.com</td>
-                                    <td>Pro</td>
-                                    <td><span class="status pending">Chờ xử lý</span></td>
-                                    <td>10/01/2024</td>
-                                    <td>
-                                        <button class="btn btn-primary">Xem</button>
-                                        <button class="btn btn-success">Kích hoạt</button>
-                                        <button class="btn btn-warning">Sửa</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>#004</td>
-                                    <td>Phạm Thị D</td>
-                                    <td>phamthid@email.com</td>
-                                    <td>Basic</td>
-                                    <td><span class="status inactive">Không hoạt động</span></td>
-                                    <td>08/01/2024</td>
-                                    <td>
-                                        <button class="btn btn-primary">Xem</button>
-                                        <button class="btn btn-success">Kích hoạt</button>
-                                        <button class="btn btn-warning">Sửa</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>#005</td>
-                                    <td>Hoàng Văn E</td>
-                                    <td>hoangvane@email.com</td>
-                                    <td>Premium</td>
-                                    <td><span class="status active">Hoạt động</span></td>
-                                    <td>05/01/2024</td>
-                                    <td>
-                                        <button class="btn btn-primary">Xem</button>
-                                        <button class="btn btn-warning">Sửa</button>
-                                        <button class="btn btn-danger">Khóa</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 <!-- Subscription Plans -->
                 <div class="card full-width-card" style="margin-top: 24px;">
                     <div class="card-header">
@@ -253,34 +163,25 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                // Sidebar navigation
                 const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+                const currentPath = window.location.pathname;
+
                 sidebarLinks.forEach(link => {
-                    link.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        sidebarLinks.forEach(l => l.classList.remove('active'));
-                        this.classList.add('active');
-                    });
+                    const href = link.getAttribute('href');
+                    // So khớp tương đối với pathname
+                    if (href && currentPath.includes(href)) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
                 });
 
-                // Button interactions
-                const buttons = document.querySelectorAll('.btn');
-                buttons.forEach(button => {
-                    button.addEventListener('click', function () {
-                        if (!this.classList.contains('btn-outline')) {
-                            const action = this.textContent.trim();
-                            alert(`Thực hiện hành động: ${action}`);
-                        }
-                    });
-                });
-
-                // Subtle animations
+                // Optional: Animation for cards
                 const cards = document.querySelectorAll('.card, .stat-card');
                 cards.forEach(card => {
                     card.addEventListener('mouseenter', function () {
                         this.style.transform = 'translateY(-2px)';
                     });
-
                     card.addEventListener('mouseleave', function () {
                         this.style.transform = 'translateY(0)';
                     });
