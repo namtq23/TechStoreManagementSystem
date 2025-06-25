@@ -505,6 +505,7 @@ public class UserDAO {
         return count;
     }
 
+
     public UserDTO getStaffById(String dbName, int userId) {
         UserDTO user = null;
         String query = """
@@ -566,6 +567,7 @@ public class UserDAO {
         }
     }
 
+
     public List<User> getStaffsByBranchIDForOutcome(int branchId, String dbName) throws SQLException {
         List<User> staffs = new ArrayList<>();
 
@@ -585,6 +587,30 @@ public class UserDAO {
         }
 
         return staffs;
+    }
+
+    public List<UserDTO> getAllCreators(String dbName) {
+        List<UserDTO> creators = new ArrayList<>();
+        String query = """
+        SELECT DISTINCT u.UserID, u.FullName 
+        FROM Users u 
+        INNER JOIN Orders o ON u.UserID = o.CreatedBy 
+        ORDER BY u.FullName
+        """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                UserDTO user = new UserDTO();
+                user.setUserID(rs.getInt("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                creators.add(user);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getAllCreators: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return creators;
     }
 
     public static void main(String[] args) throws SQLException {
