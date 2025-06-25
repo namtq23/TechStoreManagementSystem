@@ -45,22 +45,14 @@
                         </div>
                     </div>
                 </div>
-                <form id="staffForm" action="req-reset-password" method="post" style="display: none;">
+                <form id="staffForm" action="staff-forgot-password" method="post" style="display: none;">
                     <div class="form-row">
                         <label>Nhập tên cửa hàng: </label>
                         <input type="text" name="shopName" required="">
                     </div>
                     <div class="form-row">
-                        <label>Họ tên:</label>
-                        <input type="text" name="fullName" required="">
-                    </div>
-                    <div class="form-row">
                         <label>Email:</label>
                         <input type="email" name="email" required="">
-                    </div>
-                    <div class="form-row">
-                        <label>Số điện thoại:</label>
-                        <input type="text" name="phone" required="">
                     </div>
                     <button type="submit">Gửi yêu cầu đặt lại mật khẩu</button>
                 </form>
