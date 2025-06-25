@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import model.Branches;
+import model.Branch;
 import model.OrdersDTO;
 import util.DBUtil;
 
@@ -423,7 +423,7 @@ public class OrdersDAO {
             }
         }
     }
-
+                                                
     public List<Branches> getAllBranches(String dbName) {
         List<Branches> branches = new ArrayList<>();
         String query = "SELECT BranchID, BranchName FROM Branches WHERE IsActive = 1 ORDER BY BranchName";

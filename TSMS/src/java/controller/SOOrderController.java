@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.List;
-import model.Branches;
+import model.Branch;
 import model.OrdersDTO;
 import model.UserDTO;
 
@@ -43,18 +43,10 @@ public class SOOrderController extends HttpServlet {
             String dbName = dbNameObj.toString();
             int page = 1;
             int pageSize = 10;
-
             // Parse page parameter
-            if (req.getParameter("page") != null) {
-                try {
-                    page = Integer.parseInt(req.getParameter("page"));
-                    if (page < 1) {
-                        page = 1;
-                    }
-                } catch (NumberFormatException e) {
-                    page = 1;
-                }
-            }
+
+            Integer branchId = null;
+
 
             // Parse filter parameters
             String[] selectedBranches = req.getParameterValues("branchIDs");
@@ -146,6 +138,7 @@ public class SOOrderController extends HttpServlet {
             req.setAttribute("minPrice", minPrice);
             req.setAttribute("maxPrice", maxPrice);
             req.setAttribute("searchKeyword", searchKeyword);
+
 
             req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/orderpage.jsp").forward(req, resp);
         } catch (Exception e) {

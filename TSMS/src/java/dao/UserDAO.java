@@ -25,8 +25,8 @@ public class UserDAO {
     //SO
     public static void insertShopOwner(ShopOwner owner) throws SQLException {
         String sql = """
-        INSERT INTO ShopOwner (AdminID, Password, FullName, ShopName, DatabaseName, Email, IdentificationID, Gender, Address, IsActive, CreatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE());
+        INSERT INTO ShopOwner (AdminID, Password, FullName, ShopName, DatabaseName, Email, IdentificationID, Gender, Address, IsActive, Phone, CreatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE());
     """;
 
         try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -40,6 +40,7 @@ public class UserDAO {
             stmt.setString(8, owner.getGender());
             stmt.setString(9, owner.getAddress());
             stmt.setInt(10, 1);
+            stmt.setString(11, owner.getPhone());
 
             stmt.executeUpdate();
         }
@@ -47,12 +48,13 @@ public class UserDAO {
 
     //SO
     public static void insertUserMethod(String email) throws SQLException {
-        ShopOwner shopOwnwer = getShopOwnwerByEmail(email);
-        int ownerId = shopOwnwer.getOwnerId();
+        ShopOwner shopOwner = getShopOwnwerByEmail(email);
+        int ownerId = shopOwner.getOwnerId();
+
         String sql = """
-        INSERT INTO UserServiceMethod(OwnerID, MethodID, TrialStartDate, TrialStatus, SubscriptionMonths, SubscriptionStart, SubscriptionEnd)
-        VALUES (?, 1, GETDATE(), 'TRIAL', 0, NULL, NULL );
-    """;
+                    INSERT INTO UserServiceMethod(OwnerID, MethodID, TrialStartDate, TrialEndDate, TrialStatus, SubscriptionMonths, SubscriptionStart, SubscriptionEnd)
+                    VALUES (?, 1, GETDATE(), DATEADD(day, 7, GETDATE()), 'TRIAL', 0, NULL, NULL );
+                    """;
 
         try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, ownerId);
@@ -119,8 +121,8 @@ public class UserDAO {
         return shopOwner;
     }
 
-    //User
-    public User getUserByEmail(String email, String dbName) throws SQLException {
+    //Phuong
+    public static User getUserByEmail(String email, String dbName) throws SQLException {
         User user = null;
 
         String sql = "select * from Users where Email = ?";
@@ -139,7 +141,7 @@ public class UserDAO {
         return user;
     }
 
-    //SO
+    //Phuong
     public List<ShopOwner> getShopOwners() throws SQLException {
         List<ShopOwner> shopOwners = new ArrayList<>();
 
@@ -158,7 +160,7 @@ public class UserDAO {
         return shopOwners;
     }
 
-    //SO
+    //Phuong
     public void updateIsActiveByEmail(String email, int newStatus) throws SQLException {
         String sql = """
             UPDATE ShopOwner SET IsActive = ? WHERE Email = ?;
@@ -194,7 +196,7 @@ public class UserDAO {
         return staffs;
     }
 
-    //SO
+    //Phuong
     public static void insertShopOwnerToUserTable(String email, String dbName) throws SQLException {
         ShopOwner shopOwnwer = getShopOwnwerByEmail(email);
         String sql = """
@@ -211,6 +213,7 @@ public class UserDAO {
         }
     }
 
+    //Phuong
     public static User getUserById(int userId, String dbName) throws SQLException {
         Connection conn;
         PreparedStatement ps;
@@ -233,6 +236,7 @@ public class UserDAO {
         return null;
     }
 
+    //Phuong
     public static boolean updateSOPassword(int ownerId, String hashedPassword) throws SQLException {
         String sql = "UPDATE ShopOwner SET Password = ? WHERE OwnerID = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -242,11 +246,24 @@ public class UserDAO {
             return affected > 0;
         }
     }
-
+    
+    
+    //Phuong
     public static boolean updateSOPasswordInTheirDTB(String dbName, String hashedPassword) throws SQLException {
         String sql = "UPDATE Users SET PasswordHash = ? WHERE UserID = 1";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, hashedPassword);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+    
+    //Phuong
+    public static boolean updateUserPasswordInTheirDTB(String dbName, String hashedPassword, int userId) throws SQLException {
+        String sql = "UPDATE Users SET PasswordHash = ? WHERE UserID = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hashedPassword);
+            ps.setInt(2, userId);
             int affected = ps.executeUpdate();
             return affected > 0;
         }
@@ -487,6 +504,69 @@ public class UserDAO {
         }
         return count;
     }
+
+
+    public UserDTO getStaffById(String dbName, int userId) {
+        UserDTO user = null;
+        String query = """
+        SELECT 
+            u.UserID,
+            u.FullName,
+            u.Phone,
+            u.Email,
+            u.Gender,
+            u.AvaUrl,
+            u.Address,
+            u.IsActive,
+            r.RoleName,
+            b.BranchName,
+            w.WarehouseName
+        FROM 
+            Users u
+            JOIN Roles r ON u.RoleID = r.RoleID
+            LEFT JOIN Branches b ON u.BranchID = b.BranchID
+            LEFT JOIN Warehouses w ON u.WarehouseID = w.WarehouseID
+        WHERE 
+            u.UserID = ?
+    """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                user = new UserDTO();
+                user.setUserID(rs.getInt("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                user.setPhone(rs.getString("Phone"));
+                user.setEmail(rs.getString("Email"));
+                user.setGender(rs.getBoolean("Gender") ? 1 : 0);
+                user.setAvaUrl(rs.getString("AvaUrl"));
+                user.setAddress(rs.getString("Address"));
+                user.setIsActive(rs.getInt("IsActive"));
+                user.setRoleName(rs.getString("RoleName"));
+                user.setBranchName(rs.getString("BranchName"));
+                user.setWarehouseName(rs.getString("WarehouseName"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getStaffById: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return user;
+    }
+
+    public boolean deleteStaff(String dbName, int userId) {
+        String query = "UPDATE Users SET IsActive = 0 WHERE UserID = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("Error in deleteStaff: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
     public List<User> getStaffsByBranchIDForOutcome(int branchId, String dbName) throws SQLException {
         List<User> staffs = new ArrayList<>();

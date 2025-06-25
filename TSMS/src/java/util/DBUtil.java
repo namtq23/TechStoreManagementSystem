@@ -102,9 +102,11 @@ public class DBUtil {
             throw new SQLException("SQL Server JDBC Driver not found", e);
         }
 
+
 ////        Phuong
         String url = "jdbc:sqlserver://DESKTOP-LJ3A22Q:1433;databaseName=" + dbName + ";encrypt=false";
         return DriverManager.getConnection(url, "sa", "123");
+      
         //Nam
 //        String url = "jdbc:sqlserver://MAYTINHCUANAM:1433;instanceName=TRNAM;databaseName=" + dbName + ";encrypt=false";
 //         return DriverManager.getConnection(url, "sa", "123456");

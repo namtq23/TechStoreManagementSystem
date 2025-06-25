@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.util.List;
-import model.Customer;
 import model.CustomerDTO;
 
 @WebServlet(name = "BMCustomerController", urlPatterns = {"/bm-customer"})
@@ -19,73 +18,85 @@ public class BMCustomerController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        Object userIdObj = session.getAttribute("userId");
-        Object roleIdObj = session.getAttribute("roleId");
-        Object dbNameObj = session.getAttribute("dbName");
-
-        if (userIdObj == null || roleIdObj == null || dbNameObj == null) {
+        if (session == null || session.getAttribute("userId") == null ||
+            session.getAttribute("roleId") == null || session.getAttribute("dbName") == null) {
             resp.sendRedirect("login");
             return;
         }
 
-        int roleId = Integer.parseInt(roleIdObj.toString());
+        int roleId = Integer.parseInt(session.getAttribute("roleId").toString());
         if (roleId != 1) {
             resp.sendRedirect("login");
             return;
         }
 
+        String dbName = session.getAttribute("dbName").toString();
+        String keyword = req.getParameter("keyword");
+        String genderFilter = req.getParameter("gender");
+        String showTop = req.getParameter("showTop");
+
+        String minStr = req.getParameter("minGrandTotal");
+        String maxStr = req.getParameter("maxGrandTotal");
+
+        Double minGrandTotal = parseDoubleOrNull(minStr);
+        Double maxGrandTotal = parseDoubleOrNull(maxStr);
+
+        int page = parseIntOrDefault(req.getParameter("page"), 1);
+        int pageSize = 10;
+        int offset = (page - 1) * pageSize;
+
         try {
-            String dbName = dbNameObj.toString();
-            String keyword = req.getParameter("keyword");
-            String genderFilter = req.getParameter("gender"); // "male", "female", "all", hoặc null
-            String showTop = req.getParameter("top"); // nếu bằng "true" thì hiển thị top 10
-            int page = 1;
-            int pageSize = 10;
-
-            // Đảm bảo page >= 1
-            String pageParam = req.getParameter("page");
-            if (pageParam != null) {
-                try {
-                    page = Integer.parseInt(pageParam);
-                    if (page < 1) {
-                        page = 1;
-                    }
-                } catch (NumberFormatException e) {
-                    page = 1;
-                }
-            }
-
-            int offset = (page - 1) * pageSize;
-
             CustomerDAO customerDAO = new CustomerDAO();
             List<CustomerDTO> customers;
             int totalCustomers;
             int totalPages;
 
-            if ("true".equalsIgnoreCase(showTop)) {
-                // Trường hợp lọc top 10 khách hàng chi tiêu nhiều nhất
-                customers = customerDAO.getTop10CustomersBySpending(dbName);
-                totalCustomers = customers.size();
-                totalPages = 1;
-                page = 1;
-            } else if (keyword != null && !keyword.trim().isEmpty()) {
-                // Trường hợp tìm kiếm: không phân trang
-                customers = customerDAO.searchCustomersByName(dbName, keyword.trim(), genderFilter);
+            boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+            boolean hasTop = "true".equalsIgnoreCase(showTop);
 
-                totalCustomers = customers.size();
-                totalPages = 1; // Vì hiển thị tất cả
-                page = 1; // reset về trang đầu
-            } else {
-                // Trường hợp hiển thị tất cả: có phân trang
-                totalCustomers = customerDAO.countCustomers(dbName, genderFilter);
-                totalPages = (int) Math.ceil((double) totalCustomers / pageSize);
+            if (hasTop) {
+                double min = (minGrandTotal != null) ? minGrandTotal : 0.0;
+                double max = (maxGrandTotal != null) ? maxGrandTotal : Double.MAX_VALUE;
 
-                // Nếu page > totalPages thì set về cuối cùng
-                if (page > totalPages && totalPages > 0) {
-                    page = totalPages;
-                    offset = (page - 1) * pageSize;
+                // Lấy tất cả khách hàng theo chi tiêu
+                customers = customerDAO.getTopCustomersBySpending(min, max, dbName);
+
+                // Lọc theo keyword nếu có
+                if (hasKeyword) {
+                    String lowerKeyword = keyword.toLowerCase();
+                    customers.removeIf(c -> !c.getFullName().toLowerCase().contains(lowerKeyword));
                 }
 
+                // Lọc theo giới tính nếu có
+                if ("male".equalsIgnoreCase(genderFilter)) {
+                    customers.removeIf(c -> c.getGender() == null || !c.getGender());
+                } else if ("female".equalsIgnoreCase(genderFilter)) {
+                    customers.removeIf(c -> c.getGender() == null || c.getGender());
+                }
+
+                totalCustomers = customers.size();
+                totalPages = (int) Math.ceil((double) totalCustomers / pageSize);
+                page = Math.min(page, totalPages == 0 ? 1 : totalPages);
+                offset = (page - 1) * pageSize;
+
+                int toIndex = Math.min(offset + pageSize, totalCustomers);
+                if (offset > toIndex) offset = 0;
+                customers = customers.subList(offset, toIndex);
+            } else if (hasKeyword) {
+                customers = customerDAO.filterCustomers(dbName, keyword, genderFilter);
+                totalCustomers = customers.size();
+                totalPages = (int) Math.ceil((double) totalCustomers / pageSize);
+                page = Math.min(page, totalPages);
+                offset = (page - 1) * pageSize;
+
+                int toIndex = Math.min(offset + pageSize, totalCustomers);
+                if (offset > toIndex) offset = 0;
+                customers = customers.subList(offset, toIndex);
+            } else {
+                totalCustomers = customerDAO.countCustomers(dbName, genderFilter);
+                totalPages = (int) Math.ceil((double) totalCustomers / pageSize);
+                page = Math.min(page, totalPages == 0 ? 1 : totalPages);
+                offset = (page - 1) * pageSize;
                 customers = customerDAO.getCustomerListByPage(dbName, offset, pageSize, genderFilter);
             }
 
@@ -93,19 +104,91 @@ public class BMCustomerController extends HttpServlet {
             req.setAttribute("currentPage", page);
             req.setAttribute("totalPages", totalPages);
             req.setAttribute("totalCustomers", totalCustomers);
-            req.setAttribute("startCustomer", keyword != null && !keyword.trim().isEmpty() ? 1 : offset + 1);
-            req.setAttribute("endCustomer", keyword != null && !keyword.trim().isEmpty()
-                    ? totalCustomers : Math.min(offset + pageSize, totalCustomers));
+            req.setAttribute("startCustomer", offset + 1);
+            req.setAttribute("endCustomer", offset + customers.size());
             req.setAttribute("genderFilter", genderFilter);
             req.setAttribute("keyword", keyword);
             req.setAttribute("showTop", showTop);
+            req.setAttribute("minGrandTotal", minGrandTotal);
+            req.setAttribute("maxGrandTotal", maxGrandTotal);
             req.setAttribute("service", "active");
 
             req.getRequestDispatcher("/WEB-INF/jsp/manager/customer.jsp").forward(req, resp);
 
         } catch (SQLException e) {
-            throw new ServletException("Database error when loading customers", e);
+            e.printStackTrace();
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi truy xuất dữ liệu khách hàng.");
         }
+    }
 
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            String idStr = req.getParameter("id");
+            if (idStr == null || idStr.trim().isEmpty()) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu mã khách hàng.");
+                return;
+            }
+
+            int customerId = Integer.parseInt(idStr.trim());
+            String fullName = getSafeParam(req, "fullName");
+            String email = getSafeParam(req, "email");
+            String genderStr = getSafeParam(req, "gender");
+            String phone = getSafeParam(req, "phoneNumber");
+            String address = getSafeParam(req, "address");
+
+            if (fullName == null || email == null || genderStr == null || phone == null || address == null) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Dữ liệu không hợp lệ.");
+                return;
+            }
+
+            boolean gender = Boolean.parseBoolean(genderStr.trim());
+
+            HttpSession session = req.getSession(false);
+            if (session == null || session.getAttribute("dbName") == null) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không xác định được cơ sở dữ liệu.");
+                return;
+            }
+
+            String dbName = session.getAttribute("dbName").toString();
+            CustomerDAO dao = new CustomerDAO();
+
+            boolean success = dao.updateCustomer(customerId, fullName, email, gender, phone, address, dbName);
+
+            if (success) {
+                resp.sendRedirect("bm-customer");
+            } else {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Cập nhật thất bại.");
+            }
+
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID không hợp lệ.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Có lỗi xảy ra khi xử lý yêu cầu.");
+        }
+    }
+
+    private String getSafeParam(HttpServletRequest req, String paramName) {
+        String value = req.getParameter(paramName);
+        return (value != null && !value.trim().isEmpty()) ? value.trim() : null;
+    }
+
+    private int parseIntOrDefault(String str, int defaultVal) {
+        try {
+            int value = Integer.parseInt(str);
+            return (value > 0) ? value : defaultVal;
+        } catch (Exception e) {
+            return defaultVal;
+        }
+    }
+
+    private Double parseDoubleOrNull(String str) {
+        try {
+            return (str != null && !str.trim().isEmpty()) ? Double.parseDouble(str) : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

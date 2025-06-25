@@ -12,6 +12,10 @@ public class UserDTO {
     private int userID;
     private String fullName;
     private String phone;
+    private String email;
+    private int gender;
+    private String avaUrl;
+    private String address;
     private int isActive;
     private String roleName;
     private String branchName;
@@ -20,10 +24,14 @@ public class UserDTO {
     public UserDTO() {
     }
 
-    public UserDTO(int userID, String fullName, String phone, int isActive, String roleName, String branchName, String warehouseName) {
+    public UserDTO(int userID, String fullName, String phone, String email, int gender, String avaUrl, String address, int isActive, String roleName, String branchName, String warehouseName) {
         this.userID = userID;
         this.fullName = fullName;
         this.phone = phone;
+        this.email = email;
+        this.gender = gender;
+        this.avaUrl = avaUrl;
+        this.address = address;
         this.isActive = isActive;
         this.roleName = roleName;
         this.branchName = branchName;
@@ -52,6 +60,38 @@ public class UserDTO {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public int getGender() {
+        return gender;
+    }
+
+    public void setGender(int gender) {
+        this.gender = gender;
+    }
+
+    public String getAvaUrl() {
+        return avaUrl;
+    }
+
+    public void setAvaUrl(String avaUrl) {
+        this.avaUrl = avaUrl;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public int getIsActive() {
@@ -85,6 +125,6 @@ public class UserDTO {
     public void setWarehouseName(String warehouseName) {
         this.warehouseName = warehouseName;
     }
-    
+
     
 }

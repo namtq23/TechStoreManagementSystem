@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Branch;
-import model.Branches;
+import model.Branch;
 import model.Role;
 import model.User;
 import model.UserDTO;
@@ -50,6 +50,33 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
         }
 
         String dbName = dbNameObj.toString();
+        String action = req.getParameter("action");
+
+        if ("view".equals(action)) {
+            String userID = req.getParameter("userID");
+            UserDAO userDAO = new UserDAO();
+            UserDTO user = userDAO.getStaffById(dbName, Integer.parseInt(userID));           
+            BranchDAO branchDAO = new BranchDAO();
+            WareHouseDAO warehouseDAO = new WareHouseDAO();
+            List<Branch> branchesList = branchDAO.getAllBranches(dbName);
+            List<Warehouse> warehousesList = warehouseDAO.getAllWarehouses(dbName);
+            req.setAttribute("staff", user);
+            req.setAttribute("branchesList", branchesList);
+            req.setAttribute("warehousesList", warehousesList);
+            req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/edit-staff.jsp").forward(req, resp);
+            return;
+        }else if ("delete".equals(action)) {
+            String userID = req.getParameter("userID");
+            UserDAO userDAO = new UserDAO();
+            boolean deleted = userDAO.deleteStaff(dbName, Integer.parseInt(userID));
+            if (deleted) {
+                session.setAttribute("success", "Sa thải nhân viên thành công!");
+            } else {
+                session.setAttribute("error", "Sa thải nhân viên thất bại!");
+            }
+            resp.sendRedirect("so-staff");
+            return;
+        }
         int page = 1;
         int pageSize = 10;
         Integer status = null;
@@ -92,7 +119,7 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
         UserDAO userDAO = new UserDAO();
         BranchDAO branchDAO = new BranchDAO();
         WareHouseDAO warehouseDAO = new WareHouseDAO();
-        List<Branches> branchesList = branchDAO.getAllBranch(dbName);
+        List<Branch> branchesList = branchDAO.getAllBranches(dbName);
         List<Warehouse> warehousesList = warehouseDAO.getAllWarehouses(dbName);
         List<UserDTO> staffList = userDAO.getStaffListByPage(dbName, page, pageSize, status, role, search);
         int totalStaff = userDAO.countStaff(dbName, status, role, search);
