@@ -20,9 +20,11 @@ import util.DBUtil;
  */
 public class OrdersDAO {
 
-    public List<OrdersDTO> getOrdersListByPage(String dbName, int page, int pageSize, Integer branchID) {
-    List<OrdersDTO> orders = new ArrayList<>();
-    StringBuilder query = new StringBuilder("""
+    public List<OrdersDTO> getFilteredOrdersListByPage(String dbName, int page, int pageSize,
+            String[] branchIDs, String[] creatorIDs, String startDate, String endDate,
+            Double minPrice, Double maxPrice, String searchKeyword) {
+        List<OrdersDTO> orders = new ArrayList<>();
+        StringBuilder query = new StringBuilder("""
         SELECT 
             od.OrderDetailID,
             od.ProductDetailID,
@@ -50,58 +52,166 @@ public class OrdersDAO {
             JOIN Branches b ON o.BranchID = b.BranchID
             JOIN Customers c ON o.CustomerID = c.CustomerID
             JOIN Users u ON o.CreatedBy = u.UserID
+        WHERE 1=1
         """);
 
-    if (branchID != null && branchID > 0) {
-        query.append(" WHERE o.BranchID = ?");
+        List<Object> parameters = new ArrayList<>();
+
+        // Branch filter
+        if (branchIDs != null && branchIDs.length > 0) {
+            query.append(" AND o.BranchID IN (");
+            for (int i = 0; i < branchIDs.length; i++) {
+                query.append("?");
+                if (i < branchIDs.length - 1) {
+                    query.append(",");
+                }
+                parameters.add(Integer.parseInt(branchIDs[i]));
+            }
+            query.append(")");
+        }
+
+        // Creator filter
+        if (creatorIDs != null && creatorIDs.length > 0) {
+            query.append(" AND o.CreatedBy IN (");
+            for (int i = 0; i < creatorIDs.length; i++) {
+                query.append("?");
+                if (i < creatorIDs.length - 1) {
+                    query.append(",");
+                }
+                parameters.add(Integer.parseInt(creatorIDs[i]));
+            }
+            query.append(")");
+        }
+
+        // Date filter - only start date (from selected time to now)
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            query.append(" AND CAST(o.CreatedAt AS DATE) >= ?");
+            parameters.add(startDate);
+        }
+
+        // Price range filter
+        if (minPrice != null) {
+            query.append(" AND o.GrandTotal >= ?");
+            parameters.add(minPrice);
+        }
+        if (maxPrice != null) {
+            query.append(" AND o.GrandTotal <= ?");
+            parameters.add(maxPrice);
+        }
+
+        // Search by product name
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            query.append(" AND (p.ProductName LIKE ? OR c.FullName LIKE ? OR CAST(o.OrderID AS NVARCHAR) LIKE ?)");
+            String searchPattern = "%" + searchKeyword + "%";
+            parameters.add(searchPattern);
+            parameters.add(searchPattern);
+            parameters.add(searchPattern);
+        }
+
+        query.append(" ORDER BY o.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        parameters.add((page - 1) * pageSize);
+        parameters.add(pageSize);
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                OrdersDTO order = extractOrderDTOFromResultSet(rs);
+                orders.add(order);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getFilteredOrdersListByPage: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return orders;
     }
 
-    query.append(" ORDER BY o.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+    public int countFilteredOrders(String dbName, String[] branchIDs, String[] creatorIDs,
+            String startDate, String endDate, Double minPrice, Double maxPrice, String searchKeyword) {
+        int count = 0;
+        StringBuilder query = new StringBuilder("""
+        SELECT COUNT(DISTINCT o.OrderID) 
+        FROM Orders o 
+        LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID 
+        LEFT JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID
+        LEFT JOIN Products p ON pd.ProductID = p.ProductID
+        JOIN Customers c ON o.CustomerID = c.CustomerID
+        WHERE 1=1
+        """);
 
-    try (Connection conn = DBUtil.getConnectionTo(dbName); 
-         PreparedStatement stmt = conn.prepareStatement(query.toString())) {
-        int paramIndex = 1;
-        if (branchID != null && branchID > 0) {
-            stmt.setInt(paramIndex++, branchID);
-        }
-        stmt.setInt(paramIndex++, (page - 1) * pageSize);
-        stmt.setInt(paramIndex, pageSize);
+        List<Object> parameters = new ArrayList<>();
 
-        ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
-            OrdersDTO order = extractOrderDTOFromResultSet(rs);
-            orders.add(order);
+        // Branch filter
+        if (branchIDs != null && branchIDs.length > 0) {
+            query.append(" AND o.BranchID IN (");
+            for (int i = 0; i < branchIDs.length; i++) {
+                query.append("?");
+                if (i < branchIDs.length - 1) {
+                    query.append(",");
+                }
+                parameters.add(Integer.parseInt(branchIDs[i]));
+            }
+            query.append(")");
         }
-    } catch (SQLException e) {
-        System.err.println("Error in getOrdersListByPage: " + e.getMessage());
-        e.printStackTrace();
+
+        // Creator filter
+        if (creatorIDs != null && creatorIDs.length > 0) {
+            query.append(" AND o.CreatedBy IN (");
+            for (int i = 0; i < creatorIDs.length; i++) {
+                query.append("?");
+                if (i < creatorIDs.length - 1) {
+                    query.append(",");
+                }
+                parameters.add(Integer.parseInt(creatorIDs[i]));
+            }
+            query.append(")");
+        }
+
+        // Date filter - only start date (from selected time to now)
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            query.append(" AND CAST(o.CreatedAt AS DATE) >= ?");
+            parameters.add(startDate);
+        }
+
+        // Price range filter
+        if (minPrice != null) {
+            query.append(" AND o.GrandTotal >= ?");
+            parameters.add(minPrice);
+        }
+        if (maxPrice != null) {
+            query.append(" AND o.GrandTotal <= ?");
+            parameters.add(maxPrice);
+        }
+
+        // Search by product name, customer name, or order ID
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            query.append(" AND (p.ProductName LIKE ? OR c.FullName LIKE ? OR CAST(o.OrderID AS NVARCHAR) LIKE ?)");
+            String searchPattern = "%" + searchKeyword + "%";
+            parameters.add(searchPattern);
+            parameters.add(searchPattern);
+            parameters.add(searchPattern);
+        }
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in countFilteredOrders: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return count;
     }
-    return orders;
-}
-
-public int countOrderDetails(String dbName, Integer branchID) {
-    int count = 0;
-    StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM Orders o LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID");
-    
-    if (branchID != null && branchID > 0) {
-        query.append(" WHERE o.BranchID = ?");
-    }
-
-    try (Connection conn = DBUtil.getConnectionTo(dbName); 
-         PreparedStatement stmt = conn.prepareStatement(query.toString())) {
-        if (branchID != null && branchID > 0) {
-            stmt.setInt(1, branchID);
-        }
-        ResultSet rs = stmt.executeQuery();
-        if (rs.next()) {
-            count = rs.getInt(1);
-        }
-    } catch (SQLException e) {
-        System.err.println("Error in countOrderDetails: " + e.getMessage());
-        e.printStackTrace();
-    }
-    return count;
-}
 
     public void updateOrderDetails(String dbName, OrdersDTO order) {
         String query = """
@@ -124,8 +234,8 @@ public int countOrderDetails(String dbName, Integer branchID) {
     }
 
     public OrdersDTO getOrderById(String dbName, int orderID) {
-    OrdersDTO order = null;
-    String query = """
+        OrdersDTO order = null;
+        String query = """
             SELECT 
                 od.OrderDetailID,
                 od.ProductDetailID,
@@ -189,68 +299,67 @@ public int countOrderDetails(String dbName, Integer branchID) {
                 p.ImageURL, pd.Description, pd.ProductCode, pd.WarrantyPeriod
             """;
 
-    try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-        stmt.setInt(1, orderID);
-        ResultSet rs = stmt.executeQuery();
-        if (rs.next()) {
-            order = extractOrderDTOFromResultSetDetailed(rs);
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, orderID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                order = extractOrderDTOFromResultSetDetailed(rs);
+            }
+        } catch (Exception e) {
+            System.err.println("Error in getOrderById: " + e.getMessage());
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        System.err.println("Error in getOrderById: " + e.getMessage());
-        e.printStackTrace();
+        return order;
     }
-    return order;
-}
 
-private OrdersDTO extractOrderDTOFromResultSetDetailed(ResultSet rs) throws SQLException {
-    OrdersDTO order = new OrdersDTO(
-        rs.getInt("OrderDetailID"),
-        rs.getInt("ProductDetailID"),
-        rs.getInt("Quantity"),
-        rs.getString("BranchName"),
-        rs.getString("CustomerName"),
-        rs.getString("CreatedByName"),
-        rs.getString("ProductName"),
-        rs.getInt("OrderID"),
-        rs.getInt("BranchID"),
-        rs.getInt("CreatedBy"),
-        rs.getString("OrderStatus"),
-        rs.getTimestamp("CreatedAt"),
-        rs.getInt("CustomerID"),
-        rs.getString("PaymentMethod"),
-        rs.getString("Notes"),
-        rs.getDouble("GrandTotal"),
-        rs.getDouble("CustomerPay"),
-        rs.getDouble("Change")
-    );
-    
-    // Set additional fields for detailed view
-    order.setCustomerPhone(rs.getString("CustomerPhone"));
-    order.setCustomerEmail(rs.getString("CustomerEmail"));
-    order.setCustomerAddress(rs.getString("CustomerAddress"));
-    order.setCustomerGender(rs.getBoolean("CustomerGender"));
-    order.setCustomerDOB(rs.getDate("CustomerDOB"));
-    
-    order.setCreatedByEmail(rs.getString("CreatedByEmail"));
-    order.setCreatedByPhone(rs.getString("CreatedByPhone"));
-    order.setCreatedByGender(rs.getBoolean("CreatedByGender"));
-    order.setCreatedByAddress(rs.getString("CreatedByAddress"));
-    order.setCreatedByAvaUrl(rs.getString("CreatedByAvaUrl"));
-    order.setRoleName(rs.getString("RoleName"));
-    
-    order.setProductID(rs.getInt("ProductID"));
-    order.setCostPrice(rs.getDouble("CostPrice"));
-    order.setVAT(rs.getDouble("VAT"));
-    order.setProductIsActive(rs.getBoolean("ProductIsActive"));
-    order.setImageURL(rs.getString("ImageURL"));
-    order.setProductDescription(rs.getString("ProductDescription"));
-    order.setProductCode(rs.getString("ProductCode"));
-    order.setWarrantyPeriod(rs.getString("WarrantyPeriod"));
-    order.setSerialNumber(rs.getString("SerialNumbers")); // Sử dụng STRING_AGG để lấy tất cả serial numbers
-    
-    return order;
-}
+    private OrdersDTO extractOrderDTOFromResultSetDetailed(ResultSet rs) throws SQLException {
+        OrdersDTO order = new OrdersDTO(
+                rs.getInt("OrderDetailID"),
+                rs.getInt("ProductDetailID"),
+                rs.getInt("Quantity"),
+                rs.getString("BranchName"),
+                rs.getString("CustomerName"),
+                rs.getString("CreatedByName"),
+                rs.getString("ProductName"),
+                rs.getInt("OrderID"),
+                rs.getInt("BranchID"),
+                rs.getInt("CreatedBy"),
+                rs.getString("OrderStatus"),
+                rs.getTimestamp("CreatedAt"),
+                rs.getInt("CustomerID"),
+                rs.getString("PaymentMethod"),
+                rs.getString("Notes"),
+                rs.getDouble("GrandTotal"),
+                rs.getDouble("CustomerPay"),
+                rs.getDouble("Change")
+        );
 
+        // Set additional fields for detailed view
+        order.setCustomerPhone(rs.getString("CustomerPhone"));
+        order.setCustomerEmail(rs.getString("CustomerEmail"));
+        order.setCustomerAddress(rs.getString("CustomerAddress"));
+        order.setCustomerGender(rs.getBoolean("CustomerGender"));
+        order.setCustomerDOB(rs.getDate("CustomerDOB"));
+
+        order.setCreatedByEmail(rs.getString("CreatedByEmail"));
+        order.setCreatedByPhone(rs.getString("CreatedByPhone"));
+        order.setCreatedByGender(rs.getBoolean("CreatedByGender"));
+        order.setCreatedByAddress(rs.getString("CreatedByAddress"));
+        order.setCreatedByAvaUrl(rs.getString("CreatedByAvaUrl"));
+        order.setRoleName(rs.getString("RoleName"));
+
+        order.setProductID(rs.getInt("ProductID"));
+        order.setCostPrice(rs.getDouble("CostPrice"));
+        order.setVAT(rs.getDouble("VAT"));
+        order.setProductIsActive(rs.getBoolean("ProductIsActive"));
+        order.setImageURL(rs.getString("ImageURL"));
+        order.setProductDescription(rs.getString("ProductDescription"));
+        order.setProductCode(rs.getString("ProductCode"));
+        order.setWarrantyPeriod(rs.getString("WarrantyPeriod"));
+        order.setSerialNumber(rs.getString("SerialNumbers")); // Sử dụng STRING_AGG để lấy tất cả serial numbers
+
+        return order;
+    }
 
     public void deleteOrder(String dbName, int orderID) throws SQLException {
         Connection conn = null;
@@ -314,25 +423,25 @@ private OrdersDTO extractOrderDTOFromResultSetDetailed(ResultSet rs) throws SQLE
             }
         }
     }
-    public List<Branches> getAllBranches(String dbName) {
-    List<Branches> branches = new ArrayList<>();
-    String query = "SELECT BranchID, BranchName FROM Branches WHERE IsActive = 1 ORDER BY BranchName";
 
-    try (Connection conn = DBUtil.getConnectionTo(dbName); 
-         PreparedStatement stmt = conn.prepareStatement(query)) {
-        ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
-            Branches branch = new Branches();
-            branch.setBranchID(rs.getInt("BranchID"));
-            branch.setBranchName(rs.getString("BranchName"));
-            branches.add(branch);
+    public List<Branches> getAllBranches(String dbName) {
+        List<Branches> branches = new ArrayList<>();
+        String query = "SELECT BranchID, BranchName FROM Branches WHERE IsActive = 1 ORDER BY BranchName";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Branches branch = new Branches();
+                branch.setBranchID(rs.getInt("BranchID"));
+                branch.setBranchName(rs.getString("BranchName"));
+                branches.add(branch);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getAllBranches: " + e.getMessage());
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        System.err.println("Error in getAllBranches: " + e.getMessage());
-        e.printStackTrace();
+        return branches;
     }
-    return branches;
-}
 
     private static OrdersDTO extractOrderDTOFromResultSet(ResultSet rs) throws SQLException {
         int orderDetailID = rs.getInt("OrderDetailID");

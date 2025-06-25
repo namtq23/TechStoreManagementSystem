@@ -280,7 +280,7 @@ public class UserDAO {
         }
         return false;
     }
-    
+
     public static boolean insertWareHouseManagerIntoUser(String dbName, User user) throws SQLException {
         String sql = """
         INSERT INTO Users (
@@ -309,7 +309,6 @@ public class UserDAO {
         return false;
     }
 
-    
     //All User
     public static boolean isUserAccountTaken(String dbName, String email, String phone) throws SQLException {
         String sql = "SELECT COUNT(*) FROM Users WHERE Email = ? OR Phone = ?";
@@ -323,7 +322,6 @@ public class UserDAO {
             }
         }
     }
-    
 
     private static ShopOwner extractShopOwnerFromResultSet(ResultSet rs) throws SQLException {
         ShopOwner shopOwner = new ShopOwner(
@@ -384,9 +382,10 @@ public class UserDAO {
 
         return user;
     }
-  public List<UserDTO> getStaffListByPage(String dbName, int page, int pageSize, Integer status, Integer role, String search) {
-    List<UserDTO> staffList = new ArrayList<>();
-    StringBuilder query = new StringBuilder("""
+
+    public List<UserDTO> getStaffListByPage(String dbName, int page, int pageSize, Integer status, Integer role, String search) {
+        List<UserDTO> staffList = new ArrayList<>();
+        StringBuilder query = new StringBuilder("""
         SELECT 
             u.UserID,
             u.FullName,
@@ -404,94 +403,92 @@ public class UserDAO {
             u.RoleID != 0
     """);
 
-    if (status != null) {
-        query.append(" AND u.IsActive = ?");
-    }
-    if (role != null) {
-        query.append(" AND u.RoleID = ?");
-    }
-    if (search != null && !search.trim().isEmpty()) {
-        query.append(" AND (u.UserID LIKE ? OR u.FullName LIKE ?)");
-    }
-
-    query.append(" ORDER BY u.UserID ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
-
-    try (Connection conn = DBUtil.getConnectionTo(dbName);
-         PreparedStatement stmt = conn.prepareStatement(query.toString())) {
-        int paramIndex = 1;
         if (status != null) {
-            stmt.setInt(paramIndex++, status);
+            query.append(" AND u.IsActive = ?");
         }
         if (role != null) {
-            stmt.setInt(paramIndex++, role);
+            query.append(" AND u.RoleID = ?");
         }
         if (search != null && !search.trim().isEmpty()) {
-            String searchPattern = "%" + search.trim() + "%";
-            stmt.setString(paramIndex++, searchPattern);
-            stmt.setString(paramIndex++, searchPattern);
+            query.append(" AND (u.UserID LIKE ? OR u.FullName LIKE ?)");
         }
-        stmt.setInt(paramIndex++, (page - 1) * pageSize);
-        stmt.setInt(paramIndex, pageSize);
 
-        ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
-            UserDTO user = new UserDTO();
-            user.setUserID(rs.getInt("UserID"));
-            user.setFullName(rs.getString("FullName"));
-            user.setPhone(rs.getString("Phone"));
-            user.setIsActive(rs.getInt("IsActive"));
-            user.setRoleName(rs.getString("RoleName"));
-            user.setBranchName(rs.getString("BranchName"));
-            user.setWarehouseName(rs.getString("WarehouseName"));
-            staffList.add(user);
+        query.append(" ORDER BY u.UserID ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+            int paramIndex = 1;
+            if (status != null) {
+                stmt.setInt(paramIndex++, status);
+            }
+            if (role != null) {
+                stmt.setInt(paramIndex++, role);
+            }
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                stmt.setString(paramIndex++, searchPattern);
+                stmt.setString(paramIndex++, searchPattern);
+            }
+            stmt.setInt(paramIndex++, (page - 1) * pageSize);
+            stmt.setInt(paramIndex, pageSize);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                UserDTO user = new UserDTO();
+                user.setUserID(rs.getInt("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                user.setPhone(rs.getString("Phone"));
+                user.setIsActive(rs.getInt("IsActive"));
+                user.setRoleName(rs.getString("RoleName"));
+                user.setBranchName(rs.getString("BranchName"));
+                user.setWarehouseName(rs.getString("WarehouseName"));
+                staffList.add(user);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getStaffListByPage: " + e.getMessage());
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        System.err.println("Error in getStaffListByPage: " + e.getMessage());
-        e.printStackTrace();
+        return staffList;
     }
-    return staffList;
-}
 
     public int countStaff(String dbName, Integer status, Integer role, String search) {
-    int count = 0;
-    StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM Users u WHERE u.RoleID != 0");
+        int count = 0;
+        StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM Users u WHERE u.RoleID != 0");
 
-    if (status != null) {
-        query.append(" AND u.IsActive = ?");
-    }
-    if (role != null) {
-        query.append(" AND u.RoleID = ?");
-    }
-    if (search != null && !search.trim().isEmpty()) {
-        query.append(" AND (u.UserID LIKE ? OR u.FullName LIKE ?)");
-    }
-
-    try (Connection conn = DBUtil.getConnectionTo(dbName);
-         PreparedStatement stmt = conn.prepareStatement(query.toString())) {
-        int paramIndex = 1;
         if (status != null) {
-            stmt.setInt(paramIndex++, status);
+            query.append(" AND u.IsActive = ?");
         }
         if (role != null) {
-            stmt.setInt(paramIndex++, role);
+            query.append(" AND u.RoleID = ?");
         }
         if (search != null && !search.trim().isEmpty()) {
-            String searchPattern = "%" + search.trim() + "%";
-            stmt.setString(paramIndex++, searchPattern);
-            stmt.setString(paramIndex++, searchPattern);
+            query.append(" AND (u.UserID LIKE ? OR u.FullName LIKE ?)");
         }
-        ResultSet rs = stmt.executeQuery();
-        if (rs.next()) {
-            count = rs.getInt(1);
-        }
-    } catch (SQLException e) {
-        System.err.println("Error in countStaff: " + e.getMessage());
-        e.printStackTrace();
-    }
-    return count;
-}
 
-  public List<User> getStaffsByBranchIDForOutcome(int branchId, String dbName) throws SQLException {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+            int paramIndex = 1;
+            if (status != null) {
+                stmt.setInt(paramIndex++, status);
+            }
+            if (role != null) {
+                stmt.setInt(paramIndex++, role);
+            }
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                stmt.setString(paramIndex++, searchPattern);
+                stmt.setString(paramIndex++, searchPattern);
+            }
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in countStaff: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return count;
+    }
+
+    public List<User> getStaffsByBranchIDForOutcome(int branchId, String dbName) throws SQLException {
         List<User> staffs = new ArrayList<>();
 
         String sql = """
@@ -512,6 +509,30 @@ public class UserDAO {
         return staffs;
     }
 
+    public List<UserDTO> getAllCreators(String dbName) {
+        List<UserDTO> creators = new ArrayList<>();
+        String query = """
+        SELECT DISTINCT u.UserID, u.FullName 
+        FROM Users u 
+        INNER JOIN Orders o ON u.UserID = o.CreatedBy 
+        ORDER BY u.FullName
+        """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                UserDTO user = new UserDTO();
+                user.setUserID(rs.getInt("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                creators.add(user);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getAllCreators: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return creators;
+    }
+
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
 //        List<ShopOwner> shopOwners = ud.getShopOwners();  
@@ -521,7 +542,5 @@ public class UserDAO {
         ShopOwner so = ud.getShopOwnwerByEmail("ndpp.work@gmail.com");
         System.out.println(so.getPassword());
     }
-    
-    
-    
+
 }
