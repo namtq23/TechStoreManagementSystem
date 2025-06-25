@@ -124,51 +124,133 @@ public int countOrderDetails(String dbName, Integer branchID) {
     }
 
     public OrdersDTO getOrderById(String dbName, int orderID) {
-        OrdersDTO order = null;
-        String query = """
-                SELECT 
-                    od.OrderDetailID,
-                    od.ProductDetailID,
-                    od.Quantity,
-                    o.OrderID,
-                    o.BranchID,
-                    o.CreatedBy,
-                    o.OrderStatus,
-                    o.CreatedAt,
-                    o.CustomerID,
-                    o.PaymentMethod,
-                    o.Notes,
-                    o.GrandTotal,
-                    o.CustomerPay,
-                    o.Change,
-                    b.BranchName,
-                    c.FullName AS CustomerName,
-                    u.FullName AS CreatedByName,
-                    p.ProductName
-                FROM 
-                    Orders o
-                    LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID
-                    LEFT JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID
-                    LEFT JOIN Products p ON pd.ProductID = p.ProductID
-                    JOIN Branches b ON o.BranchID = b.BranchID
-                    JOIN Customers c ON o.CustomerID = c.CustomerID
-                    JOIN Users u ON o.CreatedBy = u.UserID
-                WHERE 
-                    o.OrderID = ?
-                """;
+    OrdersDTO order = null;
+    String query = """
+            SELECT 
+                od.OrderDetailID,
+                od.ProductDetailID,
+                od.Quantity,
+                o.OrderID,
+                o.BranchID,
+                o.CreatedBy,
+                o.OrderStatus,
+                o.CreatedAt,
+                o.CustomerID,
+                o.PaymentMethod,
+                o.Notes,
+                o.GrandTotal,
+                o.CustomerPay,
+                o.Change,
+                b.BranchName,
+                c.FullName AS CustomerName,
+                c.PhoneNumber AS CustomerPhone,
+                c.Email AS CustomerEmail,
+                c.Address AS CustomerAddress,
+                c.Gender AS CustomerGender,
+                c.DateOfBirth AS CustomerDOB,
+                u.UserID,
+                u.FullName AS CreatedByName,
+                u.Email AS CreatedByEmail,
+                u.Phone AS CreatedByPhone,
+                u.Gender AS CreatedByGender,
+                u.Address AS CreatedByAddress,
+                u.AvaUrl AS CreatedByAvaUrl,
+                r.RoleName,
+                p.ProductID,
+                p.ProductName,
+                p.CostPrice,
+                p.VAT,
+                p.IsActive AS ProductIsActive,
+                p.ImageURL,
+                pd.Description AS ProductDescription,
+                pd.ProductCode,
+                pd.WarrantyPeriod,
+                STRING_AGG(pdsn.SerialNumber, ', ') AS SerialNumbers
+            FROM 
+                Orders o
+                LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID
+                LEFT JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID
+                LEFT JOIN Products p ON pd.ProductID = p.ProductID
+                LEFT JOIN ProductDetailSerialNumber pdsn ON pd.ProductDetailID = pdsn.ProductDetailID 
+                    AND pdsn.OrderID = o.OrderID AND pdsn.Status = 1
+                JOIN Branches b ON o.BranchID = b.BranchID
+                JOIN Customers c ON o.CustomerID = c.CustomerID
+                JOIN Users u ON o.CreatedBy = u.UserID
+                JOIN Roles r ON u.RoleID = r.RoleID
+            WHERE 
+                o.OrderID = ?
+            GROUP BY 
+                od.OrderDetailID, od.ProductDetailID, od.Quantity, o.OrderID, o.BranchID, 
+                o.CreatedBy, o.OrderStatus, o.CreatedAt, o.CustomerID, o.PaymentMethod, 
+                o.Notes, o.GrandTotal, o.CustomerPay, o.Change, b.BranchName, 
+                c.FullName, c.PhoneNumber, c.Email, c.Address, c.Gender, c.DateOfBirth,
+                u.UserID, u.FullName, u.Email, u.Phone, u.Gender, u.Address, u.AvaUrl,
+                r.RoleName, p.ProductID, p.ProductName, p.CostPrice, p.VAT, p.IsActive,
+                p.ImageURL, pd.Description, pd.ProductCode, pd.WarrantyPeriod
+            """;
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, orderID);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                order = extractOrderDTOFromResultSet(rs);
-            }
-        } catch (Exception e) {
-            System.err.println("Error in getOrderById: " + e.getMessage());
-            e.printStackTrace();
+    try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setInt(1, orderID);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            order = extractOrderDTOFromResultSetDetailed(rs);
         }
-        return order;
+    } catch (Exception e) {
+        System.err.println("Error in getOrderById: " + e.getMessage());
+        e.printStackTrace();
     }
+    return order;
+}
+
+private OrdersDTO extractOrderDTOFromResultSetDetailed(ResultSet rs) throws SQLException {
+    OrdersDTO order = new OrdersDTO(
+        rs.getInt("OrderDetailID"),
+        rs.getInt("ProductDetailID"),
+        rs.getInt("Quantity"),
+        rs.getString("BranchName"),
+        rs.getString("CustomerName"),
+        rs.getString("CreatedByName"),
+        rs.getString("ProductName"),
+        rs.getInt("OrderID"),
+        rs.getInt("BranchID"),
+        rs.getInt("CreatedBy"),
+        rs.getString("OrderStatus"),
+        rs.getTimestamp("CreatedAt"),
+        rs.getInt("CustomerID"),
+        rs.getString("PaymentMethod"),
+        rs.getString("Notes"),
+        rs.getDouble("GrandTotal"),
+        rs.getDouble("CustomerPay"),
+        rs.getDouble("Change")
+    );
+    
+    // Set additional fields for detailed view
+    order.setCustomerPhone(rs.getString("CustomerPhone"));
+    order.setCustomerEmail(rs.getString("CustomerEmail"));
+    order.setCustomerAddress(rs.getString("CustomerAddress"));
+    order.setCustomerGender(rs.getBoolean("CustomerGender"));
+    order.setCustomerDOB(rs.getDate("CustomerDOB"));
+    
+    order.setCreatedByEmail(rs.getString("CreatedByEmail"));
+    order.setCreatedByPhone(rs.getString("CreatedByPhone"));
+    order.setCreatedByGender(rs.getBoolean("CreatedByGender"));
+    order.setCreatedByAddress(rs.getString("CreatedByAddress"));
+    order.setCreatedByAvaUrl(rs.getString("CreatedByAvaUrl"));
+    order.setRoleName(rs.getString("RoleName"));
+    
+    order.setProductID(rs.getInt("ProductID"));
+    order.setCostPrice(rs.getDouble("CostPrice"));
+    order.setVAT(rs.getDouble("VAT"));
+    order.setProductIsActive(rs.getBoolean("ProductIsActive"));
+    order.setImageURL(rs.getString("ImageURL"));
+    order.setProductDescription(rs.getString("ProductDescription"));
+    order.setProductCode(rs.getString("ProductCode"));
+    order.setWarrantyPeriod(rs.getString("WarrantyPeriod"));
+    order.setSerialNumber(rs.getString("SerialNumbers")); // Sử dụng STRING_AGG để lấy tất cả serial numbers
+    
+    return order;
+}
+
 
     public void deleteOrder(String dbName, int orderID) throws SQLException {
         Connection conn = null;
