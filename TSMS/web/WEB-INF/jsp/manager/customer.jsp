@@ -15,7 +15,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TSMS - Nhân Viên</title>
-        <link rel="stylesheet" href="css/bm-staff.css">
+        <link rel="stylesheet" href="css/khachhang.css">
         <link rel="stylesheet" href="css/header.css"/>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     </head>
@@ -111,67 +111,84 @@
         </header>
 
         <div class="main-container">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <!--Product Type Filter--> 
-                <div class="filter-section">
-                    <div class="filter-header">
-                        <h3>Trạng thái khách hàng</h3>
-                        <i class="fas fa-chevron-up"></i>
+
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <form action="bm-customer" method="get">
+        <!-- Thêm dòng này để kích hoạt lọc theo khoảng giá -->
+        <input type="hidden" name="showTop" value="true" />
+
+        <!-- Category Filter -->
+        <div class="filter-section">
+            <div class="filter-header">
+                <h3>Nhóm khách hàng</h3>
+            </div>
+            <div class="filter-content">
+                <div class="category-tree">
+                    <div class="category-item">
+                        <input type="checkbox" id="all-categories" name="categories" value="all">
+                        <label for="all-categories" class="category-label">
+                            <span>Tất cả</span>
+                        </label>
                     </div>
-
-                    <div class="filter-content">
-
-                        <form action="bm-customer" method="get">
-                            <label class="checkbox-item">
-                                <input type="radio" name="top" value="" 
-                                       <%= request.getParameter("top") == null ? "checked" : "" %>>
-                                <span>Tổng hợp</span><br>
-                            </label>
-                            <label class="checkbox-item">
-                                <input type="radio" name="top" value="true" 
-                                       <%= "true".equals(request.getParameter("top")) ? "checked" : "" %>>
-                                <span>Tiềm năng</span><br>
-                            </label>
-
-                            <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
-                        </form>
-
-                    </div>
-
                 </div>
-                <div class="filter-section">
-                    <div class="filter-header">
-                        <h3>Giới tính khách hàng</h3>
-                        <i class="fas fa-chevron-up"></i>
-                    </div>
-                    <div class="filter-content">
-                        <form action="bm-customer" method="get">
-                            <label class="checkbox-item">
-                                <input type="radio" id="gender-all" name="gender" value="all"
-                                       <%= request.getParameter("gender") == null || "all".equals(request.getParameter("gender")) ? "checked" : "" %>>
-                                <span for="gender-all">Tổng hợp</span><br>
-                            </label>
+            </div>
+        </div>
 
-                            <label class="checkbox-item">
-                                <input type="radio" id="gender-male" name="gender" value="male"
-                                       <%= "male".equals(request.getParameter("gender")) ? "checked" : "" %>>
-                                <span for="gender-male">Nam</span><br>
-                            </label>
-
-                            <label class="checkbox-item">
-                                <input type="radio" id="gender-female" name="gender" value="female"
-                                       <%= "female".equals(request.getParameter("gender")) ? "checked" : "" %>>
-                                <span for="gender-female">Nữ</span><br>
-                            </label>
-
-                            <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
-                        </form>
-                    </div>
-
+        <!-- Price Range Filter -->
+        <div class="filter-section">
+            <div class="filter-header">
+                <h3>Khoảng chi tiêu</h3>
+            </div>
+            <div class="filter-content">
+                <div class="price-range">
+                    <input type="number" name="minGrandTotal" placeholder="Số tiền chi từ"
+                           value="${minGrandTotal}" class="GrandTotal-input">
+                    <input type="number" name="maxGrandTotal" placeholder="Số tiền chi đến"
+                           value="${maxGrandTotal}" class="GrandTotal-input">
                 </div>
-            </aside>
+            </div>
+        </div>
 
+        <!-- Status Filter -->
+        <div class="filter-section">
+            <div class="filter-header">
+                <h3>Giới tính</h3>
+            </div>
+            <div class="filter-content">
+                <label class="radio-item">
+                    <input type="radio" name="gender" value="all">
+                    <span class="radio-mark"></span> Tất cả
+                </label>
+                <label class="radio-item">
+                    <input type="radio" id="gender-male" name="gender" value="male"
+                           <%= "male".equals(request.getParameter("gender")) ? "checked" : "" %>>
+                    <span class="radio-mark">Nam</span><br>
+                </label>
+                <label class="radio-item"> 
+                    <input type="radio" id="gender-female" name="gender" value="female"
+                           <%= "female".equals(request.getParameter("gender")) ? "checked" : "" %>>
+                    <span class="radio-mark">Nữ</span><br>
+                </label>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="filter-actions">
+            <a href="bm-customer?page=1" class="btn-clear">
+                <i class="fas fa-eraser"></i> Xóa bộ lọc
+            </a>
+            <button type="submit" class="btn-apply">
+                <i class="fas fa-filter"></i> Áp dụng lọc
+            </button>
+        </div>
+    </form>
+</aside>
+
+
+            </aside> 
+                             
             <!-- Main Content -->
             <main class="main-content">
                 <div class="page-header">
@@ -202,11 +219,11 @@
                                 <th>Mã Khách Hàng</th>
                                 <th>Tên Khách hàng</th>
                                 <th>Số Điện Thoại</th>
-                                <th>Gmail</th>
-                                <th>Địa Chỉ</th>
-                                <th>Giới Tính</th>
+<!--                                <th>Gmail</th>
+-->                                <th>Địa Chỉ</th><!--
+                                <th>Giới Tính</th>-->
                                 <th>Tổng tiền đã chi</th>
-                                <th>Ngày tạo thông tin</th>
+<!--                                <th>Ngày tạo thông tin</th>-->
                             </tr>
                         </thead>
                         <tbody>
@@ -216,81 +233,89 @@
                                     <td>${customer.customerId}</td>
                                     <td>${customer.fullName}</td>
                                     <td>${customer.phoneNumber}</td>
-                                    <td>${customer.email}</td>
-                                    <td>${customer.address}</td>
-                                    <td>${customer.gender ? 'Nam' : 'Nữ'}</td>
+<!--                                    <td>${customer.email}</td>
+-->                                    <td>${customer.address}</td><!--
+                                    <td>${customer.gender ? 'Nam' : 'Nữ'}</td>-->
                                     <td><fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true"/> ₫</td>
-                                    <td>${customer.createdAt}</td>
+<!--                                    <td>${customer.createdAt}</td>-->
                                 </tr>
+                                
+<tr id="details-${loop.index}" class="detail-row" style="display: none;">
+    <td colspan="8">
+        <div class="border rounded p-3 bg-light">
+            <form method="post" action="bm-customer">
+                <input type="hidden" name="id" value="${customer.customerId}" />
 
-                                <!-- Dòng chi tiết ẩn -->
-                                <tr id="details-${loop.index}" class="detail-row" style="display: none;">
-                                    <td colspan="8">
-                                        <div class="border rounded p-3 bg-light">
-                                            <!-- Tabs -->
-                                            <ul class="nav nav-tabs mb-3">
-                                                <li class="nav-item">
-                                                    <a class="nav-link active" data-bs-toggle="tab" href="#info-${loop.index}">Thông tin</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" data-bs-toggle="tab" href="#address-${loop.index}">Địa chỉ nhận hàng</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" data-bs-toggle="tab" href="#debt-${loop.index}">Nợ cần thu từ khách</a>
-                                                </li>
-                                            </ul>
+                <div class="row">
+                    <!-- Cột trái: ảnh -->
+                    <div class="col-md-3 text-center">
+                        <img src="https://via.placeholder.com/250x250?text=Ảnh"
+                             class="img-fluid border rounded" alt="Avatar" />
+                    </div>
 
-                                            <div class="tab-content">
-                                                <!-- Tab Thông tin -->
-                                                <div class="tab-pane fade show active" id="info-${loop.index}">
-                                                    <div class="row">
-                                                        <!-- Ảnh -->
-                                                        <div class="col-md-3 text-center">
-                                                            <img src="https://via.placeholder.com/250x250?text=Ảnh" class="img-fluid border rounded" alt="Avatar" />
-                                                        </div>
-                                                        <!-- Thông tin -->
-                                                        <div class="col-md-9">
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <p><strong>Mã KH:</strong> ${customer.customerId}</p>
-                                                                    <p><strong>Tên khách:</strong> ${customer.fullName}</p>
-                                                                    <p><strong>Email:</strong> ${customer.email}</p>
-                                                                    <p><strong>Giới tính:</strong> ${customer.gender ? 'Nam' : 'Nữ'}</p>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <p><strong>SĐT:</strong> ${customer.phoneNumber}</p>
-                                                                    <p><strong>Địa chỉ:</strong> ${customer.address}</p>
-                                                                    <p><strong>Ngày tạo:</strong> ${customer.createdAt}</p>
-                                                                    <p><strong>Tổng chi tiêu:</strong> <fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true"/> ₫</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                    <!-- Cột phải: thông tin -->
+                    <div class="col-md-9">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Mã KH:</strong> ${customer.customerId}</p>
 
-                                                <!-- Tab Địa chỉ -->
-                                                <div class="tab-pane fade" id="address-${loop.index}">
-                                                    <p>Chưa có dữ liệu địa chỉ nhận hàng.</p>
-                                                </div>
+                                <p><strong>Tên khách:</strong>
+                                    <input type="text" name="fullName" class="form-control"
+                                           value="${customer.fullName}" />
+                                </p>
 
-                                                <!-- Tab Nợ -->
-                                                <div class="tab-pane fade" id="debt-${loop.index}">
-                                                    <p>Chưa có dữ liệu công nợ.</p>
-                                                </div>
-                                            </div>
+                                <p><strong>Email:</strong>
+                                    <input type="email" name="email" class="form-control"
+                                           value="${customer.email}" />
+                                </p>
 
-                                            <!-- Nút hành động -->
-                                            <div class="mt-3 d-flex gap-2 justify-content-start flex-wrap">
-                                                <button class="btn btn-success">
-                                                    <i class="bi bi-check-circle"></i> Cập nhật
-                                                </button>
-                                                <button class="btn btn-danger">
-                                                    <i class="bi bi-lock-fill"></i> Ngừng hoạt động
-                                                </button>
-                                                <button class="btn btn-danger">
-                                                    <i class="bi bi-trash"></i> Xóa
-                                                </button>
-                                            </div>
+                                <p><strong>Giới tính:</strong>
+                                    <select name="gender" class="form-control">
+                                        <option value="true" ${customer.gender ? 'selected' : ''}>Nam</option>
+                                        <option value="false" ${!customer.gender ? 'selected' : ''}>Nữ</option>
+                                    </select>
+                                </p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <p><strong>SĐT:</strong>
+                                    <input type="text" name="phoneNumber" class="form-control"
+                                           value="${customer.phoneNumber}" />
+                                </p>
+
+                                <p><strong>Địa chỉ:</strong>
+                                    <input type="text" name="address" class="form-control"
+                                           value="${customer.address}" />
+                                </p>
+
+                                <p><strong>Ngày tạo:</strong>
+                                    <fmt:formatDate value="${customer.createdAt}" pattern="dd/MM/yyyy HH:mm" />
+                                </p>
+
+                                <p><strong>Cập nhật lần cuối:</strong>
+                                    <fmt:formatDate value="${customer.updatedAt}" pattern="dd/MM/yyyy HH:mm" />
+                                </p>
+
+                                <p><strong>Tổng chi tiêu:</strong>
+                                    <fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true" /> ₫
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Nút hành động -->
+                        <div class="mt-2 text-end">
+                            <button type="submit" class="btn btn-sm btn-success">Lưu</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </td>
+</tr>
+
+
+
+
 
                                         </div>
                                     </td>
@@ -303,7 +328,7 @@
                 <!-- Pagination -->
                 <div class="pagination-container mt-3 d-flex justify-content-between align-items-center">
                     <div class="pagination-info">
-                        Hiển thị ${startCustomer} - ${endCustomer} / Tổng số ${totalProducts} Khách hàng
+                        Hiển thị ${startCustomer} - ${endCustomer} / Tổng số ${totalCustomers} Khách hàng
                     </div>
                     <div class="pagination">
                         <a href="bm-customer?page=1" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
@@ -347,9 +372,54 @@
                                         }
                                     });
                 </script>
+                
+<script>
+function enableEdit(index) {
+    // Hiện input và ẩn text
+    const fields = ['fullName', 'email', 'gender', 'phone', 'address'];
+    fields.forEach(field => {
+        document.getElementById(`${field}-text-${index}`).style.display = 'none';
+        document.getElementById(`${field}-input-${index}`).classList.remove('d-none');
+    });
 
+    // Hiện nút "Lưu"
+    document.getElementById(`save-btn-${index}`).classList.remove('d-none');
+}
+</script>
 
+<script>
+function enableEdit(index) {
+    const fields = ['fullName', 'email', 'gender', 'phone', 'address'];
+    
+    fields.forEach(field => {
+        const span = document.getElementById(`${field}-text-${index}`);
+        const input = document.getElementById(`${field}-input-${index}`);
+        if (span && input) {
+            span.classList.add('d-none');
+            input.classList.remove('d-none');
+        }
+    });
 
+    const saveBtn = document.getElementById(`save-btn-${index}`);
+    if (saveBtn) saveBtn.classList.remove('d-none');
 
-                </html>
+    const cancelBtn = document.getElementById(`cancel-btn-${index}`);
+    if (cancelBtn) cancelBtn.classList.remove('d-none');
 
+    const editBtn = document.querySelector(`#details-${index} button[onclick*="enableEdit"]`);
+    if (editBtn) editBtn.classList.add('d-none'); // Ẩn nút "Chỉnh sửa"
+}
+
+</script>
+                
+                
+                
+                
+ </html>
+
+ 
+ 
+ 
+ 
+ 
+ 
