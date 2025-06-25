@@ -15,16 +15,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import model.ShopOwner;
+import model.User;
 import util.EmailUtil;
 import util.TokenGenerator;
+import util.Validate;
 
 /**
  *
  * @author admin
  */
-@WebServlet("/forgot-password")
-public class ForgotPasswordServlet extends HttpServlet {
+@WebServlet(name = "StaffForgotPasswordServlet", urlPatterns = {"/staff-forgot-password"})
+public class StaffForgotPasswordServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -34,12 +35,13 @@ public class ForgotPasswordServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
+        String dbName = Validate.shopNameConverter(request.getParameter("shopName"));
 
         try {
-            ShopOwner user = UserDAO.getShopOwnwerByEmail(email);
+            User user = UserDAO.getUserByEmail(email, dbName);
 
-            if (!UserDAO.isAccountTaken(email, null)) {
-                request.setAttribute("error", "Có vẻ bạn không phải là chủ chuỗi cửa hàng!");
+            if (user == null) {
+                request.setAttribute("error", "Có vẻ bạn không phải là nhân viên của cửa hàng!");
                 request.getRequestDispatcher("/WEB-INF/jsp/common/forgot-password.jsp").forward(request, response);
             }
 
@@ -47,9 +49,9 @@ public class ForgotPasswordServlet extends HttpServlet {
                 String token = TokenGenerator.generateToken();
                 Timestamp expiry = new Timestamp(System.currentTimeMillis() + 2 * 60 * 1000);
 
-                PasswordResetTokenDAO.saveToken(user.getOwnerId(), token, expiry);
+                PasswordResetTokenDAO.saveTokenInEachShop(user.getUserID(), token, expiry, dbName);
 
-                String resetLink = request.getRequestURL().toString().replace("forgot-password", "reset-password") + "?token=" + token + "&email=" + email;
+                String resetLink = request.getRequestURL().toString().replace("staff-forgot-password", "staff-reset-password") + "?token=" + token + "&email=" + email + "&db=" + dbName;
                 String message = "Click vào đường dẫn sau để đặt lại mật khẩu:\n" + resetLink;
 
                 EmailUtil.sendEmail(email, "Đặt lại mật khẩu", message);
@@ -65,4 +67,5 @@ public class ForgotPasswordServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/jsp/common/forgot-password.jsp").forward(request, response);
         }
     }
+
 }

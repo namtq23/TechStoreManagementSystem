@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.List;
-import model.Branches;
+import model.Branch;
 import model.OrdersDTO;
 
 /**
@@ -79,7 +79,7 @@ public class SOOrderController extends HttpServlet {
                 }
             }
             // Fetch all branches
-            List<Branches> branchesList = orderDAO.getAllBranches(dbName);
+            List<Branch> branchesList = orderDAO.getAllBranches(dbName);
             req.setAttribute("branchesList", branchesList);
             // Fetch orders based on branch filter
             List<OrdersDTO> ordersList = orderDAO.getOrdersListByPage(dbName, page, pageSize, branchID);
