@@ -157,11 +157,7 @@ public class ShopOwner {
 
     @Override
     public String toString() {
-        return "ShopOwner{" + "ownerId=" + ownerId + ", password=" + password + ", fullName=" + fullName + ", shopName=" + shopName + ", databaseName=" + databaseName + ", email=" + email + ", identificationID=" + identificationID + ", gender=" + gender + ", address=" + address + ", isActive=" + isActive + '}';
+        return "ShopOwner{" + "ownerId=" + ownerId + ", password=" + password + ", fullName=" + fullName + ", shopName=" + shopName + ", databaseName=" + databaseName + ", email=" + email + ", identificationID=" + identificationID + ", gender=" + gender + ", address=" + address + ", phone=" + phone + ", isActive=" + isActive + ", createdAt=" + createdAt + '}';
     }
-
-    
-
-
     
 }
