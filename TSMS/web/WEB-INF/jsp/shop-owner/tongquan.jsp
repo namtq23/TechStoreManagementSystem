@@ -1,6 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 
 <!DOCTYPE html>
@@ -13,7 +14,6 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="css/so-overall.css">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     </head>
     <body>
@@ -291,7 +291,7 @@
                 <!-- QR Code Section -->
                 <div class="qr-section">
                     <div class="qr-content">
-                        <h4>KiotViet ra mắt kênh CSKH Zalo Official Account</h4>
+                        <h4>TSMS ra mắt kênh CSKH Zalo Official Account</h4>
                         <button class="qr-btn">QUÉT TẠI NGAY</button>
                     </div>
                     <div class="qr-code">
@@ -300,62 +300,104 @@
                 </div>
 
                 <!-- Notifications -->
-                <div class="notifications">
-                    <h4>THÔNG BÁO</h4>
-                    <div class="notification-item">
-                        <div class="notification-icon error">
-                            <i class="fas fa-exclamation-circle"></i>
-                        </div>
-                        <div class="notification-content">
-                            <p>Có <strong>1 hoạt động đăng nhập khác thường</strong> cần kiểm tra.</p>
-                        </div>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
+                <div class="notifications" style="padding: 16px; background: #ffffff; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    <h4 class="fas fa-bell" style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 12px; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">THÔNG BÁO</h4>
+                    <c:if test="${not empty recentAnnouncements}">
+                        <c:forEach var="item" items="${recentAnnouncements}">
+                            <div class="notification-item" style="display: flex; align-items: flex-start; padding: 8px; margin-bottom: 8px; background: #fff5f5; border-radius: 6px; border-left: 4px solid #f44336;">
+                                <i class="fas fa-bell" style="margin-top: 2px; color: #f44336; font-size: 14px; margin-right: 8px;"></i>
+                                <div style="flex: 1;">
+                                    <!-- Tiêu đề -->
+                                    <div style="font-weight: 600; font-size: 13px; color: #d32f2f;">${item.title}</div>
+                                    <!-- Mô tả ngắn -->
+                                    <div style="font-size: 12px; color: #555;">${item.description}</div>
+                                    <!-- Chi nhánh + Người gửi -->
+                                    <div style="font-size: 11px; color: #777; margin-top: 2px;">
+                                        <i class="fas fa-map-marker-alt" style="margin-right: 4px; color: #9c27b0;"></i> ${item.locationName}
+                                        <span style="margin-left: 8px;">
+                                            <i class="fas fa-user" style="margin-right: 4px; color: #2196f3;"></i> ${item.senderName}
+                                        </span>
+                                    </div>
+                                    <!-- Ngày + trạng thái -->
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
+                                        <div style="font-size: 10px; color: #999;">
+                                            <i class="fas fa-clock" style="margin-right: 4px;"></i>
+                                            <fmt:formatDate value="${item.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
+                                        </div>
+                                        <span style="font-size: 10px; padding: 2px 6px; background: #e3f2fd; color: #1976d2; border-radius: 10px;">
+                                            ${item.status}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>                        
+                        </c:forEach>
+                    </c:if>
+                    <c:if test="${empty recentAnnouncements}">
+                        <p style="text-align: center; color: #9e9e9e; font-size: 14px; padding: 20px 0;">Không có thông báo nào.</p>
+                    </c:if>
                 </div>
 
-                <!-- Recent Activities -->
-                <div class="activities">
-                    <h4>CÁC HOẠT ĐỘNG GẦN ĐÂY</h4>
-
-                    <div class="activity-item">
-                        <div class="activity-icon error">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="activity-content">
-                            <p><span class="activity-user">hoang minh kien</span> vừa <span class="activity-action">nhập hàng</span> với giá trị <strong>0</strong></p>
-                            <span class="activity-time">41 phút trước</span>
-                        </div>
+                <!-- Các hoạt động gần đây -->
+                <div class="activities" style="padding: 16px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    <div style="display: flex; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">
+                        <i class="fas fa-history" style="color: #2196f3; font-size: 18px; margin-right: 8px;"></i>
+                        <h4 style="margin: 0; color: #1a1a1a; font-size: 18px; font-weight: 600;">CÁC HOẠT ĐỘNG GẦN ĐÂY</h4>
                     </div>
 
-                    <div class="activity-item">
-                        <div class="activity-icon primary">
-                            <i class="fas fa-shopping-cart"></i>
-                        </div>
-                        <div class="activity-content">
-                            <p><span class="activity-user">hoang minh kien</span> vừa <span class="activity-action">bán đơn hàng</span> với giá trị <strong>4,886,000</strong></p>
-                            <span class="activity-time">41 phút trước</span>
-                        </div>
-                    </div>
+                    <c:if test="${not empty activityLogs}">
+                        <c:forEach var="log" items="${activityLogs}">
+                            <div class="activity-item" style="display: flex; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #eee;">
+                                <!-- Icon -->
+                                <div style="width: 36px; height: 36px; border-radius: 50%; background: #ff9800; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                    <i class="fas fa-boxes" style="color: white; font-size: 16px;"></i>
+                                </div>
 
-                    <div class="activity-item">
-                        <div class="activity-icon info">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="activity-content">
-                            <p><span class="activity-user">Nguyễn Lê Hùng Cường</span> vừa <span class="activity-action">bán đơn hàng</span> với giá trị <strong>1,396,000</strong></p>
-                            <span class="activity-time">một ngày trước</span>
-                        </div>
-                    </div>
+                                <!-- Nội dung -->
+                                <div style="flex: 1;">
+                                    <!-- Tiêu đề + số tiền -->
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="font-weight: 600; font-size: 13px; color: #333;">
+                                            <p style="margin: 0 0 2px 0; font-size: 13px;">
+                                                <strong>Mô tả:</strong> ${log.rawDescription}
+                                            </p>
+                                            <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">
+                                                <strong>Loại:</strong> ${log.category}
+                                            </p>
+                                        </div>
+                                        <span style="background: #e3f2fd; color: #1976d2; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 500;">
+                                            ${log.status}
+                                        </span>
+                                    </div>
 
-                    <div class="activity-item">
-                        <div class="activity-icon error">
-                            <i class="fas fa-user"></i>
+                                    <!-- Chi nhánh -->
+                                    <div style="font-size: 12px; color: #777; margin-top: 2px;">
+                                        <i class="fas fa-map-marker-alt" style="margin-right: 4px; color: #9c27b0;"></i> ${log.locationName}
+                                    </div>
+
+                                    <!-- Người thực hiện -->
+                                    <div style="font-size: 12px; color: #555; margin-top: 2px;">
+                                        <i class="fas fa-user" style="margin-right: 4px; color: #2196f3;"></i> <strong>${log.senderName}</strong>
+                                    </div>
+
+                                    <!-- Thời gian -->
+                                    <div style="font-size: 11px; color: #aaa; margin-top: 2px;">
+                                        <i class="fas fa-clock" style="margin-right: 4px;"></i>
+                                        <fmt:formatDate value="${log.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </c:if>
+
+                    <c:if test="${empty activityLogs}">
+                        <div style="text-align: center; padding: 32px 0; color: #9e9e9e;">
+                            <i class="fas fa-history" style="font-size: 32px; margin-bottom: 12px; opacity: 0.5;"></i>
+                            <p style="margin: 0; font-size: 14px;">Chưa có hoạt động nào</p>
                         </div>
-                        <div class="activity-content">
-                            <p><span class="activity-user">Nguyễn Lê Hùng Cường</span> vừa <span class="activity-action">nhập hàng</span> với giá trị <strong>0</strong></p>
-                        </div>
-                    </div>
+                    </c:if>
                 </div>
+
+
             </aside>
         </div>
 
