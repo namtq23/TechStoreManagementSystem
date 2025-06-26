@@ -73,14 +73,8 @@
                 opacity: 1;
             }
 
-   
-
-
-
-             
-                .date-label {
-                    color: #333;
-                }
+            .date-label {
+                color: #333;
             }
 
             /* Print styles */
