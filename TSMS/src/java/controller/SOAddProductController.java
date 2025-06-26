@@ -246,230 +246,215 @@ public class SOAddProductController extends HttpServlet {
     }
 
     private void handleAddProduct(HttpServletRequest req, HttpServletResponse resp, String dbName) throws SQLException, ServletException, IOException {
-        String productName = req.getParameter("productName");
-        String productCode = req.getParameter("productCode");
-        String description = req.getParameter("description");
-        String costPriceStr = req.getParameter("costPrice");
-        String retailPriceStr = req.getParameter("retailPrice");
-        String brandIdStr = req.getParameter("brandId");
-        String categoryIdStr = req.getParameter("categoryId");
-        String supplierIdStr = req.getParameter("supplierId");
-        String warrantyPeriod = req.getParameter("warrantyPeriod");
-        String vatStr = req.getParameter("vat");
-        String isActiveStr = req.getParameter("isActive");
-        String serialNumbers = req.getParameter("serialNumber");
-        Part imagePart = req.getPart("image");
+    String productName = req.getParameter("productName");
+    String productCode = req.getParameter("productCode");
+    String description = req.getParameter("description");
+    String costPriceStr = req.getParameter("costPrice");
+    String retailPriceStr = req.getParameter("retailPrice");
+    String brandIdStr = req.getParameter("brandId");
+    String categoryIdStr = req.getParameter("categoryId");
+    String supplierIdStr = req.getParameter("supplierId");
+    String warrantyPeriod = req.getParameter("warrantyPeriod");
+    String vatStr = req.getParameter("vat");
+    String isActiveStr = req.getParameter("isActive");
+    Part imagePart = req.getPart("image");
 
-
-        if (productName == null || productName.trim().isEmpty()) {
-            req.setAttribute("productNameError", "Tên sản phẩm không được để trống.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-        productName = productName.trim();
-        if (productName.length() > 255) {
-            req.setAttribute("productNameError", "Tên sản phẩm không được vượt quá 255 ký tự.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        if (productCode == null || productCode.trim().isEmpty()) {
-            req.setAttribute("productCodeError", "Mã sản phẩm không được để trống.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-        productCode = productCode.trim();
-        if (productCode.length() > 255) {
-            req.setAttribute("productCodeError", "Mã sản phẩm không được vượt quá 255 ký tự.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-        if (productDAO.isProductCodeExists(dbName, productCode)) {
-            req.setAttribute("productCodeError", "Mã sản phẩm đã tồn tại.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        if (description == null || description.trim().isEmpty()) {
-            req.setAttribute("descriptionError", "Mô tả không được để trống.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        double costPrice;
-        try {
-            costPrice = Double.parseDouble(costPriceStr);
-            if (costPrice <= 0) {
-                req.setAttribute("costPriceError", "Giá nhập phải lớn hơn 0.");
-                forwardToForm(req, resp, dbName);
-                return;
-            }
-        } catch (NumberFormatException e) {
-            req.setAttribute("costPriceError", "Giá nhập không hợp lệ.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        double retailPrice;
-        try {
-            retailPrice = Double.parseDouble(retailPriceStr);
-            if (retailPrice <= 0) {
-                req.setAttribute("retailPriceError", "Giá bán phải lớn hơn 0.");
-                forwardToForm(req, resp, dbName);
-                return;
-            }
-        } catch (NumberFormatException e) {
-            req.setAttribute("retailPriceError", "Giá bán không hợp lệ.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        int brandId;
-        try {
-            brandId = Integer.parseInt(brandIdStr);
-            if (brandId <= 0) {
-                req.setAttribute("brandIdError", "Vui lòng chọn thương hiệu.");
-                forwardToForm(req, resp, dbName);
-                return;
-            }
-        } catch (NumberFormatException e) {
-            req.setAttribute("brandIdError", "Thương hiệu không hợp lệ.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        int categoryId;
-        try {
-            categoryId = Integer.parseInt(categoryIdStr);
-            if (categoryId <= 0) {
-                req.setAttribute("categoryIdError", "Vui lòng chọn danh mục.");
-                forwardToForm(req, resp, dbName);
-                return;
-            }
-        } catch (NumberFormatException e) {
-            req.setAttribute("categoryIdError", "Danh mục không hợp lệ.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        int supplierId;
-        try {
-            supplierId = Integer.parseInt(supplierIdStr);
-            if (supplierId <= 0) {
-                req.setAttribute("supplierIdError", "Vui lòng chọn nhà cung cấp.");
-                forwardToForm(req, resp, dbName);
-                return;
-            }
-        } catch (NumberFormatException e) {
-            req.setAttribute("supplierIdError", "Nhà cung cấp không hợp lệ.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        if (warrantyPeriod == null || warrantyPeriod.trim().isEmpty()) {
-            req.setAttribute("warrantyPeriodError", "Thời gian bảo hành không được để trống.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-        if (warrantyPeriod.trim().length() > 50) {
-            req.setAttribute("warrantyPeriodError", "Thời gian bảo hành không được vượt quá 50 ký tự.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        double vat;
-        try {
-            vat = Double.parseDouble(vatStr);
-            if (vat < 0 || vat > 100) {
-                req.setAttribute("vatError", "VAT phải từ 0 đến 100%.");
-                forwardToForm(req, resp, dbName);
-                return;
-            }
-        } catch (NumberFormatException e) {
-            req.setAttribute("vatError", "VAT không hợp lệ.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        if (isActiveStr == null || isActiveStr.trim().isEmpty()) {
-            req.setAttribute("isActiveError", "Vui lòng chọn trạng thái.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-        boolean isActive = "1".equals(isActiveStr);
-
-        if (serialNumbers == null || serialNumbers.trim().isEmpty()) {
-            req.setAttribute("serialNumberError", "Serial numbers không được để trống.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-        String[] serialArray = serialNumbers.split(",");
-        for (String serial : serialArray) {
-            serial = serial.trim();
-            if (serial.isEmpty()) {
-                req.setAttribute("serialNumberError", "Danh sách serial numbers chứa giá trị trống.");
-                forwardToForm(req, resp, dbName);
-                return;
-            }
-            if (serial.length() > 255) {
-                req.setAttribute("serialNumberError", "Serial number '" + serial + "' không được vượt quá 255 ký tự.");
-                forwardToForm(req, resp, dbName);
-                return;
-            }
-            if (productDAO.isSerialNumberExists(dbName, serial)) {
-                req.setAttribute("serialNumberError", "Serial number '" + serial + "' đã tồn tại.");
-                forwardToForm(req, resp, dbName);
-                return;
-            }
-        }
-        if (imagePart == null || imagePart.getSize() == 0) {
-            req.setAttribute("imageError", "Ảnh sản phẩm không được để trống.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        String fileName = imagePart.getSubmittedFileName();
-        String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
-        boolean validExtension = false;
-        for (String ext : ALLOWED_EXTENSIONS) {
-            if (ext.equals(fileExtension)) {
-                validExtension = true;
-                break;
-            }
-        }
-        if (!validExtension) {
-            req.setAttribute("imageError", "Chỉ chấp nhận file ảnh định dạng .png, .jpg, hoặc .jpeg.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        if (imagePart.getSize() > 1024 * 1024 * 5) {
-            req.setAttribute("imageError", "Kích thước ảnh không được vượt quá 5MB.");
-            forwardToForm(req, resp, dbName);
-            return;
-        }
-
-        // Save the image
-        String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
-        }
-        String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
-        String filePath = uploadPath + File.separator + uniqueFileName;
-        imagePart.write(filePath);
-        String imageUrl = "/" + UPLOAD_DIR + "/" + uniqueFileName;
-
-        if (productDAO.addProduct(dbName, productName, imageUrl, productCode, description, costPrice, retailPrice,
-                brandId, categoryId, supplierId, warrantyPeriod, vat, isActive, serialNumbers)) {
-            req.setAttribute("successMessage", "Thêm sản phẩm thành công.");
-            req.setAttribute("imageUrl", imageUrl);
-        } else {
-            req.setAttribute("errorMessage", "Không thể thêm sản phẩm.");
-            new File(filePath).delete();
-        }
+    if (productName == null || productName.trim().isEmpty()) {
+        req.setAttribute("productNameError", "Tên sản phẩm không được để trống.");
         forwardToForm(req, resp, dbName);
+        return;
     }
+    productName = productName.trim();
+    if (productName.length() > 255) {
+        req.setAttribute("productNameError", "Tên sản phẩm không được vượt quá 255 ký tự.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    if (productCode == null || productCode.trim().isEmpty()) {
+        req.setAttribute("productCodeError", "Mã sản phẩm không được để trống.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+    productCode = productCode.trim();
+    if (productCode.length() > 255) {
+        req.setAttribute("productCodeError", "Mã sản phẩm không được vượt quá 255 ký tự.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+    if (productDAO.isProductCodeExists(dbName, productCode)) {
+        req.setAttribute("productCodeError", "Mã sản phẩm đã tồn tại.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    if (description == null || description.trim().isEmpty()) {
+        req.setAttribute("descriptionError", "Mô tả không được để trống.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+    description = description.trim();
+    if (description.length() < 10) {
+        req.setAttribute("descriptionError", "Mô tả phải có ít nhất 10 ký tự.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    double costPrice;
+    try {
+        costPrice = Double.parseDouble(costPriceStr);
+        if (costPrice <= 0) {
+            req.setAttribute("costPriceError", "Giá nhập phải lớn hơn 0.");
+            forwardToForm(req, resp, dbName);
+            return;
+        }
+    } catch (NumberFormatException e) {
+        req.setAttribute("costPriceError", "Giá nhập không hợp lệ.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    double retailPrice;
+    try {
+        retailPrice = Double.parseDouble(retailPriceStr);
+        if (retailPrice <= 0) {
+            req.setAttribute("retailPriceError", "Giá bán phải lớn hơn 0.");
+            forwardToForm(req, resp, dbName);
+            return;
+        }
+    } catch (NumberFormatException e) {
+        req.setAttribute("retailPriceError", "Giá bán không hợp lệ.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    if (retailPrice <= costPrice) {
+        req.setAttribute("retailPriceError", "Giá bán phải lớn hơn giá vốn.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    int brandId;
+    try {
+        brandId = Integer.parseInt(brandIdStr);
+        if (brandId <= 0) {
+            req.setAttribute("brandIdError", "Vui lòng chọn thương hiệu.");
+            forwardToForm(req, resp, dbName);
+            return;
+        }
+    } catch (NumberFormatException e) {
+        req.setAttribute("brandIdError", "Thương hiệu không hợp lệ.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    int categoryId;
+    try {
+        categoryId = Integer.parseInt(categoryIdStr);
+        if (categoryId <= 0) {
+            req.setAttribute("categoryIdError", "Vui lòng chọn danh mục.");
+            forwardToForm(req, resp, dbName);
+            return;
+        }
+    } catch (NumberFormatException e) {
+        req.setAttribute("categoryIdError", "Danh mục không hợp lệ.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    int supplierId;
+    try {
+        supplierId = Integer.parseInt(supplierIdStr);
+        if (supplierId <= 0) {
+            req.setAttribute("supplierIdError", "Vui lòng chọn nhà cung cấp.");
+            forwardToForm(req, resp, dbName);
+            return;
+        }
+    } catch (NumberFormatException e) {
+        req.setAttribute("supplierIdError", "Nhà cung cấp không hợp lệ.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    if (warrantyPeriod == null || warrantyPeriod.trim().isEmpty()) {
+        req.setAttribute("warrantyPeriodError", "Thời gian bảo hành không được để trống.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+    if (warrantyPeriod.trim().length() > 50) {
+        req.setAttribute("warrantyPeriodError", "Thời gian bảo hành không được vượt quá 50 ký tự.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    double vat;
+    try {
+        vat = Double.parseDouble(vatStr);
+        if (vat < 0 || vat > 100) {
+            req.setAttribute("vatError", "VAT phải từ 0 đến 100%.");
+            forwardToForm(req, resp, dbName);
+            return;
+        }
+    } catch (NumberFormatException e) {
+        req.setAttribute("vatError", "VAT không hợp lệ.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    if (isActiveStr == null || isActiveStr.trim().isEmpty()) {
+        req.setAttribute("isActiveError", "Vui lòng chọn trạng thái.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+    boolean isActive = "1".equals(isActiveStr);
+
+    if (imagePart == null || imagePart.getSize() == 0) {
+        req.setAttribute("imageError", "Ảnh sản phẩm không được để trống.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    String fileName = imagePart.getSubmittedFileName();
+    String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+    boolean validExtension = false;
+    for (String ext : ALLOWED_EXTENSIONS) {
+        if (ext.equals(fileExtension)) {
+            validExtension = true;
+            break;
+        }
+    }
+    if (!validExtension) {
+        req.setAttribute("imageError", "Chỉ chấp nhận file ảnh định dạng .png, .jpg, hoặc .jpeg.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    if (imagePart.getSize() > 1024 * 1024 * 5) {
+        req.setAttribute("imageError", "Kích thước ảnh không được vượt quá 5MB.");
+        forwardToForm(req, resp, dbName);
+        return;
+    }
+
+    String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
+    File uploadDir = new File(uploadPath);
+    if (!uploadDir.exists()) {
+        uploadDir.mkdirs();
+    }
+    String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+    String filePath = uploadPath + File.separator + uniqueFileName;
+    imagePart.write(filePath);
+    String imageUrl = UPLOAD_DIR + "/" + uniqueFileName; // Remove leading slash for relative path
+
+    if (productDAO.addProduct(dbName, productName, imageUrl, productCode, description, costPrice, retailPrice,
+            brandId, categoryId, supplierId, warrantyPeriod, vat, isActive)) {
+        req.setAttribute("successMessage", "Thêm sản phẩm thành công.");
+        req.setAttribute("imageUrl", imageUrl);
+    } else {
+        req.setAttribute("errorMessage", "Không thể thêm sản phẩm.");
+        new File(filePath).delete(); 
+    }
+    forwardToForm(req, resp, dbName);
+}
 
     private void forwardToForm(HttpServletRequest req, HttpServletResponse resp, String dbName) throws ServletException, IOException {
         try {

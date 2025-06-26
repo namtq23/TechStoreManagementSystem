@@ -565,40 +565,13 @@ public class ProductDAO {
         return products;
     }
 
-    public boolean isProductCodeExists(String dbName, String productCode) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM ProductDetails WHERE ProductCode = ?";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, productCode);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean isSerialNumberExists(String dbName, String serialNumber) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM ProductDetailSerialNumber WHERE SerialNumber = ?";
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, serialNumber);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean addProduct(String dbName, String productName, String fullName, String productCode,
+    public boolean addProduct(String dbName, String productName, String imageUrl, String productCode,
             String description, double costPrice, double retailPrice, int brandId,
             int categoryId, int supplierId, String warrantyPeriod, double vat,
-            boolean isActive, String serialNumbers) throws SQLException {
+            boolean isActive) throws SQLException {
         Connection conn = null;
         PreparedStatement psProduct = null;
         PreparedStatement psProductDetail = null;
-        PreparedStatement psSerialNumber = null;
         ResultSet rs = null;
         boolean success = false;
 
@@ -606,7 +579,7 @@ public class ProductDAO {
             conn = DBUtil.getConnectionTo(dbName);
             conn.setAutoCommit(false); // Start transaction
 
-            // Insert into Products table (removed FullName)
+            // Insert into Products table with ImageURL
             String sqlProduct = "INSERT INTO Products (ProductName, BrandID, CategoryID, SupplierID, "
                     + "CostPrice, RetailPrice, ImageURL, VAT, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             psProduct = conn.prepareStatement(sqlProduct, Statement.RETURN_GENERATED_KEYS);
@@ -616,7 +589,7 @@ public class ProductDAO {
             psProduct.setInt(4, supplierId);
             psProduct.setDouble(5, costPrice);
             psProduct.setDouble(6, retailPrice);
-            psProduct.setNull(7, java.sql.Types.NVARCHAR); // ImageURL is optional
+            psProduct.setString(7, imageUrl); // Set the image URL instead of null
             psProduct.setDouble(8, vat);
             psProduct.setBoolean(9, isActive);
             int productRows = psProduct.executeUpdate();
@@ -627,66 +600,28 @@ public class ProductDAO {
                 if (rs.next()) {
                     int productId = rs.getInt(1);
 
-                    // Get next available ProductDetailID
-                    int productDetailId = getNextAvailableProductDetailId(dbName, conn);
-
-                    // Enable IDENTITY_INSERT for ProductDetails
-                    conn.createStatement().execute("SET IDENTITY_INSERT ProductDetails ON");
-
-                    // Insert into ProductDetails table with manual ProductDetailID
-                    String sqlProductDetail = "INSERT INTO ProductDetails (ProductDetailID, ProductID, Description, ProductCode, "
-                            + "WarrantyPeriod, ProductNameUnsigned) VALUES (?, ?, ?, ?, ?, ?)";
+                    // Insert into ProductDetails table (let database auto-generate ProductDetailID)
+                    String sqlProductDetail = "INSERT INTO ProductDetails (ProductID, Description, ProductCode, "
+                            + "WarrantyPeriod, ProductNameUnsigned) VALUES (?, ?, ?, ?, ?)";
                     psProductDetail = conn.prepareStatement(sqlProductDetail);
-                    psProductDetail.setInt(1, productDetailId);
-                    psProductDetail.setInt(2, productId);
-                    psProductDetail.setString(3, description);
-                    psProductDetail.setString(4, productCode);
-                    psProductDetail.setString(5, warrantyPeriod.isEmpty() ? null : warrantyPeriod);
-                    psProductDetail.setString(6, standardizeName(productName));
+                    psProductDetail.setInt(1, productId);
+                    psProductDetail.setString(2, description);
+                    psProductDetail.setString(3, productCode);
+                    psProductDetail.setString(4, warrantyPeriod.isEmpty() ? null : warrantyPeriod);
+                    psProductDetail.setString(5, standardizeName(productName));
                     int detailRows = psProductDetail.executeUpdate();
 
-                    // Disable IDENTITY_INSERT
-                    conn.createStatement().execute("SET IDENTITY_INSERT ProductDetails OFF");
-
                     if (detailRows > 0) {
-                        // Insert serial numbers if provided
-                        if (serialNumbers != null && !serialNumbers.trim().isEmpty()) {
-                            String sqlSerialNumber = "INSERT INTO ProductDetailSerialNumber (ProductDetailID, SerialNumber, Status) VALUES (?, ?, 0)";
-                            psSerialNumber = conn.prepareStatement(sqlSerialNumber);
-                            List<String> serialNumberList = Arrays.stream(serialNumbers.split(","))
-                                    .map(String::trim)
-                                    .filter(s -> !s.isEmpty())
-                                    .distinct()
-                                    .collect(Collectors.toList());
-
-                            for (String serial : serialNumberList) {
-                                if (isSerialNumberExists(dbName, serial)) {
-                                    // START MODIFICATION
-                                    throw new SQLException("Serial number '" + serial + "' đã tồn tại.");
-                                    // END MODIFICATION
-                                }
-                                psSerialNumber.setInt(1, productDetailId);
-                                psSerialNumber.setString(2, serial);
-                                psSerialNumber.addBatch();
-                            }
-                            psSerialNumber.executeBatch();
-                        }
                         conn.commit();
                         success = true;
                     } else {
-                        // START MODIFICATION
                         throw new SQLException("Không thể chèn vào ProductDetails.");
-                        // END MODIFICATION
                     }
                 } else {
-                    // START MODIFICATION
                     throw new SQLException("Không thể lấy ProductID sau khi chèn vào Products.");
-                    // END MODIFICATION
                 }
             } else {
-                // START MODIFICATION
                 throw new SQLException("Không thể chèn vào Products.");
-                // END MODIFICATION
             }
         } catch (SQLException e) {
             if (conn != null) {
@@ -700,10 +635,6 @@ public class ProductDAO {
         } finally {
             if (rs != null) try {
                 rs.close();
-            } catch (SQLException ignored) {
-            }
-            if (psSerialNumber != null) try {
-                psSerialNumber.close();
             } catch (SQLException ignored) {
             }
             if (psProductDetail != null) try {
@@ -723,19 +654,18 @@ public class ProductDAO {
         return success;
     }
 
-    private int getNextAvailableProductDetailId(String dbName, Connection conn) throws SQLException {
-        String sql = "SELECT ProductDetailID FROM ProductDetails ORDER BY ProductDetailID";
-        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            int expectedId = 1;
-            while (rs.next()) {
-                int currentId = rs.getInt("ProductDetailID");
-                if (currentId > expectedId) {
-                    return expectedId;
+// Keep the existing methods but remove serial number related ones
+    public boolean isProductCodeExists(String dbName, String productCode) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM ProductDetails WHERE ProductCode = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, productCode);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
                 }
-                expectedId++;
             }
-            return expectedId;
         }
+        return false;
     }
 
     private String standardizeName(String name) {
