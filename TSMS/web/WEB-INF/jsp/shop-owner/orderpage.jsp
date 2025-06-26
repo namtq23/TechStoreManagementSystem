@@ -400,7 +400,7 @@
                 <input type="hidden" name="page" value="1">
                 <!-- Sidebar -->
                 <aside class="sidebar">
-                    <!-- Branch Filter -->
+                    <!-- Branch Filter - FIXED -->
                     <div class="filter-section">
                         <div class="filter-header">
                             <h3>Chi nhánh</h3>
@@ -411,9 +411,9 @@
                             <div class="checkbox-group">
                                 <c:forEach var="branch" items="${branchesList}">
                                     <label class="checkbox-item">
-                                        <input type="checkbox" name="branchIDs" value="${branch.branchID}"
+                                        <input type="checkbox" name="branchIDs" value="${branch.branchId}"
                                                <c:forEach var="selectedBranch" items="${selectedBranches}">
-                                                   <c:if test="${selectedBranch == branch.branchID}">checked</c:if>
+                                                   <c:if test="${selectedBranch == branch.branchId}">checked</c:if>
                                                </c:forEach>>
                                         <span class="checkbox-mark"></span>
                                         ${branch.branchName}
