@@ -336,14 +336,9 @@
                     <select name="isActive" required>
                         <option value="">Chọn trạng thái</option>
                         <option value="1" ${param.isActive == '1' ? 'selected' : ''}>Kích hoạt</option>
-                        <option value="0" ${param.isActive == '0' ? 'selected' : ''}>Ngừng kinh doanh</option>
+                        <option value="0" ${param.isActive == '0' ? 'selected' : ''}>Hết Hàng</option>
                     </select>
                     <div class="error">${isActiveError}</div>
-                </div>
-                <div class="form-group">
-                    <label>Serial Numbers: <span style="color: #f44336;">*</span></label>
-                    <textarea name="serialNumber" rows="3" placeholder="VD: P3-1,P3-2,P4-3" required>${param.serialNumber}</textarea>
-                    <div class="error">${serialNumberError}</div>
                 </div>
                 <div class="form-group">
                     <label>Ảnh sản phẩm: <span style="color: #f44336;">*</span></label>
