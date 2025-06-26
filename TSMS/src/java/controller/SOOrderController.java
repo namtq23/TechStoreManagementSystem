@@ -5,6 +5,7 @@
 package controller;
 
 import dao.OrdersDAO;
+import dao.UserDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import model.Branch;
 import model.OrdersDTO;
+import model.UserDTO;
 
 /**
  *
@@ -41,28 +43,47 @@ public class SOOrderController extends HttpServlet {
             String dbName = dbNameObj.toString();
             int page = 1;
             int pageSize = 10;
+            // Parse page parameter
+
             Integer branchId = null;
-            if (req.getParameter("page") != null) {
-                try {
-                    page = Integer.parseInt(req.getParameter("page"));
-                    if (page < 1) {
-                        page = 1;
-                    }
-                } catch (NumberFormatException e) {
-                    page = 1;
+
+
+            // Parse filter parameters
+            String[] selectedBranches = req.getParameterValues("branchIDs");
+            String[] selectedCreators = req.getParameterValues("creatorIDs");
+            String timeFilter = req.getParameter("timeFilter");
+            String customDate = req.getParameter("customDate");
+            String minPriceStr = req.getParameter("minPrice");
+            String maxPriceStr = req.getParameter("maxPrice");
+            String calculatedStartDate = calculateStartDate(timeFilter, customDate);
+            Double minPrice = null;
+            Double maxPrice = null;
+            String searchKeyword = req.getParameter("search");
+
+            if (searchKeyword != null) {
+                searchKeyword = searchKeyword.trim();
+                if (searchKeyword.isEmpty()) {
+                    searchKeyword = null;
                 }
             }
-            if (req.getParameter("branchId") != null) {
+            if (minPriceStr != null && !minPriceStr.trim().isEmpty()) {
                 try {
-                    branchId = Integer.parseInt(req.getParameter("branchId"));
-                    if (branchId < 1) {
-                        branchId = null;
-                    }
+                    minPrice = Double.parseDouble(minPriceStr);
                 } catch (NumberFormatException e) {
-                    branchId = null;
+                    minPrice = null;
                 }
             }
+
+            if (maxPriceStr != null && !maxPriceStr.trim().isEmpty()) {
+                try {
+                    maxPrice = Double.parseDouble(maxPriceStr);
+                } catch (NumberFormatException e) {
+                    maxPrice = null;
+                }
+            }
+
             OrdersDAO orderDAO = new OrdersDAO();
+            UserDAO userDAO = new UserDAO();
             String action = req.getParameter("action");
 
             if ("view".equals(action)) {
@@ -78,28 +99,90 @@ public class SOOrderController extends HttpServlet {
                     return;
                 }
             }
-            // Fetch all branches
+
+            // Fetch all branches and creators for filter options
             List<Branch> branchesList = orderDAO.getAllBranches(dbName);
-            req.setAttribute("branchesList", branchesList);
-            // Fetch orders based on branch filter
-            List<OrdersDTO> ordersList = orderDAO.getOrdersListByPage(dbName, page, pageSize, branchId);
-            int totalOrders = orderDAO.countOrderDetails(dbName, branchId);
+            List<UserDTO> creatorsList = userDAO.getAllCreators(dbName);
+
+            // Fetch filtered orders
+            List<OrdersDTO> ordersList = orderDAO.getFilteredOrdersListByPage(
+                    dbName, page, pageSize, selectedBranches, selectedCreators,
+                    calculatedStartDate, null, minPrice, maxPrice, searchKeyword
+            );
+
+            int totalOrders = orderDAO.countFilteredOrders(
+                    dbName, selectedBranches, selectedCreators,
+                    calculatedStartDate, null, minPrice, maxPrice, searchKeyword
+            );
+
             int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
             int startOrder = (page - 1) * pageSize + 1;
             int endOrder = Math.min(page * pageSize, totalOrders);
 
+            // Set attributes
+            req.setAttribute("branchesList", branchesList);
+            req.setAttribute("creatorsList", creatorsList);
             req.setAttribute("ordersList", ordersList);
             req.setAttribute("currentPage", page);
             req.setAttribute("totalPages", totalPages);
             req.setAttribute("totalOrders", totalOrders);
             req.setAttribute("startOrder", startOrder);
             req.setAttribute("endOrder", endOrder);
-            req.setAttribute("selectedBranchID", branchId);
+
+            // Set filter parameters for maintaining state
+            req.setAttribute("selectedBranches", selectedBranches);
+            req.setAttribute("selectedCreators", selectedCreators);
+            req.setAttribute("timeFilter", timeFilter);
+            req.setAttribute("customDate", customDate);
+            req.setAttribute("calculatedStartDate", calculatedStartDate);
+            req.setAttribute("minPrice", minPrice);
+            req.setAttribute("maxPrice", maxPrice);
+            req.setAttribute("searchKeyword", searchKeyword);
+
 
             req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/orderpage.jsp").forward(req, resp);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String calculateStartDate(String timeFilter, String customDate) {
+        java.time.LocalDate now = java.time.LocalDate.now();
+        java.time.LocalDate startDate;
+
+        if (timeFilter == null || timeFilter.isEmpty()) {
+            timeFilter = "this-month"; // Default to this month
+        }
+
+        switch (timeFilter) {
+            case "today":
+                startDate = now;
+                break;
+            case "this-week":
+                // Get start of current week (Monday)
+                startDate = now.with(java.time.DayOfWeek.MONDAY);
+                break;
+            case "this-month":
+                // Get start of current month
+                startDate = now.withDayOfMonth(1);
+                break;
+            case "custom":
+                if (customDate != null && !customDate.trim().isEmpty()) {
+                    try {
+                        startDate = java.time.LocalDate.parse(customDate);
+                    } catch (Exception e) {
+                        startDate = now.withDayOfMonth(1); // Default to start of month if parsing fails
+                    }
+                } else {
+                    startDate = now.withDayOfMonth(1); // Default to start of month if no custom date
+                }
+                break;
+            default:
+                startDate = now.withDayOfMonth(1); // Default to start of month
+                break;
+        }
+
+        return startDate.toString();
     }
 
     @Override
