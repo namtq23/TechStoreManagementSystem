@@ -28,8 +28,8 @@
             }
 
             .action-buttons .btn {
-                background: #17a2b8;
-                border-color: #17a2b8;
+                background: #4CAF50;
+                border-color: #4CAF50;
                 color: white;
             }
 
@@ -97,7 +97,7 @@
                     </div>
 
                     <a href="bm-promotions" class="nav-item active">
-                        <i class="fas fa-ticket"></i>
+                        <i class="fas fa-ticket" ></i>
                         Khuyến mãi
                     </a>
 
@@ -127,7 +127,6 @@
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
@@ -316,7 +315,7 @@
                                     <c:forEach var="promotion" items="${promotions}">
                                         <tr class="promotion-row" data-status="${promotion.status}">
                                             <td>
-                                                <div class="fas fa-ticket" style="color: #17a2b8; font-size: 30px"></div>
+                                                <div class="fas fa-ticket" style = "color: #007bff; font-size: 30px"></div>
                                             </td>
                                             <td style="text-align: center;"><strong>${promotion.promotionID}</strong></td>
                                             <td>
@@ -431,29 +430,45 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                                // Filter functions
-                                function filterPromotions() {
-                                    const mainSearchInput = document.querySelector('input[name="search"]');
-                                    const search = mainSearchInput ? mainSearchInput.value : '';
+                            const toggle = document.getElementById("dropdownToggle");
+                            const menu = document.getElementById("dropdownMenu");
 
-                                    const statusFilter = document.querySelector('input[name="statusFilter"]:checked') ?
-                                            document.querySelector('input[name="statusFilter"]:checked').value : '';
-                                    const discountFilter = document.querySelector('input[name="discountFilter"]:checked') ?
-                                            document.querySelector('input[name="discountFilter"]:checked').value : '';
+                            toggle.addEventListener("click", function (e) {
+                                e.preventDefault();
+                                menu.style.display = menu.style.display === "block" ? "none" : "block";
+                            });
 
-                                    let url = 'bm-promotions?page=1';
-
-                                    if (search && search.trim() !== '') {
-                                        url += '&search=' + encodeURIComponent(search.trim());
-                                    }
-
-                                    if (statusFilter && statusFilter !== 'all')
-                                        url += '&status=' + statusFilter;
-                                    if (discountFilter && discountFilter !== 'all')
-                                        url += '&discount=' + discountFilter;
-
-                                    window.location.href = url;
+                            // Đóng dropdown nếu click ra ngoài
+                            document.addEventListener("click", function (e) {
+                                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                                    menu.style.display = "none";
                                 }
+                            });
+        </script>
+        <script>
+            // Filter functions
+            function filterPromotions() {
+                const mainSearchInput = document.querySelector('input[name="search"]');
+                const search = mainSearchInput ? mainSearchInput.value : '';
+
+                const statusFilter = document.querySelector('input[name="statusFilter"]:checked') ?
+                        document.querySelector('input[name="statusFilter"]:checked').value : '';
+                const discountFilter = document.querySelector('input[name="discountFilter"]:checked') ?
+                        document.querySelector('input[name="discountFilter"]:checked').value : '';
+
+                let url = 'bm-promotions?page=1';
+
+                if (search && search.trim() !== '') {
+                    url += '&search=' + encodeURIComponent(search.trim());
+                }
+
+                if (statusFilter && statusFilter !== 'all')
+                    url += '&status=' + statusFilter;
+                if (discountFilter && discountFilter !== 'all')
+                    url += '&discount=' + discountFilter;
+
+                window.location.href = url;
+            }
         </script>
     </body>
 </html>

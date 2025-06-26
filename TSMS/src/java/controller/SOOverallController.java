@@ -4,16 +4,16 @@
  */
 package controller;
 
+import model.AnnouncementDTO;
+import dao.AnnouncementDAO;
 import dao.CashFlowDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -31,15 +31,17 @@ import util.Validate;
 public class SOOverallController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+              throws ServletException, IOException {
+
         response.setContentType("text/html;charset=UTF-8");
+
         String sortBy = request.getParameter("sortBy");
         if (sortBy == null || sortBy.isEmpty()) {
-            sortBy = "quantity"; 
+            sortBy = "quantity";
         }
         String topPeriod = request.getParameter("topPeriod");
         if (topPeriod == null || topPeriod.isEmpty()) {
-            topPeriod = "this_month"; 
+            topPeriod = "this_month";
         }
 
         String period = request.getParameter("period");
@@ -54,10 +56,10 @@ public class SOOverallController extends HttpServlet {
         List<ProductSaleDTO> topProducts = new ArrayList<>();
         Map<String, Object> Revenue = new HashMap<>();
         String dbName = (String) request.getSession().getAttribute("dbName");
+        System.out.println(">>> DEBUG dbName = " + dbName);
+
         CashFlowDAO cashFlowDAO = new CashFlowDAO();
-
         try {
-
             BigDecimal incomeTotalToDay = cashFlowDAO.getTodayIncome(dbName);
 
             if ("this_month".equals(period)) {
@@ -112,8 +114,8 @@ public class SOOverallController extends HttpServlet {
             for (int i = 0; i < topProducts.size(); i++) {
                 ProductSaleDTO product = topProducts.get(i);
                 System.out.println("Product " + (i + 1) + ": " + product.getProductName()
-                        + " - Quantity: " + product.getTotalQuantity()
-                        + " - Revenue: " + product.getRevenue());
+                          + " - Quantity: " + product.getTotalQuantity()
+                          + " - Revenue: " + product.getRevenue());
             }
             System.out.println("========================");
 
@@ -135,23 +137,35 @@ public class SOOverallController extends HttpServlet {
 
             double monthlyChange = Validate.calculatePercentageChange(incomeTotalToDay, sameDayLastMonthIncome);
             // Đặt vào request để render ra JSP
-            
-            
+
             //Phần doang thu
             request.setAttribute("currentPeriod", period);
-            request.setAttribute("currentFilter", filterType);     
+            request.setAttribute("currentFilter", filterType);
             request.setAttribute("percentageChange", percentageChange);
             request.setAttribute("invoiceToDay", invoiceToDay);
             request.setAttribute("incomeTotal", Validate.formatCurrency(incomeTotalToDay));
             request.setAttribute("monthlyChange", monthlyChange);
-            
-            
+
             //Phân doanh thu theo filter
-             request.setAttribute("revenueData", Revenue);
+            request.setAttribute("revenueData", Revenue);
             //Phần top sản phẩm
             request.setAttribute("sortBy", sortBy);
             request.setAttribute("topProducts", topProducts);
             request.setAttribute("topPeriod", topPeriod);
+
+            AnnouncementDAO announcementDAO = new AnnouncementDAO();
+            try {
+                List<AnnouncementDTO> recentAnnouncements = announcementDAO.getRecentAnnouncementsForShopOwner(dbName);
+                request.setAttribute("recentAnnouncements", recentAnnouncements);
+
+                // Lấy hoạt động gần đây
+                List<AnnouncementDTO> activityLogs = announcementDAO.getRecentActivitiesForShopOwner(dbName);
+                request.setAttribute("activityLogs", activityLogs);
+            } catch (Exception e) {
+                e.printStackTrace(); //
+                request.setAttribute("error", "Lỗi lấy thông báo: " + e.getMessage());
+            }
+            request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/tongquan.jsp").forward(request, response);
 
         } catch (SQLException e) {
             e.printStackTrace(); // Log lỗi
@@ -159,7 +173,6 @@ public class SOOverallController extends HttpServlet {
         }
 
         // Forward sang JSP
-        request.getRequestDispatcher("/WEB-INF/jsp/shop-owner/tongquan.jsp").forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -173,7 +186,7 @@ public class SOOverallController extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+              throws ServletException, IOException {
         processRequest(request, response);
     }
 
@@ -187,7 +200,7 @@ public class SOOverallController extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+              throws ServletException, IOException {
         processRequest(request, response);
     }
 
