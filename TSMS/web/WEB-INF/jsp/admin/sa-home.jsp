@@ -15,7 +15,7 @@
             <!-- Sidebar -->
             <div class="sidebar">
                 <div class="logo">
-                    <a href="bm-overview" class="logo">
+                    <a href="sa-home" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">Admin</span>
                     </a>

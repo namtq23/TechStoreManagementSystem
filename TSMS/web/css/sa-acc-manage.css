@@ -12,7 +12,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
     padding: 15px 20px;
     background-color: #ffffff;
     border: 1px solid #dee2e6;
-    border-radius: 10px;
+    border-radius: 12px;
     margin-bottom: 0;
     align-items: center;
     font-size: 14px;
@@ -20,7 +20,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
 
 .formFilter{
     display: flex;
-    gap: 20px;
+    gap: 16px;
 }
 
 .filter-container label {
@@ -38,7 +38,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
     font-size: 14px;
     background-color: #ffffff;
     color: #333;
-    min-width: 120px;
+    min-width: 100%;
 }
 
 .filter-container select:focus,
@@ -49,11 +49,11 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
 }
 
 .btn-filter {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
+    background-color: white;
+    color: #3b82f6;
+    border: 1px solid;
+    padding: 0px 16px;
+    border-radius: 100px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
@@ -61,7 +61,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
 }
 
 .btn-filter:hover {
-    background-color: #0056b3;
+    background-color: #2563eb;
+    color: white;
 }
 
 /* Pagination Styles */

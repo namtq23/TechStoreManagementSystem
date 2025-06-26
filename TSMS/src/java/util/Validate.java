@@ -214,7 +214,7 @@ public class Validate {
 
         System.out.println(standardizeName("       an       d     "));
 
-        System.out.println(normalizeSearch("máy"));
+        System.out.println(normalizeSearch("Máy"));
     }
 
 }
