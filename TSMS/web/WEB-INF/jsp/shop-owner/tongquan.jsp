@@ -346,41 +346,44 @@
 
                     <c:if test="${not empty activityLogs}">
                         <c:forEach var="log" items="${activityLogs}">
-                            <div class="activity-item" style="display: flex; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #eee;">
-                                <!-- Icon -->
-                                <div style="width: 36px; height: 36px; border-radius: 50%; background: #ff9800; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
-                                    <i class="fas fa-boxes" style="color: white; font-size: 16px;"></i>
+                            <div class="activity-card" style="display: flex; background: #f9f9f9; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); padding: 16px; margin-bottom: 12px; gap: 12px;">
+
+                                <div style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                                     background: ${log.category eq 'Đơn hàng' ? '#e3f2fd' : (log.category eq 'Nhập hàng' or log.category eq 'Xuất kho') ? '#ede7f6' : '#fff3e0'};">
+                                    <i class="fas
+                                       ${log.category eq 'Đơn hàng' ? 'fa-shopping-cart' : (log.category eq 'Nhập hàng' or log.category eq 'Xuất kho') ? 'fa-dolly' : 'fa-dollar-sign'}"
+                                       style="color: #333;"></i>
                                 </div>
 
-                                <!-- Nội dung -->
-                                <div style="flex: 1;">
-                                    <!-- Tiêu đề + số tiền -->
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <div style="font-weight: 600; font-size: 13px; color: #333;">
-                                            <p style="margin: 0 0 2px 0; font-size: 13px;">
-                                                <strong>Mô tả:</strong> ${log.rawDescription}
-                                            </p>
-                                            <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">
-                                                <strong>Loại:</strong> ${log.category}
-                                            </p>
-                                        </div>
-                                        <span style="background: #e3f2fd; color: #1976d2; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 500;">
-                                            ${log.status}
-                                        </span>
-                                    </div>
+                                <div style="flex: 1; font-size: 13px;">
+                                    <c:choose>
+                                        <c:when test="${log.category eq 'Đơn hàng'}">
+                                            <div style="font-weight: 600; margin-bottom: 4px;">Đơn hàng mới</div>
+                                            <div>Mã: ${log.rawDescription}</div>
+                                            <div>Người tạo: ${log.senderName}</div>
+                                            <div>Chi nhánh: ${log.locationName}</div>
+                                            <div>Tổng tiền: ${log.description}</div>
+                                        </c:when>
 
-                                    <!-- Chi nhánh -->
-                                    <div style="font-size: 12px; color: #777; margin-top: 2px;">
-                                        <i class="fas fa-map-marker-alt" style="margin-right: 4px; color: #9c27b0;"></i> ${log.locationName}
-                                    </div>
+                                        <c:when test="${log.category eq 'Nhập hàng' or log.category eq 'Xuất kho'}">
+                                            <div style="font-weight: 600; margin-bottom: 4px;">${log.category}</div>
+                                            <div>Người gửi: ${log.senderName}</div>
+                                            <div>Gửi từ: ${log.fromLocation}</div>
+                                            <div>Đến: ${log.toLocation}</div>
+                                            <div>Ghi chú: ${log.rawDescription}</div>
+                                        </c:when>
 
-                                    <!-- Người thực hiện -->
-                                    <div style="font-size: 12px; color: #555; margin-top: 2px;">
-                                        <i class="fas fa-user" style="margin-right: 4px; color: #2196f3;"></i> <strong>${log.senderName}</strong>
-                                    </div>
+                                        <c:otherwise>
+                                            <div style="font-weight: 600; margin-bottom: 4px;">${log.status}</div>
+                                            <div>Danh mục: ${log.category}</div>
+                                            <div>Số tiền: ${log.description}</div>
+                                            <div>Mô tả: ${log.rawDescription}</div>
+                                            <div>Chi nhánh: ${log.locationName}</div>
+                                            <div>Người ghi: ${log.senderName}</div>
+                                        </c:otherwise>
+                                    </c:choose>
 
-                                    <!-- Thời gian -->
-                                    <div style="font-size: 11px; color: #aaa; margin-top: 2px;">
+                                    <div style="margin-top: 6px; font-size: 12px; color: #888;">
                                         <i class="fas fa-clock" style="margin-right: 4px;"></i>
                                         <fmt:formatDate value="${log.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
                                     </div>
@@ -396,6 +399,8 @@
                         </div>
                     </c:if>
                 </div>
+
+
 
 
             </aside>

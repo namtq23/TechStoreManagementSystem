@@ -21,6 +21,9 @@ public class AnnouncementDTO {
     private String locationName;
     private String category;
     private String rawDescription;
+    private String senderRole;
+    private String fromLocation;
+    private String toLocation;
 
     public int getAnnouncementID() {
         return AnnouncementID;
@@ -92,5 +95,29 @@ public class AnnouncementDTO {
 
     public void setRawDescription(String rawDescription) {
         this.rawDescription = rawDescription;
+    }
+
+    public String getSenderRole() {
+        return senderRole;
+    }
+
+    public void setSenderRole(String senderRole) {
+        this.senderRole = senderRole;
+    }
+
+    public String getFromLocation() {
+        return fromLocation;
+    }
+
+    public void setFromLocation(String fromLocation) {
+        this.fromLocation = fromLocation;
+    }
+
+    public String getToLocation() {
+        return toLocation;
+    }
+
+    public void setToLocation(String toLocation) {
+        this.toLocation = toLocation;
     }
 }
