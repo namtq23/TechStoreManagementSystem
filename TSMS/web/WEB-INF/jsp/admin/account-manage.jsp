@@ -20,7 +20,7 @@
             <!-- Sidebar -->
             <div class="sidebar">
                 <div class="logo">
-                    <a href="bm-overview" class="logo">
+                    <a href="sa-home" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">Admin</span>
                     </a>
@@ -54,12 +54,12 @@
 
             <!-- Main Content -->
             <div class="main-content">
-
-                <!-- Content Grid -->
                 <div class="content-grid">
                     <!-- Bộ lọc -->
-                    <div class="filter-container">
+                    <div class="filter-container card">
                         <form method="get" action="sa-accounts" class="formFilter">
+                            <input type="hidden" name="search" value="${param.search}" />
+                            <input type="hidden" name="recordsPerPage" value="${param.recordsPerPage}" />
                             <div>
                                 <label for="subscription">Gói dịch vụ:</label>
                                 <select name="subscription" id="subscription">
@@ -87,16 +87,34 @@
                                 <label for="toDate">Đến ngày:</label>
                                 <input type="date" name="toDate" value="${param.toDate}" />
                             </div>
-                            <button type="submit" class="btn btn-filter"><i class="fas fa-filter"></i> Lọc</button>
+                            <a href="sa-accounts?page=1" style="display: flex; text-decoration: none"><button type="button" class="btn btn-filter"><i class="fas fa-eraser"></i>Xoá</button></a>   
+
+                            <a href="" style="display: flex; text-decoration: none"><button type="submit" class="btn btn-filter"><i class="fas fa-filter"></i>Lọc</button></a> 
                         </form>
                     </div>
 
-                    <!-- Account Management -->
+                    <div style="align-content: center;">
+                        <form action="sa-accounts" method="get" class="search-form" style="display: flex; align-items: center; gap: 8px;">
+                            <div style="position: relative; flex: 1;">
+                                <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
+                                <input type="text" name="search" placeholder="Tìm kiếm người dùng..." value="${param.search}"
+                                       style="padding: 10px 10px 10px 35px; width: 100%; border: 1px solid #ccc; border-radius: 100px;">
+                            </div>
+                            <input type="hidden" name="subscription" value="${param.subscription}" />
+                            <input type="hidden" name="status" value="${param.status}" />
+                            <input type="hidden" name="fromDate" value="${param.fromDate}" />
+                            <input type="hidden" name="search" value="${param.toDate}" />
+                            <input type="hidden" name="recordsPerPage" value="${recordsPerPage}" />
+                            <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
+                        </form>
+                    </div>
+
+                    <!-- Bảng dữ liệu -->
                     <div class="card full-width-card">
                         <div class="card-header">
                             <h2>Quản lý tài khoản</h2>
-
                         </div>
+
                         <div class="table-container">
                             <table>
                                 <thead>
@@ -132,57 +150,50 @@
                                                 </c:choose>
                                             </td>
                                             <td>${owner.status}</td>
-                                            <td>
-                                                <fmt:formatDate value="${owner.createdAt}" pattern="dd/MM/yyyy" />
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-primary">Xem</button>
-                                            </td>
+                                            <td><fmt:formatDate value="${owner.createdAt}" pattern="dd/MM/yyyy" /></td>
+                                            <td><button class="btn btn-primary">Xem</button></td>
                                         </tr>
                                     </c:forEach>
                                 </tbody>
                             </table>
                         </div>
+
                         <!-- Pagination -->
-                        <form method="GET" action="bm-products">
+                        <form method="GET" action="sa-accounts">
                             <div class="pagination-container">
                                 <div class="pagination-info">
-                                    Hiển thị  - / Tổng số  hàng hóa
+                                    Hiển thị ${startUser} - ${endUser} / Tổng số ${totalRecords} tài khoản
                                 </div>
-
-                                <c:forEach var="catId" items="">
-                                    <input type="hidden" name="categories" value="" />
-                                </c:forEach>
-                                <input type="hidden" name="inventory" value="" />
-                                <input type="hidden" name="minPrice" value="" />
-                                <input type="hidden" name="maxPrice" value="" />
-                                <input type="hidden" name="status" value="" />
-                                <input type="hidden" name="search" value="" />
+                                <input type="hidden" name="subscription" value="${param.subscription}" />
+                                <input type="hidden" name="status" value="${param.status}" />
+                                <input type="hidden" name="fromDate" value="${param.fromDate}" />
+                                <input type="hidden" name="toDate" value="${param.toDate}" />
+                                <input type="hidden" name="search" value="${param.search}" />
                                 <div class="records-per-page">
                                     <label for="recordsPerPage">Hiển thị:</label>
                                     <select id="recordsPerPage" name="recordsPerPage" class="records-select" onchange="this.form.submit()">
-                                        <option value="10">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
+                                        <option value="10" ${recordsPerPage == 10 ? 'selected' : ''}>10</option>
+                                        <option value="25" ${recordsPerPage == 25 ? 'selected' : ''}>25</option>
+                                        <option value="50" ${recordsPerPage == 50 ? 'selected' : ''}>50</option>
+                                        <option value="100" ${recordsPerPage == 100 ? 'selected' : ''}>100</option>
                                     </select>
                                     <span>bản ghi/trang</span>
                                 </div>
 
                                 <div class="pagination">
-                                    <a href="" class="page-btn">
+                                    <a href="${pagingUrl}1" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
                                         <i class="fas fa-angle-double-left"></i>
                                     </a>
-                                    <a href="" class="page-btn">
+                                    <a href="${pagingUrl}${currentPage - 1}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
                                         <i class="fas fa-angle-left"></i>
                                     </a>
-
-                                    <a href="" class="page-btn">1</a>
-
-                                    <a href="" class="page-btn">
+                                    <c:forEach begin="1" end="${totalPages}" var="i">
+                                        <a href="${pagingUrl}${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                                    </c:forEach>
+                                    <a href="${pagingUrl}${currentPage + 1}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
                                         <i class="fas fa-angle-right"></i>
                                     </a>
-                                    <a href="" class="page-btn">
+                                    <a href="${pagingUrl}${totalPages}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
                                         <i class="fas fa-angle-double-right"></i>
                                     </a>
                                 </div>
@@ -191,34 +202,33 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
-                const currentPath = window.location.pathname;
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+                    const currentPath = window.location.pathname;
 
-                sidebarLinks.forEach(link => {
-                    const href = link.getAttribute('href');
-                    // So khớp tương đối với pathname
-                    if (href && currentPath.includes(href)) {
-                        link.classList.add('active');
-                    } else {
-                        link.classList.remove('active');
-                    }
-                });
-
-                // Optional: Animation for cards
-                const cards = document.querySelectorAll('.card, .stat-card');
-                cards.forEach(card => {
-                    card.addEventListener('mouseenter', function () {
-                        this.style.transform = 'translateY(-2px)';
+                    sidebarLinks.forEach(link => {
+                        const href = link.getAttribute('href');
+                        // So khớp tương đối với pathname
+                        if (href && currentPath.includes(href)) {
+                            link.classList.add('active');
+                        } else {
+                            link.classList.remove('active');
+                        }
                     });
-                    card.addEventListener('mouseleave', function () {
-                        this.style.transform = 'translateY(0)';
+
+                    // Optional: Animation for cards
+                    const cards = document.querySelectorAll('.card, .stat-card');
+                    cards.forEach(card => {
+                        card.addEventListener('mouseenter', function () {
+                            this.style.transform = 'translateY(-2px)';
+                        });
+                        card.addEventListener('mouseleave', function () {
+                            this.style.transform = 'translateY(0)';
+                        });
                     });
                 });
-            });
-        </script>
+            </script>
     </body>
 </html>

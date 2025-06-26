@@ -52,7 +52,7 @@ public class UserDAO {
         int ownerId = shopOwner.getOwnerId();
 
         String sql = """
-                    INSERT INTO UserServiceMethod(OwnerID, MethodID, TrialStartDate, TrialEndDate, TrialStatus, SubscriptionMonths, SubscriptionStart, SubscriptionEnd)
+                    INSERT INTO UserServiceMethod(OwnerID, MethodID, TrialStartDate, TrialEndDate, Status, SubscriptionMonths, SubscriptionStart, SubscriptionEnd)
                     VALUES (?, 1, GETDATE(), DATEADD(day, 7, GETDATE()), 'TRIAL', 0, NULL, NULL );
                     """;
 

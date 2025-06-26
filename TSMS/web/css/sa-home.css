@@ -452,8 +452,8 @@ table tr:last-child td {
 /* Buttons */
 .btn {
     padding: 8px 16px;
-    border: none;
-    border-radius: 6px;
+    border: 1px solid;
+    border-radius: 100px;
     cursor: pointer;
     font-size: 12px;
     font-weight: 500;
@@ -464,12 +464,13 @@ table tr:last-child td {
 }
 
 .btn-primary {
-    background: #3b82f6;
-    color: white;
+    background: white;
+    color: #3b82f6;
 }
 
 .btn-primary:hover {
     background: #2563eb;
+    color: white;
 }
 
 .btn-danger {
@@ -482,12 +483,14 @@ table tr:last-child td {
 }
 
 .btn-success {
-    background: #10b981;
-    color: white;
+    background: white;
+    border: 1px solid;
+    color: #3b82f6;
 }
 
 .btn-success:hover {
-    background: #059669;
+    background: #3b82f6;
+    color: white;
 }
 
 .btn-warning {
