@@ -73,29 +73,13 @@
                 opacity: 1;
             }
 
-            /* Dark mode support */
-            @media (prefers-color-scheme: dark) {
-                .filter-section {
-                    background: #2d3748;
-                    border-color: #4a5568;
-                }
+   
 
-                .radio-item:hover {
-                    background-color: #4a5568;
-                }
 
-                .radio-item span:not(.radio-mark) {
-                    color: #e2e8f0;
-                }
 
-                .custom-date-input {
-                    background: #4a5568;
-                    border-color: #718096;
-                    color: #e2e8f0;
-                }
-
+             
                 .date-label {
-                    color: #90cdf4;
+                    color: #333;
                 }
             }
 
