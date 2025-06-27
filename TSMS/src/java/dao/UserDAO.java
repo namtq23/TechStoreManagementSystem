@@ -363,7 +363,7 @@ public class UserDAO {
     private static ShopOwnerDTO extractShopOwnerDTOFromResultSet(ResultSet rs) throws SQLException {
         ShopOwnerDTO shopOwnerDTO = new ShopOwnerDTO(
                 rs.getDate("TrialStartDate"),
-                rs.getString("TrialStatus"),
+                rs.getString("Status"),
                 rs.getString("SubscriptionMonths"),
                 rs.getDate("SubscriptionStart"),
                 rs.getDate("SubscriptionEnd"),
@@ -378,7 +378,10 @@ public class UserDAO {
                 rs.getString("Address"),
                 rs.getString("Phone"),
                 rs.getInt("IsActive"),
-                rs.getDate("CreatedAt")
+                rs.getDate("CreatedAt"),
+                rs.getString("TaxNumber"),
+                rs.getString("WebUrl"),
+                rs.getDate("TrialEndDate")
         );
         return shopOwnerDTO;
     }
@@ -647,7 +650,7 @@ public class UserDAO {
 //        List<User> users = ud.getStaffsByBranchID(1, "DTB_StoreTemp");
 //        User o = ud.getUserByEmail("an.nguyen@email.com", "DTB_StoreTemp");
 
-        List<ShopOwnerDTO> so = ud.getShopOwners();
+        ShopOwnerDTO so = ud.getShopOwnerById(3);
         System.out.println(so);
     }
 

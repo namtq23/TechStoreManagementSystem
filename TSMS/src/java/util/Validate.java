@@ -97,6 +97,13 @@ public class Validate {
         return sdf.format(date);
     }
 
+    public static String toInputDate(Date date) {
+        if (date == null) {
+            return "";
+        }
+        return new java.text.SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
+
     public static String formatCostPriceToVND(String costPriceStr) {
         if (costPriceStr == null || costPriceStr.equalsIgnoreCase("NULL")) {
             return "NULL";
@@ -153,16 +160,18 @@ public class Validate {
 
         return LocalDate.of(previousMonth.getYear(), previousMonth.getMonth(), day);
     }
+
     //Format cost theo VND
     public static String formatCostPriceToVND(double costPrice) {
         try {
             NumberFormat vndFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
-            return vndFormat.format(costPrice) ;
+            return vndFormat.format(costPrice);
         } catch (Exception e) {
             return "0";
         }
     }
-       // Method để format date
+    // Method để format date
+
     public static String getFormattedDate(LocalDateTime createdAt) {
         if (createdAt != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");

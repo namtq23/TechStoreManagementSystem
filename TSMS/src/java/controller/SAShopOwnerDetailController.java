@@ -35,7 +35,6 @@ public class SAShopOwnerDetailController extends HttpServlet {
 
             request.setAttribute("shopOwner", shopOwner);
             request.getRequestDispatcher("/WEB-INF/jsp/admin/sa-sodetails.jsp").forward(request, response);
-
         } catch (NumberFormatException | ServletException | IOException | SQLException e) {
             System.out.println("error");
         }

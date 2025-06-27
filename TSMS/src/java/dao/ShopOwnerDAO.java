@@ -6,6 +6,7 @@ package dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class ShopOwnerDAO {
             sql.append(" AND IsActive = ?");
             params.add(Integer.parseInt(statusStr));
         }
-        
+
         if (search != null && !search.isEmpty()) {
             String keywordUnsigned = Validate.normalizeSearch(search);
             sql.append("AND (s.FullNameUnsigned LIKE ? OR s.Phone LIKE ? OR s.ShopName LIKE ?) ");
@@ -78,7 +79,7 @@ public class ShopOwnerDAO {
             params.add(Timestamp.valueOf(nextDay.atStartOfDay()));
         }
 
-        sql.append(" ORDER BY CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        sql.append(" ORDER BY CreatedAt ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
         params.add(offset);
         params.add(limit);
 
@@ -149,6 +150,39 @@ public class ShopOwnerDAO {
         return 0;
     }
 
+    public void updateShopOwnerInfo(int ownerId, String fullName, String shopName, int isActive) throws SQLException {
+        String sql = "UPDATE ShopOwner SET FullName = ?, ShopName = ?, IsActive = ? WHERE OwnerID = ?";
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, fullName);
+            stmt.setString(2, shopName);
+            stmt.setInt(3, isActive);
+            stmt.setInt(4, ownerId);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void updateShopOwnerInfoInTheirDTB(String dbName, String fullName, int isActive) throws SQLException {
+        String sql = "UPDATE Users SET FullName = ?, IsActive = ? WHERE UserID = 0";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, fullName);
+            stmt.setInt(2, isActive);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void voidUpdateDTBShopName(String oldDbName, String newDbName) {
+        String sql = "ALTER DATABASE [" + oldDbName + "] MODIFY NAME = [" + newDbName + "]";
+
+        try (Connection conn = DBUtil.getConnectionTo("master"); Statement stmt = conn.createStatement()) {
+
+            stmt.executeUpdate(sql);
+            System.out.println("Đã đổi tên DB từ " + oldDbName + " thành " + newDbName);
+
+        } catch (SQLException e) {
+            System.err.println("Đổi tên database thất bại.");
+        }
+    }
+
     private static ShopOwnerDTO extractShopOwnerDTOFromResultSet(ResultSet rs) throws SQLException {
         ShopOwnerDTO shopOwnerDTO = new ShopOwnerDTO(
                 rs.getDate("TrialStartDate"),
@@ -167,7 +201,10 @@ public class ShopOwnerDAO {
                 rs.getString("Address"),
                 rs.getString("Phone"),
                 rs.getInt("IsActive"),
-                rs.getDate("CreatedAt")
+                rs.getDate("CreatedAt"),
+                rs.getString("TaxNumber"),
+                rs.getString("WebUrl"),
+                rs.getDate("TrialEndDate")
         );
         return shopOwnerDTO;
     }

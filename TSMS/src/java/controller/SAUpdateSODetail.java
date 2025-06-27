@@ -4,6 +4,7 @@
  */
 package controller;
 
+import dao.ShopOwnerDAO;
 import dao.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import model.ShopOwnerDTO;
+import util.Validate;
 
 /**
  *
@@ -22,26 +24,28 @@ import model.ShopOwnerDTO;
 public class SAUpdateSODetail extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        String idParam = request.getParameter("id");
-        System.out.println(idParam);
-
-        if (idParam == null) {
-            response.sendRedirect("sa-home");
-            return;
-        }
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
 
         try {
-            int ownerId = Integer.parseInt(idParam);
-            ShopOwnerDTO shopOwner = UserDAO.getShopOwnerById(ownerId);
+            int ownerId = Integer.parseInt(request.getParameter("ownerId"));
+            String fullName = request.getParameter("fullName");
+            String shopName = request.getParameter("shopName");
+            String newDbName = Validate.shopNameConverter(shopName);
+            String dbName = request.getParameter("databaseName");
+            String status = request.getParameter("status");
+            int isActive = "ACTIVE".equals(status) ? 1 : 0;
 
-            request.setAttribute("shopOwner", shopOwner);
-            request.getRequestDispatcher("/WEB-INF/jsp/admin/update-sodetail.jsp").forward(request, response);
+            ShopOwnerDAO soDao = new ShopOwnerDAO();
+            soDao.updateShopOwnerInfo(ownerId, fullName, shopName, isActive);
+            soDao.voidUpdateDTBShopName(dbName, newDbName);
+            soDao.updateShopOwnerInfoInTheirDTB(newDbName, fullName, isActive);
 
-        } catch (NumberFormatException | ServletException | IOException | SQLException e) {
-            System.out.println("error");
+            response.sendRedirect("sa-sodetails?id=" + ownerId + "&update=success");
+        } catch (IOException | NumberFormatException | SQLException ex) {
+            int ownerId = Integer.parseInt(request.getParameter("ownerId"));
+            response.sendRedirect("sa-sodetails?id=" + ownerId + "&update=error");
         }
     }
 
