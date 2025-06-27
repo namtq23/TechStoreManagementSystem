@@ -34,10 +34,12 @@ public class SOOutcomeController extends HttpServlet {
             // Lấy tham số
             String branchId = request.getParameter("branchId");
             String employeeId = request.getParameter("employeeId");
+            String paymentMethod = request.getParameter("paymentMethod");
 
             // Load danh sách chi nhánh
             List<Branch> branchList = branchDAO.getAllBranches(dbName);
             List<User> employeeList = new ArrayList<>();
+            List<String> paymentMethodList = dao.getAllPaymentMethods(dbName);
 
             if (branchId != null && !branchId.isEmpty() && !branchId.equals("")) {
                 employeeList = userDAO.getStaffsByBranchIDForOutcome(Integer.parseInt(branchId), dbName);
@@ -67,14 +69,24 @@ public class SOOutcomeController extends HttpServlet {
 
             // Lấy dữ liệu outcome
             List<CashFlowReportDTO> outcomeList = dao.getOutcomeCashFlowReports(dbName, offset, recordsPerPage,
-                    dateFrom, dateTo, branchId, employeeId);
+                    dateFrom, dateTo, branchId, employeeId, paymentMethod);
 
             // Lấy tổng số bản ghi
-            int totalRecords = dao.getTotalOutcomeCashFlowCount(dbName, dateFrom, dateTo, branchId, employeeId);
+            int totalRecords = dao.getTotalOutcomeCashFlowCount(dbName, dateFrom, dateTo, branchId, employeeId, paymentMethod);
 
-            // Lấy tổng amount của tất cả các trang
-      
-            String totalOutcomeAmount  = String.valueOf(dao.getTotalOutcomeAmount(dbName, dateFrom, dateTo, branchId, employeeId));
+            // Tạo danh sách recordsPerPage theo phần trăm
+            List<Integer> recordsPerPageOptions = new ArrayList<>();
+            if (totalRecords > 0) {
+                recordsPerPageOptions.add(Math.max(1, totalRecords * 10 / 100));
+                recordsPerPageOptions.add(Math.max(1, totalRecords * 25 / 100));
+                recordsPerPageOptions.add(Math.max(1, totalRecords * 50 / 100));
+                recordsPerPageOptions.add(Math.max(1, totalRecords * 75 / 100));
+            } else {
+                recordsPerPageOptions.add(10); // fallback khi chưa có bản ghi
+            }
+
+            // Lấy tổng amount của tất cả các trang    
+            String totalOutcomeAmount = String.valueOf(dao.getTotalOutcomeAmount(dbName, dateFrom, dateTo, branchId, employeeId, paymentMethod));
 
             // Tính toán phân trang
             int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
@@ -85,7 +97,6 @@ public class SOOutcomeController extends HttpServlet {
             for (User user : employeeList) {
                 System.out.println(user.toString());
             }
-            
 
             // Set attributes
             request.setAttribute("outcomeList", outcomeList);
@@ -95,14 +106,17 @@ public class SOOutcomeController extends HttpServlet {
             request.setAttribute("recordsPerPage", recordsPerPage);
             request.setAttribute("startRecord", startRecord);
             request.setAttribute("endRecord", endRecord);
+            request.setAttribute("totalOutcomeAmount", Validate.formatCostPriceToVND(totalOutcomeAmount));
+            request.setAttribute("recordsPerPageOptions", recordsPerPageOptions);
 
             // Set filter parameters
-            request.setAttribute("totalOutcomeAmount", Validate.formatCostPriceToVND(totalOutcomeAmount));
             request.setAttribute("employeeList", employeeList);
             request.setAttribute("branchId", branchId);
             request.setAttribute("employeeId", employeeId);
             request.setAttribute("dateFrom", dateFrom);
             request.setAttribute("dateTo", dateTo);
+            request.setAttribute("paymentMethodList", paymentMethodList);
+            request.setAttribute("paymentMethod", paymentMethod);
 
         } catch (SQLException e) {
             e.printStackTrace();

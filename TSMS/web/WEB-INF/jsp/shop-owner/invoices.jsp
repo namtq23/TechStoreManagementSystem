@@ -86,7 +86,7 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-invoices?reportType=income" class="dropdown-item">Doanh Thu thuần</a>
-                            <a href="so-invoices?reportType=outcome" class="dropdown-item">Khoảng chi</a>
+                            <a href="so-outcome" class="dropdown-item">Khoảng chi</a>
                         </div>
                     </div>
 
@@ -156,6 +156,28 @@
                                 </c:choose>
                             </select>
                         </div>
+                        <div class="filter-item">
+                            <label>Phương thức thanh toán:</label>
+                            <div class="form-radio-group">
+                                <label>
+                                    <input type="radio" name="paymentMethod" value="" 
+                                           ${empty paymentMethod ? 'checked' : ''}>
+                                    Tất cả
+                                </label>
+
+                                <c:forEach var="method" items="${paymentMethodList}">
+                                    <c:if test="${method ne 'Thẻ công ty'}">
+                                        <label>
+                                            <input type="radio" name="paymentMethod" value="${method}" 
+                                                   ${paymentMethod == method ? 'checked' : ''}>
+                                            ${method}
+                                        </label>
+                                    </c:if>
+                                </c:forEach>
+
+                            </div>
+                        </div>
+
                     </fieldset>
 
                     <!-- Action Buttons -->
@@ -290,7 +312,7 @@
 
                     <div class="summary-item">
                         <span class="summary-label">Tổng thu tất cả:</span>
-                        <span class="summary-value">250.506.000đ</span>
+                        <span class="summary-value">  ${totalIncomeAmount}</span>
                     </div>
                 </div>
 
@@ -300,6 +322,7 @@
                     <input type="hidden" name="employeeId" value="${employeeId}">
                     <input type="hidden" name="fromDate" value="${dateFrom}">
                     <input type="hidden" name="toDate" value="${dateTo}">
+                    <input type="hidden" name="paymentMethod" value="${paymentMethod}">
                     <div class="pagination-container">
                         <div class="pagination-info">
                             Hiển thị ${startRecord} - ${endRecord} / Tổng số ${totalRecords} hóa đơn
@@ -308,10 +331,11 @@
                         <div class="records-per-page">
                             <label for="recordsPerPage">Hiển thị:</label>
                             <select id="recordsPerPage" name="recordsPerPage" class="records-select" onchange="this.form.submit()">
-                                <option value="10" ${recordsPerPage == 10 ? 'selected' : ''}>10</option>
-                                <option value="25" ${recordsPerPage == 25 ? 'selected' : ''}>25</option>
-                                <option value="50" ${recordsPerPage == 50 ? 'selected' : ''}>50</option>
-                                <option value="100" ${recordsPerPage == 100 ? 'selected' : ''}>100</option>
+                                <c:forEach var="option" items="${recordsPerPageOptions}">
+                                    <option value="${option}" ${recordsPerPage == option ? 'selected' : ''}>
+                                        ${option}
+                                    </option>
+                                </c:forEach>
                             </select>
                             <span>bản ghi/trang</span>
                         </div>
@@ -321,7 +345,7 @@
                             <!-- Trang đầu -->
                             <c:choose>
                                 <c:when test="${currentPage > 1}">
-                                    <a href="so-invoices?page=1&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">
+                                    <a href="so-invoices?page=1&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}&paymentMethod=${paymentMethod}" class="page-btn">
                                         <i class="fas fa-angle-double-left"></i>
                                     </a>
                                 </c:when>
@@ -335,7 +359,7 @@
                             <!-- Trang trước -->
                             <c:choose>
                                 <c:when test="${currentPage > 1}">
-                                    <a href="so-invoices?page=${currentPage - 1}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">
+                                    <a href="so-invoices?page=${currentPage - 1}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}&paymentMethod=${paymentMethod}" class="page-btn">
                                         <i class="fas fa-angle-left"></i>
                                     </a>
                                 </c:when>
@@ -354,7 +378,7 @@
                                         <span class="page-btn active">${i}</span>
                                     </c:when>
                                     <c:otherwise>
-                                        <a href="so-invoices?page=${i}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">${i}</a>
+                                        <a href="so-invoices?page=${i}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}&paymentMethod=${paymentMethod}" class="page-btn">${i}</a>
                                     </c:otherwise>
                                 </c:choose>
                             </c:forEach>
@@ -362,7 +386,7 @@
                             <!-- Trang sau -->
                             <c:choose>
                                 <c:when test="${currentPage < totalPages}">
-                                    <a href="so-invoices?page=${currentPage + 1}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">
+                                    <a href="so-invoices?page=${currentPage + 1}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}&paymentMethod=${paymentMethod}" class="page-btn">
                                         <i class="fas fa-angle-right"></i>
                                     </a>
                                 </c:when>
@@ -376,7 +400,7 @@
                             <!-- Trang cuối -->
                             <c:choose>
                                 <c:when test="${currentPage < totalPages}">
-                                    <a href="so-invoices?page=${totalPages}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}" class="page-btn">
+                                    <a href="so-invoices?page=${totalPages}&recordsPerPage=${recordsPerPage}&branchId=${branchId}&employeeId=${employeeId}&fromDate=${dateFrom}&toDate=${dateTo}&paymentMethod=${paymentMethod}" class="page-btn">
                                         <i class="fas fa-angle-double-right"></i>
                                     </a>
                                 </c:when>
@@ -433,57 +457,7 @@
             }
         </script>
 
-        <script>
-            function setQuickTime(period) {
-                const today = new Date();
-                const fromDate = document.getElementById('fromDate');
-                const toDate = document.getElementById('toDate');
 
-                // Remove active class from all quick buttons
-                document.querySelectorAll('.quick-btn').forEach(btn => btn.classList.remove('active'));
-
-                // Add active class to clicked button
-                event.target.classList.add('active');
-
-                let startDate = new Date();
-                let endDate = new Date(today);
-
-                switch (period) {
-                    case 'today':
-                        startDate = new Date(today);
-                        endDate = new Date(today);
-                        break;
-                    case 'week':
-                        startDate = new Date(today);
-                        startDate.setDate(today.getDate() - 6);
-                        endDate = new Date(today);
-                        break;
-                    case 'month':
-                        startDate = new Date(today);
-                        startDate.setDate(today.getDate() - 29);
-                        endDate = new Date(today);
-                        break;
-                    case 'quarter':
-                        startDate = new Date(today);
-                        startDate.setMonth(today.getMonth() - 3);
-                        endDate = new Date(today);
-                        break;
-                }
-
-                // Chỉ set giá trị cho input, không submit form
-                fromDate.value = formatDateForInput(startDate);
-                toDate.value = formatDateForInput(endDate);
-            }
-
-// Hàm helper để format date cho input HTML
-            function formatDateForInput(date) {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-                    }
-
-        </script>
 
 
         <script>
@@ -493,12 +467,15 @@
                 var employeeId = document.getElementById('employeeId').value || '';
                 var fromDate = document.getElementById('fromDate').value || '';
                 var toDate = document.getElementById('toDate').value || '';
+                var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || '';
+
 
                 // Build URL với cách nối chuỗi truyền thống
                 var url = 'export-excel?type=income&branchId=' + branchId +
                         '&employeeId=' + employeeId +
                         '&fromDate=' + fromDate +
-                        '&toDate=' + toDate;
+                        '&toDate=' + toDate
+                        + '&paymentMethod=' + paymentMethod;
 
                 // Debug log
                 console.log('Export URL:', url);
