@@ -151,7 +151,7 @@
                                             </td>
                                             <td>${owner.status}</td>
                                             <td><fmt:formatDate value="${owner.createdAt}" pattern="dd/MM/yyyy" /></td>
-                                            <td><button class="btn btn-primary">Xem</button></td>
+                                            <td><a href="sa-sodetails?id=${owner.ownerId}"><button class="btn btn-primary">Xem</button></a></td>
                                         </tr>
                                     </c:forEach>
                                 </tbody>

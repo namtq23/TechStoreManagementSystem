@@ -76,7 +76,7 @@
             .date-label {
                 color: #333;
             }
-
+ 
             /* Print styles */
             @media print {
                 .filter-section {
