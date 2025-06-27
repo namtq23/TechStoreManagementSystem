@@ -60,7 +60,7 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-customer" class="dropdown-item ">Khách hàng</a>
-                            <a href="so-saff" class="dropdown-item">Nhà cung cấp</a>
+                            <a href="so-supplier" class="dropdown-item">Nhà cung cấp</a>
                         </div>
                     </div>
 
