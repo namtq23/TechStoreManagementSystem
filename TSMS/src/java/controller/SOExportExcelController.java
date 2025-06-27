@@ -44,6 +44,8 @@ public class SOExportExcelController extends HttpServlet {
         String employeeId = request.getParameter("employeeId");
         String dateFrom = request.getParameter("fromDate");
         String dateTo = request.getParameter("toDate");
+        String paymentMethodInpara = request.getParameter("paymentMethod");
+
 
         try {
             CashFlowDAO dao = new CashFlowDAO();
@@ -52,10 +54,10 @@ public class SOExportExcelController extends HttpServlet {
             List<CashFlowReportDTO> dataList;
             if ("income".equals(exportType)) {
                 dataList = dao.getIncomeCashFlowReports(dbName, 0, Integer.MAX_VALUE,
-                        dateFrom, dateTo, branchId, employeeId);
+                        dateFrom, dateTo, branchId, employeeId, paymentMethodInpara);
             } else {
                 dataList = dao.getOutcomeCashFlowReports(dbName, 0, Integer.MAX_VALUE,
-                        dateFrom, dateTo, branchId, employeeId);
+                        dateFrom, dateTo, branchId, employeeId, paymentMethodInpara);
             }
 
             // Tạo file Excel

@@ -15,6 +15,7 @@ import java.util.List;
 import model.Branch;
 import model.CashFlowReportDTO;
 import model.User;
+import util.Validate;
 
 @WebServlet(name = "SOInvoicesController", urlPatterns = {"/so-invoices"})
 public class SOInvoicesController extends HttpServlet {
@@ -32,10 +33,13 @@ public class SOInvoicesController extends HttpServlet {
             // Lấy tham số
             String branchId = request.getParameter("branchId");
             String employeeId = request.getParameter("employeeId");
+            String paymentMethod = request.getParameter("paymentMethod");
+            
 
             // Load danh sách chi nhánh
             List<Branch> branchList = branchDAO.getAllBranches(dbName);
             List<User> employeeList = new ArrayList<>();
+            List<String> paymentMethodList = dao.getAllPaymentMethods(dbName);
             
             // Sửa lại: Sử dụng hàm có sẵn trong UserDAO
             if (branchId != null && !branchId.isEmpty() && !branchId.equals("")) {
@@ -68,24 +72,35 @@ public class SOInvoicesController extends HttpServlet {
 
             // Lấy dữ liệu với filter
             List<CashFlowReportDTO> incomeList = dao.getIncomeCashFlowReports(dbName, offset, recordsPerPage,
-                    dateFrom, dateTo, branchId, employeeId);
+                    dateFrom, dateTo, branchId, employeeId, paymentMethod);
 
             // Lấy tổng số bản ghi
-            int totalRecords = dao.getTotalIncomeCashFlowCount(dbName, dateFrom, dateTo, branchId, employeeId);
-
+            int totalRecords = dao.getTotalIncomeCashFlowCount(dbName, dateFrom, dateTo, branchId, employeeId, paymentMethod);
+            
+            
+                   List<Integer> recordsPerPageOptions = new ArrayList<>();
+            if (totalRecords > 0) {
+                recordsPerPageOptions.add(Math.max(1, totalRecords * 10 / 100));
+                recordsPerPageOptions.add(Math.max(1, totalRecords * 25 / 100));
+                recordsPerPageOptions.add(Math.max(1, totalRecords * 50 / 100));
+                recordsPerPageOptions.add(Math.max(1, totalRecords * 75 / 100));
+            } else {
+                recordsPerPageOptions.add(10); // fallback khi chưa có bản ghi
+            }
+            
+            //Tổng amount income
+            String totalIncomeAmount  = String.valueOf(dao.getTotalIncomeAmount(dbName, dateFrom, dateTo, branchId, employeeId, paymentMethod));
+            
             // Tính toán phân trang
             int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
             int startRecord = offset + 1;
             int endRecord = Math.min(offset + recordsPerPage, totalRecords);
             
             
-             
-            System.out.println("Nhan vien theo chi nhanh");
-            for (User user : employeeList) {
-                System.out.println(user.toString());
-            }
-
+       
+            System.out.println("sO TIỀN: "+totalIncomeAmount);
             // Set attributes
+            request.setAttribute("totalIncomeAmount", Validate.formatCostPriceToVND(totalIncomeAmount));
             request.setAttribute("incomeList", incomeList);
             request.setAttribute("currentPage", currentPage);
             request.setAttribute("totalPages", totalPages);
@@ -93,6 +108,8 @@ public class SOInvoicesController extends HttpServlet {
             request.setAttribute("recordsPerPage", recordsPerPage);
             request.setAttribute("startRecord", startRecord);
             request.setAttribute("endRecord", endRecord);
+            request.setAttribute("paymentMethodList", paymentMethodList);
+              request.setAttribute("recordsPerPageOptions", recordsPerPageOptions);
 
             // Set filter parameters
             request.setAttribute("employeeList", employeeList);
@@ -100,6 +117,9 @@ public class SOInvoicesController extends HttpServlet {
             request.setAttribute("employeeId", employeeId);
             request.setAttribute("dateFrom", dateFrom);
             request.setAttribute("dateTo", dateTo);
+            request.setAttribute("paymentMethod", paymentMethod);
+
+            
 
         } catch (SQLException e) {
             e.printStackTrace();

@@ -830,8 +830,8 @@ public class CashFlowDAO {
     }
 
 //Hàm lấy dữ liệu với phân trang
-public List<CashFlowReportDTO> getIncomeCashFlowReports(String dbName, int offset, int recordsPerPage,
-            String dateFrom, String dateTo, String branchId, String employeeId) throws SQLException {
+    public List<CashFlowReportDTO> getIncomeCashFlowReports(String dbName, int offset, int recordsPerPage,
+            String dateFrom, String dateTo, String branchId, String employeeId, String paymentMethod) throws SQLException {
         StringBuilder sql = new StringBuilder("""
     SELECT 
         cf.CashFlowID,
@@ -867,6 +867,10 @@ public List<CashFlowReportDTO> getIncomeCashFlowReports(String dbName, int offse
             sql.append(" AND cf.BranchID = ?");
             params.add(Integer.parseInt(branchId));
         }
+        if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+            sql.append(" AND cf.PaymentMethod = ?");
+            params.add(paymentMethod.trim());
+        }
 
         // SỬA LẠI: Chuyển đổi employeeId thành tên nhân viên
         if (employeeId != null && !employeeId.trim().isEmpty()) {
@@ -890,8 +894,7 @@ public List<CashFlowReportDTO> getIncomeCashFlowReports(String dbName, int offse
         params.add(recordsPerPage);
 
         List<CashFlowReportDTO> list = new ArrayList<>();
-        try (Connection conn = DBUtil.getConnectionTo(dbName); 
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
             for (int i = 0; i < params.size(); i++) {
                 stmt.setObject(i + 1, params.get(i));
@@ -905,7 +908,7 @@ public List<CashFlowReportDTO> getIncomeCashFlowReports(String dbName, int offse
                     BigDecimal amount = rs.getBigDecimal("Amount");
                     dto.setAmount(amount);
                     dto.setPaymentMethod(rs.getString("PaymentMethod"));
-                    
+
                     Object orderIdObj = rs.getObject("RelatedOrderID");
                     if (orderIdObj != null) {
                         dto.setRelatedOrderID(rs.getInt("RelatedOrderID"));
@@ -950,10 +953,9 @@ public List<CashFlowReportDTO> getIncomeCashFlowReports(String dbName, int offse
         return list;
     }
 
-
 //Hàm đếm tổng số bản ghi
-   public int getTotalIncomeCashFlowCount(String dbName, String dateFrom, String dateTo, String branchId, String employeeId) throws SQLException {
-    StringBuilder sql = new StringBuilder("""
+    public int getTotalIncomeCashFlowCount(String dbName, String dateFrom, String dateTo, String branchId, String employeeId, String paymentMethod) throws SQLException {
+        StringBuilder sql = new StringBuilder("""
     SELECT COUNT(*) as total
     FROM CashFlows cf
     LEFT JOIN Branches b ON cf.BranchID = b.BranchID
@@ -962,60 +964,62 @@ public List<CashFlowReportDTO> getIncomeCashFlowReports(String dbName, int offse
     WHERE cf.FlowType = 'INCOME'
     """);
 
-    List<Object> params = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
 
-    if (dateFrom != null && !dateFrom.trim().isEmpty()) {
-        sql.append(" AND cf.CreatedAt >= ?");
-        params.add(dateFrom + " 00:00:00");
-    }
-
-    if (dateTo != null && !dateTo.trim().isEmpty()) {
-        sql.append(" AND cf.CreatedAt <= ?");
-        params.add(dateTo + " 23:59:59");
-    }
-
-    if (branchId != null && !branchId.trim().isEmpty()) {
-        sql.append(" AND cf.BranchID = ?");
-        params.add(Integer.parseInt(branchId));
-    }
-
-   
-   // SỬA LẠI: Chuyển đổi employeeId thành tên nhân viên
-if (employeeId != null && !employeeId.trim().isEmpty()) {
-    try {
-        int userIdFilter = Integer.parseInt(employeeId);
-        // Lấy tên nhân viên từ UserID
-        User user = UserDAO.getUserById(userIdFilter, dbName);
-        if (user != null) {
-            sql.append(" AND cf.CreatedBy = ?");
-            params.add(user.getFullName());
-        }
-    } catch (NumberFormatException e) {
-        // Nếu employeeId không phải số, tìm theo tên
-        sql.append(" AND cf.CreatedBy LIKE ?");
-        params.add("%" + employeeId + "%");
-    }
-}
-
-    try (Connection conn = DBUtil.getConnectionTo(dbName); 
-         PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
-
-        for (int i = 0; i < params.size(); i++) {
-            stmt.setObject(i + 1, params.get(i));
+        if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+            sql.append(" AND cf.CreatedAt >= ?");
+            params.add(dateFrom + " 00:00:00");
         }
 
-        try (ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt("total");
+        if (dateTo != null && !dateTo.trim().isEmpty()) {
+            sql.append(" AND cf.CreatedAt <= ?");
+            params.add(dateTo + " 23:59:59");
+        }
+
+        if (branchId != null && !branchId.trim().isEmpty()) {
+            sql.append(" AND cf.BranchID = ?");
+            params.add(Integer.parseInt(branchId));
+        }
+        if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+            sql.append(" AND cf.PaymentMethod = ?");
+            params.add(paymentMethod.trim());
+        }
+
+        // SỬA LẠI: Chuyển đổi employeeId thành tên nhân viên
+        if (employeeId != null && !employeeId.trim().isEmpty()) {
+            try {
+                int userIdFilter = Integer.parseInt(employeeId);
+                // Lấy tên nhân viên từ UserID
+                User user = UserDAO.getUserById(userIdFilter, dbName);
+                if (user != null) {
+                    sql.append(" AND cf.CreatedBy = ?");
+                    params.add(user.getFullName());
+                }
+            } catch (NumberFormatException e) {
+                // Nếu employeeId không phải số, tìm theo tên
+                sql.append(" AND cf.CreatedBy LIKE ?");
+                params.add("%" + employeeId + "%");
             }
         }
-    }
-    return 0;
-}
-   // Thêm vào CashFlowDAO.java
 
-public List<CashFlowReportDTO> getOutcomeCashFlowReports(String dbName, int offset, int recordsPerPage,
-            String dateFrom, String dateTo, String branchId, String employeeId) throws SQLException {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total");
+                }
+            }
+        }
+        return 0;
+    }
+    // Thêm vào CashFlowDAO.java
+
+    public List<CashFlowReportDTO> getOutcomeCashFlowReports(String dbName, int offset, int recordsPerPage,
+            String dateFrom, String dateTo, String branchId, String employeeId, String paymentMethod) throws SQLException {
         StringBuilder sql = new StringBuilder("""
     SELECT 
         cf.CashFlowID,
@@ -1048,6 +1052,10 @@ public List<CashFlowReportDTO> getOutcomeCashFlowReports(String dbName, int offs
             sql.append(" AND cf.BranchID = ?");
             params.add(Integer.parseInt(branchId));
         }
+        if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+            sql.append(" AND cf.PaymentMethod = ?");
+            params.add(paymentMethod.trim());
+        }
 
         if (employeeId != null && !employeeId.trim().isEmpty()) {
             try {
@@ -1068,8 +1076,7 @@ public List<CashFlowReportDTO> getOutcomeCashFlowReports(String dbName, int offs
         params.add(recordsPerPage);
 
         List<CashFlowReportDTO> list = new ArrayList<>();
-        try (Connection conn = DBUtil.getConnectionTo(dbName); 
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
             for (int i = 0; i < params.size(); i++) {
                 stmt.setObject(i + 1, params.get(i));
@@ -1117,120 +1124,122 @@ public List<CashFlowReportDTO> getOutcomeCashFlowReports(String dbName, int offs
         return list;
     }
 
-
-public int getTotalOutcomeCashFlowCount(String dbName, String dateFrom, String dateTo, String branchId, String employeeId) throws SQLException {
-    StringBuilder sql = new StringBuilder("""
+    public int getTotalOutcomeCashFlowCount(String dbName, String dateFrom, String dateTo, String branchId, String employeeId, String paymentMethod) throws SQLException {
+        StringBuilder sql = new StringBuilder("""
     SELECT COUNT(*) as total
     FROM CashFlows cf
     LEFT JOIN Branches b ON cf.BranchID = b.BranchID
     WHERE cf.FlowType = 'OUTCOME'
     """);
 
-    List<Object> params = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
 
-    if (dateFrom != null && !dateFrom.trim().isEmpty()) {
-        sql.append(" AND cf.CreatedAt >= ?");
-        params.add(dateFrom + " 00:00:00");
-    }
-
-    if (dateTo != null && !dateTo.trim().isEmpty()) {
-        sql.append(" AND cf.CreatedAt <= ?");
-        params.add(dateTo + " 23:59:59");
-    }
-
-    if (branchId != null && !branchId.trim().isEmpty()) {
-        sql.append(" AND cf.BranchID = ?");
-        params.add(Integer.parseInt(branchId));
-    }
-
-    if (employeeId != null && !employeeId.trim().isEmpty()) {
-        try {
-            int userIdFilter = Integer.parseInt(employeeId);
-            User user = UserDAO.getUserById(userIdFilter, dbName);
-            if (user != null) {
-                sql.append(" AND cf.CreatedBy = ?");
-                params.add(user.getFullName());
-            }
-        } catch (NumberFormatException e) {
-            sql.append(" AND cf.CreatedBy LIKE ?");
-            params.add("%" + employeeId + "%");
-        }
-    }
-
-    try (Connection conn = DBUtil.getConnectionTo(dbName); 
-         PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
-
-        for (int i = 0; i < params.size(); i++) {
-            stmt.setObject(i + 1, params.get(i));
+        if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+            sql.append(" AND cf.CreatedAt >= ?");
+            params.add(dateFrom + " 00:00:00");
         }
 
-        try (ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt("total");
+        if (dateTo != null && !dateTo.trim().isEmpty()) {
+            sql.append(" AND cf.CreatedAt <= ?");
+            params.add(dateTo + " 23:59:59");
+        }
+
+        if (branchId != null && !branchId.trim().isEmpty()) {
+            sql.append(" AND cf.BranchID = ?");
+            params.add(Integer.parseInt(branchId));
+        }
+        if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+            sql.append(" AND cf.PaymentMethod = ?");
+            params.add(paymentMethod.trim());
+        }
+
+        if (employeeId != null && !employeeId.trim().isEmpty()) {
+            try {
+                int userIdFilter = Integer.parseInt(employeeId);
+                User user = UserDAO.getUserById(userIdFilter, dbName);
+                if (user != null) {
+                    sql.append(" AND cf.CreatedBy = ?");
+                    params.add(user.getFullName());
+                }
+            } catch (NumberFormatException e) {
+                sql.append(" AND cf.CreatedBy LIKE ?");
+                params.add("%" + employeeId + "%");
             }
         }
-    }
-    return 0;
-}
 
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total");
+                }
+            }
+        }
+        return 0;
+    }
 
 // Thêm method này vào CashFlowDAO
-public BigDecimal getTotalOutcomeAmount(String dbName, String dateFrom, String dateTo, String branchId, String employeeId) throws SQLException {
-    StringBuilder sql = new StringBuilder("""
+    public BigDecimal getTotalOutcomeAmount(String dbName, String dateFrom, String dateTo, String branchId, String employeeId, String paymentMethod) throws SQLException {
+        StringBuilder sql = new StringBuilder("""
     SELECT COALESCE(SUM(cf.Amount), 0) as totalAmount
     FROM CashFlows cf
     LEFT JOIN Branches b ON cf.BranchID = b.BranchID
     WHERE cf.FlowType = 'OUTCOME'
     """);
 
-    List<Object> params = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
 
-    if (dateFrom != null && !dateFrom.trim().isEmpty()) {
-        sql.append(" AND cf.CreatedAt >= ?");
-        params.add(dateFrom + " 00:00:00");
-    }
-
-    if (dateTo != null && !dateTo.trim().isEmpty()) {
-        sql.append(" AND cf.CreatedAt <= ?");
-        params.add(dateTo + " 23:59:59");
-    }
-
-    if (branchId != null && !branchId.trim().isEmpty()) {
-        sql.append(" AND cf.BranchID = ?");
-        params.add(Integer.parseInt(branchId));
-    }
-
-    if (employeeId != null && !employeeId.trim().isEmpty()) {
-        try {
-            int userIdFilter = Integer.parseInt(employeeId);
-            User user = UserDAO.getUserById(userIdFilter, dbName);
-            if (user != null) {
-                sql.append(" AND cf.CreatedBy = ?");
-                params.add(user.getFullName());
-            }
-        } catch (NumberFormatException e) {
-            sql.append(" AND cf.CreatedBy LIKE ?");
-            params.add("%" + employeeId + "%");
-        }
-    }
-
-    try (Connection conn = DBUtil.getConnectionTo(dbName); 
-         PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
-
-        for (int i = 0; i < params.size(); i++) {
-            stmt.setObject(i + 1, params.get(i));
+        if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+            sql.append(" AND cf.CreatedAt >= ?");
+            params.add(dateFrom + " 00:00:00");
         }
 
-        try (ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                return rs.getBigDecimal("totalAmount");
+        if (dateTo != null && !dateTo.trim().isEmpty()) {
+            sql.append(" AND cf.CreatedAt <= ?");
+            params.add(dateTo + " 23:59:59");
+        }
+
+        if (branchId != null && !branchId.trim().isEmpty()) {
+            sql.append(" AND cf.BranchID = ?");
+            params.add(Integer.parseInt(branchId));
+        }
+        if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+            sql.append(" AND cf.PaymentMethod = ?");
+            params.add(paymentMethod.trim());
+        }
+
+        if (employeeId != null && !employeeId.trim().isEmpty()) {
+            try {
+                int userIdFilter = Integer.parseInt(employeeId);
+                User user = UserDAO.getUserById(userIdFilter, dbName);
+                if (user != null) {
+                    sql.append(" AND cf.CreatedBy = ?");
+                    params.add(user.getFullName());
+                }
+            } catch (NumberFormatException e) {
+                sql.append(" AND cf.CreatedBy LIKE ?");
+                params.add("%" + employeeId + "%");
             }
         }
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBigDecimal("totalAmount");
+                }
+            }
+        }
+        return BigDecimal.ZERO;
     }
-    return BigDecimal.ZERO;
-}
-
-
 
     //Phuong: Add order detail to cashflow
     public static boolean insertCashFlow(
@@ -1262,6 +1271,79 @@ public BigDecimal getTotalOutcomeAmount(String dbName, String dateFrom, String d
             throw new SQLException("Error inserting cash flow: " + e.getMessage(), e);
         }
     }
+
+    public BigDecimal getTotalIncomeAmount(String dbName, String dateFrom, String dateTo, String branchId, String employeeId, String paymentMethod) throws SQLException {
+        StringBuilder sql = new StringBuilder("""
+        SELECT COALESCE(SUM(cf.Amount), 0) as totalAmount
+        FROM CashFlows cf
+        LEFT JOIN Branches b ON cf.BranchID = b.BranchID
+        WHERE cf.FlowType = 'INCOME'
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+            sql.append(" AND cf.CreatedAt >= ?");
+            params.add(dateFrom + " 00:00:00");
+        }
+
+        if (dateTo != null && !dateTo.trim().isEmpty()) {
+            sql.append(" AND cf.CreatedAt <= ?");
+            params.add(dateTo + " 23:59:59");
+        }
+
+        if (branchId != null && !branchId.trim().isEmpty()) {
+            sql.append(" AND cf.BranchID = ?");
+            params.add(Integer.parseInt(branchId));
+        }
+        if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+            sql.append(" AND cf.PaymentMethod = ?");
+            params.add(paymentMethod.trim());
+        }
+
+        if (employeeId != null && !employeeId.trim().isEmpty()) {
+            try {
+                int userIdFilter = Integer.parseInt(employeeId);
+                User user = UserDAO.getUserById(userIdFilter, dbName);
+                if (user != null) {
+                    sql.append(" AND cf.CreatedBy = ?");
+                    params.add(user.getFullName());
+                }
+            } catch (NumberFormatException e) {
+                sql.append(" AND cf.CreatedBy LIKE ?");
+                params.add("%" + employeeId + "%");
+            }
+        }
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBigDecimal("totalAmount");
+                }
+            }
+        }
+        return BigDecimal.ZERO;
+    }
+    
+    
+    //Lấy ra tất cả các phương thức thanh toán
+    public List<String> getAllPaymentMethods(String dbName) throws SQLException {
+    List<String> methods = new ArrayList<>();
+    String sql = "SELECT DISTINCT PaymentMethod FROM CashFlows WHERE PaymentMethod IS NOT NULL ORDER BY PaymentMethod";
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement stmt = conn.prepareStatement(sql);
+         ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+            methods.add(rs.getString("PaymentMethod"));
+        }
+    }
+    return methods;
+}
 
 
 }

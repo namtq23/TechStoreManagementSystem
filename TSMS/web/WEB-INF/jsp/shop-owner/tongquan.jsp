@@ -87,7 +87,7 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-invoices?reportType=income" class="dropdown-item">Doanh Thu thuần</a>
-                            <a href="so-invoices?reportType=outcome" class="dropdown-item">Khoảng chi</a>
+                            <a href="so-outcome" class="dropdown-item">Khoảng chi</a>
                         </div>
                     </div>
 
