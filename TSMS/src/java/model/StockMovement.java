@@ -4,7 +4,7 @@
  */
 package model;
 
-import jdk.jfr.Timestamp;
+import java.sql.Timestamp;
 
 /**
  *

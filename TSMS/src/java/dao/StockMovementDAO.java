@@ -1,122 +1,195 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dao;
 
+import model.ProductDetails;
+import util.DBUtil;
+
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import model.StockMovement;
-import model.StockMovement.StockMovementDetail;
-import util.DBUtil; // bạn cần đặt đúng package khi dùng
+import model.Warehouse;
 
 public class StockMovementDAO {
 
-    public int insertStockMovement(StockMovement movement) throws SQLException {
-        String sql = "INSERT INTO StockMovementsRequest "
-                  + "(FromSupplierID, FromBranchID, FromWarehouseID, ToBranchID, ToWarehouseID, MovementType, CreatedBy, CreatedAt, Note) "
-                  + "VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), ?)";
+    public List<ProductDetails> getAvailableProductsByBranch(int branchId, String dbName) throws SQLException {
+        List<ProductDetails> result = new ArrayList<>();
 
-        int generatedId = -1;
-        Connection conn = DBUtil.getConnection();
+        String sql = """
+            SELECT pd.ProductDetailID, pd.ProductCode, pd.Description, pd.ProductNameUnsigned,
+                   pd.WarrantyPeriod, pd.CreatedAt, pd.UpdatedAt , ip.Quantity
+            FROM InventoryProducts ip
+            JOIN Inventory i ON ip.InventoryID = i.InventoryID
+            JOIN ProductDetails pd ON ip.ProductDetailID = pd.ProductDetailID
+            WHERE i.BranchID = ?
+        """;
 
-        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setObject(1, movement.getFromSupplierID());
-            ps.setObject(2, movement.getFromBranchID());
-            ps.setObject(3, movement.getFromWarehouseID());
-            ps.setObject(4, movement.getToBranchID());
-            ps.setObject(5, movement.getToWarehouseID());
-            ps.setString(6, movement.getMovementType());
-            ps.setInt(7, movement.getCreatedBy());
-            ps.setString(8, movement.getNote());
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.executeUpdate();
+            ps.setInt(1, branchId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductDetails pd = new ProductDetails();
+                    pd.setProductDetailID(rs.getInt("ProductDetailID"));
+                    pd.setProductCode(rs.getString("ProductCode"));
+                    pd.setDescription(rs.getString("Description"));
+                    pd.setProductNameUnsigned(rs.getString("ProductNameUnsigned"));
+                    pd.setWarrantyPeriod(rs.getString("WarrantyPeriod"));
+                    pd.setDetailCreatedAt(rs.getTimestamp("CreatedAt"));
+                    pd.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
+                    pd.setQuantity(rs.getInt("Quantity"));
 
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    generatedId = rs.getInt(1);
+                    result.add(pd);
                 }
             }
-        } finally {
-            DBUtil.closeConnection(conn);
         }
-        return generatedId;
+
+        return result;
     }
 
-    public void insertMovementDetails(int movementID, List<StockMovementDetail> details) throws SQLException {
-        String sql = "INSERT INTO StockMovementDetail (MovementID, ProductDetailID, Quantity) VALUES (?, ?, ?)";
-        Connection conn = DBUtil.getConnection();
+    public List<ProductDetails> searchProductsByName(int branchId, String keyword, String dbName) throws SQLException {
+        List<ProductDetails> result = new ArrayList<>();
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            for (StockMovementDetail detail : details) {
-                ps.setInt(1, movementID);
-                ps.setInt(2, detail.getProductDetailID());
-                ps.setInt(3, detail.getQuantity());
-                ps.addBatch();
+        String sql = """
+            SELECT pd.ProductDetailID, pd.ProductCode, pd.Description, pd.ProductNameUnsigned,
+                   pd.WarrantyPeriod, pd.CreatedAt, pd.UpdatedAt
+            FROM InventoryProducts ip
+            JOIN Inventory i ON ip.InventoryID = i.InventoryID
+            JOIN ProductDetails pd ON ip.ProductDetailID = pd.ProductDetailID
+            JOIN Products p ON pd.ProductID = p.ProductID
+            WHERE i.BranchID = ? AND p.ProductName LIKE ?
+        """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, branchId);
+            ps.setString(2, "%" + keyword + "%");
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductDetails pd = new ProductDetails();
+                    pd.setProductDetailID(rs.getInt("ProductDetailID"));
+                    pd.setProductCode(rs.getString("ProductCode"));
+                    pd.setDescription(rs.getString("Description"));
+                    pd.setProductNameUnsigned(rs.getString("ProductNameUnsigned"));
+                    pd.setWarrantyPeriod(rs.getString("WarrantyPeriod"));
+                    pd.setDetailCreatedAt(rs.getTimestamp("CreatedAt"));
+                    pd.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
+                    result.add(pd);
+                }
             }
-            ps.executeBatch();
-        } finally {
-            DBUtil.closeConnection(conn);
         }
+
+        return result;
     }
 
-    public void createFullStockMovement(StockMovement movement) throws SQLException {
-        Connection conn = DBUtil.getConnection();
-        try {
+    public void createStockRequest(StockMovement movement, String dbName) throws SQLException {
+        String insertRequestSQL = """
+        INSERT INTO StockMovementsRequest 
+        (FromSupplierID, FromBranchID, FromWarehouseID, ToBranchID, ToWarehouseID, MovementType, CreatedBy, CreatedAt, Note)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """;
+
+        String insertDetailSQL = """
+        INSERT INTO StockMovementDetail (MovementID, ProductDetailID, Quantity)
+        VALUES (?, ?, ?)
+    """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName)) {
             conn.setAutoCommit(false);
 
-            int movementID = insertStockMovementTransactional(conn, movement);
-            insertMovementDetailsTransactional(conn, movementID, movement.getDetails());
+            try (PreparedStatement ps = conn.prepareStatement(insertRequestSQL, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setObject(1, movement.getFromSupplierID());
+                ps.setObject(2, movement.getFromBranchID());
+                ps.setObject(3, movement.getFromWarehouseID());
+                ps.setObject(4, movement.getToBranchID());
+                ps.setObject(5, movement.getToWarehouseID());
+                ps.setString(6, movement.getMovementType());
+                ps.setInt(7, movement.getCreatedBy());
+                ps.setTimestamp(8, movement.getCreatedAt());
+                ps.setString(9, movement.getNote());
 
-            conn.commit();
-        } catch (SQLException e) {
-            if (conn != null) {
+                ps.executeUpdate();
+
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        int movementID = rs.getInt(1);
+
+                        try (PreparedStatement psDetail = conn.prepareStatement(insertDetailSQL)) {
+                            for (StockMovement.StockMovementDetail detail : movement.getDetails()) {
+                                psDetail.setInt(1, movementID);
+                                psDetail.setInt(2, detail.getProductDetailID());
+                                psDetail.setInt(3, detail.getQuantity());
+                                psDetail.addBatch();
+                            }
+                            psDetail.executeBatch();
+                        }
+                    } else {
+                        conn.rollback();
+                        throw new SQLException("Không lấy được MovementID mới.");
+                    }
+                }
+
+                conn.commit();
+            } catch (SQLException ex) {
                 conn.rollback();
+                throw ex;
+            } finally {
+                conn.setAutoCommit(true);
             }
-            throw e;
-        } finally {
-            DBUtil.closeConnection(conn);
         }
     }
 
-    private int insertStockMovementTransactional(Connection conn, StockMovement movement) throws SQLException {
-        String sql = "INSERT INTO StockMovementsRequest "
-                  + "(FromSupplierID, FromBranchID, FromWarehouseID, ToBranchID, ToWarehouseID, MovementType, CreatedBy, CreatedAt, Note) "
-                  + "VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), ?)";
+    public List<StockMovement> getRequestsByBranch(int branchId, String dbName) throws SQLException {
+        List<StockMovement> result = new ArrayList<>();
 
-        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setObject(1, movement.getFromSupplierID());
-            ps.setObject(2, movement.getFromBranchID());
-            ps.setObject(3, movement.getFromWarehouseID());
-            ps.setObject(4, movement.getToBranchID());
-            ps.setObject(5, movement.getToWarehouseID());
-            ps.setString(6, movement.getMovementType());
-            ps.setInt(7, movement.getCreatedBy());
-            ps.setString(8, movement.getNote());
+        String sql = """
+        SELECT MovementID, FromSupplierID, FromBranchID, FromWarehouseID,
+               ToBranchID, ToWarehouseID, MovementType, CreatedBy, CreatedAt, Note
+        FROM StockMovementsRequest
+        WHERE FromBranchID = ?
+        ORDER BY CreatedAt DESC
+    """;
 
-            ps.executeUpdate();
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
+            ps.setInt(1, branchId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    StockMovement m = new StockMovement();
+                    m.setMovementID(rs.getInt("MovementID"));
+                    m.setFromSupplierID((Integer) rs.getObject("FromSupplierID"));
+                    m.setFromBranchID((Integer) rs.getObject("FromBranchID"));
+                    m.setFromWarehouseID((Integer) rs.getObject("FromWarehouseID"));
+                    m.setToBranchID((Integer) rs.getObject("ToBranchID"));
+                    m.setToWarehouseID((Integer) rs.getObject("ToWarehouseID"));
+                    m.setMovementType(rs.getString("MovementType"));
+                    m.setCreatedBy(rs.getInt("CreatedBy"));
+                    m.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                    m.setNote(rs.getString("Note"));
+
+                    result.add(m);
                 }
             }
         }
-        return -1;
+
+        return result;
     }
 
-    private void insertMovementDetailsTransactional(Connection conn, int movementID, List<StockMovementDetail> details) throws SQLException {
-        String sql = "INSERT INTO StockMovementDetail (MovementID, ProductDetailID, Quantity) VALUES (?, ?, ?)";
+    public List<Warehouse> getAllWarehouses(String dbName) throws SQLException {
+        List<Warehouse> list = new ArrayList<>();
+        String sql = "SELECT WarehouseID, WarehouseName, Address FROM Warehouses";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            for (StockMovementDetail detail : details) {
-                ps.setInt(1, movementID);
-                ps.setInt(2, detail.getProductDetailID());
-                ps.setInt(3, detail.getQuantity());
-                ps.addBatch();
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Warehouse w = new Warehouse();
+                w.setWareHouseId(rs.getInt("WarehouseID"));
+                w.setWareHouseName(rs.getString("WarehouseName"));
+                w.setWareHouseAddress(rs.getString("Address"));
+                list.add(w);
             }
-            ps.executeBatch();
         }
+        return list;
     }
-    
+
 }
