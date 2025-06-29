@@ -43,8 +43,8 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="#" class="dropdown-item">Nhập hàng</a>
-                            <a href="#" class="dropdown-item">Yêu cầu nhập hàng</a>
+                            <a href="bm-stockmovement?type=import" class="dropdown-item">Nhập hàng</a>
+                            <a href="bm-stockmovement?type=request" class="dropdown-item">Yêu cầu nhập hàng</a>
                         </div>
                     </div>
                     
