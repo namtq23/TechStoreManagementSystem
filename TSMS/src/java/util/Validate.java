@@ -214,6 +214,29 @@ public class Validate {
         return standardizedName;
     }
 
+    public static String formatGrowthPercent(Double value) {
+        if (value == null) {
+            return "0%";
+        }
+        if (value == 0.0) {
+            return "0%";
+        }
+        return String.format("%s%.2f%% so với tháng trước", value > 0 ? "+" : "", value);
+    }
+
+    public static String formatTimeAgo(int minutesAgo) {
+        if (minutesAgo < 60) {
+            return minutesAgo + " phút trước";
+        } else if (minutesAgo < 1440) { // dưới 24 giờ
+            int hours = minutesAgo / 60;
+            int remainingMinutes = minutesAgo % 60;
+            return hours + " giờ" + (remainingMinutes > 0 ? " " + remainingMinutes + " phút" : "") + " trước";
+        } else {
+            int days = minutesAgo / 1440;
+            return days + " ngày trước";
+        }
+    }
+
     public static void main(String[] args) {
         // Test hàm với đầu vào mới
         String input = "hanh tinh xanh";
@@ -223,7 +246,7 @@ public class Validate {
 
         System.out.println(standardizeName("       an       d     "));
 
-        System.out.println(normalizeSearch("Máy"));
+        System.out.println(formatGrowthPercent(100.00));
     }
 
 }

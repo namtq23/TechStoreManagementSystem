@@ -16,6 +16,7 @@ import java.util.List;
 import model.ShopOwnerDTO;
 import util.DBUtil;
 import java.sql.Timestamp;
+import model.ShopOwnerSADTO;
 import util.Validate;
 
 /**
@@ -183,6 +184,102 @@ public class ShopOwnerDAO {
         }
     }
 
+    public static ShopOwnerSADTO getDashboardAboutSO() throws SQLException {
+        ShopOwnerSADTO soSaDTO = null;
+        String sql = """
+                     DECLARE @MethodID INT = 1;
+                     DECLARE @StartOfThisMonth DATE = DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1);
+                     DECLARE @StartOfLastMonth DATE = DATEADD(MONTH, -1, @StartOfThisMonth);
+                     DECLARE @EndOfLastMonth DATE = DATEADD(DAY, -1, @StartOfThisMonth);
+                     DECLARE @Today DATETIME = GETDATE();
+                     
+                     DECLARE @TotalUsersThisMonth INT = (SELECT COUNT(*) FROM ShopOwner);
+                     DECLARE @NewUsersLastMonth INT = (SELECT COUNT(*) FROM ShopOwner WHERE CreatedAt BETWEEN @StartOfLastMonth AND @EndOfLastMonth);
+                     
+                     DECLARE @ActiveSubscribersThisMonth INT = (
+                         SELECT COUNT(*) FROM UserServiceMethod 
+                         WHERE MethodID = @MethodID AND Status != 'TRIAL'
+                     );
+                     
+                     DECLARE @ActiveSubscribersLastMonth INT = (
+                         SELECT COUNT(*) FROM UserServiceMethod 
+                         WHERE MethodID = @MethodID AND Status != 'TRIAL' 
+                           AND SubscriptionStart BETWEEN @StartOfLastMonth AND @EndOfLastMonth
+                     );
+                     
+                     WITH RevenueCTE AS (
+                         SELECT
+                             CASE 
+                                 WHEN sl.CreatedAt BETWEEN @StartOfThisMonth AND @Today THEN 'this'
+                                 WHEN sl.CreatedAt BETWEEN @StartOfLastMonth AND @EndOfLastMonth THEN 'last'
+                             END AS PeriodType,
+                             sl.SubscriptionMonths * (smp.Price * 1.0 / smp.SubscriptionMonths) AS Revenue
+                         FROM SubscriptionLogs sl
+                         JOIN ServiceMethodPrice smp 
+                             ON sl.MethodID = smp.MethodID AND sl.SubscriptionMonths = smp.SubscriptionMonths
+                         WHERE sl.Status = 'Done' AND sl.MethodID = @MethodID
+                     )
+                     SELECT
+                         ISNULL(SUM(CASE WHEN PeriodType = 'this' THEN Revenue ELSE 0 END), 0) AS RevenueThisMonth,
+                         ISNULL(SUM(CASE WHEN PeriodType = 'last' THEN Revenue ELSE 0 END), 0) AS RevenueLastMonth,
+                     
+                         CASE 
+                             WHEN SUM(CASE WHEN PeriodType = 'last' THEN Revenue ELSE 0 END) = 0 
+                                  AND SUM(CASE WHEN PeriodType = 'this' THEN Revenue ELSE 0 END) > 0 THEN 100.0
+                             WHEN SUM(CASE WHEN PeriodType = 'last' THEN Revenue ELSE 0 END) = 0 
+                                  AND SUM(CASE WHEN PeriodType = 'this' THEN Revenue ELSE 0 END) = 0 THEN 0.0
+                             ELSE ROUND(
+                                 (SUM(CASE WHEN PeriodType = 'this' THEN Revenue ELSE 0 END) - 
+                                  SUM(CASE WHEN PeriodType = 'last' THEN Revenue ELSE 0 END)) * 100.0 / 
+                                  SUM(CASE WHEN PeriodType = 'last' THEN Revenue ELSE 0 END), 2)
+                         END AS RevenueGrowthPercent,
+                     
+                         @TotalUsersThisMonth AS TotalUsersThisMonth,
+                     
+                         @NewUsersLastMonth AS NewUsersLastMonth,
+                     
+                         CASE 
+                             WHEN @NewUsersLastMonth = 0 AND @TotalUsersThisMonth > 0 THEN 100.0
+                             WHEN @NewUsersLastMonth = 0 AND @TotalUsersThisMonth = 0 THEN 0.0
+                             ELSE ROUND(
+                                 (@TotalUsersThisMonth - @NewUsersLastMonth) * 100.0 / @NewUsersLastMonth
+                                 , 2)
+                         END AS UserGrowthPercent,
+                     
+                         @ActiveSubscribersThisMonth AS ActiveSubscribersThisMonth,
+                     
+                         @ActiveSubscribersLastMonth AS ActiveSubscribersLastMonth,
+                     
+                         CASE 
+                             WHEN @ActiveSubscribersLastMonth = 0 AND @ActiveSubscribersThisMonth > 0 THEN 100.0
+                             WHEN @ActiveSubscribersLastMonth = 0 AND @ActiveSubscribersThisMonth = 0 THEN 0.0
+                             ELSE ROUND(
+                                 (@ActiveSubscribersThisMonth - @ActiveSubscribersLastMonth) * 100.0 / @ActiveSubscribersLastMonth
+                                 , 2)
+                         END AS ActiveSubscribersGrowthPercent
+                     
+                     FROM RevenueCTE;""";
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    soSaDTO = new ShopOwnerSADTO(
+                            rs.getDouble("RevenueThisMonth"),
+                            rs.getDouble("RevenueLastMonth"),
+                            rs.getObject("RevenueGrowthPercent", Double.class),
+                            rs.getInt("TotalUsersThisMonth"),
+                            rs.getInt("NewUsersLastMonth"),
+                            rs.getObject("UserGrowthPercent", Double.class),
+                            rs.getInt("ActiveSubscribersThisMonth"),
+                            rs.getInt("ActiveSubscribersLastMonth"),
+                            rs.getObject("ActiveSubscribersGrowthPercent", Double.class)
+                    );
+                }
+            }
+        }
+        return soSaDTO;
+    }
+
     private static ShopOwnerDTO extractShopOwnerDTOFromResultSet(ResultSet rs) throws SQLException {
         ShopOwnerDTO shopOwnerDTO = new ShopOwnerDTO(
                 rs.getDate("TrialStartDate"),
@@ -207,6 +304,10 @@ public class ShopOwnerDAO {
                 rs.getDate("TrialEndDate")
         );
         return shopOwnerDTO;
+    }
+
+    public static void main(String[] args) throws SQLException {
+        System.out.println(ShopOwnerDAO.getDashboardAboutSO());
     }
 
 }

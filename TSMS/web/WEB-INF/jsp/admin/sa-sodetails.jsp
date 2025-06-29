@@ -43,10 +43,10 @@
                                 <span class="sidebar-icon"><i class="fas fa-users"></i></span>
                                 <span>Quản lý tài khoản</span>
                             </a></li>
-                        <li><a href="#">
+<!--                        <li><a href="#">
                                 <span class="sidebar-icon"><i class="fas fa-dollar-sign"></i></span>
                                 <span>Doanh thu</span>
-                            </a></li>
+                            </a></li>-->
                         <li><a href="#">
                                 <span class="sidebar-icon"><i class="fas fa-clipboard-list"></i></span>
                                 <span>Subscription</span>
