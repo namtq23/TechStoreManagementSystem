@@ -6,6 +6,7 @@ package controller;
 
 import dao.ShopOwnerDAO;
 import java.io.IOException;
+import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,13 +14,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import model.ShopOwnerDTO;
+import model.ShopOwnerSubsDTO;
 
 /**
  *
  * @author admin
  */
-@WebServlet(name = "SAAccountManaController", urlPatterns = {"/sa-accounts"})
-public class SAAccountManaController extends HttpServlet {
+@WebServlet(name = "SASubscriptions", urlPatterns = {"/sa-subscriptions"})
+public class SASubscriptions extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -44,8 +46,8 @@ public class SAAccountManaController extends HttpServlet {
         int offset = (currentPage - 1) * recordsPerPage;
 
         try {
-            List<ShopOwnerDTO> shopOwners = soDao.getFilteredShopOwners(subscription, status, fromDate, toDate, searchKeyStr, offset, recordsPerPage);
-            int totalRecords = soDao.countFilteredShopOwners(subscription, status, fromDate, toDate, searchKeyStr);
+            List<ShopOwnerSubsDTO> shopOwners = soDao.getFilteredShopOwnersFromLogs(subscription, status, fromDate, toDate, searchKeyStr, offset, recordsPerPage);
+            int totalRecords = soDao.countFilteredShopOwnersFromLogs(subscription, status, fromDate, toDate, searchKeyStr);
             int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
 
             StringBuilder urlBuilder = new StringBuilder("sa-accounts?");
@@ -88,7 +90,7 @@ public class SAAccountManaController extends HttpServlet {
             req.setAttribute("fromDate", fromDate);
             req.setAttribute("toDate", toDate);
 
-            req.getRequestDispatcher("/WEB-INF/jsp/admin/account-manage.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/jsp/admin/sa-subscriptions.jsp").forward(req, resp);
         } catch (Exception e) {
             e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

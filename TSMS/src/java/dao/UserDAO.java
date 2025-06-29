@@ -25,8 +25,8 @@ public class UserDAO {
     //SO
     public static void insertShopOwner(ShopOwner owner) throws SQLException {
         String sql = """
-        INSERT INTO ShopOwner (AdminID, Password, FullName, ShopName, DatabaseName, Email, IdentificationID, Gender, Address, IsActive, Phone, CreatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE());
+        INSERT INTO ShopOwner (AdminID, Password, FullName, ShopName, DatabaseName, Email, IdentificationID, Gender, Address, IsActive, Phone, CreatedAt, FullNameUnsigned)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), ?);
     """;
 
         try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -41,7 +41,7 @@ public class UserDAO {
             stmt.setString(9, owner.getAddress());
             stmt.setInt(10, 1);
             stmt.setString(11, owner.getPhone());
-
+            stmt.setString(12, owner.getFullNameUnsigned());
             stmt.executeUpdate();
         }
     }

@@ -59,6 +59,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
     font-size: 14px;
     font-weight: 500;
     transition: background-color 0.2s ease;
+    padding: 5px 20px 5px 20px;
 }
 
 .btn-filter:hover {

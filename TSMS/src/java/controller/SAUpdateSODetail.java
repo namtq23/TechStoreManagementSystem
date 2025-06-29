@@ -5,7 +5,6 @@
 package controller;
 
 import dao.ShopOwnerDAO;
-import dao.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,7 +12,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
-import model.ShopOwnerDTO;
 import util.Validate;
 
 /**
@@ -46,6 +44,7 @@ public class SAUpdateSODetail extends HttpServlet {
         } catch (IOException | NumberFormatException | SQLException ex) {
             int ownerId = Integer.parseInt(request.getParameter("ownerId"));
             response.sendRedirect("sa-sodetails?id=" + ownerId + "&update=error");
+            System.out.println(ex);
         }
     }
 

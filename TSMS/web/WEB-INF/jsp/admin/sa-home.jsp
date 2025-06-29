@@ -1,4 +1,4 @@
-<%@ page import="java.util.*, model.ShopOwner" %>
+<%@ page import="java.util.*, model.ShopOwnerSADTO, model.SubscriptionsDTO, model.SubscriptionLogDTO, util.Validate" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <!DOCTYPE html>
@@ -32,12 +32,12 @@
                                 <span>Quản lý tài khoản</span>
                             </a>
                         </li>
-                        <li><a href="#">
+<!--                        <li><a href="#">
                                 <span class="sidebar-icon"><i class="fas fa-dollar-sign"></i></span>
                                 <span>Doanh thu</span>
                             </a>
-                        </li>
-                        <li><a href="#">
+                        </li>-->
+                        <li><a href="sa-subscriptions">
                                 <span class="sidebar-icon"><i class="fas fa-clipboard-list"></i></span>
                                 <span>Subscription</span>
                             </a>
@@ -58,6 +58,9 @@
                     <h1>Dashboard Tổng quan</h1>
                 </div>
 
+                <%
+                ShopOwnerSADTO so = (ShopOwnerSADTO) request.getAttribute("so");
+                %>
                 <!-- Stats Cards -->
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -67,8 +70,16 @@
                                 <i class="fas fa-dollar-sign"></i>
                             </div>
                         </div>
-                        <h3>₫2,450,000</h3>
-                        <div class="change">+12.5% so với tháng trước</div>
+                        <h3><%= so.getRevenueThisMonth() %> ₫</h3>
+
+                        <%
+                            String revenueGrowth = Validate.formatGrowthPercent(so.getRevenueGrowthPercent());
+                            String color = revenueGrowth.startsWith("+") ? "green" : "red";
+                        %>
+
+                        <div class="change" style="color: <%= color %>;">
+                            <%= revenueGrowth %>
+                        </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-card-header">
@@ -77,8 +88,15 @@
                                 <i class="fas fa-users"></i>
                             </div>
                         </div>
-                        <h3>1,234</h3>
-                        <div class="change">+5.2% so với tháng trước</div>
+                        <h3><%= so.getTotalUsersThisMonth() %></h3>
+                        <%
+                            String userGrowth = Validate.formatGrowthPercent(so.getUserGrowthPercent());
+                            String color1 = userGrowth.startsWith("+") ? "green" : "red";
+                        %>
+
+                        <div class="change" style="color: <%= color1 %>;">
+                            <%= userGrowth %>
+                        </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-card-header">
@@ -87,106 +105,113 @@
                                 <i class="fas fa-clipboard-list"></i>
                             </div>
                         </div>
-                        <h3>856</h3>
-                        <div class="change">+8.1% so với tháng trước</div>
+                        <h3><%= so.getActiveSubscribersThisMonth() %></h3>
+                        <%
+                            String subsGrowth = Validate.formatGrowthPercent(so.getActiveSubscribersGrowthPercent());
+                            String color2 = userGrowth.startsWith("+") ? "green" : "red";
+                        %>
+
+                        <div class="change" style="color: <%= color2 %>;">
+                            <%= subsGrowth %>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Content Grid -->
                 <div class="content-grid">
-                    <!-- Recent Activities -->
                     <div class="card">
                         <div class="card-header">
-                            <h2>Hoạt động gần đây</h2>
+                            <h2>Yêu cầu gia hạn</h2>
                         </div>
+
+                        <% 
+                        List<SubscriptionLogDTO> logs = (List<SubscriptionLogDTO>) request.getAttribute("subscriptionLogs");
+                        if (logs != null) {
+                            for (SubscriptionLogDTO log : logs) {
+                                String status = log.getStatus();
+                                if ("Pending".equalsIgnoreCase(status) || "Done".equalsIgnoreCase(status)) {
+                                    String iconClass = status.equalsIgnoreCase("Pending") ? "user" : "payment";
+                                    String actionText = status.equalsIgnoreCase("Pending") ? "đã yêu cầu đăng ký gói" : "đã thanh toán thành công gói";
+                        %>
+
                         <div class="activity-item">
-                            <div class="activity-icon user">
-                                <i class="fas fa-user-plus"></i>
+                            <div class="activity-icon <%= iconClass %>">
+                                <i class="fas fa-<%= iconClass.equals("user") ? "user-plus" : "credit-card" %>"></i>
                             </div>
                             <div class="activity-content">
-                                <div class="activity-title">Người dùng mới đăng ký</div>
-                                <div class="activity-time">2 phút trước</div>
+                                <div class="activity-title">
+                                    <%= log.getOwnerName() %> <%= actionText %>: <%= log.getSubscriptionName() %> - <%= log.getSubscriptionPrice() %> đ
+                                </div>
+                                <div class="activity-time"><%= Validate.formatTimeAgo(log.getMinutesAgo()) %></div>
                             </div>
                         </div>
-                        <div class="activity-item">
-                            <div class="activity-icon payment">
-                                <i class="fas fa-credit-card"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">Thanh toán thành công</div>
-                                <div class="activity-time">15 phút trước</div>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-icon cancel">
-                                <i class="fas fa-times-circle"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">Hủy subscription</div>
-                                <div class="activity-time">1 giờ trước</div>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-icon upgrade">
-                                <i class="fas fa-arrow-up"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">Nâng cấp gói Premium</div>
-                                <div class="activity-time">3 giờ trước</div>
-                            </div>
-                        </div>
+
+                        <%      
+                                }
+                            }
+                        } else { %>
+                        <p>Không có hoạt động nào.</p>
+                        <% } %>
                     </div>
                 </div>
+
+
 
                 <!-- Subscription Plans -->
                 <div class="card full-width-card" style="margin-top: 24px;">
                     <div class="card-header">
                         <h2>Thống kê gói Subscription</h2>
                     </div>
-                    <div class="subscription-stats">
-                        <div class="subscription-stat">
-                            <h3>245</h3>
-                            <p>Gói Basic</p>
+
+                    <%
+                        List<SubscriptionsDTO> subsList = (List<SubscriptionsDTO>) request.getAttribute("subsList");
+                        if (subsList != null && !subsList.isEmpty()) {
+                    %>
+                    <div class="subscription-stats" style="display: flex; gap: 16px;">
+                        <% for (SubscriptionsDTO sub : subsList) { %>
+                        <div class="subscription-stat" style="padding: 12px; border: 1px solid #ccc; border-radius: 8px; flex: 1; text-align: center;">
+                            <h3><%= sub.getTotalUsers() %> người dùng</h3>
+                            <p>Gói:    <%= sub.getSubscriptionName() %> - <%= sub.getSubscriptionPrice() %> ₫</p>
                         </div>
-                        <div class="subscription-stat">
-                            <h3>456</h3>
-                            <p>Gói Pro</p>
-                        </div>
-                        <div class="subscription-stat">
-                            <h3>155</h3>
-                            <p>Gói Premium</p>
-                        </div>
+                        <% } %>
                     </div>
+                    <%
+                        } else {
+                    %>
+                    <p style="padding: 16px;">Không có dữ liệu gói subscription.</p>
+                    <%
+                        }
+                    %>
                 </div>
             </div>
         </div>
+    </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
-                const currentPath = window.location.pathname;
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+            const currentPath = window.location.pathname;
 
-                sidebarLinks.forEach(link => {
-                    const href = link.getAttribute('href');
-                    // So khớp tương đối với pathname
-                    if (href && currentPath.includes(href)) {
-                        link.classList.add('active');
-                    } else {
-                        link.classList.remove('active');
-                    }
+            sidebarLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                // So khớp tương đối với pathname
+                if (href && currentPath.includes(href)) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Optional: Animation for cards
+            const cards = document.querySelectorAll('.card, .stat-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-2px)';
                 });
-
-                // Optional: Animation for cards
-                const cards = document.querySelectorAll('.card, .stat-card');
-                cards.forEach(card => {
-                    card.addEventListener('mouseenter', function () {
-                        this.style.transform = 'translateY(-2px)';
-                    });
-                    card.addEventListener('mouseleave', function () {
-                        this.style.transform = 'translateY(0)';
-                    });
+                card.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(0)';
                 });
             });
-        </script>
-    </body>
+        });
+    </script>
+</body>
 </html>
