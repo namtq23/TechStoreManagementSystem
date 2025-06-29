@@ -4,7 +4,7 @@
     Author     : admin
 --%>
 
-<%@ page import="java.util.*, model.ShopOwnerDTO" %>
+<%@ page import="java.util.*, model.ShopOwnerSubsDTO" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -20,6 +20,36 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <link rel="stylesheet" href="css/sa-home.css"/>
         <link rel="stylesheet" href="css/sa-acc-manage.css"/>
+        <style>
+            .flash-message {
+                position: fixed;
+                top: 20px;
+                right: 30px;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                color: white;
+                z-index: 1000;
+                font-size: 16px;
+                animation: fadeOut 0.5s ease-in-out 4.5s forwards;
+            }
+
+            .flash-message.success {
+                background-color: #4CAF50; 
+            }
+
+            .flash-message.error {
+                background-color: #f44336; 
+            }
+
+            @keyframes fadeOut {
+                to {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                    visibility: hidden;
+                }
+            }
+        </style>
     </head>
     <body>
         <div class="container">
@@ -41,11 +71,11 @@
                                 <span class="sidebar-icon"><i class="fas fa-users"></i></span>
                                 <span>Quản lý tài khoản</span>
                             </a></li>
-<!--                        <li><a href="#">
-                                <span class="sidebar-icon"><i class="fas fa-dollar-sign"></i></span>
-                                <span>Doanh thu</span>
-                            </a></li>-->
-                        <li><a href="#">
+                        <!--                        <li><a href="#">
+                                                        <span class="sidebar-icon"><i class="fas fa-dollar-sign"></i></span>
+                                                        <span>Doanh thu</span>
+                                                    </a></li>-->
+                        <li><a class="active" href="#">
                                 <span class="sidebar-icon"><i class="fas fa-clipboard-list"></i></span>
                                 <span>Subscription</span>
                             </a></li>
@@ -60,17 +90,33 @@
 
             <!-- Main Content -->
             <div class="main-content">
+                <%
+                String updateStatus = request.getParameter("update");
+                if ("success".equals(updateStatus)) {
+                %>
+                <div id="flash-message" class="flash-message success">
+                    Cập nhật thành công!
+                </div>
+                <%
+                    } else if ("error".equals(updateStatus)) {
+                %>
+                <div id="flash-message" class="flash-message error">
+                    Cập nhật thất bại. Vui lòng thử lại.
+                </div>
+                <%
+                    }
+                %>
+
                 <div class="content-grid">
                     <!-- Bộ lọc -->
                     <div class="filter-container card">
-                        <form method="get" action="sa-accounts" class="formFilter">
+                        <form method="get" action="sa-subscriptions" class="formFilter">
                             <input type="hidden" name="search" value="${param.search}" />
                             <input type="hidden" name="recordsPerPage" value="${param.recordsPerPage}" />
                             <div>
                                 <label for="subscription">Gói dịch vụ:</label>
                                 <select name="subscription" id="subscription">
                                     <option value="">Tất cả</option>
-                                    <option value="TRIAL" ${param.subscription == 'TRIAL' ? 'selected' : ''}>Trial</option>
                                     <option value="3" ${param.subscription == '3' ? 'selected' : ''}>3 tháng</option>
                                     <option value="6" ${param.subscription == '6' ? 'selected' : ''}>6 tháng</option>
                                     <option value="12" ${param.subscription == '12' ? 'selected' : ''}>12 tháng</option>
@@ -93,14 +139,14 @@
                                 <label for="toDate">Đến ngày:</label>
                                 <input type="date" name="toDate" value="${param.toDate}" />
                             </div>
-                            <a href="sa-accounts?page=1" style="display: flex; text-decoration: none"><button type="button" class="btn btn-filter"><i class="fas fa-eraser"></i>Xoá</button></a>   
+                            <a href="sa-subscriptions?page=1" style="display: flex; text-decoration: none"><button type="button" class="btn btn-filter"><i class="fas fa-eraser"></i>Xoá</button></a>   
 
                             <a href="" style="display: flex; text-decoration: none"><button type="submit" class="btn btn-filter"><i class="fas fa-filter"></i>Lọc</button></a> 
                         </form>
                     </div>
 
                     <div style="align-content: center;">
-                        <form action="sa-accounts" method="get" class="search-form" style="display: flex; align-items: center; gap: 8px;">
+                        <form action="sa-subscriptions" method="get" class="search-form" style="display: flex; align-items: center; gap: 8px;">
                             <div style="position: relative; flex: 1;">
                                 <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
                                 <input type="text" name="search" placeholder="Tìm kiếm người dùng..." value="${param.search}"
@@ -118,7 +164,7 @@
                     <!-- Bảng dữ liệu -->
                     <div class="card full-width-card">
                         <div class="card-header">
-                            <h2>Quản lý tài khoản</h2>
+                            <h2>Yêu cầu gia hạn</h2>
                         </div>
 
                         <div class="table-container">
@@ -131,7 +177,7 @@
                                         <th>Tên shop</th>
                                         <th>Trạng thái</th>
                                         <th>Gói dịch vụ</th>
-                                        <th>Ngày đăng ký</th>
+                                        <th>Ngày yêu cầu</th>
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
@@ -155,9 +201,9 @@
                                                     </c:otherwise>
                                                 </c:choose>
                                             </td>
-                                            <td>${owner.status}</td>
-                                            <td><fmt:formatDate value="${owner.createdAt}" pattern="dd/MM/yyyy" /></td>
-                                            <td><a href="sa-sodetails?id=${owner.ownerId}"><button class="btn btn-primary">Xem</button></a></td>
+                                            <td>${owner.subscriptionMonth} tháng</td>
+                                            <td><fmt:formatDate value="${owner.logCreatedAt}" pattern="dd/MM/yyyy" /></td>
+                                            <td><a href="sa-approved-subs?id=${owner.ownerId}&methodId=1&subsMonth=${owner.subscriptionMonth}"><button class="btn btn-primary">Chấp nhận</button></a></td>
                                         </tr>
                                     </c:forEach>
                                 </tbody>
@@ -165,7 +211,7 @@
                         </div>
 
                         <!-- Pagination -->
-                        <form method="GET" action="sa-accounts">
+                        <form method="GET" action="sa-subscriptions">
                             <div class="pagination-container">
                                 <div class="pagination-info">
                                     Hiển thị ${startUser} - ${endUser} / Tổng số ${totalRecords} tài khoản
@@ -208,33 +254,20 @@
                     </div>
                 </div>
             </div>
-
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
-                    const currentPath = window.location.pathname;
-
-                    sidebarLinks.forEach(link => {
-                        const href = link.getAttribute('href');
-                        // So khớp tương đối với pathname
-                        if (href && currentPath.includes(href)) {
-                            link.classList.add('active');
-                        } else {
-                            link.classList.remove('active');
-                        }
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Optional: Animation for cards
+                const cards = document.querySelectorAll('.card, .stat-card');
+                cards.forEach(card => {
+                    card.addEventListener('mouseenter', function () {
+                        this.style.transform = 'translateY(-2px)';
                     });
-
-                    // Optional: Animation for cards
-                    const cards = document.querySelectorAll('.card, .stat-card');
-                    cards.forEach(card => {
-                        card.addEventListener('mouseenter', function () {
-                            this.style.transform = 'translateY(-2px)';
-                        });
-                        card.addEventListener('mouseleave', function () {
-                            this.style.transform = 'translateY(0)';
-                        });
+                    card.addEventListener('mouseleave', function () {
+                        this.style.transform = 'translateY(0)';
                     });
                 });
-            </script>
+            });
+        </script>
     </body>
 </html>

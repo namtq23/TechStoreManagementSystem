@@ -5,17 +5,13 @@
 package controller;
 
 import dao.ShopOwnerDAO;
-import dao.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import model.ShopOwnerDTO;
 
 /**
@@ -49,7 +45,7 @@ public class SAAccountManaController extends HttpServlet {
 
         try {
             List<ShopOwnerDTO> shopOwners = soDao.getFilteredShopOwners(subscription, status, fromDate, toDate, searchKeyStr, offset, recordsPerPage);
-            int totalRecords = soDao.countFilteredShopOwners(subscription, status, fromDate, toDate);
+            int totalRecords = soDao.countFilteredShopOwners(subscription, status, fromDate, toDate, searchKeyStr);
             int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
 
             StringBuilder urlBuilder = new StringBuilder("sa-accounts?");
