@@ -16,6 +16,7 @@ public class ShopOwner {
     private int ownerId;
     private String password;
     private String fullName;
+    private String fullNameUnsigned;
     private String shopName;
     private String databaseName;
     private String email;
@@ -57,7 +58,29 @@ public class ShopOwner {
         this.phone = phone;
         this.isActive = isActive;
     }
-    
+
+    public ShopOwner(int ownerId, String password, String fullName, String fullNameUnsigned, String shopName, String databaseName, String email, String identificationID, String gender, String address, String phone, int isActive) {
+        this.ownerId = ownerId;
+        this.password = password;
+        this.fullName = fullName;
+        this.fullNameUnsigned = fullNameUnsigned;
+        this.shopName = shopName;
+        this.databaseName = databaseName;
+        this.email = email;
+        this.identificationID = identificationID;
+        this.gender = gender;
+        this.address = address;
+        this.phone = phone;
+        this.isActive = isActive;
+    }
+
+    public String getFullNameUnsigned() {
+        return fullNameUnsigned;
+    }
+
+    public void setFullNameUnsigned(String fullNameUnsigned) {
+        this.fullNameUnsigned = fullNameUnsigned;
+    }
 
     public Date getCreatedAt() {
         return createdAt;
