@@ -17,6 +17,7 @@ import model.ShopOwnerDTO;
 import util.DBUtil;
 import java.sql.Timestamp;
 import model.ShopOwnerSADTO;
+import model.ShopOwnerSubsDTO;
 import util.Validate;
 
 /**
@@ -25,6 +26,7 @@ import util.Validate;
  */
 public class ShopOwnerDAO {
 
+    //Phuong
     public List<ShopOwnerDTO> getFilteredShopOwners(String subscription, String statusStr, String fromDate, String toDate, String search,
             int offset, int limit) throws SQLException {
         List<ShopOwnerDTO> list = new ArrayList<>();
@@ -101,38 +103,118 @@ public class ShopOwnerDAO {
         return list;
     }
 
-    public int countFilteredShopOwners(String subscription, String statusStr, String fromDate, String toDate) throws SQLException {
+    //Phuong
+    public List<ShopOwnerSubsDTO> getFilteredShopOwnersFromLogs(String subscription, String statusStr, String fromDate, String toDate, String search,
+            int offset, int limit) throws SQLException {
+        List<ShopOwnerSubsDTO> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("SELECT \n"
+                + "    s.*, \n"
+                + "    l.MethodID, \n"
+                + "    l.SubscriptionMonths, \n"
+                + "    l.Status AS LogStatus, \n"
+                + "    l.CreatedAt AS LogCreatedAt \n"
+                + "FROM \n"
+                + "    SubscriptionLogs l \n"
+                + "JOIN \n"
+                + "    ShopOwner s ON l.OwnerID = s.OwnerID \n"
+                + "WHERE \n"
+                + "    l.Status = 'Pending' ");
+
+        List<Object> params = new ArrayList<>();
+
+        if (subscription != null && !subscription.isEmpty()) {
+            sql.append(" AND l.SubscriptionMonths = ? ");
+            params.add(Integer.parseInt(subscription));
+        }
+
+        if (statusStr != null && !statusStr.isEmpty()) {
+            sql.append(" AND s.IsActive = ? ");
+            params.add(Integer.parseInt(statusStr));
+        }
+
+        if (search != null && !search.isEmpty()) {
+            String keywordUnsigned = Validate.normalizeSearch(search);
+            sql.append(" AND (s.FullNameUnsigned LIKE ? OR s.Phone LIKE ? OR s.ShopName LIKE ?) ");
+            String pattern = "%" + keywordUnsigned + "%";
+            params.add(pattern);
+            params.add("%" + search + "%");
+            params.add("%" + search + "%");
+        }
+
+        if (fromDate != null && !fromDate.isEmpty()) {
+            sql.append(" AND l.CreatedAt >= ? ");
+            params.add(Date.valueOf(fromDate));
+        }
+
+        if (toDate != null && !toDate.isEmpty()) {
+            LocalDate nextDay = LocalDate.parse(toDate).plusDays(1);
+            sql.append(" AND l.CreatedAt < ? ");
+            params.add(Timestamp.valueOf(nextDay.atStartOfDay()));
+        }
+
+        sql.append(" ORDER BY l.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ");
+        params.add(offset);
+        params.add(limit);
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ShopOwnerSubsDTO owner = extractShopOwnerSubsDTOFromResultSet(rs);
+                    list.add(owner);
+                }
+            }
+        }
+
+        return list;
+    }
+
+    //Phuong
+    public int countFilteredShopOwners(String subscription, String statusStr, String fromDate, String toDate, String search) throws SQLException {
         StringBuilder sql = new StringBuilder(
                 "SELECT COUNT(*) "
                 + "FROM ShopOwner s "
                 + "LEFT JOIN UserServiceMethod u ON s.OwnerID = u.OwnerID "
-                + "WHERE 1=1"
+                + "WHERE 1=1 "
         );
 
         List<Object> params = new ArrayList<>();
 
         if (subscription != null && !subscription.isEmpty()) {
             if (subscription.equalsIgnoreCase("TRIAL")) {
-                sql.append(" AND u.Status = 'TRIAL'");
+                sql.append(" AND u.Status = 'TRIAL' ");
             } else {
-                sql.append(" AND u.SubscriptionMonths = ?");
+                sql.append(" AND u.SubscriptionMonths = ? ");
                 params.add(Integer.parseInt(subscription));
             }
         }
 
         if (statusStr != null && !statusStr.isEmpty()) {
-            sql.append(" AND s.IsActive = ?");
+            sql.append(" AND s.IsActive = ? ");
             params.add(Integer.parseInt(statusStr));
         }
 
+        if (search != null && !search.isEmpty()) {
+            String keywordUnsigned = Validate.normalizeSearch(search);
+            sql.append("AND (s.FullNameUnsigned LIKE ? OR s.Phone LIKE ? OR s.ShopName LIKE ?) ");
+            String searchPattern = "%" + keywordUnsigned + "%";
+            params.add(searchPattern);
+            params.add("%" + search + "%");
+            params.add("%" + search + "%");
+        }
+
         if (fromDate != null && !fromDate.isEmpty()) {
-            sql.append(" AND s.CreatedAt >= ?");
+            sql.append(" AND s.CreatedAt >= ? ");
             params.add(Date.valueOf(fromDate));
         }
 
         if (toDate != null && !toDate.isEmpty()) {
             LocalDate nextDay = LocalDate.parse(toDate).plusDays(1);
-            sql.append(" AND CreatedAt < ?");
+            sql.append(" AND s.CreatedAt < ? ");
             params.add(Timestamp.valueOf(nextDay.atStartOfDay()));
         }
 
@@ -151,6 +233,63 @@ public class ShopOwnerDAO {
         return 0;
     }
 
+    //Phuong
+    public int countFilteredShopOwnersFromLogs(String subscription, String statusStr, String fromDate, String toDate, String search) throws SQLException {
+        int total = 0;
+
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) \n"
+                + "FROM SubscriptionLogs l \n"
+                + "JOIN ShopOwner s ON l.OwnerID = s.OwnerID \n"
+                + "WHERE l.Status = 'Pending' ");
+
+        List<Object> params = new ArrayList<>();
+
+        if (subscription != null && !subscription.isEmpty()) {
+            sql.append(" AND l.SubscriptionMonths = ? ");
+            params.add(Integer.parseInt(subscription));
+        }
+
+        if (statusStr != null && !statusStr.isEmpty()) {
+            sql.append(" AND s.IsActive = ? ");
+            params.add(Integer.parseInt(statusStr));
+        }
+
+        if (search != null && !search.isEmpty()) {
+            String keywordUnsigned = Validate.normalizeSearch(search);
+            sql.append(" AND (s.FullNameUnsigned LIKE ? OR s.Phone LIKE ? OR s.ShopName LIKE ?) ");
+            String pattern = "%" + keywordUnsigned + "%";
+            params.add(pattern);
+            params.add("%" + search + "%");
+            params.add("%" + search + "%");
+        }
+
+        if (fromDate != null && !fromDate.isEmpty()) {
+            sql.append(" AND l.CreatedAt >= ? ");
+            params.add(Date.valueOf(fromDate));
+        }
+
+        if (toDate != null && !toDate.isEmpty()) {
+            LocalDate nextDay = LocalDate.parse(toDate).plusDays(1);
+            sql.append(" AND l.CreatedAt < ? ");
+            params.add(Timestamp.valueOf(nextDay.atStartOfDay()));
+        }
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    total = rs.getInt(1);
+                }
+            }
+        }
+
+        return total;
+    }
+
+    //Phuong
     public void updateShopOwnerInfo(int ownerId, String fullName, String shopName, int isActive) throws SQLException {
         String sql = "UPDATE ShopOwner SET FullName = ?, ShopName = ?, IsActive = ? WHERE OwnerID = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -162,6 +301,7 @@ public class ShopOwnerDAO {
         }
     }
 
+    //Phuong
     public void updateShopOwnerInfoInTheirDTB(String dbName, String fullName, int isActive) throws SQLException {
         String sql = "UPDATE Users SET FullName = ?, IsActive = ? WHERE UserID = 0";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -171,6 +311,7 @@ public class ShopOwnerDAO {
         }
     }
 
+    //Phuong
     public void voidUpdateDTBShopName(String oldDbName, String newDbName) {
         String sql = "ALTER DATABASE [" + oldDbName + "] MODIFY NAME = [" + newDbName + "]";
 
@@ -184,6 +325,7 @@ public class ShopOwnerDAO {
         }
     }
 
+    //Phuong
     public static ShopOwnerSADTO getDashboardAboutSO() throws SQLException {
         ShopOwnerSADTO soSaDTO = null;
         String sql = """
@@ -280,6 +422,50 @@ public class ShopOwnerDAO {
         return soSaDTO;
     }
 
+    //Phuong
+    public void activateShopOwnerIfInactive(int ownerId) throws SQLException {
+        String sql = "UPDATE ShopOwner SET IsActive = 1 WHERE OwnerID = ? AND IsActive = 0";
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, ownerId);
+            ps.executeUpdate();
+        }
+    }
+
+    //Phuong
+    public void markSubscriptionLogAsDone(int ownerId, int methodId) throws SQLException {
+        String sql = "UPDATE SubscriptionLogs SET Status = 'Done' WHERE OwnerID = ? AND MethodID = ? AND Status = 'Pending'";
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, ownerId);
+            ps.setInt(2, methodId);
+            ps.executeUpdate();
+        }
+    }
+
+    //Phuong
+    public void updateUserServiceMethod(int ownerId, int methodId, int subsMonth) throws SQLException {
+        String sql = """
+        UPDATE UserServiceMethod
+        SET 
+            Status = ?,
+            SubscriptionMonths = ?,
+            SubscriptionStart = GETDATE(),
+            SubscriptionEnd = DATEADD(MONTH, ?, GETDATE())
+        WHERE OwnerID = ? AND MethodID = ?
+        """;
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, subsMonth + " THÁNG");
+            ps.setInt(2, subsMonth);
+            ps.setInt(3, subsMonth);
+            ps.setInt(4, ownerId);
+            ps.setInt(5, methodId);
+            ps.executeUpdate();
+        }
+    }
+
+    //Phuong
     private static ShopOwnerDTO extractShopOwnerDTOFromResultSet(ResultSet rs) throws SQLException {
         ShopOwnerDTO shopOwnerDTO = new ShopOwnerDTO(
                 rs.getDate("TrialStartDate"),
@@ -306,6 +492,27 @@ public class ShopOwnerDAO {
         return shopOwnerDTO;
     }
 
+    private static ShopOwnerSubsDTO extractShopOwnerSubsDTOFromResultSet(ResultSet rs) throws SQLException {
+        ShopOwnerSubsDTO shopOwnerSubsDTO = new ShopOwnerSubsDTO(
+                rs.getInt("MethodID"),
+                rs.getString("SubscriptionMonths"),
+                rs.getTimestamp("LogCreatedAt"),
+                rs.getInt("OwnerID"),
+                rs.getString("Password"),
+                rs.getString("FullName"),
+                rs.getString("FullNameUnsigned"),
+                rs.getString("ShopName"),
+                rs.getString("DatabaseName"),
+                rs.getString("Email"),
+                rs.getString("IdentificationID"),
+                rs.getString("Gender"),
+                rs.getString("Address"),
+                rs.getString("Phone"),
+                rs.getInt("IsActive"));
+        return shopOwnerSubsDTO;
+    }
+
+    //Phuong
     public static void main(String[] args) throws SQLException {
         System.out.println(ShopOwnerDAO.getDashboardAboutSO());
     }

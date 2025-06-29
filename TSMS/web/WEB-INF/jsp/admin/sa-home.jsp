@@ -37,7 +37,7 @@
                                 <span>Doanh thu</span>
                             </a>
                         </li>-->
-                        <li><a href="#">
+                        <li><a href="sa-subscriptions">
                                 <span class="sidebar-icon"><i class="fas fa-clipboard-list"></i></span>
                                 <span>Subscription</span>
                             </a>
