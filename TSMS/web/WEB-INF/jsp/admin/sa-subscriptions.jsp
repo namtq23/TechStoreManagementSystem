@@ -1,3 +1,9 @@
+<%-- 
+    Document   : sa-subscriptions
+    Created on : Jun 29, 2025, 2:30:06 PM
+    Author     : admin
+--%>
+
 <%@ page import="java.util.*, model.ShopOwnerDTO" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -39,7 +45,7 @@
                                 <span class="sidebar-icon"><i class="fas fa-dollar-sign"></i></span>
                                 <span>Doanh thu</span>
                             </a></li>-->
-                        <li><a href="sa-subscriptions">
+                        <li><a href="#">
                                 <span class="sidebar-icon"><i class="fas fa-clipboard-list"></i></span>
                                 <span>Subscription</span>
                             </a></li>
