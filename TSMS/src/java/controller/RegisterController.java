@@ -84,7 +84,6 @@ public class RegisterController extends HttpServlet {
             return;
         }
 
-
         if (!Validate.isValidPhone(phone)) {
             req.setAttribute("error", "Số điện thoại không hợp lệ!");
             req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
@@ -101,7 +100,8 @@ public class RegisterController extends HttpServlet {
             // Tạo đối tượng ShopOwner để lưu vào AdminDB
             String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
             System.out.println(phone);
-            ShopOwner newOwner = new ShopOwner(0, hashedPassword, fullName, shopName, newDbName, email, null, null, null, phone, 1);
+            String unsignedName = Validate.normalizeSearch(fullName);
+            ShopOwner newOwner = new ShopOwner(0, hashedPassword, fullName, unsignedName, shopName, newDbName, email, null, null, null, phone, 1);
             System.out.println(newOwner);
 
             // 1. Tạo bản sao TemplateDB thành ShopDB_{username}
