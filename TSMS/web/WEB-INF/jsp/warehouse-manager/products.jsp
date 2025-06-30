@@ -34,7 +34,7 @@
                         Hàng hóa
                     </a>
 
-                    <a href="" class="nav-item">
+                    <a href="wh-import" class="nav-item">
                         <i class="fa-solid fa-download"></i>
                         Nhập hàng
                     </a>

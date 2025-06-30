@@ -1,0 +1,63 @@
+.stock-check-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 15px;
+}
+
+.stock-check-table th, .stock-check-table td {
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.stock-check-table thead th {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+.serial-item {
+    padding: 4px 8px;
+    margin: 2px;
+    display: inline-block;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.serial-item.error {
+    background-color: #ffc9c9;
+    color: #d00000;
+}
+
+.error-msg {
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+.row-completed {
+    background-color: #e6ffed;
+}
+
+.btn-scan {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: #198754;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-scan:hover {
+    background-color: #146c43;
+}
+
+.badge-success {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 13px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 8px;
+}
