@@ -18,6 +18,23 @@ public class SOCustomerController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
+        
+        // Lấy thông báo từ session nếu có
+if (session != null) {
+    String successMsg = (String) session.getAttribute("successMessage");
+    if (successMsg != null) {
+        req.setAttribute("successMessage", successMsg);
+        session.removeAttribute("successMessage");
+    }
+
+    String errorMsg = (String) session.getAttribute("errorMessage");
+    if (errorMsg != null) {
+        req.setAttribute("errorMessage", errorMsg);
+        session.removeAttribute("errorMessage");
+    }
+}
+        
+
         if (session == null || session.getAttribute("userId") == null ||
             session.getAttribute("roleId") == null || session.getAttribute("dbName") == null) {
             resp.sendRedirect("login");
@@ -123,13 +140,14 @@ public class SOCustomerController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        
         try {
             String idStr = req.getParameter("id");
             if (idStr == null || idStr.trim().isEmpty()) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu mã khách hàng.");
                 return;
             }
-
+            HttpSession session = req.getSession(false);
             int customerId = Integer.parseInt(idStr.trim());
             String fullName = getSafeParam(req, "fullName");
             String email = getSafeParam(req, "email");
@@ -138,13 +156,15 @@ public class SOCustomerController extends HttpServlet {
             String address = getSafeParam(req, "address");
 
             if (fullName == null || email == null || genderStr == null || phone == null || address == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Dữ liệu không hợp lệ.");
+                    session.setAttribute("errorMessage", "Cập nhật thất bại. Vui lòng thử lại.");
+                    resp.sendRedirect("so-customer");
+                    
                 return;
             }
 
             boolean gender = Boolean.parseBoolean(genderStr.trim());
 
-            HttpSession session = req.getSession(false);
+            
             if (session == null || session.getAttribute("dbName") == null) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không xác định được cơ sở dữ liệu.");
                 return;
@@ -155,11 +175,14 @@ public class SOCustomerController extends HttpServlet {
 
             boolean success = dao.updateCustomer(customerId, fullName, email, gender, phone, address, dbName);
 
-            if (success) {
-                resp.sendRedirect("so-customer");
-            } else {
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Cập nhật thất bại.");
-            }
+if (success) {
+    session.setAttribute("successMessage", "Cập nhật thông tin khách hàng thành công!");
+    resp.sendRedirect("so-customer");
+} else {
+    session.setAttribute("errorMessage", "Cập nhật thất bại. Vui lòng thử lại.");
+    resp.sendRedirect("so-customer");
+}
+
 
         } catch (NumberFormatException e) {
             e.printStackTrace();

@@ -118,22 +118,7 @@
         <!-- Thêm dòng này để kích hoạt lọc theo khoảng giá -->
         <input type="hidden" name="showTop" value="true" />
 
-        <!-- Category Filter -->
-        <div class="filter-section">
-            <div class="filter-header">
-                <h3>Nhóm khách hàng</h3>
-            </div>
-            <div class="filter-content">
-                <div class="category-tree">
-                    <div class="category-item">
-                        <input type="checkbox" id="all-categories" name="categories" value="all">
-                        <label for="all-categories" class="category-label">
-                            <span>Tất cả</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Price Range Filter -->
         <div class="filter-section">
@@ -190,6 +175,18 @@
                              
             <!-- Main Content -->
             <main class="main-content">
+                <c:if test="${not empty successMessage}">
+    <div class="alert alert-success" style="padding: 10px; background-color: #d4edda; color: #155724; border-radius: 5px; margin-bottom: 15px;">
+        ${successMessage}
+    </div>
+</c:if>
+
+<c:if test="${not empty errorMessage}">
+    <div class="alert alert-danger" style="padding: 10px; background-color: #f8d7da; color: #721c24; border-radius: 5px; margin-bottom: 15px;">
+        ${errorMessage}
+    </div>
+</c:if>
+
                 <div class="page-header">
                     <h1>Khách hàng</h1>
                     <div class="header-actions">
@@ -203,11 +200,6 @@
                             </button>
                         </form>
 
-                        <button class="btn btn-success">
-                            <i class="fas fa-plus"></i>
-                            Thêm mới
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
                     </div>
                 </div>
                 <!-- Products Table -->
@@ -230,6 +222,7 @@
                                 <!-- Dòng chính -->
                                 <tr onclick="toggleDetails(${loop.index})" style="cursor: pointer;">
                                     <td>${customer.customerId}</td>
+                                    
                                     <td>${customer.fullName}</td>
                                     <td>${customer.phoneNumber}</td>
 <!--                                    <td>${customer.email}</td>
@@ -241,7 +234,8 @@
                                 
 <tr id="details-${loop.index}" class="detail-row" style="display: none;">
     <td colspan="8">
-        <div class="border rounded p-3 bg-light">
+        <div class="detail-container">
+
             <form method="post" action="so-customer">
                 <input type="hidden" name="id" value="${customer.customerId}" />
 
@@ -257,6 +251,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <p><strong>Mã KH:</strong> ${customer.customerId}</p>
+                                <p><strong>Mã Chi nhánh</strong> ${customer.branchID}</p>
 
                                 <p><strong>Tên khách:</strong>
                                     <input type="text" name="fullName" class="form-control"
@@ -290,10 +285,10 @@
                                 <p><strong>Ngày tạo:</strong>
                                     <fmt:formatDate value="${customer.createdAt}" pattern="dd/MM/yyyy HH:mm" />
                                 </p>
-
+<!--
                                 <p><strong>Cập nhật lần cuối:</strong>
                                     <fmt:formatDate value="${customer.updatedAt}" pattern="dd/MM/yyyy HH:mm" />
-                                </p>
+                                </p>-->
 
                                 <p><strong>Tổng chi tiêu:</strong>
                                     <fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true" /> ₫
@@ -411,6 +406,16 @@ function enableEdit(index) {
 
 </script>
                 
+<script>
+    setTimeout(() => {
+        const alert = document.querySelector(".alert");
+        if (alert) {
+            alert.style.transition = "opacity 0.5s";
+            alert.style.opacity = 0;
+            setTimeout(() => alert.remove(), 500);
+        }
+    }, 3000);
+</script>
                 
                 
                 
