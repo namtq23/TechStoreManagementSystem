@@ -287,7 +287,7 @@
 
                         <div class="card-footer text-end">
                             <a href="so-promotions" class="btn btn-secondary">Hủy</a>
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit" class="btn btn-success" style="background-color: #2196F3; border-color:#2196F3">
                                 <c:choose><c:when test="${action == 'update'}">Cập nhật</c:when><c:otherwise>Tạo khuyến mãi</c:otherwise></c:choose>
                             </button>
                         </div>
