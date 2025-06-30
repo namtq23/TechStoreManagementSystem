@@ -276,8 +276,8 @@ public class UserDAO {
         INSERT INTO Users (
             PasswordHash, FullName, Email, Phone,
             BranchID, WarehouseID, RoleID, IsActive,
-            Gender, AvaUrl
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            Gender, AvaUrl, Address, DOB
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     """;
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -291,6 +291,8 @@ public class UserDAO {
             stmt.setInt(8, user.getIsActive());
             stmt.setString(9, user.getGender());
             stmt.setString(10, user.getAvaUrl());
+            stmt.setString(11, user.getAddress());
+            stmt.setObject(12, user.getDob());
 
             int rs = stmt.executeUpdate();
             if (rs > 0) {
@@ -399,7 +401,8 @@ public class UserDAO {
                 rs.getString("AvaUrl"),
                 rs.getInt("RoleID"),
                 rs.getInt("IsActive"),
-                rs.getString("Address")
+                rs.getString("Address"),
+                rs.getDate("DOB")
         );
 
         return user;

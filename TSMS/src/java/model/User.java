@@ -4,6 +4,8 @@
  */
 package model;
 
+import java.util.Date;
+
 /**
  *
  * @author admin
@@ -22,12 +24,13 @@ public class User {
     private int roleId;
     private int isActive;
     private String address;
+    private Date dob;
 
     // Constructors
     public User() {
     }
 
-    public User(int userID, String password, String fullName, String email, String phone, String branchId, String warehouseId, String gender, String avaUrl, int roleId, int isActive, String address) {
+    public User(int userID, String password, String fullName, String email, String phone, String branchId, String warehouseId, String gender, String avaUrl, int roleId, int isActive, String address, Date dob) {
         this.userID = userID;
         this.password = password;
         this.fullName = fullName;
@@ -40,6 +43,15 @@ public class User {
         this.roleId = roleId;
         this.isActive = isActive;
         this.address = address;
+        this.dob = dob;
+    }
+
+    public Date getDob() {
+        return dob;
+    }
+
+    public void setDob(Date dob) {
+        this.dob = dob;
     }
 
     public String getAddress() {
@@ -118,7 +130,7 @@ public class User {
         return warehouseId;
     }
 
-    public void setWarehouseId(String warehouseId){
+    public void setWarehouseId(String warehouseId) {
         this.warehouseId = warehouseId;
     }
 
@@ -140,7 +152,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" + "userID=" + userID + ", password=" + password + ", fullName=" + fullName + ", email=" + email + ", phone=" + phone + ", branchId=" + branchId + ", warehouseId=" + warehouseId + ", gender=" + gender + ", roleId=" + roleId + ", isActive=" + isActive + '}';
+        return "User{" + "userID=" + userID + ", password=" + password + ", fullName=" + fullName + ", email=" + email + ", phone=" + phone + ", branchId=" + branchId + ", warehouseId=" + warehouseId + ", gender=" + gender + ", avaUrl=" + avaUrl + ", roleId=" + roleId + ", isActive=" + isActive + ", address=" + address + ", dob=" + dob + '}';
     }
 
 }
