@@ -38,7 +38,6 @@ public class BMStockMovementController extends HttpServlet {
             String dbName = dbNameObj.toString();
             int branchId = Integer.parseInt(branchIdObj.toString());
 
-            // Lấy message từ session, sau đó xóa
             String success = (String) session.getAttribute("successMessage");
             String error = (String) session.getAttribute("errorMessage");
             String selectedToWarehouseID = (String) session.getAttribute("selectedToWarehouseID");
@@ -77,8 +76,31 @@ public class BMStockMovementController extends HttpServlet {
             List<StockMovement.StockMovementDetail> draft
                       = (List<StockMovement.StockMovementDetail>) session.getAttribute("requestDraft");
 
+            List<ProductDetails> draftProductDetails = new ArrayList<>();
+            if (draft != null && !draft.isEmpty()) {
+                for (StockMovement.StockMovementDetail detail : draft) {
+                    try {
+                        // Tìm sản phẩm trong danh sách tất cả sản phẩm (không bị filter)
+                        List<ProductDetails> allProducts = dao.getAvailableProductsByBranch(branchId, dbName);
+                        for (ProductDetails p : allProducts) {
+                            if (p.getProductDetailID() == detail.getProductDetailID()) {
+                                draftProductDetails.add(p);
+                                break;
+                            }
+                        }
+                    } catch (SQLException e) {
+                    }
+                }
+            }
+            int totalQuantity = 0;
+            if (draft != null) {
+                totalQuantity = draft.stream().mapToInt(StockMovement.StockMovementDetail::getQuantity).sum();
+            }
+            
+            req.setAttribute("totalQuantity", totalQuantity);
             req.setAttribute("products", products);
             req.setAttribute("draftDetails", draft);
+            req.setAttribute("draftProductDetails", draftProductDetails);
             req.getRequestDispatcher("/WEB-INF/jsp/manager/bm-stockmovement-request.jsp").forward(req, resp);
 
         } catch (SQLException | NumberFormatException e) {
@@ -124,7 +146,6 @@ public class BMStockMovementController extends HttpServlet {
                 session.setAttribute("errorMessage", "Thiếu mã sản phẩm.");
             }
 
-            // ✅ Ghi lại lựa chọn kho
             if (toWarehouseID != null && !toWarehouseID.isBlank()) {
                 session.setAttribute("selectedToWarehouseID", toWarehouseID);
             }
@@ -134,7 +155,7 @@ public class BMStockMovementController extends HttpServlet {
             return;
         }
 
-        // === ADD PRODUCT ===
+// === ADD PRODUCT ===
         if ("add".equals(action)) {
             String idStr = req.getParameter("productDetailID");
             if (idStr != null) {
@@ -146,22 +167,51 @@ public class BMStockMovementController extends HttpServlet {
                     draft = new ArrayList<>();
                 }
 
-                boolean exists = draft.stream().anyMatch(d -> d.getProductDetailID() == productDetailID);
-                if (!exists) {
-                    draft.add(new StockMovement.StockMovementDetail(productDetailID, 1));
-                    session.setAttribute("requestDraft", draft);
-                } else {
-                    session.setAttribute("errorMessage", "Sản phẩm đã có trong danh sách.");
+                // Tìm sản phẩm đã có
+                boolean found = false;
+                for (StockMovement.StockMovementDetail detail : draft) {
+                    if (detail.getProductDetailID() == productDetailID) {
+                        detail.setQuantity(detail.getQuantity() + 1);
+                        found = true;
+                        break;
+                    }
                 }
-            } else {
-                session.setAttribute("errorMessage", "Thiếu mã sản phẩm.");
+
+                // Nếu chưa có, thêm mới
+                if (!found) {
+                    draft.add(new StockMovement.StockMovementDetail(productDetailID, 1));
+                }
+
+                session.setAttribute("requestDraft", draft);
             }
+
             String selectedWarehouse = req.getParameter("toWarehouseID");
             if (selectedWarehouse != null && !selectedWarehouse.isBlank()) {
                 session.setAttribute("selectedToWarehouseID", selectedWarehouse);
             }
 
-            resp.sendRedirect("request-stock");
+            // Giữ keyword
+            String keyword = req.getParameter("keyword");
+            String redirectURL = "request-stock";
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                redirectURL += "?keyword=" + java.net.URLEncoder.encode(keyword, "UTF-8");
+            }
+            resp.sendRedirect(redirectURL);
+            return;
+        }
+
+        // === RESET ALL PRODUCTS ===
+        if ("reset".equals(action)) {
+            session.removeAttribute("requestDraft");
+            session.setAttribute("successMessage", "Đã xóa tất cả sản phẩm khỏi phiếu yêu cầu.");
+
+            // Giữ lại keyword nếu có
+            String keyword = req.getParameter("keyword");
+            String redirectURL = "request-stock";
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                redirectURL += "?keyword=" + java.net.URLEncoder.encode(keyword, "UTF-8");
+            }
+            resp.sendRedirect(redirectURL);
             return;
         }
 
