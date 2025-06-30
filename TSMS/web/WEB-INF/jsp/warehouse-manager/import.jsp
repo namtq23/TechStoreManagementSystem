@@ -167,70 +167,71 @@
                 <!-- Import Orders Table -->
                 <div class="table-container">
                     <table class="invoices-table">
-                        <thead>
-                            <tr>
-                                <th>STT</th>
-                                <th>Mã đơn nhập</th>
-                                <th>Nhà cung cấp</th>
-                                <th>Trạng thái</th>
-                                <th>Ngày tạo</th>
-                                <th>Người tạo</th>
-                                <th>Tổng tiền</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="req" items="${importRequests}" varStatus="loop">
+                            <thead>
                                 <tr>
-                                    <td>${loop.index + 1}</td>
-                                    <td>${req.movementID}</td>
-                                    <td>${req.fromSupplierName}</td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${req.movementType eq 'pending'}">
-                                                <span class="status-badge pending">Chờ xử lý</span>
-                                            </c:when>
-                                            <c:when test="${req.movementType eq 'processing'}">
-                                                <span class="status-badge processing">Đang xử lý</span>
-                                            </c:when>
-                                            <c:when test="${req.movementType eq 'completed'}">
-                                                <span class="status-badge completed">Hoàn thành</span>
-                                            </c:when>
-                                            <c:when test="${req.movementType eq 'cancelled'}">
-                                                <span class="status-badge cancelled">Đã hủy</span>
-                                            </c:when>
-                                        </c:choose>
-                                    </td>
-                                    <td>${req.formattedDate}</td>
-                                    <td>${req.createdByName}</td>
-                                    <td>${req.formattedTotalAmount}</td>
-                                    <td>
-                                        <div class="action-buttons">
+                                    <th>STT</th>
+                                    <th>Mã đơn nhập</th>
+                                    <th>Nhà cung cấp</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Người tạo</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="req" items="${importRequests}" varStatus="loop">
+                                    <tr>
+                                        <td>${loop.index + 1}</td>
+                                        <td>${req.movementID}</td>
+                                        <td>${req.fromSupplierName}</td>
+                                        <td>
                                             <c:choose>
-                                                <c:when test="${req.movementType eq 'pending'}">
-                                                    <button class="btn-action edit" onclick="editOrder('${req.movementID}')">Xử lý</button>
+                                                <c:when test="${req.responseStatus eq 'pending'}">
+                                                    <span class="status-badge pending">Chờ xử lý</span>
                                                 </c:when>
-                                                <c:when test="${req.movementType eq 'processing'}">
-                                                    <button class="btn-action process" onclick="editOrder('${req.movementID}')">Tiếp tục nhập</button>
+                                                <c:when test="${req.responseStatus eq 'processing'}">
+                                                    <span class="status-badge processing">Đang xử lý</span>
                                                 </c:when>
-                                                <c:when test="${req.movementType eq 'completed'}">
-                                                    <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
+                                                <c:when test="${req.responseStatus eq 'completed'}">
+                                                    <span class="status-badge completed">Hoàn thành</span>
                                                 </c:when>
-                                                <c:when test="${req.movementType eq 'cancelled'}">
-                                                    <button class="btn-action cancelled" disabled>Đã hủy</button>
+                                                <c:when test="${req.responseStatus eq 'cancelled'}">
+                                                    <span class="status-badge cancelled">Đã huỷ</span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
+                                                    <span class="status-badge unknown">Không rõ</span>
                                                 </c:otherwise>
                                             </c:choose>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-
-
-                    </table>
+                                        </td>
+                                        <td>${req.formattedDate}</td>
+                                        <td>${req.createdByName}</td>
+                                        <td>${req.formattedTotalAmount}</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <c:choose>
+                                                    <c:when test="${req.responseStatus eq 'pending'}">
+                                                        <button class="btn-action edit" onclick="editOrder('${req.movementID}')">Xử lý</button>
+                                                    </c:when>
+                                                    <c:when test="${req.responseStatus eq 'processing'}">
+                                                        <button class="btn-action process" onclick="editOrder('${req.movementID}')">Tiếp tục nhập</button>
+                                                    </c:when>
+                                                    <c:when test="${req.responseStatus eq 'completed'}">
+                                                        <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
+                                                    </c:when>
+                                                    <c:when test="${req.responseStatus eq 'cancelled'}">
+                                                        <button class="btn-action cancelled" disabled>Đã huỷ</button>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
                 </div>
 
 
@@ -312,32 +313,7 @@
             }
 
             // Export to Excel function
-            function exportToExcel() {
-                // Lấy giá trị từ các input field
-                var branchId = document.getElementById('branchId').value || '';
-                var supplierId = document.getElementById('supplierId').value || '';
-                var fromDate = document.getElementById('fromDate').value || '';
-                var toDate = document.getElementById('toDate').value || '';
-                var status = document.querySelector('input[name="status"]:checked')?.value || '';
-
-                // Build URL với cách nối chuỗi truyền thống
-                var url = 'export-excel?type=import&branchId=' + branchId +
-                        '&supplierId=' + supplierId +
-                        '&fromDate=' + fromDate +
-                        '&toDate=' + toDate +
-                        '&status=' + status;
-
-                // Debug log
-                console.log('Export URL:', url);
-
-                // Tạo link download
-                var link = document.createElement('a');
-                link.href = url;
-                link.download = 'import_orders_report.xlsx';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
+           
 
             // Action functions
             function viewOrder(orderId) {
@@ -352,7 +328,7 @@
                 window.location.href = 'serial-check?id=' + orderId;
             }
 
-        
+
         </script>
 
     </body>

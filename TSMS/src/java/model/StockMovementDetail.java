@@ -22,7 +22,10 @@ public class StockMovementDetail {
     private int quantity;
     private String unit;
     private String note;
-    private int scanned;
+    private int scanned;         // ✅ Subquery đếm tạm thời
+
+
+    private int quantityScanned; // ✅ Dữ liệu từ bảng
 
       private List<ProductDetailSerialNumber> serials; // Thêm dòng này
 
@@ -120,6 +123,14 @@ public class StockMovementDetail {
         this.serials = serials;
     }
 
+        public int getQuantityScanned() {
+        return quantityScanned;
+    }
+
+    public void setQuantityScanned(int quantityScanned) {
+        this.quantityScanned = quantityScanned;
+    }
+    
     @Override
     public String toString() {
         return "StockMovementDetail{" + "detailID=" + detailID + ", requestID=" + requestID + ", productID=" + productID + ", productName=" + productName + ", productCode=" + productCode + ", quantity=" + quantity + ", unit=" + unit + ", note=" + note + '}';

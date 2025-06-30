@@ -236,6 +236,13 @@ public class Validate {
             return days + " ngày trước";
         }
     }
+    
+    //Validate: Serinumber
+    private static final String SERIAL_REGEX = "^[A-Z0-9\\-]{5,30}$";
+     public static boolean validateSerialFormat(String serial) {
+        if (serial == null) return false;
+        return serial.toUpperCase().matches(SERIAL_REGEX);
+    }
 
     public static void main(String[] args) {
         // Test hàm với đầu vào mới
