@@ -11,6 +11,7 @@ import java.util.Date;
  * @author Dell
  */
 public class UserDTO {
+
     private int userID;
     private String fullName;
     private String phone;
@@ -23,6 +24,9 @@ public class UserDTO {
     private String branchName;
     private String warehouseName;
     private Date DOB;
+    private int roleID;
+    private Integer branchID;
+    private Integer warehouseID;
 
     public UserDTO() {
     }
@@ -40,6 +44,7 @@ public class UserDTO {
         this.branchName = branchName;
         this.warehouseName = warehouseName;
     }
+
     public UserDTO(int userID, String fullName, String phone, String email, int gender, String avaUrl, String address, int isActive, String roleName, String branchName, String warehouseName, Date DOB) {
         this.userID = userID;
         this.fullName = fullName;
@@ -53,6 +58,24 @@ public class UserDTO {
         this.branchName = branchName;
         this.warehouseName = warehouseName;
         this.DOB = DOB;
+    }
+
+    public UserDTO(int userID, String fullName, String phone, String email, int gender, String avaUrl, String address, int isActive, String roleName, String branchName, String warehouseName, Date DOB, int roleID, Integer branchID, Integer warehouseID) {
+        this.userID = userID;
+        this.fullName = fullName;
+        this.phone = phone;
+        this.email = email;
+        this.gender = gender;
+        this.avaUrl = avaUrl;
+        this.address = address;
+        this.isActive = isActive;
+        this.roleName = roleName;
+        this.branchName = branchName;
+        this.warehouseName = warehouseName;
+        this.DOB = DOB;
+        this.roleID = roleID;
+        this.branchID = branchID;
+        this.warehouseID = warehouseID;
     }
 
     public int getUserID() {
@@ -150,4 +173,29 @@ public class UserDTO {
     public void setDOB(Date DOB) {
         this.DOB = DOB;
     }
+
+    public int getRoleID() {
+        return roleID;
+    }
+
+    public void setRoleID(int roleID) {
+        this.roleID = roleID;
+    }
+
+    public Integer getBranchID() {
+        return branchID;
+    }
+
+    public void setBranchID(Integer branchID) {
+        this.branchID = branchID;
+    }
+
+    public Integer getWarehouseID() {
+        return warehouseID;
+    }
+
+    public void setWarehouseID(Integer warehouseID) {
+        this.warehouseID = warehouseID;
+    }
+
 }
