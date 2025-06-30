@@ -113,4 +113,9 @@ public class ProductDetails {
                 ", updatedAt=" + updatedAt +
                 '}';
     }
+    public ProductDetails() {
 }
+
+}
+
+
