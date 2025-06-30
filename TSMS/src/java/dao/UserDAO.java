@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import model.ShopOwner;
 import model.ShopOwnerDTO;
@@ -513,7 +514,6 @@ public class UserDAO {
         return count;
     }
 
-
     public UserDTO getStaffById(String dbName, int userId) {
         UserDTO user = null;
         String query = """
@@ -527,6 +527,9 @@ public class UserDAO {
             u.Address,
             u.IsActive,
             u.DOB,
+            u.RoleID,
+            u.BranchID,
+            u.WarehouseID,
             r.RoleName,
             b.BranchName,
             w.WarehouseName
@@ -553,6 +556,9 @@ public class UserDAO {
                 user.setAddress(rs.getString("Address"));
                 user.setIsActive(rs.getInt("IsActive"));
                 user.setDOB(rs.getDate("DOB"));
+                user.setRoleID(rs.getInt("RoleID"));
+                user.setBranchID(rs.getObject("BranchID") != null ? rs.getInt("BranchID") : null);
+                user.setWarehouseID(rs.getObject("WarehouseID") != null ? rs.getInt("WarehouseID") : null);
                 user.setRoleName(rs.getString("RoleName"));
                 user.setBranchName(rs.getString("BranchName"));
                 user.setWarehouseName(rs.getString("WarehouseName"));
@@ -562,6 +568,34 @@ public class UserDAO {
             e.printStackTrace();
         }
         return user;
+    }
+
+    public String checkDuplicateEmailAndPhone(String dbName, int userId, String email, String phone) {
+        String query = "SELECT UserID FROM Users WHERE (Email = ? OR Phone = ?) AND UserID != ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, email);
+            stmt.setString(2, phone);
+            stmt.setInt(3, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                // Check which field is duplicated
+                String checkEmailQuery = "SELECT UserID FROM Users WHERE Email = ? AND UserID != ?";
+                try (PreparedStatement emailStmt = conn.prepareStatement(checkEmailQuery)) {
+                    emailStmt.setString(1, email);
+                    emailStmt.setInt(2, userId);
+                    ResultSet emailRs = emailStmt.executeQuery();
+                    if (emailRs.next()) {
+                        return "email";
+                    }
+                }
+                return "phone";
+            }
+            return null;
+        } catch (SQLException e) {
+            System.err.println("Error in checkDuplicateEmailAndPhone: " + e.getMessage());
+            e.printStackTrace();
+            return "error";
+        }
     }
 
     public boolean deleteStaff(String dbName, int userId) {
@@ -577,6 +611,48 @@ public class UserDAO {
         }
     }
 
+    public String updateStaff(String dbName, int userId, String fullName, Date DOB, int gender, String address,
+            String phone, String email, int roleID, Integer branchID, Integer warehouseID, int isActive) {
+        // Check for duplicates
+        String duplicateCheck = checkDuplicateEmailAndPhone(dbName, userId, email, phone);
+        if (duplicateCheck != null) {
+            return duplicateCheck; // Returns "email" or "phone" if duplicate found
+        }
+
+        String query = """
+            UPDATE Users 
+            SET FullName = ?, DOB = ?, Gender = ?, Address = ?, Phone = ?, Email = ?, 
+                RoleID = ?, BranchID = ?, WarehouseID = ?, IsActive = ?
+            WHERE UserID = ?
+        """;
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, fullName);
+            stmt.setDate(2, DOB != null ? new java.sql.Date(DOB.getTime()) : null);
+            stmt.setInt(3, gender);
+            stmt.setString(4, address);
+            stmt.setString(5, phone);
+            stmt.setString(6, email);
+            stmt.setInt(7, roleID);
+            if (branchID != null) {
+                stmt.setInt(8, branchID);
+            } else {
+                stmt.setNull(8, java.sql.Types.INTEGER);
+            }
+            if (warehouseID != null) {
+                stmt.setInt(9, warehouseID);
+            } else {
+                stmt.setNull(9, java.sql.Types.INTEGER);
+            }
+            stmt.setInt(10, isActive);
+            stmt.setInt(11, userId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0 ? "success" : "error";
+        } catch (SQLException e) {
+            System.err.println("Error in updateStaff: " + e.getMessage());
+            e.printStackTrace();
+            return "error";
+        }
+    }
 
     public List<User> getStaffsByBranchIDForOutcome(int branchId, String dbName) throws SQLException {
         List<User> staffs = new ArrayList<>();
@@ -598,32 +674,32 @@ public class UserDAO {
 
         return staffs;
     }
+
     public List<UserDTO> getBranchCreators(String dbName, int branchID) {
-    List<UserDTO> creators = new ArrayList<>();
-    String query = """
+        List<UserDTO> creators = new ArrayList<>();
+        String query = """
         SELECT DISTINCT u.UserID, u.FullName 
         FROM Users u 
         INNER JOIN Orders o ON u.UserID = o.CreatedBy 
         WHERE o.BranchID = ?
         ORDER BY u.FullName
         """;
-    
-    try (Connection conn = DBUtil.getConnectionTo(dbName); 
-         PreparedStatement stmt = conn.prepareStatement(query)) {
-        stmt.setInt(1, branchID);
-        ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
-            UserDTO user = new UserDTO();
-            user.setUserID(rs.getInt("UserID"));
-            user.setFullName(rs.getString("FullName"));
-            creators.add(user);
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, branchID);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                UserDTO user = new UserDTO();
+                user.setUserID(rs.getInt("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                creators.add(user);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getBranchCreators: " + e.getMessage());
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        System.err.println("Error in getBranchCreators: " + e.getMessage());
-        e.printStackTrace();
+        return creators;
     }
-    return creators;
-}
 
     public List<UserDTO> getAllCreators(String dbName) {
         List<UserDTO> creators = new ArrayList<>();

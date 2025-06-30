@@ -5,6 +5,7 @@
 package controller;
 
 import dao.BranchDAO;
+import dao.RoleDAO;
 import dao.UserDAO;
 import dao.WareHouseDAO;
 import java.io.IOException;
@@ -28,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import model.Role;
 
 /**
  *
@@ -54,13 +56,15 @@ public class SOStaffController extends HttpServlet {
             UserDAO userDAO = new UserDAO();
             BranchDAO branchDAO = new BranchDAO();
             WareHouseDAO warehouseDAO = new WareHouseDAO();
+            RoleDAO roleDAO = new RoleDAO();
             List<Branch> branchesList = branchDAO.getAllBranches(dbName);
             List<Warehouse> warehousesList = warehouseDAO.getAllWarehouses(dbName);
-
+            List<Role> roles = roleDAO.getAllRoles(dbName);
             if ("view".equals(action)) {
                 String userID = req.getParameter("userID");
                 UserDTO user = userDAO.getStaffById(dbName, Integer.parseInt(userID));
                 req.setAttribute("staff", user);
+                req.setAttribute("roles", roles);
                 req.setAttribute("branchesList", branchesList);
                 req.setAttribute("warehousesList", warehousesList);
                 req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/edit-staff.jsp").forward(req, resp);
@@ -75,7 +79,59 @@ public class SOStaffController extends HttpServlet {
                 }
                 resp.sendRedirect("so-staff");
                 return;
+            } else if ("edit".equals(action)) {
+                String userID = req.getParameter("userID");
+                UserDTO user = userDAO.getStaffById(dbName, Integer.parseInt(userID));
+                req.setAttribute("staff", user);
+                req.setAttribute("roles", roles);
+                req.setAttribute("branchesList", branchesList);
+                req.setAttribute("warehousesList", warehousesList);
+                req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/edit-staff.jsp").forward(req, resp);
+                return;
+            } else if ("update".equals(action)) {
+                String userID = req.getParameter("userID");
+                String fullName = req.getParameter("fullName");
+                String dobStr = req.getParameter("DOB");
+                int gender = Integer.parseInt(req.getParameter("gender"));
+                String address = req.getParameter("address");
+                String phone = req.getParameter("phone");
+                String email = req.getParameter("email");
+                int roleID = Integer.parseInt(req.getParameter("roleID"));
+                String branchIDStr = req.getParameter("branchID");
+                String warehouseIDStr = req.getParameter("warehouseID");
+                int isActive = Integer.parseInt(req.getParameter("isActive"));
+
+                Integer branchID = branchIDStr.isEmpty() ? null : Integer.parseInt(branchIDStr);
+                Integer warehouseID = warehouseIDStr.isEmpty() ? null : Integer.parseInt(warehouseIDStr);
+                Date DOB = null;
+                if (!dobStr.isEmpty()) {
+                    try {
+                        DOB = new SimpleDateFormat("yyyy-MM-dd").parse(dobStr);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                String updateResult = userDAO.updateStaff(dbName, Integer.parseInt(userID), fullName, DOB, gender, address, phone, email, roleID, branchID, warehouseID, isActive);
+                UserDTO user = userDAO.getStaffById(dbName, Integer.parseInt(userID));
+                req.setAttribute("staff", user);
+                req.setAttribute("roles", roles);
+                req.setAttribute("branchesList", branchesList);
+                req.setAttribute("warehousesList", warehousesList);
+
+                if ("success".equals(updateResult)) {
+                    session.setAttribute("success", "Cập nhật nhân viên thành công!");
+                } else if ("email".equals(updateResult)) {
+                    session.setAttribute("emailError", "Email đã được sử dụng bởi người dùng khác!");
+                } else if ("phone".equals(updateResult)) {
+                    session.setAttribute("phoneError", "Số điện thoại đã được sử dụng bởi người dùng khác!");
+                } else {
+                    session.setAttribute("error", "Cập nhật nhân viên thất bại!");
+                }
+                req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/edit-staff.jsp").forward(req, resp);
+                return;
             }
+
             int page = 1;
             int pageSize = 10;
             Integer status = null;
@@ -114,7 +170,7 @@ public class SOStaffController extends HttpServlet {
                     role = null;
                 }
             }
-            
+
             List<UserDTO> staffList = userDAO.getStaffListByPage(dbName, page, pageSize, status, role, search);
             int totalStaff = userDAO.countStaff(dbName, status, role, search);
             int totalPages = (int) Math.ceil((double) totalStaff / pageSize);
@@ -145,15 +201,15 @@ public class SOStaffController extends HttpServlet {
             String fullName = req.getParameter("fullName");
             String phone = req.getParameter("phone");
             String genderId = req.getParameter("gender");
-            String dobStr = req.getParameter("dob"); 
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy"); 
+            String dobStr = req.getParameter("dob");
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             Date dob = null;
             try {
                 dob = sdf.parse(dobStr);
             } catch (ParseException e) {
-                System.out.println(e); 
+                System.out.println(e);
             }
-            
+
             System.out.println(dob);
 
             String address = req.getParameter("address");
