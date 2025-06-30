@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -43,7 +44,7 @@
 
         .staff-details {
             display: grid;
-            grid-template-columns: repeat/auto-fit, minmax(300px, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
 
@@ -257,6 +258,10 @@
                 <div class="info-row">
                     <label>Họ tên:</label>
                     <span>${staff.fullName}</span>
+                </div>
+                <div class="info-row">
+                    <label>Ngày sinh:</label>
+                    <span><fmt:formatDate value="${staff.DOB}" pattern="dd/MM/yyyy"/></span>
                 </div>
                 <div class="info-row">
                     <label>Giới tính:</label>

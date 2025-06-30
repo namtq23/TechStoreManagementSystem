@@ -4,6 +4,8 @@
  */
 package model;
 
+import java.util.Date;
+
 /**
  *
  * @author Dell
@@ -20,6 +22,7 @@ public class UserDTO {
     private String roleName;
     private String branchName;
     private String warehouseName;
+    private Date DOB;
 
     public UserDTO() {
     }
@@ -36,6 +39,20 @@ public class UserDTO {
         this.roleName = roleName;
         this.branchName = branchName;
         this.warehouseName = warehouseName;
+    }
+    public UserDTO(int userID, String fullName, String phone, String email, int gender, String avaUrl, String address, int isActive, String roleName, String branchName, String warehouseName, Date DOB) {
+        this.userID = userID;
+        this.fullName = fullName;
+        this.phone = phone;
+        this.email = email;
+        this.gender = gender;
+        this.avaUrl = avaUrl;
+        this.address = address;
+        this.isActive = isActive;
+        this.roleName = roleName;
+        this.branchName = branchName;
+        this.warehouseName = warehouseName;
+        this.DOB = DOB;
     }
 
     public int getUserID() {
@@ -126,5 +143,11 @@ public class UserDTO {
         this.warehouseName = warehouseName;
     }
 
-    
+    public Date getDOB() {
+        return DOB;
+    }
+
+    public void setDOB(Date DOB) {
+        this.DOB = DOB;
+    }
 }

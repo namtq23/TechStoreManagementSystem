@@ -26,6 +26,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import util.Validate;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -50,15 +51,15 @@ public class SOStaffController extends HttpServlet {
 
             String dbName = dbNameObj.toString();
             String action = req.getParameter("action");
+            UserDAO userDAO = new UserDAO();
+            BranchDAO branchDAO = new BranchDAO();
+            WareHouseDAO warehouseDAO = new WareHouseDAO();
+            List<Branch> branchesList = branchDAO.getAllBranches(dbName);
+            List<Warehouse> warehousesList = warehouseDAO.getAllWarehouses(dbName);
 
             if ("view".equals(action)) {
                 String userID = req.getParameter("userID");
-                UserDAO userDAO = new UserDAO();
                 UserDTO user = userDAO.getStaffById(dbName, Integer.parseInt(userID));
-                BranchDAO branchDAO = new BranchDAO();
-                WareHouseDAO warehouseDAO = new WareHouseDAO();
-                List<Branch> branchesList = branchDAO.getAllBranches(dbName);
-                List<Warehouse> warehousesList = warehouseDAO.getAllWarehouses(dbName);
                 req.setAttribute("staff", user);
                 req.setAttribute("branchesList", branchesList);
                 req.setAttribute("warehousesList", warehousesList);
@@ -66,7 +67,6 @@ public class SOStaffController extends HttpServlet {
                 return;
             } else if ("delete".equals(action)) {
                 String userID = req.getParameter("userID");
-                UserDAO userDAO = new UserDAO();
                 boolean deleted = userDAO.deleteStaff(dbName, Integer.parseInt(userID));
                 if (deleted) {
                     session.setAttribute("success", "Sa thải nhân viên thành công!");
@@ -114,12 +114,7 @@ public class SOStaffController extends HttpServlet {
                     role = null;
                 }
             }
-
-            UserDAO userDAO = new UserDAO();
-            BranchDAO branchDAO = new BranchDAO();
-            WareHouseDAO warehouseDAO = new WareHouseDAO();
-            List<Branch> branchesList = branchDAO.getAllBranches(dbName);
-            List<Warehouse> warehousesList = warehouseDAO.getAllWarehouses(dbName);
+            
             List<UserDTO> staffList = userDAO.getStaffListByPage(dbName, page, pageSize, status, role, search);
             int totalStaff = userDAO.countStaff(dbName, status, role, search);
             int totalPages = (int) Math.ceil((double) totalStaff / pageSize);

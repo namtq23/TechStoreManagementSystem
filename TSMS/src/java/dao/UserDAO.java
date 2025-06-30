@@ -526,6 +526,7 @@ public class UserDAO {
             u.AvaUrl,
             u.Address,
             u.IsActive,
+            u.DOB,
             r.RoleName,
             b.BranchName,
             w.WarehouseName
@@ -551,6 +552,7 @@ public class UserDAO {
                 user.setAvaUrl(rs.getString("AvaUrl"));
                 user.setAddress(rs.getString("Address"));
                 user.setIsActive(rs.getInt("IsActive"));
+                user.setDOB(rs.getDate("DOB"));
                 user.setRoleName(rs.getString("RoleName"));
                 user.setBranchName(rs.getString("BranchName"));
                 user.setWarehouseName(rs.getString("WarehouseName"));
