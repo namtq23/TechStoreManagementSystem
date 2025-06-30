@@ -27,60 +27,52 @@ public class StockMovementsRequestDAO {
 
         StringBuilder sql = new StringBuilder();
         sql.append("""
-      SELECT 
-                    smr.MovementID,
-                    smr.FromSupplierID,
-                    s.SupplierName AS FromSupplierName,
-                    smr.MovementType,
-                    smr.CreatedAt,
-                    smr.CreatedBy,
-                    u.FullName AS CreatedByName,
-                    smr.Note,
-                    ISNULL(SUM(smd.Quantity * p.CostPrice), 0) AS TotalAmount
-                FROM StockMovementsRequest smr
-                LEFT JOIN Suppliers s ON smr.FromSupplierID = s.SupplierID
-                LEFT JOIN Users u ON smr.CreatedBy = u.UserID
-                LEFT JOIN StockMovementDetail smd ON smr.MovementID = smd.MovementID
-                LEFT JOIN ProductDetails pd ON smd.ProductDetailID = pd.ProductDetailID
-                LEFT JOIN Products p ON pd.ProductID = p.ProductID
-                WHERE smr.FromBranchID IS NULL 
-                  AND smr.FromWarehouseID IS NULL 
-                  AND smr.ToBranchID IS NULL 
-                  AND smr.ToWarehouseID = ?
-                GROUP BY 
-                    smr.MovementID, smr.FromSupplierID, s.SupplierName,
-                    smr.MovementType, smr.CreatedAt, smr.CreatedBy, u.FullName, smr.Note
-              
+        SELECT 
+            smr.MovementID,
+            smr.FromSupplierID,
+            s.SupplierName AS FromSupplierName,
+            smr.MovementType,
+            smr.CreatedAt,
+            smr.CreatedBy,
+            u.FullName AS CreatedByName,
+            smr.Note,
+            ISNULL(SUM(smd.Quantity * p.CostPrice), 0) AS TotalAmount,
+            MAX(smrsp.ResponseStatus) AS ResponseStatus
+        FROM StockMovementsRequest smr
+        LEFT JOIN Suppliers s ON smr.FromSupplierID = s.SupplierID
+        LEFT JOIN Users u ON smr.CreatedBy = u.UserID
+        LEFT JOIN StockMovementDetail smd ON smr.MovementID = smd.MovementID
+        LEFT JOIN ProductDetails pd ON smd.ProductDetailID = pd.ProductDetailID
+        LEFT JOIN Products p ON pd.ProductID = p.ProductID
+        LEFT JOIN StockMovementResponses smrsp ON smr.MovementID = smrsp.MovementID
+        WHERE smr.ToWarehouseID = ?
+          AND smr.MovementType = 'import'
+        GROUP BY 
+            smr.MovementID, smr.FromSupplierID, s.SupplierName,
+            smr.MovementType, smr.CreatedAt, smr.CreatedBy, u.FullName, smr.Note
+        ORDER BY smr.CreatedAt DESC
     """);
-
-        // Nếu sau này có thêm điều kiện lọc, append ở đây:
-        // Example:
-        // if (statusFilter != null) {
-        //     sql.append(" AND smr.MovementType = ? ");
-        // }
-        sql.append(" ORDER BY smr.CreatedAt DESC");
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             ps.setString(1, warehouseId);
 
-            // Nếu có điều kiện lọc thêm, set tiếp các param
-            // int paramIndex = 2;
-            // if (statusFilter != null) {
-            //     ps.setString(paramIndex++, statusFilter);
-            // }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     StockMovementsRequest smr = new StockMovementsRequest();
                     smr.setMovementID(rs.getInt("MovementID"));
-                    smr.setFromSupplierID(rs.getInt("FromSupplierID"));
+                    smr.setFromSupplierID(rs.getObject("FromSupplierID") != null ? rs.getInt("FromSupplierID") : null);
                     smr.setFromSupplierName(rs.getString("FromSupplierName"));
                     smr.setMovementType(rs.getString("MovementType"));
                     smr.setCreatedAt(rs.getTimestamp("CreatedAt").toLocalDateTime());
                     smr.setCreatedBy(rs.getInt("CreatedBy"));
                     smr.setCreatedByName(rs.getString("CreatedByName"));
                     smr.setNote(rs.getString("Note"));
-                    smr.setTotalAmount(rs.getBigDecimal("TotalAmount")); // Đảm bảo bạn có setter
+                    smr.setTotalAmount(rs.getBigDecimal("TotalAmount"));
+
+                    // ✅ Thêm dòng này để lấy responseStatus
+                    smr.setResponseStatus(rs.getString("ResponseStatus"));
+
                     list.add(smr);
                 }
             }

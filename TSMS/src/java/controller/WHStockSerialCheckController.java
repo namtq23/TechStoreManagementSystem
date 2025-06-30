@@ -1,87 +1,106 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
-
 package controller;
 
+import dao.SerialNumberDAO;
 import dao.StockMovementDetailDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.List;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 import model.StockMovementDetail;
+import util.Validate;
 
-/**
- *
- * @author TRIEU NAM
- */
 @WebServlet(name="WHStockSerialCheckController", urlPatterns={"/serial-check"})
 public class WHStockSerialCheckController extends HttpServlet {
-   
-    /** 
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
- int id = Integer.parseInt(request.getParameter("id"));
-String dbName = (String) request.getSession().getAttribute("dbName");
 
-StockMovementDetailDAO dao = new StockMovementDetailDAO();
-List<StockMovementDetail> details = dao.getDetailsByMovementID(dbName, id);
+        String dbName = (String) request.getSession().getAttribute("dbName");
 
+        String idParam = request.getParameter("id");
+        if (idParam == null && request.getAttribute("id") != null) {
+            idParam = request.getAttribute("id").toString();
+        }
 
-request.setAttribute("movementID", id); // <- THÊM DÒNG NÀY
-request.setAttribute("movementDetails", details);
-System.out.println("Đơn nhập #" + id + " có " + details.size() + " dòng sản phẩm.");
+        if (idParam == null) {
+            request.setAttribute("error", "Không tìm thấy mã đơn kiểm kho.");
+            request.getRequestDispatcher("/WEB-INF/jsp/warehouse-manager/stock-check.jsp").forward(request, response);
+            return;
+        }
 
-request.getRequestDispatcher("/WEB-INF/jsp/warehouse-manager/stock-check.jsp").forward(request, response);
+        int movementID = Integer.parseInt(idParam);
 
-    } 
+        StockMovementDetailDAO dao = new StockMovementDetailDAO();
+        List<StockMovementDetail> details = dao.getDetailsByMovementID(dbName, movementID);
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
-     * Handles the HTTP <code>GET</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+        request.setAttribute("movementID", movementID);
+        request.setAttribute("movementDetails", details);
+        System.out.println("📦 Đơn nhập #" + movementID+ " có " + details.size() + " dòng sản phẩm.");
+
+        request.getRequestDispatcher("/WEB-INF/jsp/warehouse-manager/stock-check.jsp").forward(request, response);
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         processRequest(request, response);
-    } 
+    }
 
-    /** 
-     * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        processRequest(request, response);
+         response.setContentType("text/html;charset=UTF-8");
+        String dbName = (String) request.getSession().getAttribute("dbName");
+        String serial = request.getParameter("scannedSerial");
+        String detailIDStr = request.getParameter("detailID");
+       
+        String movementIDStr = request.getParameter("movementID");
+System.out.println("Serial nhận được: [" + serial + "]");
+
+        if (serial == null || detailIDStr == null || serial.trim().isEmpty() || !Validate.validateSerialFormat(serial)) {
+            request.setAttribute("error", "Vui lòng nhập Serial hợp lệ.");
+            processRequest(request, response);
+            return;
+        }
+
+         int detailID = Integer.parseInt(detailIDStr);
+         System.out.println(detailID);
+        int movementID = Integer.parseInt(movementIDStr);
+
+   
+        SerialNumberDAO serialDAO = new SerialNumberDAO();
+
+        // Kiểm tra trùng serial
+        if (serialDAO.checkIfSerialExists(dbName, serial)) {
+            System.err.println("❌ Serial đã tồn tại trong hệ thống: " + serial);
+            request.setAttribute("error", "Serial đã tồn tại trong hệ thống.");
+            request.setAttribute("movementID", movementID);
+            processRequest(request, response);
+            return;
+        }
+
+        // Thêm serial vào chi tiết
+        boolean inserted = serialDAO.addScannedSerial(dbName, detailID, serial);
+
+        if (inserted) {
+            System.out.println("✅ Serial được thêm thành công: " + serial);
+            request.setAttribute("success", "Đã thêm Serial thành công.");
+        } else {
+            System.err.println("❌ Lỗi khi thêm serial: " + serial);
+            request.setAttribute("error", "Có lỗi xảy ra khi thêm Serial.");
+        }
+
+        request.setAttribute("movementID", movementID);
+       processRequest(request, response);
+
     }
 
-    /** 
-     * Returns a short description of the servlet.
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Quản lý kiểm tra serial sản phẩm khi nhập kho";
+    }
 }

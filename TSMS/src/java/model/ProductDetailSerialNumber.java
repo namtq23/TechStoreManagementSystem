@@ -19,7 +19,10 @@ public class ProductDetailSerialNumber {
     private Integer orderID;       // có thể null
     private Integer branchID;      // có thể null
     private Integer warehouseID;   // có thể null
-    private String error;          // dùng để hiển thị lỗi nếu có
+    private String error;// dùng để hiển thị lỗi nếu có
+    private int movementDetailID;
+
+   
 
     public ProductDetailSerialNumber() {
     }
@@ -87,6 +90,13 @@ public class ProductDetailSerialNumber {
 
     public void setError(String error) {
         this.error = error;
+    }
+     public int getMovementDetailID() {
+        return movementDetailID;
+    }
+
+    public void setMovementDetailID(int movementDetailID) {
+        this.movementDetailID = movementDetailID;
     }
 
     @Override
