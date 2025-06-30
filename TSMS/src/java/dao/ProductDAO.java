@@ -567,92 +567,123 @@ public class ProductDAO {
 
     public boolean addProduct(String dbName, String productName, String imageUrl, String productCode,
             String description, double costPrice, double retailPrice, int brandId,
-            int categoryId, int supplierId, String warrantyPeriod, double vat,
-            boolean isActive) throws SQLException {
-        Connection conn = null;
-        PreparedStatement psProduct = null;
-        PreparedStatement psProductDetail = null;
-        ResultSet rs = null;
-        boolean success = false;
+            int categoryId, int supplierId, String warrantyPeriod, double vat) throws SQLException {
+    Connection conn = null;
+    PreparedStatement psProduct = null;
+    PreparedStatement psProductDetail = null;
+    PreparedStatement psInventoryProduct = null;
+    PreparedStatement psWarehouseProduct = null;
+    ResultSet rs = null;
+    boolean success = false;
 
-        try {
-            conn = DBUtil.getConnectionTo(dbName);
-            conn.setAutoCommit(false); // Start transaction
+    try {
+        conn = DBUtil.getConnectionTo(dbName);
+        conn.setAutoCommit(false); // Start transaction
 
-            // Insert into Products table with ImageURL
-            String sqlProduct = "INSERT INTO Products (ProductName, BrandID, CategoryID, SupplierID, "
-                    + "CostPrice, RetailPrice, ImageURL, VAT, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            psProduct = conn.prepareStatement(sqlProduct, Statement.RETURN_GENERATED_KEYS);
-            psProduct.setString(1, productName);
-            psProduct.setInt(2, brandId);
-            psProduct.setInt(3, categoryId);
-            psProduct.setInt(4, supplierId);
-            psProduct.setDouble(5, costPrice);
-            psProduct.setDouble(6, retailPrice);
-            psProduct.setString(7, imageUrl); // Set the image URL instead of null
-            psProduct.setDouble(8, vat);
-            psProduct.setBoolean(9, isActive);
-            int productRows = psProduct.executeUpdate();
+        // Insert into Products table with ImageURL and default IsActive = 1
+        String sqlProduct = "INSERT INTO Products (ProductName, BrandID, CategoryID, SupplierID, "
+                + "CostPrice, RetailPrice, ImageURL, VAT, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        psProduct = conn.prepareStatement(sqlProduct, Statement.RETURN_GENERATED_KEYS);
+        psProduct.setString(1, productName);
+        psProduct.setInt(2, brandId);
+        psProduct.setInt(3, categoryId);
+        psProduct.setInt(4, supplierId);
+        psProduct.setDouble(5, costPrice);
+        psProduct.setDouble(6, retailPrice);
+        psProduct.setString(7, imageUrl);
+        psProduct.setDouble(8, vat);
+        psProduct.setBoolean(9, true); // Default IsActive = 1
+        int productRows = psProduct.executeUpdate();
 
-            if (productRows > 0) {
-                // Get generated ProductID
-                rs = psProduct.getGeneratedKeys();
-                if (rs.next()) {
-                    int productId = rs.getInt(1);
+        if (productRows > 0) {
+            // Get generated ProductID
+            rs = psProduct.getGeneratedKeys();
+            if (rs.next()) {
+                int productId = rs.getInt(1);
 
-                    // Insert into ProductDetails table (let database auto-generate ProductDetailID)
-                    String sqlProductDetail = "INSERT INTO ProductDetails (ProductID, Description, ProductCode, "
-                            + "WarrantyPeriod, ProductNameUnsigned) VALUES (?, ?, ?, ?, ?)";
-                    psProductDetail = conn.prepareStatement(sqlProductDetail);
-                    psProductDetail.setInt(1, productId);
-                    psProductDetail.setString(2, description);
-                    psProductDetail.setString(3, productCode);
-                    psProductDetail.setString(4, warrantyPeriod.isEmpty() ? null : warrantyPeriod);
-                    psProductDetail.setString(5, standardizeName(productName));
-                    int detailRows = psProductDetail.executeUpdate();
+                // Insert into ProductDetails table
+                String sqlProductDetail = "INSERT INTO ProductDetails (ProductID, Description, ProductCode, "
+                        + "WarrantyPeriod, ProductNameUnsigned) VALUES (?, ?, ?, ?, ?)";
+                psProductDetail = conn.prepareStatement(sqlProductDetail, Statement.RETURN_GENERATED_KEYS);
+                psProductDetail.setInt(1, productId);
+                psProductDetail.setString(2, description);
+                psProductDetail.setString(3, productCode);
+                psProductDetail.setString(4, warrantyPeriod.isEmpty() ? null : warrantyPeriod);
+                psProductDetail.setString(5, standardizeName(productName));
+                int detailRows = psProductDetail.executeUpdate();
 
-                    if (detailRows > 0) {
+                if (detailRows > 0) {
+                    // Get generated ProductDetailID
+                    rs = psProductDetail.getGeneratedKeys();
+                    if (rs.next()) {
+                        int productDetailId = rs.getInt(1);
+
+                        // Insert into InventoryProducts for each Inventory
+                        String sqlInventoryProduct = "INSERT INTO InventoryProducts (InventoryID, ProductDetailID, Quantity) "
+                                + "SELECT InventoryID, ?, 0 FROM Inventory";
+                        psInventoryProduct = conn.prepareStatement(sqlInventoryProduct);
+                        psInventoryProduct.setInt(1, productDetailId);
+                        psInventoryProduct.executeUpdate();
+
+                        // Insert into WarehouseProducts for each Warehouse
+                        String sqlWarehouseProduct = "INSERT INTO WarehouseProducts (WarehouseID, ProductDetailID, Quantity) "
+                                + "SELECT WarehouseID, ?, 0 FROM Warehouses";
+                        psWarehouseProduct = conn.prepareStatement(sqlWarehouseProduct);
+                        psWarehouseProduct.setInt(1, productDetailId);
+                        psWarehouseProduct.executeUpdate();
+
                         conn.commit();
                         success = true;
                     } else {
-                        throw new SQLException("Không thể chèn vào ProductDetails.");
+                        throw new SQLException("Không thể lấy ProductDetailID sau khi chèn vào ProductDetails.");
                     }
                 } else {
-                    throw new SQLException("Không thể lấy ProductID sau khi chèn vào Products.");
+                    throw new SQLException("Không thể chèn vào ProductDetails.");
                 }
             } else {
-                throw new SQLException("Không thể chèn vào Products.");
+                throw new SQLException("Không thể lấy ProductID sau khi chèn vào Products.");
             }
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    throw new SQLException("Rollback thất bại: " + ex.getMessage(), ex);
-                }
-            }
-            throw e;
-        } finally {
-            if (rs != null) try {
-                rs.close();
-            } catch (SQLException ignored) {
-            }
-            if (psProductDetail != null) try {
-                psProductDetail.close();
-            } catch (SQLException ignored) {
-            }
-            if (psProduct != null) try {
-                psProduct.close();
-            } catch (SQLException ignored) {
-            }
-            if (conn != null) try {
-                conn.setAutoCommit(true);
-                DBUtil.closeConnection(conn);
-            } catch (SQLException ignored) {
+        } else {
+            throw new SQLException("Không thể chèn vào Products.");
+        }
+    } catch (SQLException e) {
+        if (conn != null) {
+            try {
+                conn.rollback();
+            } catch (SQLException ex) {
+                throw new SQLException("Rollback thất bại: " + ex.getMessage(), ex);
             }
         }
-        return success;
+        throw e;
+    } finally {
+        if (rs != null) try {
+            rs.close();
+        } catch (SQLException ignored) {
+        }
+        if (psWarehouseProduct != null) try {
+            psWarehouseProduct.close();
+        } catch (SQLException ignored) {
+        }
+        if (psInventoryProduct != null) try {
+            psInventoryProduct.close();
+        } catch (SQLException ignored) {
+        }
+        if (psProductDetail != null) try {
+            psProductDetail.close();
+        } catch (SQLException ignored) {
+        }
+        if (psProduct != null) try {
+            psProduct.close();
+        } catch (SQLException ignored) {
+        }
+        if (conn != null) try {
+            conn.setAutoCommit(true);
+            DBUtil.closeConnection(conn);
+        } catch (SQLException ignored) {
+        }
     }
+    return success;
+}
 
 // Keep the existing methods but remove serial number related ones
     public boolean isProductCodeExists(String dbName, String productCode) throws SQLException {

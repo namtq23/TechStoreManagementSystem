@@ -150,10 +150,10 @@
                 }
             }
             // Redirect after success message
-            <c:if test="${not empty successMessage}">
-            setTimeout(function () {
-                window.location.href = 'so-products';
-            }, 1000);
+            <c:if test="${not empty successMessage && param.action == 'addProduct'}">
+                    setTimeout(function () {
+                    window.location.href = 'so-products';
+                        }, 1000);
             </c:if>
         </script>
     </head>
@@ -248,218 +248,204 @@
         </header>
         
         <div class="container">
-            <h1>Thêm sản phẩm mới</h1>
-            <c:if test="${not empty successMessage}">
-                <div class="success">${successMessage}</div>
-            </c:if>
-            <c:if test="${not empty errorMessage}">
-                <div class="error">${errorMessage}</div>
-            </c:if>
+    <h1>Thêm sản phẩm mới</h1>
+    <c:if test="${not empty successMessage}">
+        <div class="success">${successMessage}</div>
+    </c:if>
+    <c:if test="${not empty errorMessage}">
+        <div class="error">${errorMessage}</div>
+    </c:if>
+    <form action="so-add-product" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="addProduct">
+        <div class="form-group">
+            <label>Tên sản phẩm: <span style="color: #f44336;">*</span></label>
+            <input type="text" name="productName" value="${param.productName}" required>
+            <div class="error">${productNameError}</div>
+        </div>
+        <div class="form-group">
+            <label>Mã sản phẩm: <span style="color: #f44336;">*</span></label>
+            <input type="text" name="productCode" value="${param.productCode}" required>
+            <div class="error">${productCodeError}</div>
+        </div>
+        <div class="form-group">
+            <label>Mô tả: <span style="color: #f44336;">*</span></label>
+            <textarea name="description" rows="4" required>${param.description}</textarea>
+            <div class="error">${descriptionError}</div>
+        </div>
+        <div class="form-group">
+            <label>Giá nhập: <span style="color: #f44336;">*</span></label>
+            <input type="number" name="costPrice" step="0.01" value="${param.costPrice}" required>
+            <div class="error">${costPriceError}</div>
+        </div>
+        <div class="form-group">
+            <label>Giá bán: <span style="color: #f44336;">*</span></label>
+            <input type="number" name="retailPrice" step="0.01" value="${param.retailPrice}" required>
+            <div class="error">${retailPriceError}</div>
+        </div>
+        <div class="form-group">
+            <label>Thương hiệu: <span style="color: #f44336;">*</span></label>
+            <div class="dropdown-container">
+                <select name="brandId" required>
+                    <option value="">Chọn thương hiệu</option>
+                    <c:forEach var="brand" items="${brands}">
+                        <option value="${brand.brandID}" ${param.brandId == brand.brandID ? 'selected' : ''}>${brand.brandName}</option>
+                    </c:forEach>
+                </select>
+                <button type="button" class="btn btn-add" onclick="openModal('brandModal')">Thêm mới</button>
+            </div>
+            <div class="error">${brandIdError}</div>
+        </div>
+        <div class="form-group">
+            <label>Danh mục: <span style="color: #f44336;">*</span></label>
+            <div class="dropdown-container">
+                <select name="categoryId" required>
+                    <option value="">Chọn danh mục</option>
+                    <c:forEach var="category" items="${categories}">
+                        <option value="${category.categoryID}" ${param.categoryId == category.categoryID ? 'selected' : ''}>${category.categoryName}</option>
+                    </c:forEach>
+                </select>
+                <button type="button" class="btn btn-add" onclick="openModal('categoryModal')">Thêm mới</button>
+            </div>
+            <div class="error">${categoryIdError}</div>
+        </div>
+        <div class="form-group">
+            <label>Nhà cung cấp: <span style="color: #f44336;">*</span></label>
+            <div class="dropdown-container">
+                <select name="supplierId" required>
+                    <option value="">Chọn nhà cung cấp</option>
+                    <c:forEach var="supplier" items="${suppliers}">
+                        <option value="${supplier.supplierID}" ${param.supplierId == supplier.supplierID ? 'selected' : ''}>${supplier.supplierName}</option>
+                    </c:forEach>
+                </select>
+                <button type="button" class="btn btn-add" onclick="openModal('supplierModal')">Thêm mới</button>
+            </div>
+            <div class="error">${supplierIdError}</div>
+        </div>
+        <div class="form-group">
+            <label>Thời gian bảo hành: <span style="color: #f44336;">*</span></label>
+            <input type="text" name="warrantyPeriod" value="${param.warrantyPeriod}" required>
+            <div class="error">${warrantyPeriodError}</div>
+        </div>
+        <div class="form-group">
+            <label>VAT (%): <span style="color: #f44336;">*</span></label>
+            <input type="number" name="vat" step="0.01" value="${param.vat}" required>
+            <div class="error">${vatError}</div>
+        </div>
+        <div class="form-group">
+            <label>Ảnh sản phẩm: <span style="color: #f44336;">*</span></label>
+            <input type="file" name="image" accept=".png,.jpg,.jpeg" required onchange="previewImage(event)">
+            <img id="imagePreview" class="image-preview" src="#" alt="Ảnh preview">
+            <div id="imageUrl" class="image-url">${imageUrl}</div>
+            <div class="error">${imageError}</div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">Lưu sản phẩm</button>
+            <a href="so-products" class="btn btn-danger">Hủy</a>
+        </div>
+    </form>
+
+    <div id="brandModal" class="modal" style="display: ${showBrandModal == 'true' ? 'flex' : 'none'}">
+        <div class="modal-content">
+            <h2>Thêm thương hiệu</h2>
             <form action="so-add-product" method="post" enctype="multipart/form-data">
-                <input type="hidden" name="action" value="addProduct">
+                <input type="hidden" name="action" value="addBrand">
+                <input type="hidden" name="productName" value="${param.productName}">
+                <input type="hidden" name="productCode" value="${param.productCode}">
+                <input type="hidden" name="description" value="${param.description}">
+                <input type="hidden" name="costPrice" value="${param.costPrice}">
+                <input type="hidden" name="retailPrice" value="${param.retailPrice}">
+                <input type="hidden" name="brandId" value="${param.brandId}">
+                <input type="hidden" name="categoryId" value="${param.categoryId}">
+                <input type="hidden" name="supplierId" value="${param.supplierId}">
+                <input type="hidden" name="warrantyPeriod" value="${param.warrantyPeriod}">
+                <input type="hidden" name="vat" value="${param.vat}">
+                <input type="hidden" name="serialNumber" value="${param.serialNumber}">
+                <input type="hidden" name="image" value="${param.image}">
                 <div class="form-group">
-                    <label>Tên sản phẩm: <span style="color: #f44336;">*</span></label>
-                    <input type="text" name="productName" value="${param.productName}" required>
-                    <div class="error">${productNameError}</div>
-                </div>
-                <div class="form-group">
-                    <label>Mã sản phẩm: <span style="color: #f44336;">*</span></label>
-                    <input type="text" name="productCode" value="${param.productCode}" required>
-                    <div class="error">${productCodeError}</div>
-                </div>
-                <div class="form-group">
-                    <label>Mô tả: <span style="color: #f44336;">*</span></label>
-                    <textarea name="description" rows="4" required>${param.description}</textarea>
-                    <div class="error">${descriptionError}</div>
-                </div>
-                <div class="form-group">
-                    <label>Giá nhập: <span style="color: #f44336;">*</span></label>
-                    <input type="number" name="costPrice" step="0.01" value="${param.costPrice}" required>
-                    <div class="error">${costPriceError}</div>
-                </div>
-                <div class="form-group">
-                    <label>Giá bán: <span style="color: #f44336;">*</span></label>
-                    <input type="number" name="retailPrice" step="0.01" value="${param.retailPrice}" required>
-                    <div class="error">${retailPriceError}</div>
-                </div>
-                <div class="form-group">
-                    <label>Thương hiệu: <span style="color: #f44336;">*</span></label>
-                    <div class="dropdown-container">
-                        <select name="brandId" required>
-                            <option value="">Chọn thương hiệu</option>
-                            <c:forEach var="brand" items="${brands}">
-                                <option value="${brand.brandID}" ${param.brandId == brand.brandID ? 'selected' : ''}>${brand.brandName}</option>
-                            </c:forEach>
-                        </select>
-                        <button type="button" class="btn btn-add" onclick="openModal('brandModal')">Thêm mới</button>
-                    </div>
-                    <div class="error">${brandIdError}</div>
-                </div>
-                <div class="form-group">
-                    <label>Danh mục: <span style="color: #f44336;">*</span></label>
-                    <div class="dropdown-container">
-                        <select name="categoryId" required>
-                            <option value="">Chọn danh mục</option>
-                            <c:forEach var="category" items="${categories}">
-                                <option value="${category.categoryID}" ${param.categoryId == category.categoryID ? 'selected' : ''}>${category.categoryName}</option>
-                            </c:forEach>
-                        </select>
-                        <button type="button" class="btn btn-add" onclick="openModal('categoryModal')">Thêm mới</button>
-                    </div>
-                    <div class="error">${categoryIdError}</div>
-                </div>
-                <div class="form-group">
-                    <label>Nhà cung cấp: <span style="color: #f44336;">*</span></label>
-                    <div class="dropdown-container">
-                        <select name="supplierId" required>
-                            <option value="">Chọn nhà cung cấp</option>
-                            <c:forEach var="supplier" items="${suppliers}">
-                                <option value="${supplier.supplierID}" ${param.supplierId == supplier.supplierID ? 'selected' : ''}>${supplier.supplierName}</option>
-                            </c:forEach>
-                        </select>
-                        <button type="button" class="btn btn-add" onclick="openModal('supplierModal')">Thêm mới</button>
-                    </div>
-                    <div class="error">${supplierIdError}</div>
-                </div>
-                <div class="form-group">
-                    <label>Thời gian bảo hành: <span style="color: #f44336;">*</span></label>
-                    <input type="text" name="warrantyPeriod" value="${param.warrantyPeriod}" required>
-                    <div class="error">${warrantyPeriodError}</div>
-                </div>
-                <div class="form-group">
-                    <label>VAT (%): <span style="color: #f44336;">*</span></label>
-                    <input type="number" name="vat" step="0.01" value="${param.vat}" required>
-                    <div class="error">${vatError}</div>
-                </div>
-                <div class="form-group">
-                    <label>Trạng thái: <span style="color: #f44336;">*</span></label>
-                    <select name="isActive" required>
-                        <option value="">Chọn trạng thái</option>
-                        <option value="1" ${param.isActive == '1' ? 'selected' : ''}>Kích hoạt</option>
-                        <option value="0" ${param.isActive == '0' ? 'selected' : ''}>Hết Hàng</option>
-                    </select>
-                    <div class="error">${isActiveError}</div>
-                </div>
-                <div class="form-group">
-                    <label>Ảnh sản phẩm: <span style="color: #f44336;">*</span></label>
-                    <input type="file" name="image" accept=".png,.jpg,.jpeg" required onchange="previewImage(event)">
-                    <img id="imagePreview" class="image-preview" src="#" alt="Ảnh preview">
-                    <div id="imageUrl" class="image-url">${imageUrl}</div>
-                    <div class="error">${imageError}</div>
+                    <label>Tên thương hiệu: <span style="color: #f44336;">*</span></label>
+                    <input type="text" name="brandName" value="${param.brandName}" required>
+                    <div class="error">${brandNameError}</div>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-success">Lưu sản phẩm</button>
-                    <a href="so-products" class="btn btn-danger">Hủy</a>
+                    <button type="submit" class="btn btn-success">Lưu</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('brandModal')">Hủy</button>
                 </div>
             </form>
-
-            <div id="brandModal" class="modal" style="display: ${showBrandModal == 'true' ? 'flex' : 'none'}">
-                <div class="modal-content">
-                    <h2>Thêm thương hiệu</h2>
-                    <form action="so-add-product" method="post" enctype="multipart/form-data">
-                        <input type="hidden" name="action" value="addBrand">
-                        <input type="hidden" name="productName" value="${param.productName}">
-                        <input type="hidden" name="productCode" value="${param.productCode}">
-                        <input type="hidden" name="description" value="${param.description}">
-                        <input type="hidden" name="costPrice" value="${param.costPrice}">
-                        <input type="hidden" name="retailPrice" value="${param.retailPrice}">
-                        <input type="hidden" name="brandId" value="${param.brandId}">
-                        <input type="hidden" name="categoryId" value="${param.categoryId}">
-                        <input type="hidden" name="supplierId" value="${param.supplierId}">
-                        <input type="hidden" name="warrantyPeriod" value="${param.warrantyPeriod}">
-                        <input type="hidden" name="vat" value="${param.vat}">
-                        <input type="hidden" name="isActive" value="${param.isActive}">
-                        <input type="hidden" name="serialNumber" value="${param.serialNumber}">
-                        <input type="hidden" name="image" value="${param.image}">
-                        <div class="form-group">
-                            <label>Tên thương hiệu: <span style="color: #f44336;">*</span></label>
-                            <input type="text" name="brandName" value="${param.brandName}" required>
-                            <div class="error">${brandNameError}</div>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-success">Lưu</button>
-                            <button type="button" class="btn btn-danger" onclick="closeModal('brandModal')">Hủy</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div id="categoryModal" class="modal" style="display: ${showCategoryModal == 'true' ? 'flex' : 'none'}">
-                <div class="modal-content">
-                    <h2>Thêm danh mục</h2>
-                    <form action="so-add-product" method="post" enctype="multipart/form-data">
-                        <input type="hidden" name="action" value="addCategory">
-                        <input type="hidden" name="productName" value="${param.productName}">
-                        <input type="hidden" name="productCode" value="${param.productCode}">
-                        <input type="hidden" name="description" value="${param.description}">
-                        <input type="hidden" name="costPrice" value="${param.costPrice}">
-                        <input type="hidden" name="retailPrice" value="${param.retailPrice}">
-                        <input type="hidden" name="brandId" value="${param.brandId}">
-                        <input type="hidden" name="categoryId" value="${param.categoryId}">
-                        <input type="hidden" name="supplierId" value="${param.supplierId}">
-                        <input type="hidden" name="warrantyPeriod" value="${param.warrantyPeriod}">
-                        <input type="hidden" name="vat" value="${param.vat}">
-                        <input type="hidden" name="isActive" value="${param.isActive}">
-                        <input type="hidden" name="serialNumber" value="${param.serialNumber}">
-                        <input type="hidden" name="image" value="${param.image}">
-                        <div class="form-group">
-                            <label>Tên danh mục: <span style="color: #f44336;">*</span></label>
-                            <input type="text" name="categoryName" value="${param.categoryName}" required>
-                            <div class="error">${categoryNameError}</div>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-success">Lưu</button>
-                            <button type="button" class="btn btn-danger" onclick="closeModal('categoryModal')">Hủy</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div id="supplierModal" class="modal" style="display: ${showSupplierModal == 'true' ? 'flex' : 'none'}">
-                <div class="modal-content">
-                    <h2>Thêm nhà cung cấp</h2>
-                    <form action="so-add-product" method="post" enctype="multipart/form-data">
-                        <input type="hidden" name="action" value="addSupplier">
-                        <input type="hidden" name="productName" value="${param.productName}">
-                        <input type="hidden" name="productCode" value="${param.productCode}">
-                        <input type="hidden" name="description" value="${param.description}">
-                        <input type="hidden" name="costPrice" value="${param.costPrice}">
-                        <input type="hidden" name="retailPrice" value="${param.retailPrice}">
-                        <input type="hidden" name="brandId" value="${param.brandId}">
-                        <input type="hidden" name="categoryId" value="${param.categoryId}">
-                        <input type="hidden" name="supplierId" value="${param.supplierId}">
-                        <input type="hidden" name="warrantyPeriod" value="${param.warrantyPeriod}">
-                        <input type="hidden" name="vat" value="${param.vat}">
-                        <input type="hidden" name="isActive" value="${param.isActive}">
-                        <input type="hidden" name="serialNumber" value="${param.serialNumber}">
-                        <input type="hidden" name="image" value="${param.image}">
-                        <div class="form-group">
-                            <label>Tên nhà cung cấp: <span style="color: #f44336;">*</span></label>
-                            <input type="text" name="supplierName" value="${param.supplierName}" required>
-                            <div class="error">${supplierNameError}</div>
-                        </div>
-                        <div class="form-group">
-                            <label>Tên liên hệ: <span style="color: #f44336;">*</span></label>
-                            <input type="text" name="contactName" value="${param.contactName}" required>
-                            <div class="error">${contactNameError}</div>
-                        </div>
-                        <div class="form-group">
-                            <label>Số điện thoại: <span style="color: #f44336;">*</span></label>
-                            <input type="text" name="phone" value="${param.phone}" required>
-                            <div class="error">${phoneError}</div>
-                        </div>
-                        <div class="form-group">
-                            <label>Email: <span style="color: #f44336;">*</span></label>
-                            <input type="email" name="email" value="${param.email}" required>
-                            <div class="error">${emailError}</div>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-success">Lưu</button>
-                            <button type="button" class="btn btn-danger" onclick="closeModal('supplierModal')">Hủy</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
         </div>
-    </body>
-</html>
+    </div>
+
+    <div id="categoryModal" class="modal" style="display: ${showCategoryModal == 'true' ? 'flex' : 'none'}">
+        <div class="modal-content">
+            <h2>Thêm danh mục</h2>
+            <form action="so-add-product" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="addCategory">
+                <input type="hidden" name="productName" value="${param.productName}">
+                <input type="hidden" name="productCode" value="${param.productCode}">
+                <input type="hidden" name="description" value="${param.description}">
+                <input type="hidden" name="costPrice" value="${param.costPrice}">
+                <input type="hidden" name="retailPrice" value="${param.retailPrice}">
+                <input type="hidden" name="brandId" value="${param.brandId}">
+                <input type="hidden" name="categoryId" value="${param.categoryId}">
+                <input type="hidden" name="supplierId" value="${param.supplierId}">
+                <input type="hidden" name="warrantyPeriod" value="${param.warrantyPeriod}">
+                <input type="hidden" name="vat" value="${param.vat}">
+                <input type="hidden" name="serialNumber" value="${param.serialNumber}">
+                <input type="hidden" name="image" value="${param.image}">
+                <div class="form-group">
+                    <label>Tên danh mục: <span style="color: #f44336;">*</span></label>
+                    <input type="text" name="categoryName" value="${param.categoryName}" required>
+                    <div class="error">${categoryNameError}</div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">Lưu</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('categoryModal')">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="supplierModal" class="modal" style="display: ${showSupplierModal == 'true' ? 'flex' : 'none'}">
+        <div class="modal-content">
+            <h2>Thêm nhà cung cấp</h2>
+            <form action="so-add-product" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="addSupplier">
+                <input type="hidden" name="productName" value="${param.productName}">
+                <input type="hidden" name="productCode" value="${param.productCode}">
+                <input type="hidden" name="description" value="${param.description}">
+                <input type="hidden" name="costPrice" value="${param.costPrice}">
+                <input type="hidden" name="retailPrice" value="${param.retailPrice}">
+                <input type="hidden" name="brandId" value="${param.brandId}">
+                <input type="hidden" name="categoryId" value="${param.categoryId}">
+                <input type="hidden" name="supplierId" value="${param.supplierId}">
+                <input type="hidden" name="warrantyPeriod" value="${param.warrantyPeriod}">
+                <input type="hidden" name="vat" value="${param.vat}">
+                <input type="hidden" name="serialNumber" value="${param.serialNumber}">
+                <input type="hidden" name="image" value="${param.image}">
+                <div class="form-group">
+                    <label>Tên nhà cung cấp: <span style="color: #f44336;">*</span></label>
+                    <input type="text" name="supplierName" value="${param.supplierName}" required>
+                    <div class="error">${supplierNameError}</div>
+                </div>
+                <div class="form-group">
+                    <label>Tên liên hệ: <span style="color: #f44336;">*</span></label>
+                    <input type="text" name="contactName" value="${param.contactName}" required>
+                    <div class="error">${contactNameError}</div>
+                </div>
+                <div class="form-group">
+                    <label>Số điện thoại: <span style="color: #f44336;">*</span></label>
+                    <input type="text" name="phone" value="${param.phone}" required>
+                    <div class="error">${phoneError}</div>
+                </div>
+                <div class="form-group">
+                    <label>Email: <span style="color: #f44336;">*</span></label>
+                    <input type="email" name="email" value="${param.email}" required>
+                    <div class="error">${emailError}</div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">Lưu</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('supplierModal')">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

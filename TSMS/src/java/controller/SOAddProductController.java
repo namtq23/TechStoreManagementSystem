@@ -256,7 +256,6 @@ public class SOAddProductController extends HttpServlet {
     String supplierIdStr = req.getParameter("supplierId");
     String warrantyPeriod = req.getParameter("warrantyPeriod");
     String vatStr = req.getParameter("vat");
-    String isActiveStr = req.getParameter("isActive");
     Part imagePart = req.getPart("image");
 
     if (productName == null || productName.trim().isEmpty()) {
@@ -401,13 +400,6 @@ public class SOAddProductController extends HttpServlet {
         return;
     }
 
-    if (isActiveStr == null || isActiveStr.trim().isEmpty()) {
-        req.setAttribute("isActiveError", "Vui lòng chọn trạng thái.");
-        forwardToForm(req, resp, dbName);
-        return;
-    }
-    boolean isActive = "1".equals(isActiveStr);
-
     if (imagePart == null || imagePart.getSize() == 0) {
         req.setAttribute("imageError", "Ảnh sản phẩm không được để trống.");
         forwardToForm(req, resp, dbName);
@@ -445,8 +437,7 @@ public class SOAddProductController extends HttpServlet {
     imagePart.write(filePath);
     String imageUrl = UPLOAD_DIR + "/" + uniqueFileName; // Remove leading slash for relative path
 
-    if (productDAO.addProduct(dbName, productName, imageUrl, productCode, description, costPrice, retailPrice,
-            brandId, categoryId, supplierId, warrantyPeriod, vat, isActive)) {
+    if (productDAO.addProduct(dbName, productName, imageUrl, productCode, description, costPrice, retailPrice, brandId, categoryId, supplierId, warrantyPeriod, vat)) {
         req.setAttribute("successMessage", "Thêm sản phẩm thành công.");
         req.setAttribute("imageUrl", imageUrl);
     } else {
@@ -456,18 +447,18 @@ public class SOAddProductController extends HttpServlet {
     forwardToForm(req, resp, dbName);
 }
 
-    private void forwardToForm(HttpServletRequest req, HttpServletResponse resp, String dbName) throws ServletException, IOException {
-        try {
-            List<Category> categories = categoryDAO.getAllCategories(dbName);
-            List<Supplier> suppliers = suppliersDAO.getAllSupplier(dbName);
-            List<Brand> brands = brandDAO.getAllBrands(dbName);
-            req.setAttribute("categories", categories);
-            req.setAttribute("suppliers", suppliers);
-            req.setAttribute("brands", brands);
-            req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/so-add-product.jsp").forward(req, resp);
-        } catch (SQLException e) {
-            req.setAttribute("errorMessage", "Lỗi khi tải dữ liệu: " + e.getMessage());
-            req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/so-add-product.jsp").forward(req, resp);
-        }
+private void forwardToForm(HttpServletRequest req, HttpServletResponse resp, String dbName) throws ServletException, IOException {
+    try {
+        List<Category> categories = categoryDAO.getAllCategories(dbName);
+        List<Supplier> suppliers = suppliersDAO.getAllSupplier(dbName);
+        List<Brand> brands = brandDAO.getAllBrands(dbName);
+        req.setAttribute("categories", categories);
+        req.setAttribute("suppliers", suppliers);
+        req.setAttribute("brands", brands);
+        req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/so-add-product.jsp").forward(req, resp);
+    } catch (SQLException e) {
+        req.setAttribute("errorMessage", "Lỗi khi tải dữ liệu: " + e.getMessage());
+        req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/so-add-product.jsp").forward(req, resp);
     }
+}
 }
