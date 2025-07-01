@@ -43,12 +43,18 @@ public class SOOrderController extends HttpServlet {
             String dbName = dbNameObj.toString();
             int page = 1;
             int pageSize = 10;
-            // Parse page parameter
+            String pageParam = req.getParameter("page");
+            if (pageParam != null && !pageParam.trim().isEmpty()) {
+                try {
+                    page = Integer.parseInt(pageParam);
+                    if (page < 1) {
+                        page = 1;
+                    }
+                } catch (NumberFormatException e) {
+                    page = 1;
+                }
+            }
 
-            Integer branchId = null;
-
-
-            // Parse filter parameters
             String[] selectedBranches = req.getParameterValues("branchIDs");
             String[] selectedCreators = req.getParameterValues("creatorIDs");
             String timeFilter = req.getParameter("timeFilter");
@@ -56,6 +62,7 @@ public class SOOrderController extends HttpServlet {
             String minPriceStr = req.getParameter("minPrice");
             String maxPriceStr = req.getParameter("maxPrice");
             String calculatedStartDate = calculateStartDate(timeFilter, customDate);
+
             Double minPrice = null;
             Double maxPrice = null;
             String searchKeyword = req.getParameter("search");
@@ -66,6 +73,7 @@ public class SOOrderController extends HttpServlet {
                     searchKeyword = null;
                 }
             }
+
             if (minPriceStr != null && !minPriceStr.trim().isEmpty()) {
                 try {
                     minPrice = Double.parseDouble(minPriceStr);
@@ -85,12 +93,13 @@ public class SOOrderController extends HttpServlet {
             OrdersDAO orderDAO = new OrdersDAO();
             UserDAO userDAO = new UserDAO();
             String action = req.getParameter("action");
-
             if ("view".equals(action)) {
                 try {
                     int orderID = Integer.parseInt(req.getParameter("orderID"));
-                    OrdersDTO order = orderDAO.getOrderById(dbName, orderID);
+                    OrdersDTO order = orderDAO.getOrderBasicInfo(dbName, orderID);
+                    List<OrdersDTO> orderProducts = orderDAO.getOrderProductsById(dbName, orderID);
                     req.setAttribute("order", order);
+                    req.setAttribute("orderProducts", orderProducts);
                     req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/edit-order.jsp").forward(req, resp);
                     return;
                 } catch (Exception e) {
@@ -99,17 +108,14 @@ public class SOOrderController extends HttpServlet {
                     return;
                 }
             }
-
-            // Fetch all branches and creators for filter options
             List<Branch> branchesList = orderDAO.getAllBranches(dbName);
             List<UserDTO> creatorsList = userDAO.getAllCreators(dbName);
 
-            // Fetch filtered orders
             List<OrdersDTO> ordersList = orderDAO.getFilteredOrdersListByPage(
                     dbName, page, pageSize, selectedBranches, selectedCreators,
                     calculatedStartDate, null, minPrice, maxPrice, searchKeyword
             );
-
+            
             int totalOrders = orderDAO.countFilteredOrders(
                     dbName, selectedBranches, selectedCreators,
                     calculatedStartDate, null, minPrice, maxPrice, searchKeyword
@@ -129,7 +135,6 @@ public class SOOrderController extends HttpServlet {
             req.setAttribute("startOrder", startOrder);
             req.setAttribute("endOrder", endOrder);
 
-            // Set filter parameters for maintaining state
             req.setAttribute("selectedBranches", selectedBranches);
             req.setAttribute("selectedCreators", selectedCreators);
             req.setAttribute("timeFilter", timeFilter);
@@ -138,11 +143,10 @@ public class SOOrderController extends HttpServlet {
             req.setAttribute("minPrice", minPrice);
             req.setAttribute("maxPrice", maxPrice);
             req.setAttribute("searchKeyword", searchKeyword);
-
-
             req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/orderpage.jsp").forward(req, resp);
         } catch (Exception e) {
             e.printStackTrace();
+            req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/orderpage.jsp").forward(req, resp);
         }
     }
 
@@ -151,7 +155,7 @@ public class SOOrderController extends HttpServlet {
         java.time.LocalDate startDate;
 
         if (timeFilter == null || timeFilter.isEmpty()) {
-            timeFilter = "this-month"; // Default to this month
+            timeFilter = "this-month";
         }
 
         switch (timeFilter) {
@@ -159,11 +163,9 @@ public class SOOrderController extends HttpServlet {
                 startDate = now;
                 break;
             case "this-week":
-                // Get start of current week (Monday)
                 startDate = now.with(java.time.DayOfWeek.MONDAY);
                 break;
             case "this-month":
-                // Get start of current month
                 startDate = now.withDayOfMonth(1);
                 break;
             case "custom":
@@ -171,14 +173,14 @@ public class SOOrderController extends HttpServlet {
                     try {
                         startDate = java.time.LocalDate.parse(customDate);
                     } catch (Exception e) {
-                        startDate = now.withDayOfMonth(1); // Default to start of month if parsing fails
+                        startDate = now.withDayOfMonth(1);
                     }
                 } else {
-                    startDate = now.withDayOfMonth(1); // Default to start of month if no custom date
+                    startDate = now.withDayOfMonth(1);
                 }
                 break;
             default:
-                startDate = now.withDayOfMonth(1); // Default to start of month
+                startDate = now.withDayOfMonth(1);
                 break;
         }
 

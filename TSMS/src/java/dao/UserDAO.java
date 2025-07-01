@@ -707,6 +707,7 @@ public class UserDAO {
         SELECT DISTINCT u.UserID, u.FullName 
         FROM Users u 
         INNER JOIN Orders o ON u.UserID = o.CreatedBy 
+                       WHERE u.RoleID IN (1, 2)
         ORDER BY u.FullName
         """;
 

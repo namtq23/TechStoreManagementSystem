@@ -15,14 +15,14 @@
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
             line-height: 1.6;
         }
 
-        /* Header Styles - Match với thiết kế của bạn */
+        /* Header Styles */
         .header {
             background: linear-gradient(135deg, #2196F3 0%, #1976D2 50%, #0D47A1 100%);
             height: 60px;
@@ -463,6 +463,117 @@
             font-size: 18px;
         }
 
+        /* Styles cho phần sản phẩm */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            border-color: #2196F3;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.1);
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .product-header h4 {
+            color: #2196F3;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .product-id {
+            background: #2196F3;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .product-content {
+            display: flex;
+            gap: 15px;
+        }
+
+        .product-image {
+            flex-shrink: 0;
+        }
+
+        .product-details {
+            flex: 1;
+        }
+
+        .quantity-badge {
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .serial-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .serial-badge {
+            background: #6c757d;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .no-products i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #ffc107;
+        }
+
+        .alert {
+            padding: 12px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .main-nav {
@@ -521,101 +632,127 @@
             .main-content {
                 padding: 0 15px;
             }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-content {
+                flex-direction: column;
+            }
+            
+            .product-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
 <body>
     <header class="header">
-            <div class="header-container">
-                <div class="logo">
-                    <a href="so-overview" class="logo">
-                        <div class="logo-icon">T</div>
-                        <span class="logo-text">TSMS</span>
-                    </a>
-                </div>
-                <nav class="main-nav">
-                    <a href="so-overview" class="nav-item">
-                        <i class="fas fa-chart-line"></i>
-                        Tổng quan
-                    </a>
-
-                    <a href="so-products?page=1" class="nav-item">
-                        <i class="fas fa-box"></i>
-                        Hàng hóa
-                    </a>
-
-                    <div class="nav-item dropdown active">
-                        <a href="#" class="dropdown-toggle">
-                            <i class="fas fa-exchange-alt"></i>
-                            Giao dịch
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="so-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="so-createimport" class="dropdown-item">Tạo đơn nhập hàng</a>
-                            <a href="so-ienoti" class="dropdown-item">Thông báo nhập/xuất</a>
-                        </div>
-                    </div>
-
-                    <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
-                            <i class="fas fa-handshake"></i>
-                            Đối tác
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="so-customer" class="dropdown-item">Khách hàng</a>
-                            <a href="so-supplier" class="dropdown-item">Nhà cung cấp</a>
-                        </div>
-                    </div>
-
-                    <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
-                            <i class="fas fa-users"></i>
-                            Nhân viên
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="so-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="so-commission" class="dropdown-item">Hoa hồng</a>
-                        </div>
-                    </div>
-
-                    <a href="so-promotions" class="nav-item">
-                        <i class="fas fa-gift"></i>
-                        Khuyến mãi
-                    </a>
-
-                    <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
-                            <i class="fas fa-chart-bar"></i>
-                            Báo cáo
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="so-invoices?reportType=income" class="dropdown-item">Doanh Thu thuần</a>
-                            <a href="so-invoices?reportType=outcome" class="dropdown-item">Khoảng chi</a>
-                        </div>
-                    </div>
-
-                </nav>
-
-                <div class="header-right">
-                    <div class="user-dropdown">
-                        <a href="#" class="user-icon gradient" id="dropdownToggle">
-                            <i class="fas fa-user-circle fa-2x"></i>
-                        </a>
-                        <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
-                            <a href="logout" class="dropdown-item">Đăng xuất</a>
-                        </div>
-                    </div>      
-                </div>
+        <div class="header-container">
+            <div class="logo">
+                <a href="so-overview" class="logo">
+                    <div class="logo-icon">T</div>
+                    <span class="logo-text">TSMS</span>
+                </a>
             </div>
-        </header>
+            <nav class="main-nav">
+                <a href="so-overview" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    Tổng quan
+                </a>
+                <a href="so-products?page=1" class="nav-item">
+                    <i class="fas fa-box"></i>
+                    Hàng hóa
+                </a>
+                <div class="nav-item dropdown active">
+                    <a href="#" class="dropdown-toggle">
+                        <i class="fas fa-exchange-alt"></i>
+                        Giao dịch
+                        <i class="fas fa-caret-down"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="so-orders" class="dropdown-item">Đơn hàng</a>
+                        <a href="so-createimport" class="dropdown-item">Tạo đơn nhập hàng</a>
+                        <a href="so-ienoti" class="dropdown-item">Thông báo nhập/xuất</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown">
+                    <a href="#" class="dropdown-toggle">
+                        <i class="fas fa-handshake"></i>
+                        Đối tác
+                        <i class="fas fa-caret-down"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="so-customer" class="dropdown-item">Khách hàng</a>
+                        <a href="so-supplier" class="dropdown-item">Nhà cung cấp</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown">
+                    <a href="#" class="dropdown-toggle">
+                        <i class="fas fa-users"></i>
+                        Nhân viên
+                        <i class="fas fa-caret-down"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="so-staff" class="dropdown-item">Danh sách nhân viên</a>
+                        <a href="so-commission" class="dropdown-item">Hoa hồng</a>
+                    </div>
+                </div>
+                <a href="so-promotions" class="nav-item">
+                    <i class="fas fa-gift"></i>
+                    Khuyến mãi
+                </a>
+                <div class="nav-item dropdown">
+                    <a href="#" class="dropdown-toggle">
+                        <i class="fas fa-chart-bar"></i>
+                        Báo cáo
+                        <i class="fas fa-caret-down"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="so-invoices?reportType=income" class="dropdown-item">Doanh Thu thuần</a>
+                        <a href="so-invoices?reportType=outcome" class="dropdown-item">Khoảng chi</a>
+                    </div>
+                </div>
+            </nav>
+            <div class="header-right">
+                <div class="user-dropdown">
+                    <a href="#" class="user-icon gradient" id="dropdownToggle">
+                        <i class="fas fa-user-circle fa-2x"></i>
+                    </a>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                        <a href="logout" class="dropdown-item">Đăng xuất</a>
+                    </div>
+                </div>      
+            </div>
+        </div>
+    </header>
 
     <!-- Main Content -->
     <div class="main-content">
+        <!-- Success/Error Messages -->
+        <c:if test="${param.success == 'update'}">
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                Cập nhật đơn hàng thành công!
+            </div>
+        </c:if>
+        <c:if test="${param.error == 'update'}">
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                Có lỗi xảy ra khi cập nhật đơn hàng!
+            </div>
+        </c:if>
+        <c:if test="${param.error == 'view'}">
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                Không thể tải thông tin đơn hàng!
+            </div>
+        </c:if>
+
         <!-- Page Header -->
         <div class="page-header">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -637,85 +774,101 @@
 
         <!-- Info Grid -->
         <div class="info-grid">
-            <!-- Phần 1: Thông tin sản phẩm -->
-            <div class="info-card">
+            <!-- Phần 1: Danh sách sản phẩm trong đơn hàng -->
+            <div class="info-card" style="grid-column: 1 / -1;">
                 <div class="card-header">
                     <i class="fas fa-box"></i>
-                    Thông Tin Sản Phẩm
+                    Danh Sách Sản Phẩm 
+                    <c:if test="${not empty orderProducts}">
+                        (${orderProducts.size()} sản phẩm)
+                    </c:if>
                 </div>
                 <div class="card-body">
-                    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-                        <div style="flex-shrink: 0;">
-                            <c:choose>
-                                <c:when test="${not empty order.imageURL}">
-                                    <img src="${order.imageURL}" alt="Product Image" class="product-img">
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="product-img image-placeholder">
-                                        <i class="fas fa-image"></i>
+                    <c:choose>
+                        <c:when test="${not empty orderProducts}">
+                            <div class="products-grid">
+                                <c:forEach var="product" items="${orderProducts}" varStatus="status">
+                                    <div class="product-card">
+                                        <div class="product-header">
+                                            <h4>Sản phẩm ${status.index + 1}</h4>
+                                            <span class="product-id">#${product.productID}</span>
+                                        </div>
+                                        
+                                        <div class="product-content">
+                                            <div class="product-image">
+                                                <c:choose>
+                                                    <c:when test="${not empty product.imageURL}">
+                                                        <img src="${product.imageURL}" alt="Product Image" class="product-img">
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <div class="product-img image-placeholder">
+                                                            <i class="fas fa-image"></i>
+                                                        </div>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                            
+                                            <div class="product-details">
+                                                <div class="info-row">
+                                                    <span class="info-label">Tên sản phẩm:</span>
+                                                    <span class="info-value">${product.productName}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Mã code:</span>
+                                                    <span class="info-value">${product.productCode}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Số lượng:</span>
+                                                    <span class="info-value">
+                                                        <span class="quantity-badge">${product.quantity}</span>
+                                                    </span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Giá gốc:</span>
+                                                    <span class="info-value">
+                                                        <fmt:formatNumber value="${product.costPrice}" type="currency" currencySymbol="₫"/>
+                                                    </span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">VAT:</span>
+                                                    <span class="info-value">${product.VAT}%</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Trạng thái:</span>
+                                                    <span class="info-value">
+                                                        <c:choose>
+                                                            <c:when test="${product.productIsActive}">
+                                                                <span class="badge badge-success">Hoạt động</span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="badge badge-danger">Ngừng hoạt động</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Bảo hành:</span>
+                                                    <span class="info-value">${product.warrantyPeriod}</span>
+                                                </div>                        
+                                                <c:if test="${not empty product.productDescription}">
+                                                    <div class="info-row">
+                                                        <span class="info-label">Mô tả:</span>
+                                                        <span class="info-value">${product.productDescription}</span>
+                                                    </div>
+                                                </c:if>
+                                            </div>
+                                        </div>
                                     </div>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                        <div style="flex: 1;">
-                            <div class="info-row">
-                                <span class="info-label">Mã sản phẩm:</span>
-                                <span class="info-value">${order.productID}</span>
+                                </c:forEach>
                             </div>
-                            <div class="info-row">
-                                <span class="info-label">Tên sản phẩm:</span>
-                                <span class="info-value">${order.productName}</span>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="no-products">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Không có sản phẩm nào trong đơn hàng này</p>
                             </div>
-                            <div class="info-row">
-                                <span class="info-label">Trạng thái:</span>
-                                <span class="info-value">
-                                    <c:choose>
-                                        <c:when test="${order.productIsActive}">
-                                            <span class="badge badge-success">Hoạt động</span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span class="badge badge-danger">Ngừng hoạt động</span>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Giá gốc:</span>
-                        <span class="info-value">
-                            <fmt:formatNumber value="${order.costPrice}" type="currency" currencySymbol="₫"/>
-                        </span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">VAT:</span>
-                        <span class="info-value">${order.VAT}%</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Mô tả:</span>
-                        <span class="info-value">${order.productDescription}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Mã code:</span>
-                        <span class="info-value">${order.productCode}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Bảo hành:</span>
-                        <span class="info-value">${order.warrantyPeriod}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Serial Number:</span>
-                        <span class="info-value">
-                            <c:choose>
-                                <c:when test="${not empty order.serialNumber}">
-                                    ${order.serialNumber}
-                                </c:when>
-                                <c:otherwise>
-                                    <span style="color: #6c757d; font-style: italic;">Chưa có serial number</span>
-                                </c:otherwise>
-                            </c:choose>
-                        </span>
-                    </div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
 
@@ -767,12 +920,27 @@
                         <span class="info-value">${order.paymentMethod}</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">Số lượng:</span>
-                        <span class="info-value">${order.quantity}</span>
+                        <span class="info-label">Tổng sản phẩm:</span>
+                        <span class="info-value">
+                            <c:set var="totalQuantity" value="0"/>
+                            <c:forEach var="product" items="${orderProducts}">
+                                <c:set var="totalQuantity" value="${totalQuantity + product.quantity}"/>
+                            </c:forEach>
+                            <span class="quantity-badge">${totalQuantity}</span> sản phẩm
+                        </span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Ghi chú:</span>
-                        <span class="info-value">${order.notes}</span>
+                        <span class="info-value">
+                            <c:choose>
+                                <c:when test="${not empty order.notes}">
+                                    ${order.notes}
+                                </c:when>
+                                <c:otherwise>
+                                    <span style="color: #6c757d; font-style: italic;">Không có ghi chú</span>
+                                </c:otherwise>
+                            </c:choose>
+                        </span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Tổng tiền:</span>
@@ -864,6 +1032,10 @@
                 </div>
                 <div class="card-body">
                     <div class="info-row">
+                        <span class="info-label">Mã KH:</span>
+                        <span class="info-value">${order.customerID}</span>
+                    </div>
+                    <div class="info-row">
                         <span class="info-label">Họ tên:</span>
                         <span class="info-value">${order.customerName}</span>
                     </div>
@@ -891,9 +1063,14 @@
                     <div class="info-row">
                         <span class="info-label">Ngày sinh:</span>
                         <span class="info-value">
-                            <c:if test="${not empty order.customerDOB}">
-                                <fmt:formatDate value="${order.customerDOB}" pattern="dd/MM/yyyy"/>
-                            </c:if>
+                            <c:choose>
+                                <c:when test="${not empty order.customerDOB}">
+                                    <fmt:formatDate value="${order.customerDOB}" pattern="dd/MM/yyyy"/>
+                                </c:when>
+                                <c:otherwise>
+                                    <span style="color: #6c757d; font-style: italic;">Chưa cập nhật</span>
+                                </c:otherwise>
+                            </c:choose>
                         </span>
                     </div>
                 </div>
@@ -906,7 +1083,7 @@
                 <i class="fas fa-edit"></i>
                 Chỉnh Sửa Đơn Hàng
             </h2>
-            <form action="so-orders" method="post">
+            <form action="so-orders" method="post" id="updateOrderForm">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="orderID" value="${order.orderID}">
                 
@@ -966,22 +1143,106 @@
                     }
                 });
             }
+
+            // Auto-hide alerts after 5 seconds
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-20px)';
+                    setTimeout(function() {
+                        alert.remove();
+                    }, 300);
+                }, 5000);
+            });
         });
 
         // Form submission confirmation
-        document.querySelector('form').addEventListener('submit', function(e) {
-            if (!confirm('Bạn có chắc chắn muốn cập nhật đơn hàng này?')) {
+        document.getElementById('updateOrderForm').addEventListener('submit', function(e) {
+            const currentStatus = '${order.orderStatus}';
+            const newStatus = document.getElementById('orderStatus').value;
+            
+            let confirmMessage = 'Bạn có chắc chắn muốn cập nhật đơn hàng này?';
+            
+            if (currentStatus !== newStatus) {
+                if (newStatus === 'Cancelled') {
+                    confirmMessage = 'Bạn có chắc chắn muốn HỦY đơn hàng này? Hành động này không thể hoàn tác!';
+                } else if (newStatus === 'Completed') {
+                    confirmMessage = 'Bạn có chắc chắn đơn hàng này đã HOÀN THÀNH?';
+                }
+            }
+            
+            if (!confirm(confirmMessage)) {
                 e.preventDefault();
             }
         });
 
-        // Show success/error messages
-        <c:if test="${param.success == 'update'}">
-            alert('Cập nhật đơn hàng thành công!');
-        </c:if>
+        // Smooth scroll to edit section when there's an error
         <c:if test="${param.error == 'update'}">
-            alert('Có lỗi xảy ra khi cập nhật đơn hàng!');
+            document.querySelector('.edit-section').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'center'
+            });
         </c:if>
+
+        // Add loading state to form submission
+        document.getElementById('updateOrderForm').addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>Đang cập nhật...';
+            submitBtn.disabled = true;
+            
+            // Re-enable after 10 seconds in case of network issues
+            setTimeout(function() {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 10000);
+        });
+
+        // Add tooltips for status badges
+        document.querySelectorAll('.status-badge').forEach(function(badge) {
+            const status = badge.textContent.trim();
+            let tooltip = '';
+            
+            switch(status) {
+                case 'Chờ xử lý':
+                    tooltip = 'Đơn hàng đang chờ được xử lý';
+                    break;
+                case 'Đang xử lý':
+                    tooltip = 'Đơn hàng đang được xử lý';
+                    break;
+                case 'Hoàn thành':
+                    tooltip = 'Đơn hàng đã hoàn thành';
+                    break;
+                case 'Đã hủy':
+                    tooltip = 'Đơn hàng đã bị hủy';
+                    break;
+            }
+            
+            if (tooltip) {
+                badge.title = tooltip;
+            }
+        });
+
+        // Add click to copy functionality for order ID and serial numbers
+        document.querySelectorAll('.info-value').forEach(function(element) {
+            if (element.textContent.includes('#') || element.querySelector('.serial-badge')) {
+                element.style.cursor = 'pointer';
+                element.title = 'Click để sao chép';
+                
+                element.addEventListener('click', function() {
+                    const text = this.textContent.trim();
+                    navigator.clipboard.writeText(text).then(function() {
+                        // Show temporary success message
+                        const originalTitle = element.title;
+                        element.title = 'Đã sao chép!';
+                        setTimeout(function() {
+                            element.title = originalTitle;
+                        }, 2000);
+                    });
+                });
+            }
+        });
     </script>
 </body>
 </html>
