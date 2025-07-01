@@ -332,7 +332,7 @@ public class ShopOwnerDAO {
                      DECLARE @MethodID INT = 1;
                      DECLARE @StartOfThisMonth DATE = DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1);
                      DECLARE @StartOfLastMonth DATE = DATEADD(MONTH, -1, @StartOfThisMonth);
-                     DECLARE @EndOfLastMonth DATE = DATEADD(DAY, -1, @StartOfThisMonth);
+                     DECLARE @EndOfLastMonth DATETIME = DATEADD(MILLISECOND, -3, CAST(DATEADD(MONTH, 1, @StartOfLastMonth) AS DATETIME));
                      DECLARE @Today DATETIME = GETDATE();
                      
                      DECLARE @TotalUsersThisMonth INT = (SELECT COUNT(*) FROM ShopOwner);
@@ -461,6 +461,26 @@ public class ShopOwnerDAO {
             ps.setInt(3, subsMonth);
             ps.setInt(4, ownerId);
             ps.setInt(5, methodId);
+            ps.executeUpdate();
+        }
+    }
+    
+    public static int getOwnerIdByPhone(String phone) throws SQLException {
+        String sql = "SELECT OwnerId FROM ShopOwner WHERE Phone = ?";
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, phone);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("OwnerId");
+            }
+        }
+        return -1;
+    }
+
+    public static void deactivateOwner(int ownerId) throws SQLException {
+        String sql = "UPDATE ShopOwner SET IsActive = 0 WHERE OwnerId = ?";
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, ownerId);
             ps.executeUpdate();
         }
     }
