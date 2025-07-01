@@ -38,15 +38,14 @@ public class DBUtil {
 //            dataSource.setPassword("123");
             
             //Phung
-
-            dataSource.setUrl("jdbc:sqlserver://PHUNGPDHE189026\\SQL2019:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
-            dataSource.setUsername("sa");
-            dataSource.setPassword("1");
+//            dataSource.setUrl("jdbc:sqlserver://PHUNGPDHE189026\\SQL2019:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
+//            dataSource.setUsername("sa");
+//            dataSource.setPassword("1");
             
             //Dat
-//            dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
-//            dataSource.setUsername("sa");
-//            dataSource.setPassword("123");
+            dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
+            dataSource.setUsername("sa");
+            dataSource.setPassword("123");
 
             dataSource.setInitialSize(5);
             dataSource.setMaxTotal(10);
@@ -85,13 +84,13 @@ public class DBUtil {
 //        String url = "jdbc:sqlserver://DESKTOP-LJ3A22Q:1433;encrypt=false";
 //        return DriverManager.getConnection(url, "sa", "123");
         //Phung
-
-        String url = "jdbc:sqlserver://PHUNGPDHE189026:1433;instanceName=SQL2019;encrypt=false";
-        return DriverManager.getConnection(url, "sa", "1");
+//
+//        String url = "jdbc:sqlserver://PHUNGPDHE189026:1433;instanceName=SQL2019;encrypt=false";
+//        return DriverManager.getConnection(url, "sa", "1");
         
         //Dat
-//        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;encrypt=false";
-//        return DriverManager.getConnection(url, "sa", "123");
+        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;encrypt=false";
+        return DriverManager.getConnection(url, "sa", "123");
     }
 
     // Kết nối tới một database cụ thể (dùng để nạp schema vào DB mới tạo)
@@ -114,12 +113,12 @@ public class DBUtil {
 //        return DriverManager.getConnection(url, "sa", "123");
         //Phung
 
-        String url = "jdbc:sqlserver://PHUNGPDHE189026:1433;instanceName=SQL2019;databaseName=" + dbName + ";encrypt=false";
-        return DriverManager.getConnection(url, "sa", "1");
+//        String url = "jdbc:sqlserver://PHUNGPDHE189026:1433;instanceName=SQL2019;databaseName=" + dbName + ";encrypt=false";
+//        return DriverManager.getConnection(url, "sa", "1");
 
-        //Dat
-//        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=" + dbName + ";encrypt=false";
-//        return DriverManager.getConnection(url, "sa", "123");
+//        Dat
+        String url = "jdbc:sqlserver://ND2P:1433;instanceName=PHUONG;databaseName=" + dbName + ";encrypt=false";
+        return DriverManager.getConnection(url, "sa", "123");
 
     }
 

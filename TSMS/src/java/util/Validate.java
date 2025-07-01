@@ -219,7 +219,7 @@ public class Validate {
             return "0%";
         }
         if (value == 0.0) {
-            return "0%";
+            return "0% so với tháng trước";
         }
         return String.format("%s%.2f%% so với tháng trước", value > 0 ? "+" : "", value);
     }

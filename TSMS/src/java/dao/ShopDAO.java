@@ -32,8 +32,19 @@ public class ShopDAO {
         }
     }
     
+    public static String getPhoneByUserId(String dbName) throws SQLException {
+        String sql = "SELECT Phone FROM Users WHERE UserId = 1";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("Phone");
+            }
+        }
+        return null;
+    }
+    
     public static void main(String[] args) throws SQLException {
         ShopDAO shop = new ShopDAO();
-        System.out.println(shop.isShopTaken("pp"));
+        System.out.println(shop.getPhoneByUserId("DTB_P"));
     }
 }
