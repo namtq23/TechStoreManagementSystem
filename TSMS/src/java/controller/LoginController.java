@@ -103,7 +103,7 @@ public class LoginController extends HttpServlet {
                 if (user != null && BCrypt.checkpw(password, user.getPassword())) {
                     //Check subscription
                     String phone = ShopDAO.getPhoneByUserId(dbNameStaff);
-
+                    
                     if (phone == null) {
                         req.setAttribute("error", "Không tìm thấy tài khoản chủ sở hữu!");
                         req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
@@ -160,6 +160,11 @@ public class LoginController extends HttpServlet {
                             req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
                         }
                         return;
+                    } else {
+                        if (user.getIsActive() == 0){
+                            req.setAttribute("error", "Tài khoản tạm vô hiệu hoá");
+                            req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
+                        }
                     }
 
                     HttpSession session = req.getSession(true);

@@ -290,20 +290,22 @@ public class ShopOwnerDAO {
     }
 
     //Phuong
-    public void updateShopOwnerInfo(int ownerId, String fullName, String shopName, int isActive) throws SQLException {
-        String sql = "UPDATE ShopOwner SET FullName = ?, ShopName = ?, IsActive = ? WHERE OwnerID = ?";
+    public void updateShopOwnerInfo(int ownerId, String fullName, String shopName, int isActive, String dbName) throws SQLException {
+        String sql = "UPDATE ShopOwner SET FullName = ?, FullNameUnsigned = ?,  ShopName = ?, IsActive = ?, DatabaseName = ? WHERE OwnerID = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, fullName);
-            stmt.setString(2, shopName);
-            stmt.setInt(3, isActive);
-            stmt.setInt(4, ownerId);
+            stmt.setString(2, Validate.normalizeSearch(fullName));
+            stmt.setString(3, shopName);
+            stmt.setInt(4, isActive);
+            stmt.setString(5, dbName);
+            stmt.setInt(6, ownerId);
             stmt.executeUpdate();
         }
     }
 
     //Phuong
     public void updateShopOwnerInfoInTheirDTB(String dbName, String fullName, int isActive) throws SQLException {
-        String sql = "UPDATE Users SET FullName = ?, IsActive = ? WHERE UserID = 0";
+        String sql = "UPDATE Users SET FullName = ?, IsActive = ? WHERE UserID = 1";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, fullName);
             stmt.setInt(2, isActive);
@@ -313,15 +315,38 @@ public class ShopOwnerDAO {
 
     //Phuong
     public void voidUpdateDTBShopName(String oldDbName, String newDbName) {
-        String sql = "ALTER DATABASE [" + oldDbName + "] MODIFY NAME = [" + newDbName + "]";
+        String alterSql = "ALTER DATABASE [" + oldDbName + "] MODIFY NAME = [" + newDbName + "]";
 
         try (Connection conn = DBUtil.getConnectionTo("master"); Statement stmt = conn.createStatement()) {
 
-            stmt.executeUpdate(sql);
-            System.out.println("Đã đổi tên DB từ " + oldDbName + " thành " + newDbName);
+            String findSessionsSql
+                    = "SELECT session_id FROM sys.dm_exec_sessions "
+                    + "WHERE database_id = DB_ID('" + oldDbName + "')";
+
+            ResultSet rs = stmt.executeQuery(findSessionsSql);
+            List<Integer> sessionIds = new ArrayList<>();
+
+            while (rs.next()) {
+                int sessionId = rs.getInt("session_id");
+                if (sessionId != 1) { // bỏ qua system session
+                    sessionIds.add(sessionId);
+                }
+            }
+
+            for (int spid : sessionIds) {
+                try {
+                    stmt.execute("KILL " + spid);
+                    System.out.println("Đã kill session: " + spid);
+                } catch (SQLException killEx) {
+                    System.err.println("Không thể kill session " + spid + ": " + killEx.getMessage());
+                }
+            }
+
+            stmt.executeUpdate(alterSql);
+            System.out.println("Đã đổi tên database từ [" + oldDbName + "] sang [" + newDbName + "]");
 
         } catch (SQLException e) {
-            System.err.println("Đổi tên database thất bại.");
+            System.err.println("Lỗi khi đổi tên database: " + e.getMessage());
         }
     }
 
@@ -464,7 +489,7 @@ public class ShopOwnerDAO {
             ps.executeUpdate();
         }
     }
-    
+
     public static int getOwnerIdByPhone(String phone) throws SQLException {
         String sql = "SELECT OwnerId FROM ShopOwner WHERE Phone = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
