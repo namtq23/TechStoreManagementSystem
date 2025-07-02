@@ -7,7 +7,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 @WebServlet(name = "SOSupplierController", urlPatterns = {"/so-supplier"})
@@ -28,7 +27,7 @@ public class SOSupplierController extends HttpServlet {
 
         //Check active status
         if ((Integer) session.getAttribute("isActive") == 0) {
-            resp.sendRedirect(req.getContextPath() + "/subscription");
+            resp.sendRedirect(req.getContextPath() + "/subscription?status=expired");
             return;
         }
 

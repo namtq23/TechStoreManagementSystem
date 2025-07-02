@@ -45,7 +45,7 @@ public class SOProductController extends HttpServlet {
 
             //Check active status
             if ((Integer) session.getAttribute("isActive") == 0) {
-                resp.sendRedirect(req.getContextPath() + "/subscription");
+                resp.sendRedirect(req.getContextPath() + "/subscription?status=expired");
                 return;
             }
 
