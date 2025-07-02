@@ -36,7 +36,7 @@ public class SAUpdateSODetail extends HttpServlet {
             int isActive = "ACTIVE".equals(status) ? 1 : 0;
 
             ShopOwnerDAO soDao = new ShopOwnerDAO();
-            soDao.updateShopOwnerInfo(ownerId, fullName, shopName, isActive);
+            soDao.updateShopOwnerInfo(ownerId, fullName, shopName, isActive, newDbName);
             soDao.voidUpdateDTBShopName(dbName, newDbName);
             soDao.updateShopOwnerInfoInTheirDTB(newDbName, fullName, isActive);
 
