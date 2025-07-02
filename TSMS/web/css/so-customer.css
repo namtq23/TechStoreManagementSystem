@@ -7,12 +7,38 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
     Author     : Kawaii
 */
 
+.price-range.vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.GrandTotal-input {
+    width: 95%;
+    padding: 10px 14px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    margin-bottom: 5%;
+}
+
+.GrandTotal-input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.2);
+}
+
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
+
+
+
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;

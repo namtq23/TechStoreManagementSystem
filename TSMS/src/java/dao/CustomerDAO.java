@@ -88,54 +88,60 @@ public class CustomerDAO {
     }
 
     // Tìm kiếm khách hàng theo tên (FullName)
-    public List<CustomerDTO> filterCustomers(String dbName, String keyword, String genderFilter) throws SQLException {
-        List<CustomerDTO> customers = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("""
+   public List<CustomerDTO> filterCustomers(String dbName, String keyword, String genderFilter, int branchId) throws SQLException {
+    List<CustomerDTO> customers = new ArrayList<>();
+    StringBuilder sql = new StringBuilder("""
         SELECT 
-                    c.CustomerID,
-                    c.FullName,
-                    c.PhoneNumber,
-                    c.Email,
-                    c.Address,
-                    c.Gender,
-                    c.DateOfBirth,
-                    c.CreatedAt,
-                    c.UpdatedAt,
-                    o.BranchID,      
-                    o.grandTotal                                                   
-                FROM Customers c
-                JOIN (
-                SELECT CustomerID, MIN(OrderID) AS FirstOrderID
-                FROM Orders
-                GROUP BY CustomerID
-                ) fo ON c.CustomerID = fo.CustomerID
-                JOIN Orders o ON fo.FirstOrderID = o.OrderID      
+            c.CustomerID,
+            c.FullName,
+            c.PhoneNumber,
+            c.Email,
+            c.Address,
+            c.Gender,
+            c.DateOfBirth,
+            c.CreatedAt,
+            c.UpdatedAt,
+            o.BranchID,      
+            o.grandTotal                                                   
+        FROM Customers c
+        JOIN (
+            SELECT CustomerID, MIN(OrderID) AS FirstOrderID
+            FROM Orders
+            GROUP BY CustomerID
+        ) fo ON c.CustomerID = fo.CustomerID
+        JOIN Orders o ON fo.FirstOrderID = o.OrderID      
         WHERE RIGHT(FullName, CHARINDEX(' ', REVERSE(FullName)) - 1) COLLATE Latin1_General_CI_AI LIKE ?
     """);
 
-        if ("male".equalsIgnoreCase(genderFilter)) {
-            sql.append(" AND Gender = 1");
-        } else if ("female".equalsIgnoreCase(genderFilter)) {
-            sql.append(" AND Gender = 0");
-        }
-
-        sql.append(" ORDER BY CustomerID");
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
-
-            stmt.setString(1, "%" + keyword + "%");
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    customers.add((CustomerDTO) extractCustomerFromResultSet(rs));
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Lỗi khi tìm kiếm khách hàng: " + e.getMessage());
-        }
-
-        return customers;
+    if ("male".equalsIgnoreCase(genderFilter)) {
+        sql.append(" AND Gender = 1");
+    } else if ("female".equalsIgnoreCase(genderFilter)) {
+        sql.append(" AND Gender = 0");
     }
+
+    if (branchId > 0) {
+        sql.append(" AND o.BranchID = ").append(branchId);
+    }
+
+    sql.append(" ORDER BY CustomerID");
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+        stmt.setString(1, "%" + keyword + "%");
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                customers.add((CustomerDTO) extractCustomerFromResultSet(rs));
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Lỗi khi tìm kiếm khách hàng: " + e.getMessage());
+    }
+
+    return customers;
+}
+
 
     // ✅ Hàm dùng chung để map ResultSet → Customer object
     private Customer extractCustomerFromResultSet(ResultSet rs) throws SQLException {
@@ -161,32 +167,40 @@ public class CustomerDAO {
     }
 
     // ✅ Đếm tổng số khách hàng (loại bỏ branchId)
-    public int countCustomers(String dbName, String genderFilter) {
-        int count = 0;
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Customers WHERE 1=1");
+public int countCustomers(String dbName, String genderFilter, int branchId) {
+    int count = 0;
+    StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(*) 
+        FROM Customers c
+        JOIN Orders o ON c.CustomerID = o.CustomerID
+        WHERE 1=1
+    """);
 
-        if ("male".equalsIgnoreCase(genderFilter)) {
-            sql.append(" AND Gender = 1");
-        } else if ("female".equalsIgnoreCase(genderFilter)) {
-            sql.append(" AND Gender = 0");
-        }
-
-        try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql.toString()); ResultSet rs = ps.executeQuery()) {
-
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-        } catch (Exception e) {
-            System.out.println("Lỗi khi đếm khách hàng theo giới tính: " + e.getMessage());
-        }
-
-        return count;
+    if ("male".equalsIgnoreCase(genderFilter)) {
+        sql.append(" AND Gender = 1");
+    } else if ("female".equalsIgnoreCase(genderFilter)) {
+        sql.append(" AND Gender = 0");
     }
 
+    if (branchId > 0) {
+        sql.append(" AND o.BranchID = ").append(branchId);
+    }
+
+    try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql.toString()); ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+            count = rs.getInt(1);
+        }
+    } catch (Exception e) {
+        System.out.println("Lỗi khi đếm khách hàng: " + e.getMessage());
+    }
+
+    return count;
+}
+
     // ✅ Phân trang danh sách khách hàng
-    public List<CustomerDTO> getCustomerListByPage(String dbName, int offset, int limit, String genderFilter) {
-        List<CustomerDTO> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("""
+   public List<CustomerDTO> getCustomerListByPage(String dbName, int offset, int limit, String genderFilter, int branchId) {
+    List<CustomerDTO> list = new ArrayList<>();
+    StringBuilder sql = new StringBuilder("""
         SELECT 
             c.CustomerID,
             c.FullName,
@@ -201,37 +215,41 @@ public class CustomerDAO {
             o.grandTotal                                                               
         FROM Customers c
         JOIN (
-        SELECT CustomerID, MIN(OrderID) AS FirstOrderID
-        FROM Orders
-        GROUP BY CustomerID
+            SELECT CustomerID, MIN(OrderID) AS FirstOrderID
+            FROM Orders
+            GROUP BY CustomerID
         ) fo ON c.CustomerID = fo.CustomerID
         JOIN Orders o ON fo.FirstOrderID = o.OrderID                                              
         WHERE 1=1
     """);
 
-        if ("male".equalsIgnoreCase(genderFilter)) {
-            sql.append(" AND Gender = 1");
-        } else if ("female".equalsIgnoreCase(genderFilter)) {
-            sql.append(" AND Gender = 0");
-        }
-
-        sql.append(" ORDER BY CustomerID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
-
-        try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql.toString())) {
-
-            ps.setInt(1, offset);
-            ps.setInt(2, limit);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add((CustomerDTO) extractCustomerFromResultSet(rs));
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Lỗi khi phân trang khách hàng theo giới tính: " + e.getMessage());
-        }
-        return list;
+    if ("male".equalsIgnoreCase(genderFilter)) {
+        sql.append(" AND Gender = 1");
+    } else if ("female".equalsIgnoreCase(genderFilter)) {
+        sql.append(" AND Gender = 0");
     }
+
+    if (branchId > 0) {
+        sql.append(" AND o.BranchID = ").append(branchId);
+    }
+
+    sql.append(" ORDER BY CustomerID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+    try (Connection con = DBUtil.getConnectionTo(dbName); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        ps.setInt(1, offset);
+        ps.setInt(2, limit);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add((CustomerDTO) extractCustomerFromResultSet(rs));
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Lỗi khi phân trang khách hàng theo giới tính và branch: " + e.getMessage());
+    }
+    return list;
+}
+
 
     //  Lấy 10 khách hàng có GrandTotal cao nhất
 public List<CustomerDTO> getTopCustomersBySpending(double minTotal, double maxTotal, String dbName) {
@@ -322,6 +340,13 @@ public boolean updateCustomer(int id, String fullName, String email, boolean gen
         return rowsUpdated > 0;
     }
 }
+
+
+
+
+
+
+
 
     //Phuong
     public static boolean insertCustomer(String dbName, Customer customer) {

@@ -157,6 +157,22 @@
                 </label>
             </div>
         </div>
+                    
+                    <div class="filter-section">
+    <div class="filter-header">
+        <h3>Lọc theo chi nhánh</h3>
+    </div>
+    <div class="filter-content">
+        <select name="branchID" class="branch-filter">
+            <option value="">-- Tất cả chi nhánh --</option>
+            <option value="1" ${branchID == 1 ? "selected" : ""}>Chi nhánh 1</option>
+            <option value="2" ${branchID == 2 ? "selected" : ""}>Chi nhánh 2</option>
+            <option value="3" ${branchID == 3 ? "selected" : ""}>Chi nhánh 3</option>
+        </select>
+    </div>
+</div>
+
+                    
 
         <!-- Action Buttons -->
         <div class="filter-actions">
