@@ -40,6 +40,12 @@ public class SOOrderController extends HttpServlet {
                 return;
             }
 
+            //Check active status
+            if ((Integer) session.getAttribute("isActive") == 0) {
+                resp.sendRedirect(req.getContextPath() + "/subscription");
+                return;
+            }
+
             String dbName = dbNameObj.toString();
             int page = 1;
             int pageSize = 10;
@@ -115,7 +121,7 @@ public class SOOrderController extends HttpServlet {
                     dbName, page, pageSize, selectedBranches, selectedCreators,
                     calculatedStartDate, null, minPrice, maxPrice, searchKeyword
             );
-            
+
             int totalOrders = orderDAO.countFilteredOrders(
                     dbName, selectedBranches, selectedCreators,
                     calculatedStartDate, null, minPrice, maxPrice, searchKeyword

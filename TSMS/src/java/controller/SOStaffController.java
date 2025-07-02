@@ -51,6 +51,12 @@ public class SOStaffController extends HttpServlet {
                 return;
             }
 
+            //Check active status
+            if ((Integer) session.getAttribute("isActive") == 0) {
+                resp.sendRedirect(req.getContextPath() + "/subscription");
+                return;
+            }
+
             String dbName = dbNameObj.toString();
             String action = req.getParameter("action");
             UserDAO userDAO = new UserDAO();
