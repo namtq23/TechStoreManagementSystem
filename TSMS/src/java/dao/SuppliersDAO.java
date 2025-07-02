@@ -196,4 +196,24 @@ public class SuppliersDAO {
             System.out.println(s);
         }
     }
+
+
+public boolean updateSupplier(String dbName, int supplierID, String supplierName, String contactName, String phone, String email) throws SQLException {
+    String sql = """
+        UPDATE Suppliers
+        SET SupplierName = ?, ContactName = ?, Phone = ?, Email = ?
+        WHERE SupplierID = ?
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, supplierName);
+        stmt.setString(2, contactName.isEmpty() ? null : contactName);
+        stmt.setString(3, phone.isEmpty() ? null : phone);
+        stmt.setString(4, email.isEmpty() ? null : email);
+        stmt.setInt(5, supplierID);
+
+        return stmt.executeUpdate() > 0;
+    }
+}
 }

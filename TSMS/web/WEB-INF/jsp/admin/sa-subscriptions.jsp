@@ -35,11 +35,11 @@
             }
 
             .flash-message.success {
-                background-color: #4CAF50; 
+                background-color: #4CAF50;
             }
 
             .flash-message.error {
-                background-color: #f44336; 
+                background-color: #f44336;
             }
 
             @keyframes fadeOut {
@@ -182,30 +182,41 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <c:forEach var="owner" items="${shopOwners}">
-                                        <tr>
-                                            <td>${owner.ownerId}</td>
-                                            <td>${owner.fullName}</td>
-                                            <td>${owner.email}</td>
-                                            <td>${owner.shopName}</td>
-                                            <td>
-                                                <c:choose>
-                                                    <c:when test="${owner.isActive == 1}">
-                                                        <span class="status active">Hoạt động</span>
-                                                    </c:when>
-                                                    <c:when test="${owner.isActive == 0}">
-                                                        <span class="status inactive">Không hoạt động</span>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="status pending">Chờ xử lý</span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td>${owner.subscriptionMonth} tháng</td>
-                                            <td><fmt:formatDate value="${owner.logCreatedAt}" pattern="dd/MM/yyyy" /></td>
-                                            <td><a href="sa-approved-subs?id=${owner.ownerId}&methodId=1&subsMonth=${owner.subscriptionMonth}"><button class="btn btn-primary">Chấp nhận</button></a></td>
-                                        </tr>
-                                    </c:forEach>
+                                    <c:choose>
+                                        <c:when test="${empty shopOwners}">
+                                            <tr>
+                                                <td colspan="8" class="empty-state">
+                                                    <h5>Không có yêu cầu nào!</h5>
+                                                </td>
+                                            </tr>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:forEach var="owner" items="${shopOwners}">
+                                                <tr>
+                                                    <td>${owner.ownerId}</td>
+                                                    <td>${owner.fullName}</td>
+                                                    <td>${owner.email}</td>
+                                                    <td>${owner.shopName}</td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${owner.isActive == 1}">
+                                                                <span class="status active">Hoạt động</span>
+                                                            </c:when>
+                                                            <c:when test="${owner.isActive == 0}">
+                                                                <span class="status inactive">Không hoạt động</span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="status pending">Chờ xử lý</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </td>
+                                                    <td>${owner.subscriptionMonth} tháng</td>
+                                                    <td><fmt:formatDate value="${owner.logCreatedAt}" pattern="dd/MM/yyyy" /></td>
+                                                    <td><a href="sa-approved-subs?id=${owner.ownerId}&methodId=1&subsMonth=${owner.subscriptionMonth}"><button class="btn btn-primary">Chấp nhận</button></a></td>
+                                                </tr>
+                                            </c:forEach>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </tbody>
                             </table>
                         </div>

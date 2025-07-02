@@ -106,6 +106,25 @@ public class SubscriptionsDAO {
         return list;
     }
 
+    public static boolean insertSubscriptionLog(int ownerId, int methodId, int months, String status) {
+        String sql = "INSERT INTO SubscriptionLogs (OwnerID, MethodID, SubscriptionMonths, Status) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, ownerId);
+            stmt.setInt(2, methodId);
+            stmt.setInt(3, months);
+            stmt.setString(4, status);
+
+            int rows = stmt.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public static void main(String[] args) throws SQLException {
         System.out.println(SubscriptionsDAO.getAllSubscriptionSummaryByMethodId(1));
     }

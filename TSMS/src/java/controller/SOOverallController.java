@@ -13,6 +13,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -34,6 +35,13 @@ public class SOOverallController extends HttpServlet {
               throws ServletException, IOException {
 
         response.setContentType("text/html;charset=UTF-8");
+        HttpSession session = request.getSession(false);
+
+        //Check active status
+        if ((Integer) session.getAttribute("isActive") == 0) {
+            response.sendRedirect(request.getContextPath() + "/subscription");
+            return;
+        }
 
         String sortBy = request.getParameter("sortBy");
         if (sortBy == null || sortBy.isEmpty()) {

@@ -129,31 +129,41 @@
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <c:forEach var="owner" items="${shopOwners}">
-                                        <tr>
-                                            <td>${owner.ownerId}</td>
-                                            <td>${owner.fullName}</td>
-                                            <td>${owner.email}</td>
-                                            <td>${owner.shopName}</td>
-                                            <td>
-                                                <c:choose>
-                                                    <c:when test="${owner.isActive == 1}">
-                                                        <span class="status active">Hoạt động</span>
-                                                    </c:when>
-                                                    <c:when test="${owner.isActive == 0}">
-                                                        <span class="status inactive">Không hoạt động</span>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="status pending">Chờ xử lý</span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td>${owner.status}</td>
-                                            <td><fmt:formatDate value="${owner.createdAt}" pattern="dd/MM/yyyy" /></td>
-                                            <td><a href="sa-sodetails?id=${owner.ownerId}"><button class="btn btn-primary">Xem</button></a></td>
-                                        </tr>
-                                    </c:forEach>
+                                <tbody><c:choose>
+                                        <c:when test="${empty shopOwners}">
+                                            <tr>
+                                                <td colspan="8" class="empty-state">
+                                                    <h5>Không có tài khoản nào!</h5>
+                                                </td>
+                                            </tr>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:forEach var="owner" items="${shopOwners}">
+                                                <tr>
+                                                    <td>${owner.ownerId}</td>
+                                                    <td>${owner.fullName}</td>
+                                                    <td>${owner.email}</td>
+                                                    <td>${owner.shopName}</td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${owner.isActive == 1}">
+                                                                <span class="status active">Hoạt động</span>
+                                                            </c:when>
+                                                            <c:when test="${owner.isActive == 0}">
+                                                                <span class="status inactive">Không hoạt động</span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="status pending">Chờ xử lý</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </td>
+                                                    <td>${owner.status}</td>
+                                                    <td><fmt:formatDate value="${owner.createdAt}" pattern="dd/MM/yyyy" /></td>
+                                                    <td><a href="sa-sodetails?id=${owner.ownerId}"><button class="btn btn-primary">Xem</button></a></td>
+                                                </tr>
+                                            </c:forEach>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </tbody>
                             </table>
                         </div>

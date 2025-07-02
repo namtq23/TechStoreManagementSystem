@@ -19,8 +19,29 @@ public class SOCustomerController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
 
-        if (session == null || session.getAttribute("userId") == null ||
-            session.getAttribute("roleId") == null || session.getAttribute("dbName") == null) {
+        //Check active status
+        if ((Integer) session.getAttribute("isActive") == 0) {
+            resp.sendRedirect(req.getContextPath() + "/subscription");
+            return;
+        }
+
+        // Lấy thông báo từ session nếu có
+        if (session != null) {
+            String successMsg = (String) session.getAttribute("successMessage");
+            if (successMsg != null) {
+                req.setAttribute("successMessage", successMsg);
+                session.removeAttribute("successMessage");
+            }
+
+            String errorMsg = (String) session.getAttribute("errorMessage");
+            if (errorMsg != null) {
+                req.setAttribute("errorMessage", errorMsg);
+                session.removeAttribute("errorMessage");
+            }
+        }
+
+        if (session == null || session.getAttribute("userId") == null
+                || session.getAttribute("roleId") == null || session.getAttribute("dbName") == null) {
             resp.sendRedirect("login");
             return;
         }
@@ -102,7 +123,9 @@ public class SOCustomerController extends HttpServlet {
                 offset = (page - 1) * pageSize;
 
                 int toIndex = Math.min(offset + pageSize, totalCustomers);
-                if (offset > toIndex) offset = 0;
+                if (offset > toIndex) {
+                    offset = 0;
+                }
                 customers = customers.subList(offset, toIndex);
 
             } else if (hasKeyword) {
@@ -113,7 +136,9 @@ public class SOCustomerController extends HttpServlet {
                 offset = (page - 1) * pageSize;
 
                 int toIndex = Math.min(offset + pageSize, totalCustomers);
-                if (offset > toIndex) offset = 0;
+                if (offset > toIndex) {
+                    offset = 0;
+                }
                 customers = customers.subList(offset, toIndex);
 
             } else {
@@ -187,9 +212,7 @@ public class SOCustomerController extends HttpServlet {
             } else {
                 session.setAttribute("errorMessage", "Cập nhật thất bại. Vui lòng thử lại.");
             }
-
-            resp.sendRedirect("so-customer");
-
+            resp.sendRedirect("so-customer")
         } catch (NumberFormatException e) {
             e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID không hợp lệ.");

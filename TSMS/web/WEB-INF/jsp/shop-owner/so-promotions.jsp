@@ -129,7 +129,6 @@
                 <div class="filter-section">
                     <div class="filter-header">
                         <h3>Trạng thái</h3>
-                        <i class="fas fa-chevron-up"></i>
                     </div>
                     <div class="filter-content">
                         <label class="radio-item">
@@ -163,7 +162,6 @@
                 <div class="filter-section">
                     <div class="filter-header">
                         <h3>Mức giảm giá</h3>
-                        <i class="fas fa-chevron-up"></i>
                     </div>
                     <div class="filter-content">
                         <label class="radio-item">
@@ -293,7 +291,7 @@
                                         <input type="checkbox" id="selectAll">
                                     </th>
                                     <th></th>
-                                    <th>Mã khuyến mãi</th>
+                                    <th>Mã KM</th>
                                     <th>Tên khuyến mãi</th>
                                     <th>Giảm giá</th>
                                     <th>Thời gian</th>
@@ -322,7 +320,7 @@
                                                 <td><input type="checkbox" class="product-checkbox"></td>
                                                 <td>
                                                     <div class = "fas fa-ticket"
-                                                         style = "color: #007bff; font-size: 20px">
+                                                         style = "color: #2196F3; font-size: 20px">
                                                     </div>
                                                 </td>
                                                 <td style="text-align: center;"><strong>${promotion.promotionID}</strong></td>

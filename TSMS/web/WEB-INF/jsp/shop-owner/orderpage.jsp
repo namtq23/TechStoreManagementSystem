@@ -76,7 +76,7 @@
             .date-label {
                 color: #333;
             }
- 
+
             /* Print styles */
             @media print {
                 .filter-section {
@@ -160,31 +160,18 @@
             }
 
             .btn-search {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 12px 20px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background-color: #2196F3 ;
                 border: none;
+                color: #fff;
                 border-radius: 8px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
+                padding: 12px 20px;
+                font-size: 14px;
+                font-weight: bold;
+                text-transform: none;
                 transition: all 0.3s ease;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
             }
 
-            .btn-search:hover {
-                background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-            }
 
-            .btn-search i {
-                font-size: 12px;
-            }
 
             /* Search Results Info */
             .search-results-info {
@@ -280,6 +267,49 @@
                 color: #667eea;
                 font-weight: 600;
             }
+            /* Style cho nút Chi tiết */
+            .btn-primary.btn-sm {
+                background-color: #2196F3 !important;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 6px 12px;
+                font-size: 13px;
+                transition: all 0.3s ease;
+            }
+
+            .btn-primary.btn-sm:hover {
+                background-color: #333 !important;
+                box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            }
+
+            /* Style cho nút Xoá */
+            .btn-danger.btn-sm {
+                background-color: #f44336 !important;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 6px 12px;
+                font-size: 13px;
+                transition: all 0.3s ease;
+            }
+
+            .btn-danger.btn-sm:hover {
+                background-color: #d32f2f !important;
+                box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+            }
+            /* Bố cục nút Chi tiết và Xoá đẹp hơn */
+            .action-buttons {
+                display: inline;
+                gap: 100px; /* Khoảng cách giữa nút */
+            }
+
+            .action-buttons .btn {
+                min-width: 90px; /* Đảm bảo độ rộng bằng nhau */
+                text-align: center;
+                justify-content: center;
+            }
+
         </style>            
     </head>
     <body>
@@ -292,7 +322,7 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="so-overview" class="nav-item">
+                    <a href="so-overview" class="nav-item active">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
@@ -302,7 +332,7 @@
                         Hàng hóa
                     </a>
 
-                    <div class="nav-item dropdown active">
+                    <div class="nav-item dropdown">
                         <a href="#" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
                             Giao dịch
@@ -352,7 +382,7 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-invoices?reportType=income" class="dropdown-item">Doanh Thu thuần</a>
-                            <a href="so-invoices?reportType=outcome" class="dropdown-item">Khoảng chi</a>
+                            <a href="so-outcome" class="dropdown-item">Khoảng chi</a>
                         </div>
                     </div>
 
@@ -562,43 +592,102 @@
                                 <th>Chi nhánh</th>
                                 <th>Khách hàng</th>
                                 <th>Nhân viên tạo</th>
-                                <th>Thời gian tạo</th>
                                 <th>Trạng thái đơn</th>
                                 <th>Tổng tiền</th>
-                                <th>Phương thức</th>
                                 <th style="justify-content: center; text-align: center">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             <%
                                 List<OrdersDTO> ordersList = (List<OrdersDTO>) request.getAttribute("ordersList");
+                                Integer currentPage = (Integer) request.getAttribute("currentPage");
+                                Integer pageSize = 10;
+                                int startIndex = (currentPage - 1) * pageSize;
+                
                                 if (ordersList != null && !ordersList.isEmpty()) {
-                                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm");
                                     java.text.NumberFormat currencyFormat = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
-                                    for (OrdersDTO order : ordersList) {
+                    
+                                    for (int i = 0; i < ordersList.size(); i++) {
+                                        OrdersDTO order = ordersList.get(i);
+                                        int stt = startIndex + i + 1;
                             %>
-                            <tr>                                
-                                <td></td>
-                                <td><%=order.getOrderID()%></td>
-                                <td><%=order.getProductName()%></td>
-                                <td><%=order.getBranchName()%></td>
-                                <td><%=order.getCustomerName()%></td>
-                                <td><%=order.getCreatedByName()%></td>
-                                <td><%=order.getCreatedAt()%> </td>
-                                <td><%=order.getOrderStatus()%></td>
-                                <td><%=currencyFormat.format(order.getGrandTotal())%></td>
-                                <td><%=order.getPaymentMethod()%></td>
-                                <td class="actions-col" style="justify-content: center; display: flex; gap: 5px">
-                                    <form action="so-orders" method="get" style="display:inline;">
-                                        <input type="hidden" name="action" value="view"/>
-                                        <input type="hidden" name="orderID" value="<%=order.getOrderID()%>"/>
-                                        <button type="submit" class="btn btn-success" style="text-decoration: none; width: 79px;background:#2196F3">Chi tiết</button>
-                                    </form>
-                                    <form action="so-orders" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xoá sản phẩm này không?');">
-                                        <input type="hidden" name="action" value="delete"/>
-                                        <input type="hidden" name="orderID" value="<%=order.getOrderID()%>"/>
-                                        <button type="submit" class="btn btn-success" style="background: #f44336;">Xoá</button>
-                                    </form>
+                            <tr>
+                                <td> </td>
+                                <td><strong>#<%=order.getOrderID()%></strong></td>
+                                <td style="max-width: 250px; word-wrap: break-word;">
+                                    <div class="product-details">
+                                        <%
+                                            String productDetails = order.getProductName();
+                                            if (productDetails != null && !productDetails.trim().isEmpty() && !productDetails.equals("Không có sản phẩm")) {
+                                                String[] products = productDetails.split(";");
+                                                for (String product : products) {
+                                                    if (product.trim().length() > 0) {
+                                        %>
+                                        <div class="product-item">
+                                            <i class="fas fa-box"></i> <%=product.trim()%>
+                                        </div>
+                                        <%
+                                                    }
+                                                }
+                                            } else {
+                                        %>
+                                        <div class="product-item no-product">
+                                            <i class="fas fa-exclamation-triangle"></i> Không có sản phẩm
+                                        </div>
+                                        <%
+                                            }
+                                        %>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="branch-info">
+                                        <i class="fas fa-store"></i>
+                                        <%=order.getBranchName() != null ? order.getBranchName() : "N/A"%>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="customer-info">
+                                        <i class="fas fa-user"></i>
+                                        <%=order.getCustomerName() != null ? order.getCustomerName() : "N/A"%>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="creator-info">
+                                        <i class="fas fa-user-tie"></i>
+                                        <%=order.getCreatedByName() != null ? order.getCreatedByName() : "N/A"%>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="date-info">
+                                        <i class="fas fa-calendar"></i>
+                                        <%=order.getCreatedAt() != null ? sdf.format(order.getCreatedAt()) : "N/A"%>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="price-info">
+                                        <strong><%=currencyFormat.format(order.getGrandTotal())%></strong>
+                                    </div>
+                                </td>
+                                <td class="actions-col">
+                                    <div class="action-buttons">
+                                        <form action="so-orders" method="get" style="display:inline;">
+                                            <input type="hidden" name="action" value="view"/>
+                                            <input type="hidden" name="orderID" value="<%=order.getOrderID()%>"/>
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-eye"></i> Chi tiết
+                                            </button>
+                                        </form>
+                                        <form action="so-orders" method="post" style="display:inline;" 
+                                              onsubmit="return confirm('Bạn có chắc chắn muốn xoá đơn hàng #<%=order.getOrderID()%> không?');">
+                                            <input type="hidden" name="action" value="delete"/>
+                                            <input type="hidden" name="orderID" value="<%=order.getOrderID()%>"/>
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i> Xoá
+                                            </button>
+                                        </form>
+
+                                    </div>
                                 </td>
                             </tr>
                             <%
@@ -606,7 +695,13 @@
                                 } else {
                             %>
                             <tr>
-                                <td colspan="12" style="text-align:center;">Không có đơn hàng nào!</td>
+                                <td colspan="11" style="text-align:center; padding: 40px;">
+                                    <div class="no-data">
+                                        <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+                                        <p style="color: #666; font-size: 16px;">Không tìm thấy đơn hàng nào!</p>
+                                        <p style="color: #999; font-size: 14px;">Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+                                    </div>
+                                </td>
                             </tr>
                             <%
                                 }
@@ -694,6 +789,7 @@
                 const checkboxes = document.querySelectorAll('input[name="selectedOrders"]');
                 checkboxes.forEach(cb => cb.checked = this.checked);
             });
+
             // Show/hide custom date input based on radio selection
             document.querySelectorAll('input[name="timeFilter"]').forEach(radio => {
                 radio.addEventListener('change', function () {
@@ -705,7 +801,7 @@
                     }
                 });
             });
-// Enhanced JavaScript for smooth animations
+            // Enhanced JavaScript for smooth animations
             document.addEventListener('DOMContentLoaded', function () {
                 const radioButtons = document.querySelectorAll('input[name="timeFilter"]');
                 const customDateContainer = document.getElementById('customDateContainer');
@@ -762,7 +858,7 @@
                 customDateInput.setAttribute('max', today);
             });
 
-// CSS for ripple animation
+
             const style = document.createElement('style');
             style.textContent = `
     @keyframes ripple {

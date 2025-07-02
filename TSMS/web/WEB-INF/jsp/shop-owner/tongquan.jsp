@@ -276,7 +276,7 @@
 
             <!-- Sidebar -->
             <aside class="sidebar">
-                <!-- Promotion Banner -->
+<!--                 Promotion Banner 
                 <div class="promo-banner">
                     <div class="promo-content">
                         <h4>Nhận Hóa đơn điện tử & Chữ ký số</h4>
@@ -288,7 +288,7 @@
                     </div>
                 </div>
 
-                <!-- QR Code Section -->
+                 QR Code Section 
                 <div class="qr-section">
                     <div class="qr-content">
                         <h4>TSMS ra mắt kênh CSKH Zalo Official Account</h4>
@@ -297,11 +297,11 @@
                     <div class="qr-code">
                         <i class="fas fa-qrcode"></i>
                     </div>
-                </div>
+                </div>-->
 
                 <!-- Notifications -->
                 <div class="notifications" style="padding: 16px; background: #ffffff; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                    <h4 class="fas fa-bell" style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 12px; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">THÔNG BÁO</h4>
+                    <h4 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 12px; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">THÔNG BÁO</h4>
                     <c:if test="${not empty recentAnnouncements}">
                         <c:forEach var="item" items="${recentAnnouncements}">
                             <div class="notification-item" style="display: flex; align-items: flex-start; padding: 8px; margin-bottom: 8px; background: #fff5f5; border-radius: 6px; border-left: 4px solid #f44336;">
@@ -340,7 +340,7 @@
                 <!-- Các hoạt động gần đây -->
                 <div class="activities" style="padding: 16px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                     <div style="display: flex; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">
-                        <i class="fas fa-history" style="color: #2196f3; font-size: 18px; margin-right: 8px;"></i>
+                        <i  style="color: #2196f3; font-size: 18px; margin-right: 8px;"></i>
                         <h4 style="margin: 0; color: #1a1a1a; font-size: 18px; font-weight: 600;">CÁC HOẠT ĐỘNG GẦN ĐÂY</h4>
                     </div>
 
