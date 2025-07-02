@@ -196,7 +196,7 @@ public class SOOrderController extends HttpServlet {
                 break;
         }
 
-        return startDate.toString();
+        return startDate != null ? startDate.toString() : null;
     }
     
 
