@@ -65,9 +65,12 @@ public class SOOrderController extends HttpServlet {
             String[] selectedCreators = req.getParameterValues("creatorIDs");
             String timeFilter = req.getParameter("timeFilter");
             String customDate = req.getParameter("customDate");
+//            String startDate = req.getParameter("startDate");
+//        String endDate = req.getParameter("endDate");
             String minPriceStr = req.getParameter("minPrice");
             String maxPriceStr = req.getParameter("maxPrice");
             String calculatedStartDate = calculateStartDate(timeFilter, customDate);
+//            String calculatedStartDate = calculateStartDate(timeFilter, startDate, endDate);
 
             Double minPrice = null;
             Double maxPrice = null;
@@ -145,6 +148,8 @@ public class SOOrderController extends HttpServlet {
             req.setAttribute("selectedCreators", selectedCreators);
             req.setAttribute("timeFilter", timeFilter);
             req.setAttribute("customDate", customDate);
+//            req.setAttribute("startDate", startDate);
+//        req.setAttribute("endDate", endDate);
             req.setAttribute("calculatedStartDate", calculatedStartDate);
             req.setAttribute("minPrice", minPrice);
             req.setAttribute("maxPrice", maxPrice);
@@ -165,6 +170,7 @@ public class SOOrderController extends HttpServlet {
         }
 
         switch (timeFilter) {
+            
             case "today":
                 startDate = now;
                 break;
@@ -192,6 +198,7 @@ public class SOOrderController extends HttpServlet {
 
         return startDate.toString();
     }
+    
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -242,4 +249,43 @@ public class SOOrderController extends HttpServlet {
             e.printStackTrace();
         }
     }
+    private String calculateStartDate(String timeFilter, String startDate, String endDate) {
+    java.time.LocalDate now = java.time.LocalDate.now();
+    java.time.LocalDate calculatedStartDate;
+
+    if (timeFilter == null || timeFilter.isEmpty()) {
+        timeFilter = "this-month";
+    }
+
+    switch (timeFilter) {
+        case "all": // ADDED: Handle "all" option by returning null to fetch all orders
+            calculatedStartDate = null;
+            break;
+        case "today":
+            calculatedStartDate = now;
+            break;
+        case "this-week":
+            calculatedStartDate = now.with(java.time.DayOfWeek.MONDAY);
+            break;
+        case "this-month":
+            calculatedStartDate = now.withDayOfMonth(1);
+            break;
+        case "custom":
+            if (startDate != null && !startDate.trim().isEmpty()) {
+                try {
+                    calculatedStartDate = java.time.LocalDate.parse(startDate);
+                } catch (Exception e) {
+                    calculatedStartDate = now.withDayOfMonth(1);
+                }
+            } else {
+                calculatedStartDate = now.withDayOfMonth(1);
+            }
+            break;
+        default:
+            calculatedStartDate = now.withDayOfMonth(1);
+            break;
+    }
+
+    return calculatedStartDate != null ? calculatedStartDate.toString() : null;
+}
 }
