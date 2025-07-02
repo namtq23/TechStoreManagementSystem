@@ -426,9 +426,11 @@
 
         <c:if test="${not empty success}">
             <div class="notification success" id="notification">${success}</div>
+            <c:remove var="success" scope="session"/>
         </c:if>
         <c:if test="${not empty error}">
             <div class="notification error" id="notification">${error}</div>
+            <c:remove var="error" scope="session"/>
         </c:if>
 
         <script>
@@ -446,20 +448,20 @@
                 }
             });
 
+            // Handle notification
             const noti = document.getElementById("notification");
-            if (noti && noti.classList.contains("success") && noti.textContent.trim() !== "") {
+            if (noti && noti.textContent.trim() !== "") {
+                // Show notification for 4 seconds, then hide it
                 setTimeout(() => {
                     noti.classList.add("hide");
+                    // Optionally remove the notification element from the DOM
                     setTimeout(() => {
-                        window.location.href = "so-staff";
-                    }, 1000); // Redirect after 1 second
-                }, 1000); // Start hiding after 1 second
-            } else if (noti && noti.textContent.trim() !== "") {
-                setTimeout(() => {
-                    noti.classList.add("hide");
-                }, 4000); // Existing hide for error notifications
+                        noti.remove();
+                    }, 500); // Wait for the fade-out animation to complete
+                }, 4000);
             }
 
+            // Form validation
             const form = document.getElementById("editStaffForm");
             const fullName = document.getElementById("fullName");
             const DOB = document.getElementById("DOB");
