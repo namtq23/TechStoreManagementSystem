@@ -99,4 +99,53 @@ public class SOSupplierController extends HttpServlet {
         req.setAttribute("service", "active");
         req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/so-supplier.jsp").forward(req, resp);
     }
+    
+    
+    @Override
+protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    try {
+        String idStr = req.getParameter("id");
+        if (idStr == null || idStr.trim().isEmpty()) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu ID nhà cung cấp.");
+            return;
+        }
+
+        int supplierId = Integer.parseInt(idStr.trim());
+        String supplierName = req.getParameter("supplierName");
+        String contactName = req.getParameter("contactName");
+        String phone = req.getParameter("phone");
+        String email = req.getParameter("email");
+
+        HttpSession session = req.getSession(false);
+        String dbName = (session != null) ? (String) session.getAttribute("dbName") : null;
+
+        if (dbName == null || supplierName == null || supplierName.trim().isEmpty()) {
+            resp.sendRedirect("so-supplier.jsp");
+            return;
+        }
+
+        SuppliersDAO dao = new SuppliersDAO();
+        boolean success = dao.updateSupplier(dbName, supplierId, supplierName, contactName, phone, email);
+
+        if (success) {
+            session.setAttribute("successMessage", "Cập nhật nhà cung cấp thành công!");
+        } else {
+            session.setAttribute("errorMessage", "Cập nhật thất bại.");
+        }
+
+        resp.sendRedirect("so-supplier");
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+}
+
+private String getSafeParam(HttpServletRequest req, String paramName) {
+    String value = req.getParameter(paramName);
+    return (value != null && !value.trim().isEmpty()) ? value.trim() : null;
+}
+
+    
+    
 }
