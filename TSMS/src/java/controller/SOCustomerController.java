@@ -18,25 +18,30 @@ public class SOCustomerController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        
+
+        //Check active status
+        if ((Integer) session.getAttribute("isActive") == 0) {
+            resp.sendRedirect(req.getContextPath() + "/subscription");
+            return;
+        }
+
         // Lấy thông báo từ session nếu có
-if (session != null) {
-    String successMsg = (String) session.getAttribute("successMessage");
-    if (successMsg != null) {
-        req.setAttribute("successMessage", successMsg);
-        session.removeAttribute("successMessage");
-    }
+        if (session != null) {
+            String successMsg = (String) session.getAttribute("successMessage");
+            if (successMsg != null) {
+                req.setAttribute("successMessage", successMsg);
+                session.removeAttribute("successMessage");
+            }
 
-    String errorMsg = (String) session.getAttribute("errorMessage");
-    if (errorMsg != null) {
-        req.setAttribute("errorMessage", errorMsg);
-        session.removeAttribute("errorMessage");
-    }
-}
-        
+            String errorMsg = (String) session.getAttribute("errorMessage");
+            if (errorMsg != null) {
+                req.setAttribute("errorMessage", errorMsg);
+                session.removeAttribute("errorMessage");
+            }
+        }
 
-        if (session == null || session.getAttribute("userId") == null ||
-            session.getAttribute("roleId") == null || session.getAttribute("dbName") == null) {
+        if (session == null || session.getAttribute("userId") == null
+                || session.getAttribute("roleId") == null || session.getAttribute("dbName") == null) {
             resp.sendRedirect("login");
             return;
         }
@@ -97,7 +102,9 @@ if (session != null) {
                 offset = (page - 1) * pageSize;
 
                 int toIndex = Math.min(offset + pageSize, totalCustomers);
-                if (offset > toIndex) offset = 0;
+                if (offset > toIndex) {
+                    offset = 0;
+                }
                 customers = customers.subList(offset, toIndex);
             } else if (hasKeyword) {
                 customers = customerDAO.filterCustomers(dbName, keyword, genderFilter);
@@ -107,7 +114,9 @@ if (session != null) {
                 offset = (page - 1) * pageSize;
 
                 int toIndex = Math.min(offset + pageSize, totalCustomers);
-                if (offset > toIndex) offset = 0;
+                if (offset > toIndex) {
+                    offset = 0;
+                }
                 customers = customers.subList(offset, toIndex);
             } else {
                 totalCustomers = customerDAO.countCustomers(dbName, genderFilter);
@@ -140,7 +149,7 @@ if (session != null) {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        
+
         try {
             String idStr = req.getParameter("id");
             if (idStr == null || idStr.trim().isEmpty()) {
@@ -156,15 +165,14 @@ if (session != null) {
             String address = getSafeParam(req, "address");
 
             if (fullName == null || email == null || genderStr == null || phone == null || address == null) {
-                    session.setAttribute("errorMessage", "Cập nhật thất bại. Vui lòng thử lại.");
-                    resp.sendRedirect("so-customer");
-                    
+                session.setAttribute("errorMessage", "Cập nhật thất bại. Vui lòng thử lại.");
+                resp.sendRedirect("so-customer");
+
                 return;
             }
 
             boolean gender = Boolean.parseBoolean(genderStr.trim());
 
-            
             if (session == null || session.getAttribute("dbName") == null) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không xác định được cơ sở dữ liệu.");
                 return;
@@ -175,14 +183,13 @@ if (session != null) {
 
             boolean success = dao.updateCustomer(customerId, fullName, email, gender, phone, address, dbName);
 
-if (success) {
-    session.setAttribute("successMessage", "Cập nhật thông tin khách hàng thành công!");
-    resp.sendRedirect("so-customer");
-} else {
-    session.setAttribute("errorMessage", "Cập nhật thất bại. Vui lòng thử lại.");
-    resp.sendRedirect("so-customer");
-}
-
+            if (success) {
+                session.setAttribute("successMessage", "Cập nhật thông tin khách hàng thành công!");
+                resp.sendRedirect("so-customer");
+            } else {
+                session.setAttribute("errorMessage", "Cập nhật thất bại. Vui lòng thử lại.");
+                resp.sendRedirect("so-customer");
+            }
 
         } catch (NumberFormatException e) {
             e.printStackTrace();

@@ -18,14 +18,20 @@ public class SOSupplierController extends HttpServlet {
         HttpSession session = req.getSession(false);
 
         // Kiểm tra đăng nhập
-        if (session == null ||
-            session.getAttribute("userId") == null ||
-            session.getAttribute("roleId") == null ||
-            session.getAttribute("dbName") == null) {
+        if (session == null
+                || session.getAttribute("userId") == null
+                || session.getAttribute("roleId") == null
+                || session.getAttribute("dbName") == null) {
             resp.sendRedirect("login");
             return;
         }
-        
+
+        //Check active status
+        if ((Integer) session.getAttribute("isActive") == 0) {
+            resp.sendRedirect(req.getContextPath() + "/subscription");
+            return;
+        }
+
         int roleId = Integer.parseInt(session.getAttribute("roleId").toString());
         if (roleId != 0) {
             resp.sendRedirect("login");
@@ -43,7 +49,9 @@ public class SOSupplierController extends HttpServlet {
         if (pageParam != null) {
             try {
                 page = Integer.parseInt(pageParam);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
             } catch (NumberFormatException e) {
                 page = 1;
             }
@@ -71,12 +79,12 @@ public class SOSupplierController extends HttpServlet {
             // Hiển thị tất cả với phân trang
             totalSuppliers = suppliersDAO.countSuppliers(dbName);
             totalPages = (int) Math.ceil((double) totalSuppliers / pageSize);
-            
+
             if (page > totalPages && totalPages > 0) {
                 page = totalPages;
                 offset = (page - 1) * pageSize;
             }
-            
+
             suppliers = suppliersDAO.getSuppliersByPage(dbName, offset, pageSize);
         }
         req.setAttribute("suppliers", suppliers);

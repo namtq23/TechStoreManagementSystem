@@ -725,6 +725,13 @@ public class UserDAO {
         }
         return creators;
     }
+    
+    public static void deactivateAllUsers(String dbName) throws SQLException {
+        String sql = "UPDATE [Users] SET IsActive = 0";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.executeUpdate();
+        }
+    }
 
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();

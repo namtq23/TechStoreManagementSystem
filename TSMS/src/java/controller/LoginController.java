@@ -72,7 +72,7 @@ public class LoginController extends HttpServlet {
             String shopName = req.getParameter("shopname");
             String remember = req.getParameter("remember");
 
-            System.out.println(username + password);
+            System.out.println(username + password + shopName);
 
             if (username == null || password == null) {
                 req.setAttribute("error", "Email hoặc mật khẩu không được để trống");
@@ -99,7 +99,7 @@ public class LoginController extends HttpServlet {
             String dbNameStaff = Validate.shopNameConverter(shopName);
             User user = UserDAO.getUserByEmail(username, dbNameStaff);
             String phone = ShopDAO.getPhoneByUserId(dbNameStaff);
-            
+
             if (phone == null) {
                 req.setAttribute("error", "Không tìm thấy tài khoản chủ sở hữu!");
                 req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
@@ -130,8 +130,26 @@ public class LoginController extends HttpServlet {
 
             if (isExpired) {
                 ShopOwnerDAO.deactivateOwner(ownerId);
+                UserDAO.deactivateAllUsers(dbNameStaff);
+                user = UserDAO.getUserByEmail(username, dbNameStaff);
 
                 if (user.getUserID() == 1) {
+                    HttpSession session = req.getSession(true);
+                    System.out.println(user.getEmail());
+                    session.setAttribute("userId", user.getUserID());
+                    session.setAttribute("roleId", user.getRoleId());
+                    session.setAttribute("dbName", dbNameStaff);
+                    session.setAttribute("branchId", user.getBranchId());
+                    session.setAttribute("warehouseId", user.getWarehouseId());
+                    session.setAttribute("isActive", user.getIsActive());
+                    System.out.println("Session created: " + session.getId());
+                    System.out.println("userId set: " + session.getAttribute("userId"));
+                    System.out.println("roleId set: " + session.getAttribute("roleId"));
+                    System.out.println("dbName set: " + session.getAttribute("dbName"));
+                    System.out.println("warehouseId set: " + session.getAttribute("warehouseId"));
+                    System.out.println("Active status: " + session.getAttribute("isActive"));
+
+                    session.setMaxInactiveInterval(1000 * 60 * 60 * 24);
                     resp.sendRedirect(req.getContextPath() + "/subscription");
                 } else {
                     req.setAttribute("error", "Tài khoản tạm vô hiệu hoá do chưa đăng ký sử dụng dịch vụ");
@@ -149,11 +167,13 @@ public class LoginController extends HttpServlet {
                     session.setAttribute("dbName", dbNameStaff);
                     session.setAttribute("branchId", user.getBranchId());
                     session.setAttribute("warehouseId", user.getWarehouseId());
+                    session.setAttribute("isActive", user.getIsActive());
                     System.out.println("Session created: " + session.getId());
                     System.out.println("userId set: " + session.getAttribute("userId"));
                     System.out.println("roleId set: " + session.getAttribute("roleId"));
                     System.out.println("dbName set: " + session.getAttribute("dbName"));
                     System.out.println("warehouseId set: " + session.getAttribute("warehouseId"));
+                    System.out.println("Active status: " + session.getAttribute("isActive"));
 
                     session.setMaxInactiveInterval(1000 * 60 * 60 * 24);
 

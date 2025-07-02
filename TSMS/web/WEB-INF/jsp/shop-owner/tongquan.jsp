@@ -276,7 +276,7 @@
 
             <!-- Sidebar -->
             <aside class="sidebar">
-                <!-- Promotion Banner -->
+<!--                 Promotion Banner 
                 <div class="promo-banner">
                     <div class="promo-content">
                         <h4>Nhận Hóa đơn điện tử & Chữ ký số</h4>
@@ -288,7 +288,7 @@
                     </div>
                 </div>
 
-                <!-- QR Code Section -->
+                 QR Code Section 
                 <div class="qr-section">
                     <div class="qr-content">
                         <h4>TSMS ra mắt kênh CSKH Zalo Official Account</h4>
@@ -297,7 +297,7 @@
                     <div class="qr-code">
                         <i class="fas fa-qrcode"></i>
                     </div>
-                </div>
+                </div>-->
 
                 <!-- Notifications -->
                 <div class="notifications" style="padding: 16px; background: #ffffff; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">

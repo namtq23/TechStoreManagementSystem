@@ -7,8 +7,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
     Author     : Kawaii
 */
 
-  
-        * {
+
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -548,7 +548,7 @@ body {
     .metrics-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .sidebar {
         width: 280px;
     }
@@ -559,32 +559,32 @@ body {
         flex-direction: column;
         padding: 10px;
     }
-    
+
     .sidebar {
         width: 100%;
     }
-    
+
     .metrics-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .main-nav {
         display: none;
     }
-    
+
     .section-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
-    
+
     .chart-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
 }
-  .chart-container {
+.chart-container {
     width: 95%;
     height: 400px; /* tăng chiều cao tại đây nếu muốn biểu đồ cao hơn */
     position: relative;
@@ -634,7 +634,7 @@ canvas#myTopProduct{
 }
 
 .dropdown-toggle {
-    text-decoration: none;  
+    text-decoration: none;
     color: white;
 }
 

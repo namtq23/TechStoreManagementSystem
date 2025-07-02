@@ -46,6 +46,12 @@ public class SOPromotionController extends HttpServlet {
                 response.sendRedirect("login");
                 return;
             }
+            
+            //Check active status
+            if ((Integer) session.getAttribute("isActive") == 0) {
+                response.sendRedirect(request.getContextPath() + "/subscription");
+                return;
+            }
 
             // Parse thông tin session
             int userId = Integer.parseInt(userIdObj.toString());
