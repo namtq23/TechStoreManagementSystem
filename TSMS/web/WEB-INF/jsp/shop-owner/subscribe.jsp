@@ -4,6 +4,8 @@
     Author     : admin
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -606,37 +608,36 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Help Button -->
-            <button class="help-button">
-                <i class="fas fa-phone"></i>
-            </button>
         </main>
 
-        <script>
-            // Handle plan selection
-            document.querySelectorAll('.plan-option').forEach(option => {
-                option.addEventListener('click', function () {
-                    document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
-                    this.classList.add('selected');
-                    this.querySelector('input[type="radio"]').checked = true;
+    <c:if test="${not empty expired}">
+        <div class="notification error" id="notification">Tài khoản của bạn đã hết hạn. Mua ngay để tiếp tục sử dụng.</div>
+    </c:if>
 
-                    // Update price in summary
-                    const price = this.querySelector('.plan-price').textContent;
-                    const duration = this.querySelector('.plan-duration').textContent;
-                    document.querySelector('.summary-item span:first-child').textContent = `Gói hỗ trợ x ${duration}`;
-                    document.querySelector('.summary-item span:last-child').textContent = price;
-                    document.querySelector('.summary-item.total span:last-child').textContent = price;
-                });
-            });
+    <script>
+        // Handle plan selection
+        document.querySelectorAll('.plan-option').forEach(option => {
+            option.addEventListener('click', function () {
+                document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                this.querySelector('input[type="radio"]').checked = true;
 
-            // Handle tab switching
-            document.querySelectorAll('.tab-button').forEach(tab => {
-                tab.addEventListener('click', function () {
-                    document.querySelectorAll('.tab-button').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                });
+                // Update price in summary
+                const price = this.querySelector('.plan-price').textContent;
+                const duration = this.querySelector('.plan-duration').textContent;
+                document.querySelector('.summary-item span:first-child').textContent = `Gói hỗ trợ x ${duration}`;
+                document.querySelector('.summary-item span:last-child').textContent = price;
+                document.querySelector('.summary-item.total span:last-child').textContent = price;
             });
-        </script>
-    </body>
+        });
+
+        // Handle tab switching
+        document.querySelectorAll('.tab-button').forEach(tab => {
+            tab.addEventListener('click', function () {
+                document.querySelectorAll('.tab-button').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
 </html>
