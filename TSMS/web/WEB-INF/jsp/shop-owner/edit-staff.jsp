@@ -424,15 +424,12 @@
             </form>
         </div>
 
-        <%-- Notification Section --%>
         <c:if test="${not empty success}">
             <div class="notification success" id="notification">${success}</div>
-            <%-- Clear the success message from the session after displaying it --%>
             <c:remove var="success" scope="session"/>
         </c:if>
         <c:if test="${not empty error}">
             <div class="notification error" id="notification">${error}</div>
-            <%-- Clear the error message from the session after displaying it --%>
             <c:remove var="error" scope="session"/>
         </c:if>
 
