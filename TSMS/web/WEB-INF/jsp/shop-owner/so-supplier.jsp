@@ -112,65 +112,40 @@
 
         <div class="main-container">
             <!-- Sidebar -->
-            <aside class="sidebar">
-                <!--Product Type Filter--> 
-                <div class="filter-section">
-                    <div class="filter-header">
-                        <h3>Trạng thái nhà cung cấp</h3>
-                        <i class="fas fa-chevron-up"></i>
-                    </div>
+ <aside class="sidebar">
+    <form action="so-customer" method="get">
+        <!-- Thêm dòng này để kích hoạt lọc theo khoảng giá -->
+        <input type="hidden" name="showTop" value="true" />
 
-                    <div class="filter-content">
 
-                        <form action="bm-supplier" method="get">
-                            <label class="checkbox-item">
-                                <input type="radio" name="top" value="" 
-                                       <%= request.getParameter("top") == null ? "checked" : "" %>>
-                                <span>Tổng hợp</span><br>
-                            </label>
-                            <label class="checkbox-item">
-                                <input type="radio" name="top" value="true" 
-                                       <%= "true".equals(request.getParameter("top")) ? "checked" : "" %>>
-                                <span>Tiềm năng</span><br>
-                            </label>
 
-                            <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
-                        </form>
-
-                    </div>
-
+        <!-- Price Range Filter -->
+        <div class="filter-section">
+            <div class="filter-header">
+                <h3>Khoảng chi tiêu</h3>
+            </div>
+            <div class="filter-content">
+                <div class="price-range">
+                    <input type="number" name="minGrandTotal" placeholder="Số tiền nhập từ"
+                           value="${minGrandTotal}" class="GrandTotal-input">
+                    <input type="number" name="maxGrandTotal" placeholder="Số tiền nhập đến"
+                           value="${maxGrandTotal}" class="GrandTotal-input">
                 </div>
-                <div class="filter-section">
-                    <div class="filter-header">
-                        <h3>Giới tính khách hàng</h3>
-                        <i class="fas fa-chevron-up"></i>
-                    </div>
-                    <div class="filter-content">
-                        <form action="bm-supplier" method="get">
-                            <label class="checkbox-item">
-                                <input type="radio" id="gender-all" name="gender" value="all"
-                                       <%= request.getParameter("gender") == null || "all".equals(request.getParameter("gender")) ? "checked" : "" %>>
-                                <span for="gender-all">Tổng hợp</span><br>
-                            </label>
+            </div>
+        </div>
 
-                            <label class="checkbox-item">
-                                <input type="radio" id="gender-male" name="gender" value="male"
-                                       <%= "male".equals(request.getParameter("gender")) ? "checked" : "" %>>
-                                <span for="gender-male">Nam</span><br>
-                            </label>
 
-                            <label class="checkbox-item">
-                                <input type="radio" id="gender-female" name="gender" value="female"
-                                       <%= "female".equals(request.getParameter("gender")) ? "checked" : "" %>>
-                                <span for="gender-female">Nữ</span><br>
-                            </label>
-
-                            <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
-                        </form>
-                    </div>
-
-                </div>
-            </aside>
+        <!-- Action Buttons -->
+        <div class="filter-actions">
+            <a href="so-customer?page=1" class="btn-clear">
+                <i class="fas fa-eraser"></i> Xóa bộ lọc
+            </a>
+            <button type="submit" class="btn-apply">
+                <i class="fas fa-filter"></i> Áp dụng lọc
+            </button>
+        </div>
+    </form>
+</aside>
 
             <!-- Main Content -->
             <main class="main-content">
@@ -195,77 +170,159 @@
                         </button>
                     </div>
                 </div>
+<c:if test="${not empty sessionScope.successMessage}">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        ${sessionScope.successMessage}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <c:remove var="successMessage" scope="session"/>
+</c:if>
 
-                <!-- Products Table -->
-                <div class="table-container">
-                    <table class="products-table">
-                        <thead>
-                            <tr>
-                                <th>Mã Nhà cung cấp</th>
-                                <th>Tên Công Ty</th>
-                                <th>Người giao dịch</th>
-                                <th>Số điện thoại</th>
-                                <th>Gmail</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="supplier" items="${suppliers}">
-                                <tr>
-                                    <td>${supplier.supplierID}</td>
-                                    <td>${supplier.supplierName}</td>
-                                    <td>${supplier.contactName}</td>
-                                    <td>${supplier.phone}</td>
-                                    <td>${supplier.email}</td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
+<c:if test="${not empty sessionScope.errorMessage}">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        ${sessionScope.errorMessage}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <c:remove var="errorMessage" scope="session"/>
+</c:if>
 
-                    </table>
-                </div>
+    <div class="table-container">
+    <table class="products-table table table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Mã Nhà cung cấp</th>
+                <th>Tên Công Ty</th>
+                <th>Người giao dịch</th>
+                <th>Số điện thoại</th>
+                <th>Gmail</th>
+            </tr>
+        </thead>
+        <tbody>
+            <c:forEach var="supplier" items="${suppliers}" varStatus="loop">
+                <!-- Dòng chính -->
+                <tr onclick="toggleDetails(${loop.index})" style="cursor: pointer;">
+                    <td>${supplier.supplierID}</td>
+                    <td>${supplier.supplierName}</td>
+                    <td>${supplier.contactName}</td>
+                    <td>${supplier.phone}</td>
+                    <td>${supplier.email}</td>
+                </tr>
 
-                <!-- Pagination -->
-                <div class="pagination-container">
-                    <div class="pagination-info">
-                        Hiển thị ${startSupplier} - ${endSupplier} / Tổng số ${totalSuppliers} Nhà cung cấp
-                    </div>
+                <!-- Dòng chi tiết để chỉnh sửa -->
+                <tr id="details-${loop.index}" class="detail-row" style="display: none;">
+                    <td colspan="5">
+                        <form method="post" action="so-supplier">
+                            <input type="hidden" name="id" value="${supplier.supplierID}" />
 
-                    <div class="pagination">
-                        <a href="bm-customer?page=1" class="page-btn ${currentPage == 1 ? "disabled" : ""}"> 
-                            <i class="fas fa-angle-double-left"></i>
-                        </a>
-                        <a href="bm-customer?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? "disabled" : ""}">
-                            <i class="fas fa-angle-left"></i>
-                        </a>
-                        <c:forEach begin="1" end="${totalPages}" var="i">
-                            <a href="bm-customer?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
-                        </c:forEach>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Tên công ty:</strong>
+                                        <input type="text" name="supplierName" class="form-control"
+                                               value="${supplier.supplierName}" />
+                                    </p>
 
-                        <a href="bm-customer?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
-                            <i class="fas fa-angle-right"></i>
-                        </a>
-                        <a href="bm-customer?page=${totalPages}" class="page-btn ${currentPage == totalPages ? "disabled" : ""}">
-                            <i class="fas fa-angle-double-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </main>
-        </div>
-    </body>
-    <script>
-        const toggle = document.getElementById("dropdownToggle");
-        const menu = document.getElementById("dropdownMenu");
+                                    <p><strong>Người giao dịch:</strong>
+                                        <input type="text" name="contactName" class="form-control"
+                                               value="${supplier.contactName}" />
+                                    </p>
+                                </div>
 
-        toggle.addEventListener("click", function (e) {
-            e.preventDefault();
-            menu.style.display = menu.style.display === "block" ? "none" : "block";
-        });
+                                <div class="col-md-6">
+                                    <p><strong>Số điện thoại:</strong>
+                                        <input type="text" name="phone" class="form-control"
+                                               value="${supplier.phone}" />
+                                    </p>
 
-        // Đóng dropdown nếu click ra ngoài
-        document.addEventListener("click", function (e) {
-            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-                menu.style.display = "none";
-            }
-        });
-    </script>
+                                    <p><strong>Email:</strong>
+                                        <input type="email" name="email" class="form-control"
+                                               value="${supplier.email}" />
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="mt-2 text-end">
+                                <button type="submit" class="btn btn-sm btn-success">Lưu</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+            </c:forEach>
+        </tbody>
+    </table>
+</div>
+
+                <!-- Scripts -->
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <script>
+                                    function toggleDetails(index) {
+                                        $(".detail-row").not("#details-" + index).hide(); // Ẩn các dòng chi tiết khác
+                                        $("#details-" + index).fadeToggle(200);
+                                    }
+
+                                    // Dropdown xử lý menu (giữ nguyên)
+                                    const toggle = document.getElementById("dropdownToggle");
+                                    const menu = document.getElementById("dropdownMenu");
+
+                                    toggle?.addEventListener("click", function (e) {
+                                        e.preventDefault();
+                                        menu.style.display = menu.style.display === "block" ? "none" : "block";
+                                    });
+
+                                    document.addEventListener("click", function (e) {
+                                        if (!toggle?.contains(e.target) && !menu?.contains(e.target)) {
+                                            menu.style.display = "none";
+                                        }
+                                    });
+                </script>
+                
+<script>
+function enableEdit(index) {
+    // Hiện input và ẩn text
+    const fields = ['fullName', 'email', 'gender', 'phone', 'address'];
+    fields.forEach(field => {
+        document.getElementById(`${field}-text-${index}`).style.display = 'none';
+        document.getElementById(`${field}-input-${index}`).classList.remove('d-none');
+    });
+
+    // Hiện nút "Lưu"
+    document.getElementById(`save-btn-${index}`).classList.remove('d-none');
+}
+</script>
+
+<script>
+function enableEdit(index) {
+    const fields = ['fullName', 'email', 'gender', 'phone', 'address'];
+    
+    fields.forEach(field => {
+        const span = document.getElementById(`${field}-text-${index}`);
+        const input = document.getElementById(`${field}-input-${index}`);
+        if (span && input) {
+            span.classList.add('d-none');
+            input.classList.remove('d-none');
+        }
+    });
+
+    const saveBtn = document.getElementById(`save-btn-${index}`);
+    if (saveBtn) saveBtn.classList.remove('d-none');
+
+    const cancelBtn = document.getElementById(`cancel-btn-${index}`);
+    if (cancelBtn) cancelBtn.classList.remove('d-none');
+
+    const editBtn = document.querySelector(`#details-${index} button[onclick*="enableEdit"]`);
+    if (editBtn) editBtn.classList.add('d-none'); // Ẩn nút "Chỉnh sửa"
+}
+
+</script>
+                
+<script>
+    setTimeout(() => {
+        const alert = document.querySelector(".alert");
+        if (alert) {
+            alert.style.transition = "opacity 0.5s";
+            alert.style.opacity = 0;
+            setTimeout(() => alert.remove(), 500);
+        }
+    }, 3000);
+</script>
 </html>
 
