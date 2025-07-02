@@ -5,6 +5,7 @@
 package controller;
 
 import dao.ShopOwnerDAO;
+import dao.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
+import model.ShopOwner;
 
 /**
  *
@@ -29,9 +31,11 @@ public class SAApproveSubs extends HttpServlet {
                 int ownerId = Integer.parseInt(ownerIdStr);
                 int methodId = Integer.parseInt(request.getParameter("methodId"));
                 int subsMonth = Integer.parseInt(request.getParameter("subsMonth"));
-
+                
+                ShopOwner so = UserDAO.getShopOwnerById(ownerId);
                 ShopOwnerDAO dao = new ShopOwnerDAO();
                 dao.activateShopOwnerIfInactive(ownerId);
+                UserDAO.activateUsersIfInactive(so.getDatabaseName());
                 dao.markSubscriptionLogAsDone(ownerId, methodId);
                 dao.updateUserServiceMethod(ownerId, methodId, subsMonth);
 

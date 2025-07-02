@@ -53,7 +53,7 @@ public class SOStaffController extends HttpServlet {
 
             //Check active status
             if ((Integer) session.getAttribute("isActive") == 0) {
-                resp.sendRedirect(req.getContextPath() + "/subscription?status=expired");
+                resp.sendRedirect(req.getContextPath() + "/subscription");
                 return;
             }
 
@@ -225,6 +225,7 @@ public class SOStaffController extends HttpServlet {
             String roleId = req.getParameter("role");
             String password = req.getParameter("password");
             String confirmedPassword = req.getParameter("confirmPassword");
+            String identificationID = req.getParameter("cccd");
 
             HttpSession session = req.getSession(true);
             Object dbNameObj = session.getAttribute("dbName");
@@ -289,17 +290,17 @@ public class SOStaffController extends HttpServlet {
 
             switch (roleId) {
                 case "1":
-                    User bm = new User(0, hashedPassword, fullName, email, phone, branchId, null, genderId, null, 1, 1, address, dob);
+                    User bm = new User(0, hashedPassword, fullName, email, phone, branchId, null, genderId, null, 1, 1, address, dob, identificationID);
                     System.out.println("BM created: " + bm);
                     UserDAO.insertBranchManagerAndSaleIntoUser(dbName, bm);
                     break;
                 case "2":
-                    User sale = new User(0, hashedPassword, fullName, email, phone, branchId, null, genderId, null, 2, 1, address, dob);
+                    User sale = new User(0, hashedPassword, fullName, email, phone, branchId, null, genderId, null, 2, 1, address, dob, identificationID);
                     System.out.println("Sale staff created: " + sale);
                     UserDAO.insertBranchManagerAndSaleIntoUser(dbName, sale);
                     break;
                 case "3":
-                    User wm = new User(0, hashedPassword, fullName, email, phone, null, whId, genderId, null, 3, 1, address, dob);
+                    User wm = new User(0, hashedPassword, fullName, email, phone, null, whId, genderId, null, 3, 1, address, dob, identificationID);
                     System.out.println("WM created: " + wm);
                     UserDAO.insertBranchManagerAndSaleIntoUser(dbName, wm);
                     break;

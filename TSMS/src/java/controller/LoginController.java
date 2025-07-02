@@ -154,7 +154,7 @@ public class LoginController extends HttpServlet {
                             System.out.println("Active status: " + session.getAttribute("isActive"));
 
                             session.setMaxInactiveInterval(1000 * 60 * 60 * 24);
-                            resp.sendRedirect(req.getContextPath() + "/subscription?status=expired");
+                            resp.sendRedirect(req.getContextPath() + "/subscription");
                         } else {
                             req.setAttribute("error", "Tài khoản tạm vô hiệu hoá do chưa đăng ký sử dụng dịch vụ");
                             req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
