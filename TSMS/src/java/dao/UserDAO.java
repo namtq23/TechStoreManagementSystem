@@ -403,7 +403,8 @@ public class UserDAO {
                 rs.getInt("RoleID"),
                 rs.getInt("IsActive"),
                 rs.getString("Address"),
-                rs.getDate("DOB")
+                rs.getDate("DOB"),
+                rs.getString("IdentificationID")
         );
 
         return user;
@@ -732,15 +733,24 @@ public class UserDAO {
             ps.executeUpdate();
         }
     }
+    
+    //Phuong
+    public static void activateUsersIfInactive(String dbName) throws SQLException {
+        String sql = "UPDATE Users SET IsActive = 1 WHERE IsActive = 0";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.executeUpdate();
+        }
+    }
 
     public static void main(String[] args) throws SQLException {
         UserDAO ud = new UserDAO();
 //        List<ShopOwner> shopOwners = ud.getShopOwners();  
 //        List<User> users = ud.getStaffsByBranchID(1, "DTB_StoreTemp");
-//        User o = ud.getUserByEmail("an.nguyen@email.com", "DTB_StoreTemp");
+        User o = UserDAO.getUserById(2, "DTB_Phuongtest");
 
-        ShopOwnerDTO so = ud.getShopOwnerById(3);
-        System.out.println(so);
+//        ShopOwnerDTO so = ud.getShopOwnerById(3);
+        System.out.println(o);
     }
 
 }

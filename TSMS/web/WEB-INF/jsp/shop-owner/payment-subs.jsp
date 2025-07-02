@@ -1,17 +1,17 @@
 <%-- 
-    Document   : subscribe
-    Created on : Jul 1, 2025, 8:41:44 AM
+    Document   : payment-subs
+    Created on : Jul 2, 2025, 1:35:53 PM
     Author     : admin
 --%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Mua Gói hỗ trợ - TSMS</title>
+        <title>Thông tin thanh toán</title>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="css/header.css"/>
@@ -26,6 +26,79 @@
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 background-color: #f5f5f5;
                 color: #333;
+            }
+
+            .payment-box {
+                background: #fff;
+                border-radius: 8px;
+                padding: 30px;
+                max-width: 800px;
+                margin: auto;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+
+            .payment-header {
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 20px;
+                color: #333;
+            }
+
+            .payment-content {
+                display: flex;
+                gap: 24px;
+                align-items: flex-start;
+            }
+
+            .qr-code {
+                width: 240px;
+                flex-shrink: 0;
+            }
+
+            .qr-code img {
+                width: 100%;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+            }
+
+            .info-table {
+                flex: 1;
+                font-size: 16px;
+            }
+
+            .info-table tr td {
+                padding: 10px 8px;
+                vertical-align: top;
+            }
+
+            .info-table tr td:first-child {
+                font-weight: bold;
+                color: #333;
+                width: 160px;
+            }
+
+            .note-box {
+                background-color: #fff3cd;
+                color: #856404;
+                padding: 12px 16px;
+                border: 1px solid #ffeeba;
+                border-radius: 6px;
+                margin-top: 20px;
+                font-size: 14px;
+            }
+
+            .confirmation-link {
+                margin-top: 12px;
+                font-size: 14px;
+            }
+
+            .confirmation-link a {
+                color: #007bff;
+                text-decoration: none;
+            }
+
+            .confirmation-link a:hover {
+                text-decoration: underline;
             }
 
             .main-content {
@@ -365,46 +438,19 @@
                 background: #138496;
                 transform: scale(1.1);
             }
-            .notification {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 8px;
-                font-size: 16px;
-                color: white;
-                z-index: 9999;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-                animation: slideDown 0.4s ease;
+            .btn-cancel {
+                width: 100%;
+                background-color: white;
+                color: black;
+                border: 1px solid black;
+                padding: 10px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
             }
 
-            /* Thành công: nền xanh lá */
-            .notification.success {
-                background-color: #28a745;
-            }
-
-            /* Lỗi: nền đỏ */
-            .notification.error {
-                background-color: #dc3545;
-            }
-
-            /* Ẩn sau 4s */
-            .notification.hide {
-                opacity: 0;
-                visibility: hidden;
-                transition: opacity 0.5s ease;
-            }
-
-            /* Animation xuất hiện */
-            @keyframes slideDown {
-                from {
-                    opacity: 0;
-                    transform: translateY(-10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+            .btn-cancel:hover {
+                background-color: #e0e0e0; /* hoặc gray, hoặc #ccc */
             }
         </style>
     </head>
@@ -499,196 +545,96 @@
             </div>
         </header>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <form action="subscription-payment" method="post">
-                <div class="container">
-                    <!-- Left Sidebar -->
-                    <div class="sidebar">
-                        <h3>Gian hàng</h3>
-                        <ul class="sidebar-menu">
-                            <li><a href="#"><i class="fas fa-info-circle"></i> Thông tin gian hàng</a></li>
-                            <li><a href="#" class="active"><i class="fas fa-shopping-cart"></i> Gói dịch vụ</a></li>
-                            <li><a href="#"><i class="fas fa-history"></i> Lịch sử mua hàng</a></li>
-                            <li><a href="#"><i class="fas fa-check-circle"></i> Bản xác nhận dịch vụ</a></li>
-                        </ul>
-                    </div>
+            <div class="container">
+                <!-- Left Sidebar -->
+                <div class="sidebar">
+                    <h3>Gian hàng</h3>
+                    <ul class="sidebar-menu">
+                        <li><a href="#"><i class="fas fa-info-circle"></i> Thông tin gian hàng</a></li>
+                        <li><a href="#" class="active"><i class="fas fa-shopping-cart"></i> Gói dịch vụ</a></li>
+                        <li><a href="#"><i class="fas fa-history"></i> Lịch sử mua hàng</a></li>
+                        <li><a href="#"><i class="fas fa-check-circle"></i> Bản xác nhận dịch vụ</a></li>
+                    </ul>
+                </div>
 
-                    <!-- Main Form -->
-                    <div class="main-form">
-                        <div class="form-header">
-                            <i class="fas fa-arrow-left"></i>
-                            <h2>Mua Gói hỗ trợ</h2>
-                        </div>
+                <div class="main-form">
+                    <div class="payment-box">
+                        <div class="payment-header">Chuyển khoản thanh toán</div>
 
-                        <div class="form-content">
-                            <!-- Form Fields -->
-                            <!-- Plan Selection -->
-                            <div class="plan-options">
-                                <div class="plan-option">
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="radio" name="plan" value="1" id="plan1">
-                                        <label for="plan1" class="plan-duration">3 tháng</label>
-                                    </div>
-                                    <div class="plan-price">700,000đ</div>
-                                </div>
-
-                                <div class="plan-option selected">
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="radio" name="plan" value="2" id="plan2" checked>
-                                        <label for="plan2" class="plan-duration">6 tháng</label>
-                                    </div>
-                                    <div class="plan-price">1,200,000đ</div>
-                                </div>
-
-                                <div class="plan-option">
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="radio" name="plan" value="3" id="plan3">
-                                        <label for="plan3" class="plan-duration">1 năm</label>
-                                    </div>
-                                    <div class="plan-price">2,000,000đ</div>
-                                </div>
-
-                                <div class="plan-option">
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="radio" name="plan" value="4" id="plan4">
-                                        <label for="plan5" class="plan-duration">2 năm</label>
-                                    </div>
-                                    <div class="plan-price">3,700,000đ</div>
-                                </div>
+                        <div class="payment-content">
+                            <!-- QR -->
+                            <div class="qr-code">
+                                <img src="${qrUrl}" alt="QR Code chuyển khoản" style="width: 240px; border-radius: 8px;">
                             </div>
 
-                            <div class="form-tabs">
-                                <button type="button" class="tab-button active">Thông tin người mua</button>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="fullname" class="required">Họ và tên</label>
-                                    <input type="text" id="fullname" name="fullname" value="${user.fullName}" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Giới tính</label>
-                                    <div class="gender-options">
-                                        <div class="gender-option">
-                                            <input type="radio" name="gender" value="male" id="male"
-                                                   <c:if test="${user.gender == '1'}">checked</c:if>>
-                                                   <label for="male">Nam</label>
-                                            </div>
-                                            <div class="gender-option">
-                                                <input type="radio" name="gender" value="female" id="female"
-                                                <c:if test="${user.gender == '0'}">checked</c:if>>
-                                                <label for="female">Nữ</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="phone" class="required">Số điện thoại</label>
-                                        <div class="phone-input">
-                                            <input type="number" id="phone" name="phone" value="${user.phone}" required style="width: 100%;">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input type="email" id="email" name="email" value="${user.email}">
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="cccd" class="required">CCCD/Hộ chiếu</label>
-                                    <input type="text" id="cccd" name="cccd" value="${user.identificationID}" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="address" class="required">Địa chỉ</label>
-                                    <input type="text" id="address" name="address" value="${user.address}" required>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- Right Summary -->
-                    <div class="summary-card">
-                        <h3>Chi tiết hóa đơn</h3>
-
-                        <div class="summary-item">
-                            <span>Gói 6 tháng</span>
-                            <span>1,200,000đ</span>
+                            <!-- Thông tin chuyển khoản -->
+                            <table class="info-table">
+                                <tr>
+                                    <td>Ngân hàng</td>
+                                    <td>Ngân hàng TMCP Quân đội (MB)</td>
+                                </tr>
+                                <tr>
+                                    <td>Số tài khoản</td>
+                                    <td>9529012005</td>
+                                </tr>
+                                <tr>
+                                    <td>Số tiền chuyển khoản</td>
+                                    <td><strong><fmt:formatNumber value="${amount}" type="number" groupingUsed="true"/>đ</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Nội dung</td>
+                                    <td><strong>${transferNote}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Chủ tài khoản</td>
+                                    <td>NGUYEN DOAN PHUNG PHUONG</td>
+                                </tr>
+                                <tr>
+                                    <td>Chi nhánh</td>
+                                    <td>Chi nhánh Hai Bà Trưng, Hà Nội</td>
+                                </tr>
+                            </table>
                         </div>
 
-                        <div class="summary-item total">
-                            <span>Tổng tiền thanh toán</span>
-                            <span>1,200,000đ</span>
+                        <!-- Ghi chú -->
+                        <div class="note-box">
+                            📌 Vui lòng quét mã QR hoặc nhập đúng thông tin chuyển khoản để thanh toán được ghi nhận chính xác.
                         </div>
-
-                        <div class="summary-note">
-                            Bằng cách tra chọn Tiếp tục thanh toán, bạn đã đồng ý với các <a href="#" style="color: #17a2b8;">Điều khoản dịch vụ</a> của KiotViet
-                        </div>
-
-                        <button type="submit" class="btn-primary">Tiếp tục thanh toán</button>
                     </div>
                 </div>
-            </form>
+
+                <!-- Right Summary -->
+                <div class="summary-card">
+                    <h3>Chi tiết hóa đơn</h3>
+
+                    <div class="summary-item">
+                        <span>Gói 6 tháng</span>
+                        <span>1,200,000đ</span>
+                    </div>
+
+                    <div class="summary-item total">
+                        <span>Tổng tiền thanh toán</span>
+                        <span>1,200,000đ</span>
+                    </div>
+
+                    <div class="confirmation-link">
+                        Nếu bạn đã thanh toán, bấm vào đây để xác nhận thanh toán và hoàn thành quy trình.
+                    </div>
+
+                    <form action="sa-subscriptions" method="post">
+                        <div hidden="">
+                            <input type="text" name="phone" value="${phone}">
+                            <input type="text" name="plan" value="${planId}">
+                        </div>
+                        <a href="">
+                            <button type="submit" class="btn-primary" style="margin-bottom: 10px;
+                                    margin-top: 10px;">Xác nhận thanh toán</button>
+                        </a>
+                        <a href=""><button type="submit" class="btn-cancel">Huỷ</button></a> 
+                    </form>
+                </div>
+            </div>
         </main>
-
-        <c:if test="${not empty success}">
-            <div class="notification success" id="notification">${success}</div>
-        </c:if>
-
-        <c:if test="${not empty error}">
-            <div class="notification error" id="notification">${error}</div>
-        </c:if>
-
-        <c:if test="${not empty expired}">
-            <div class="notification error" id="notification">Tài khoản của bạn đã hết hạn. Mua ngay để tiếp tục sử dụng.</div>
-        </c:if>
-
-        <script>
-            // Handle plan selection
-            document.querySelectorAll('.plan-option').forEach(option => {
-                option.addEventListener('click', function () {
-                    document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
-                    this.classList.add('selected');
-                    this.querySelector('input[type="radio"]').checked = true;
-
-                    // Update price in summary
-                    const price = this.querySelector('.plan-price').textContent;
-                    const duration = this.querySelector('.plan-duration').textContent;
-                    document.querySelector('.summary-item span:first-child').textContent = "Gói " + duration;
-                    document.querySelector('.summary-item span:last-child').textContent = price;
-                    document.querySelector('.summary-item.total span:last-child').textContent = price;
-                });
-            });
-
-            // Handle tab switching
-            document.querySelectorAll('.tab-button').forEach(tab => {
-                tab.addEventListener('click', function () {
-                    document.querySelectorAll('.tab-button').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-        </script>
-        <script>
-            const toggle = document.getElementById("dropdownToggle");
-            const menu = document.getElementById("dropdownMenu");
-
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                menu.style.display = menu.style.display === "block" ? "none" : "block";
-            });
-
-            // Đóng dropdown nếu click ra ngoài
-            document.addEventListener("click", function (e) {
-                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-                    menu.style.display = "none";
-                }
-            });
-        </script>
     </body>
 </html>

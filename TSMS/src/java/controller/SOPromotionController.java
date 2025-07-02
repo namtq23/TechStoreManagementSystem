@@ -49,7 +49,7 @@ public class SOPromotionController extends HttpServlet {
             
             //Check active status
             if ((Integer) session.getAttribute("isActive") == 0) {
-                response.sendRedirect(request.getContextPath() + "/subscription?status=expired");
+                response.sendRedirect(request.getContextPath() + "/subscription");
                 return;
             }
 

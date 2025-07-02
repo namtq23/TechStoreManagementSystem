@@ -5,6 +5,7 @@
 package controller;
 
 import dao.ShopOwnerDAO;
+import dao.SubscriptionsDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -12,9 +13,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.ShopOwnerDTO;
 import model.ShopOwnerSubsDTO;
+import model.SubscriptionLog;
+import model.Subscriptions;
 
 /**
  *
@@ -50,7 +56,7 @@ public class SASubscriptions extends HttpServlet {
             int totalRecords = soDao.countFilteredShopOwnersFromLogs(subscription, status, fromDate, toDate, searchKeyStr);
             int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
 
-            StringBuilder urlBuilder = new StringBuilder("sa-accounts?");
+            StringBuilder urlBuilder = new StringBuilder("sa-subscriptions?");
 
             if (subscription != null && !subscription.isEmpty()) {
                 urlBuilder.append("subscription=").append(subscription).append("&");
@@ -94,6 +100,44 @@ public class SASubscriptions extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            String phone = req.getParameter("phone");
+            int planId = Integer.parseInt(req.getParameter("plan"));
+
+            int subsMonth = 0;
+            switch (planId) {
+                case 1:
+                    subsMonth = 3;
+                    break;
+                case 2:
+                    subsMonth = 6;
+                    break;
+                case 3:
+                    subsMonth = 12;
+                    break;
+                case 4:
+                    subsMonth = 24;
+                    break;
+            }
+
+            int ownerId = ShopOwnerDAO.getOwnerIdByPhone(phone);
+            boolean success = SubscriptionsDAO.insertSubscriptionLog(ownerId, 1, subsMonth, "Pending");
+            System.out.println("Xac nhan thanh toan: " + success);
+            
+            if(success){
+                req.setAttribute("success", "Cảm ơn quý khách đã tin tưởng và sử dụng dịch vụ. Thông báo về trạng thái đăng ký gói dịch vụ sẽ được thông báo qua email, mong quý khách kiên nhẫn!");
+                req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/subscribe.jsp").forward(req, resp);
+            } else {
+                req.setAttribute("error", "Xác nhận thanh toán không thành công!");
+                req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/subscribe.jsp").forward(req, resp);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SASubscriptions.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
