@@ -476,6 +476,64 @@
                             </div>
                         </div>
                     </div>
+<!--                                       <div class="filter-section time-filter-section">
+                        <div class="filter-header">
+                            <h3><i class="fas fa-clock"></i> Thời gian</h3>
+                            <i class="fas fa-chevron-up"></i>
+                        </div>
+                        <div class="filter-content">
+                             ADDED: All time filter option 
+                            <label class="radio-item">
+                                <input type="radio" name="timeFilter" value="all"
+                                       ${param.timeFilter == 'all' ? 'checked' : ''}>
+                                <span class="radio-mark"></span>
+                                <span><i class="fas fa-globe"></i> Tất cả</span>
+                            </label>
+
+                            <label class="radio-item">
+                                <input type="radio" name="timeFilter" value="this-month" 
+                                       ${empty param.timeFilter || param.timeFilter == 'this-month' ? 'checked' : ''}>
+                                <span class="radio-mark"></span>
+                                <span><i class="fas fa-calendar-alt"></i> Tháng này</span>
+                            </label>
+
+                            <label class="radio-item">
+                                <input type="radio" name="timeFilter" value="this-week"
+                                       ${param.timeFilter == 'this-week' ? 'checked' : ''}>
+                                <span class="radio-mark"></span>
+                                <span><i class="fas fa-calendar-week"></i> Tuần này</span>
+                            </label>
+
+                            <label class="radio-item">
+                                <input type="radio" name="timeFilter" value="today"
+                                       ${param.timeFilter == 'today' ? 'checked' : ''}>
+                                <span class="radio-mark"></span>
+                                <span><i class="fas fa-calendar-day"></i> Ngày hôm nay</span>
+                            </label>
+
+                            <label class="radio-item">
+                                <input type="radio" name="timeFilter" value="custom"
+                                       ${param.timeFilter == 'custom' ? 'checked' : ''}>
+                                <span class="radio-mark"></span>
+                                <span><i class="fas fa-calendar-plus"></i> Lựa chọn khác</span>
+                            </label>
+
+                             MODIFIED: Changed custom date to include start and end date 
+                            <div class="custom-date-container ${param.timeFilter == 'custom' ? 'show' : ''}" id="customDateContainer">
+                                <label class="date-label">
+                                    <i class="fas fa-calendar-check"></i> Chọn khoảng thời gian
+                                </label>
+                                <div class="date-input-group">
+                                    <input type="date" name="startDate" value="${param.startDate}"
+                                           class="custom-date-input" id="startDateInput"
+                                           placeholder="Từ ngày...">
+                                    <input type="date" name="endDate" value="${param.endDate}"
+                                           class="custom-date-input" id="endDateInput"
+                                           placeholder="Đến ngày...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>-->
 
                     <!-- Creator Filter -->
                     <div class="filter-section">
@@ -551,6 +609,12 @@
                             <c:if test="${not empty customDate}">
                                 <input type="hidden" name="customDate" value="${customDate}">
                             </c:if>
+                                <%--<c:if test="${not empty startDate}">
+                                <input type="hidden" name="startDate" value="${startDate}">
+                            </c:if>
+                            <c:if test="${not empty endDate}">
+                                <input type="hidden" name="endDate" value="${endDate}">
+                            </c:if>--%>
                             <c:if test="${not empty minPrice}">
                                 <input type="hidden" name="minPrice" value="${minPrice}">
                             </c:if>
@@ -730,6 +794,8 @@
                             String[] selectedCreators = (String[]) request.getAttribute("selectedCreators");
                             String timeFilter = (String) request.getAttribute("timeFilter");
                             String customDate = (String) request.getAttribute("customDate");
+                            //String startDate = (String) request.getAttribute("startDate"); // MODIFIED: Changed from customDate to startDate
+                            //String endDate = (String) request.getAttribute("endDate");
                             Double minPrice = (Double) request.getAttribute("minPrice");
                             Double maxPrice = (Double) request.getAttribute("maxPrice");
                             String searchKeyword = (String) request.getAttribute("searchKeyword");
@@ -750,6 +816,12 @@
                             if (customDate != null && !customDate.trim().isEmpty()) {
                                 filterParams.append("&customDate=").append(customDate);
                             }
+//                            if (startDate != null && !startDate.trim().isEmpty()) { // MODIFIED: Changed from customDate to startDate
+//                                filterParams.append("&startDate=").append(startDate);
+//                            }
+//                            if (endDate != null && !endDate.trim().isEmpty()) { // ADDED: Added endDate
+//                                filterParams.append("&endDate=").append(endDate);
+//                            }
                             if (minPrice != null) {
                                 filterParams.append("&minPrice=").append(minPrice);
                             }
