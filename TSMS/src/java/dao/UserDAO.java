@@ -121,6 +121,31 @@ public class UserDAO {
 
         return shopOwner;
     }
+    
+    public static ShopOwnerDTO getShopOwnerByEmail(String email) throws SQLException {
+        ShopOwnerDTO shopOwner = null;
+
+        String sql = "SELECT * \n"
+                + "FROM ShopOwner \n"
+                + "JOIN UserServiceMethod \n"
+                + "ON ShopOwner.OwnerID = UserServiceMethod.OwnerID\n"
+                + "WHERE ShopOwner.Email = ?;\n"
+                + "";
+
+        try (Connection conn = DBUtil.getConnectionTo("SuperAdminDB"); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    shopOwner = extractShopOwnerDTOFromResultSet(rs);
+                }
+            }
+        }
+
+        return shopOwner;
+    }
+    
 
     //Phuong
     public static User getUserByEmail(String email, String dbName) throws SQLException {
@@ -384,7 +409,9 @@ public class UserDAO {
                 rs.getDate("CreatedAt"),
                 rs.getString("TaxNumber"),
                 rs.getString("WebUrl"),
-                rs.getDate("TrialEndDate")
+                rs.getDate("TrialEndDate"),
+                rs.getDate("DOB")
+                
         );
         return shopOwnerDTO;
     }
@@ -726,14 +753,14 @@ public class UserDAO {
         }
         return creators;
     }
-    
+
     public static void deactivateAllUsers(String dbName) throws SQLException {
         String sql = "UPDATE [Users] SET IsActive = 0";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.executeUpdate();
         }
     }
-    
+
     //Phuong
     public static void activateUsersIfInactive(String dbName) throws SQLException {
         String sql = "UPDATE Users SET IsActive = 1 WHERE IsActive = 0";
@@ -750,7 +777,7 @@ public class UserDAO {
         User o = UserDAO.getUserById(2, "DTB_Phuongtest");
 
 //        ShopOwnerDTO so = ud.getShopOwnerById(3);
-        System.out.println(o);
+        System.out.println(UserDAO.getShopOwnerByEmail("ndpp.work@gmail.com"));
     }
 
 }
