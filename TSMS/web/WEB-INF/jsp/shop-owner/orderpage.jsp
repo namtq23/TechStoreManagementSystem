@@ -322,7 +322,7 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="so-overview" class="nav-item active">
+                    <a href="so-overview" class="nav-item">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
@@ -332,7 +332,7 @@
                         Hàng hóa
                     </a>
 
-                    <div class="nav-item dropdown">
+                    <div class="nav-item dropdown active">
                         <a href="#" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
                             Giao dịch
@@ -394,7 +394,7 @@
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="so-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
@@ -476,64 +476,64 @@
                             </div>
                         </div>
                     </div>
-<!--                                       <div class="filter-section time-filter-section">
-                        <div class="filter-header">
-                            <h3><i class="fas fa-clock"></i> Thời gian</h3>
-                            <i class="fas fa-chevron-up"></i>
-                        </div>
-                        <div class="filter-content">
-                             ADDED: All time filter option 
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="all"
-                                       ${param.timeFilter == 'all' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-globe"></i> Tất cả</span>
-                            </label>
+                    <!--                                       <div class="filter-section time-filter-section">
+                                            <div class="filter-header">
+                                                <h3><i class="fas fa-clock"></i> Thời gian</h3>
+                                                <i class="fas fa-chevron-up"></i>
+                                            </div>
+                                            <div class="filter-content">
+                                                 ADDED: All time filter option 
+                                                <label class="radio-item">
+                                                    <input type="radio" name="timeFilter" value="all"
+                    ${param.timeFilter == 'all' ? 'checked' : ''}>
+             <span class="radio-mark"></span>
+             <span><i class="fas fa-globe"></i> Tất cả</span>
+         </label>
 
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="this-month" 
-                                       ${empty param.timeFilter || param.timeFilter == 'this-month' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-calendar-alt"></i> Tháng này</span>
-                            </label>
+         <label class="radio-item">
+             <input type="radio" name="timeFilter" value="this-month" 
+                    ${empty param.timeFilter || param.timeFilter == 'this-month' ? 'checked' : ''}>
+             <span class="radio-mark"></span>
+             <span><i class="fas fa-calendar-alt"></i> Tháng này</span>
+         </label>
 
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="this-week"
-                                       ${param.timeFilter == 'this-week' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-calendar-week"></i> Tuần này</span>
-                            </label>
+         <label class="radio-item">
+             <input type="radio" name="timeFilter" value="this-week"
+                    ${param.timeFilter == 'this-week' ? 'checked' : ''}>
+             <span class="radio-mark"></span>
+             <span><i class="fas fa-calendar-week"></i> Tuần này</span>
+         </label>
 
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="today"
-                                       ${param.timeFilter == 'today' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-calendar-day"></i> Ngày hôm nay</span>
-                            </label>
+         <label class="radio-item">
+             <input type="radio" name="timeFilter" value="today"
+                    ${param.timeFilter == 'today' ? 'checked' : ''}>
+             <span class="radio-mark"></span>
+             <span><i class="fas fa-calendar-day"></i> Ngày hôm nay</span>
+         </label>
 
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="custom"
-                                       ${param.timeFilter == 'custom' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-calendar-plus"></i> Lựa chọn khác</span>
-                            </label>
+         <label class="radio-item">
+             <input type="radio" name="timeFilter" value="custom"
+                    ${param.timeFilter == 'custom' ? 'checked' : ''}>
+             <span class="radio-mark"></span>
+             <span><i class="fas fa-calendar-plus"></i> Lựa chọn khác</span>
+         </label>
 
-                             MODIFIED: Changed custom date to include start and end date 
-                            <div class="custom-date-container ${param.timeFilter == 'custom' ? 'show' : ''}" id="customDateContainer">
-                                <label class="date-label">
-                                    <i class="fas fa-calendar-check"></i> Chọn khoảng thời gian
-                                </label>
-                                <div class="date-input-group">
-                                    <input type="date" name="startDate" value="${param.startDate}"
-                                           class="custom-date-input" id="startDateInput"
-                                           placeholder="Từ ngày...">
-                                    <input type="date" name="endDate" value="${param.endDate}"
-                                           class="custom-date-input" id="endDateInput"
-                                           placeholder="Đến ngày...">
-                                </div>
-                            </div>
-                        </div>
-                    </div>-->
+          MODIFIED: Changed custom date to include start and end date 
+         <div class="custom-date-container ${param.timeFilter == 'custom' ? 'show' : ''}" id="customDateContainer">
+             <label class="date-label">
+                 <i class="fas fa-calendar-check"></i> Chọn khoảng thời gian
+             </label>
+             <div class="date-input-group">
+                 <input type="date" name="startDate" value="${param.startDate}"
+                        class="custom-date-input" id="startDateInput"
+                        placeholder="Từ ngày...">
+                 <input type="date" name="endDate" value="${param.endDate}"
+                        class="custom-date-input" id="endDateInput"
+                        placeholder="Đến ngày...">
+             </div>
+         </div>
+     </div>
+ </div>-->
 
                     <!-- Creator Filter -->
                     <div class="filter-section">
@@ -609,12 +609,12 @@
                             <c:if test="${not empty customDate}">
                                 <input type="hidden" name="customDate" value="${customDate}">
                             </c:if>
-                                <%--<c:if test="${not empty startDate}">
-                                <input type="hidden" name="startDate" value="${startDate}">
-                            </c:if>
-                            <c:if test="${not empty endDate}">
-                                <input type="hidden" name="endDate" value="${endDate}">
-                            </c:if>--%>
+                            <%--<c:if test="${not empty startDate}">
+                            <input type="hidden" name="startDate" value="${startDate}">
+                        </c:if>
+                        <c:if test="${not empty endDate}">
+                            <input type="hidden" name="endDate" value="${endDate}">
+                        </c:if>--%>
                             <c:if test="${not empty minPrice}">
                                 <input type="hidden" name="minPrice" value="${minPrice}">
                             </c:if>
@@ -941,6 +941,22 @@
     }
 `;
             document.head.appendChild(style);
+        </script>
+        <script>
+            const toggle = document.getElementById("dropdownToggle");
+            const menu = document.getElementById("dropdownMenu");
+
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                menu.style.display = menu.style.display === "block" ? "none" : "block";
+            });
+
+            // Đóng dropdown nếu click ra ngoài
+            document.addEventListener("click", function (e) {
+                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                    menu.style.display = "none";
+                }
+            });
         </script>
     </body>
 </html>

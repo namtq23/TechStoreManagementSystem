@@ -532,7 +532,8 @@ public class ShopOwnerDAO {
                 rs.getDate("CreatedAt"),
                 rs.getString("TaxNumber"),
                 rs.getString("WebUrl"),
-                rs.getDate("TrialEndDate")
+                rs.getDate("TrialEndDate"),
+                rs.getDate("DOB")
         );
         return shopOwnerDTO;
     }

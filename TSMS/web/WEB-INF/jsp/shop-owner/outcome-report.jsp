@@ -99,7 +99,7 @@
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="so-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
@@ -463,14 +463,14 @@
                 var employeeId = document.getElementById('employeeId').value || '';
                 var fromDate = document.getElementById('fromDate').value || '';
                 var toDate = document.getElementById('toDate').value || '';
-          var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || '';
+                var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || '';
 
                 // Build URL với cách nối chuỗi truyền thống
                 var url = 'export-excel?type=outcome&branchId=' + branchId +
                         '&employeeId=' + employeeId +
                         '&fromDate=' + fromDate +
                         '&toDate=' + toDate
-                              +'&paymentMethod=' + paymentMethod;
+                        + '&paymentMethod=' + paymentMethod;
                 // Debug log
                 console.log('Export URL:', url);
 
