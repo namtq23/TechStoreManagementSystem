@@ -303,12 +303,81 @@ public class ShopOwnerDAO {
         }
     }
 
+    public void updateShopOwnerInfo(int ownerId, String fullName, String shopName, String dbName,
+            String email, String identificationId, String phone,
+            String address, int gender, String taxNumber,
+            String webURL, Date dob) throws SQLException {
+        String sql = "UPDATE ShopOwner SET "
+                + "FullName = ?, "
+                + "FullNameUnsigned = ?, "
+                + "ShopName = ?, "
+                + "DatabaseName = ?, "
+                + "Email = ?, "
+                + "IdentificationID = ?, "
+                + "Phone = ?, "
+                + "Address = ?, "
+                + "Gender = ?, "
+                + "TaxNumber = ?, "
+                + "WebURL = ?, "
+                + "DOB = ? "
+                + "WHERE OwnerID = ?";
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, fullName);
+            stmt.setString(2, Validate.normalizeSearch(fullName));
+            stmt.setString(3, shopName);
+            stmt.setString(4, dbName);
+            stmt.setString(5, email);
+            stmt.setString(6, identificationId);
+            stmt.setString(7, phone);
+            stmt.setString(8, address);
+            stmt.setInt(9, gender);
+            stmt.setString(10, taxNumber);
+            stmt.setString(11, webURL);
+            stmt.setDate(12, dob);
+            stmt.setInt(13, ownerId);
+
+            stmt.executeUpdate();
+        }
+    }
+
     //Phuong
     public void updateShopOwnerInfoInTheirDTB(String dbName, String fullName, int isActive) throws SQLException {
         String sql = "UPDATE Users SET FullName = ?, IsActive = ? WHERE UserID = 1";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, fullName);
             stmt.setInt(2, isActive);
+            stmt.executeUpdate();
+        }
+    }
+    
+    public void updateShopOwnerInfoInTheirDTB(String fullName,
+            String email, String identificationId, String phone,
+            String address, int gender, String taxNumber,
+            String webURL, Date dob, String oldDbName) throws SQLException {
+        String sql = "UPDATE Users SET "
+                + "FullName = ?, "
+                + "Email = ?, "
+                + "IdentificationID = ?, "
+                + "Phone = ?, "
+                + "Address = ?, "
+                + "Gender = ?, "
+                + "TaxNumber = ?, "
+                + "WebURL = ?, "
+                + "DOB = ? "
+                + "WHERE UserID = 1";
+
+        try (Connection conn = DBUtil.getConnectionTo(oldDbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, fullName);
+            stmt.setString(2, email);
+            stmt.setString(3, identificationId);
+            stmt.setString(4, phone);
+            stmt.setString(5, address);
+            stmt.setInt(6, gender);
+            stmt.setString(7, taxNumber);
+            stmt.setString(8, webURL);
+            stmt.setDate(9, dob);
+
             stmt.executeUpdate();
         }
     }

@@ -480,6 +480,36 @@
                     flex-direction: column;
                 }
             }
+
+
+            .flash-message {
+                position: fixed;
+                top: 20px;
+                right: 30px;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                color: white;
+                z-index: 1000;
+                font-size: 16px;
+                animation: fadeOut 0.5s ease-in-out 4.5s forwards;
+            }
+
+            .flash-message.success {
+                background-color: #4CAF50; /* xanh thành công */
+            }
+
+            .flash-message.error {
+                background-color: #f44336; /* đỏ lỗi */
+            }
+
+            @keyframes fadeOut {
+                to {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                    visibility: hidden;
+                }
+            }
         </style>
     </head>
     <body>
@@ -575,6 +605,23 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <%
+                String updateStatus = request.getParameter("update");
+                if ("success".equals(updateStatus)) {
+            %>
+            <div id="flash-message" class="flash-message success">
+                Cập nhật thành công!
+            </div>
+            <%
+                } else if ("error".equals(updateStatus)) {
+            %>
+            <div id="flash-message" class="flash-message error">
+                Cập nhật thất bại. Vui lòng thử lại.
+            </div>
+            <%
+                }
+            %>
+
             <div class="container">
                 <!-- Left Sidebar -->
                 <div class="sidebar">
@@ -582,6 +629,8 @@
                     <ul class="sidebar-menu">
                         <li><a href="#" class="active"><i class="fas fa-info-circle"></i> Thông tin gian hàng</a></li>
                         <li><a href="#"><i class="fas fa-lock"></i> Đổi mật khẩu</a></li>
+                        <li><a href="#"><i class="fas fa-code-branch"></i> Tạo chi nhánh</a></li>
+                        <li><a href="#"><i class="fas fa-warehouse"></i> Tạo kho tổng</a></li>
                         <li><a href="#"><i class="fas fa-shopping-cart"></i> Gói dịch vụ</a></li>
                         <li><a href="#"><i class="fas fa-history"></i> Lịch sử mua hàng</a></li>
                     </ul>
@@ -616,6 +665,8 @@
                                     <div class="info-item">
                                         <span class="info-label">Mã người dùng:</span>
                                         <span class="info-value">#${user.ownerId}</span>
+                                        <input type="number" name="ownerId" class="form-input" 
+                                               value="${user.ownerId}" hidden="">
                                     </div>
 
                                     <div class="info-item">
@@ -715,6 +766,8 @@
                                         <div class="info-value">
                                             <input type="text" name="shopName" class="form-input" 
                                                    value="${user.shopName}" required>
+                                            <input type="text" name="databaseName" class="form-input" 
+                                                   value="${user.databaseName}" hidden="">
                                         </div>
                                     </div>
 
