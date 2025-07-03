@@ -212,7 +212,7 @@ public class SOCustomerController extends HttpServlet {
             } else {
                 session.setAttribute("errorMessage", "Cập nhật thất bại. Vui lòng thử lại.");
             }
-            resp.sendRedirect("so-customer")
+            resp.sendRedirect("so-customer");
         } catch (NumberFormatException e) {
             e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID không hợp lệ.");
