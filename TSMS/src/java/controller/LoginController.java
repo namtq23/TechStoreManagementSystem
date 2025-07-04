@@ -131,7 +131,7 @@ public class LoginController extends HttpServlet {
                             }
                         }
                     }
-
+                    
                     if (isExpired) {
                         ShopOwnerDAO.deactivateOwner(ownerId);
                         UserDAO.deactivateAllUsers(dbNameStaff);
@@ -156,17 +156,19 @@ public class LoginController extends HttpServlet {
                             session.setMaxInactiveInterval(1000 * 60 * 60 * 24);
                             resp.sendRedirect(req.getContextPath() + "/subscription");
                         } else {
-                            req.setAttribute("error", "Tài khoản tạm vô hiệu hoá do chưa đăng ký sử dụng dịch vụ");
+                            req.setAttribute("error", "Tài khoản tạm thời bị vô hiệu hoá do chưa đăng ký sử dụng dịch vụ");
                             req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
                         }
                         return;
                     } else {
                         if (user.getIsActive() == 0){
-                            req.setAttribute("error", "Tài khoản tạm vô hiệu hoá");
+                            System.out.println("111111111111111111");
+                            req.setAttribute("error", "Tài khoản tạm thời bị vô hiệu hoá");
                             req.getRequestDispatcher("/WEB-INF/jsp/common/homelogin.jsp").forward(req, resp);
+                            return;
                         }
                     }
-
+                    
                     HttpSession session = req.getSession(true);
                     System.out.println(user.getEmail());
                     session.setAttribute("userId", user.getUserID());

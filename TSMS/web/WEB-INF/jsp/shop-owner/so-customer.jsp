@@ -101,7 +101,7 @@
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="so-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
@@ -185,8 +185,6 @@
                     </div>
                 </form>
             </aside>
-
-
         </aside> 
 
         <!-- Main Content -->
@@ -206,7 +204,6 @@
             <div class="page-header">
                 <h1>Khách hàng</h1>
                 <div class="header-actions">
-
                     <form action="so-customer" method="get" class="search-container">
                         <i class="fas fa-search"></i>
                         <input type="text" name="keyword" placeholder="Theo mã, tên khách hàng" class="search-input"
@@ -256,8 +253,6 @@
                                             <input type="hidden" name="id" value="${customer.customerId}" />
 
                                             <div class="row">
-
-
                                                 <!-- Cột phải: thông tin -->
                                                 <div class="col-md-9">
                                                     <div class="row">
@@ -331,11 +326,8 @@
                 </table>
             </div>
 
-            <div class="pagination-container mt-3 d-flex justify-content-between align-items-center">
-                <div class="pagination-info">
-                    Hiển thị ${startCustomer} - ${endCustomer} / Tổng số ${totalCustomers} Khách hàng
-                </div>
-                <div class="pagination">
+
+            <!-- Pagination -->
                     <%-- First Page --%>
                     <c:url var="firstPageUrl" value="so-customer">
                         <c:param name="page" value="1"/>
@@ -548,9 +540,5 @@
 
 
             </html>
-
-
-
-
 
 

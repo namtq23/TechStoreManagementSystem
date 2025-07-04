@@ -95,7 +95,7 @@
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="so-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
@@ -678,6 +678,22 @@
                                                                   });
 
         </script>
+        <script>
+        const toggle = document.getElementById("dropdownToggle");
+        const menu = document.getElementById("dropdownMenu");
+
+        toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        });
+
+        // Đóng dropdown nếu click ra ngoài
+        document.addEventListener("click", function (e) {
+            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                menu.style.display = "none";
+            }
+        });
+    </script>
 
     </body>
 

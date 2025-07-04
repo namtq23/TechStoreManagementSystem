@@ -20,11 +20,12 @@ public class ShopOwnerDTO extends ShopOwner {
     private Date subscriptionEnd;
     private String taxNumber;
     private String webUrl;
+    private Date dob;
 
     public ShopOwnerDTO(Date trial, String status, String subscription, Date subscriptionStart,
             Date subscriptionEnd, int ownerId, String password, String fullName, String shopName,
             String databaseName, String email, String identificationID, String gender, String address,
-            String phone, int isActive, Date createdAt, String taxNumber, String webUrl, Date trialEnd) {
+            String phone, int isActive, Date createdAt, String taxNumber, String webUrl, Date trialEnd, Date dob) {
         super(ownerId, password, fullName, shopName, databaseName, email, identificationID, gender, address, phone, isActive, createdAt);
         this.trial = trial;
         this.status = status;
@@ -34,8 +35,17 @@ public class ShopOwnerDTO extends ShopOwner {
         this.taxNumber = taxNumber;
         this.webUrl = webUrl;
         this.trialEnd = trialEnd;
+        this.dob = dob;
     }
 
+    public Date getDob() {
+        return dob;
+    }
+
+    public void setDob(Date dob) {
+        this.dob = dob;
+    }
+    
     public Date getTrialEnd() {
         return trialEnd;
     }
@@ -52,11 +62,11 @@ public class ShopOwnerDTO extends ShopOwner {
         this.taxNumber = taxNumber;
     }
 
-    public String getWebUrl() {
+    public String getWebURL() {
         return webUrl;
     }
 
-    public void setWebUrl(String webUrl) {
+    public void setWebURL(String webUrl) {
         this.webUrl = webUrl;
     }
 

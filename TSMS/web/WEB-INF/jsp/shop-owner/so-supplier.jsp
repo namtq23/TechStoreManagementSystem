@@ -101,7 +101,7 @@
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="so-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
@@ -112,40 +112,40 @@
 
         <div class="main-container">
             <!-- Sidebar -->
- <aside class="sidebar">
-    <form action="so-customer" method="get">
-        <!-- Thêm dòng này để kích hoạt lọc theo khoảng giá -->
-        <input type="hidden" name="showTop" value="true" />
+            <aside class="sidebar">
+                <form action="so-customer" method="get">
+                    <!-- Thêm dòng này để kích hoạt lọc theo khoảng giá -->
+                    <input type="hidden" name="showTop" value="true" />
 
 
 
-        <!-- Price Range Filter -->
-        <div class="filter-section">
-            <div class="filter-header">
-                <h3>Khoảng chi tiêu</h3>
-            </div>
-            <div class="filter-content">
-                <div class="price-range">
-                    <input type="number" name="minGrandTotal" placeholder="Số tiền nhập từ"
-                           value="${minGrandTotal}" class="GrandTotal-input">
-                    <input type="number" name="maxGrandTotal" placeholder="Số tiền nhập đến"
-                           value="${maxGrandTotal}" class="GrandTotal-input">
-                </div>
-            </div>
-        </div>
+                    <!-- Price Range Filter -->
+                    <div class="filter-section">
+                        <div class="filter-header">
+                            <h3>Khoảng chi tiêu</h3>
+                        </div>
+                        <div class="filter-content">
+                            <div class="price-range">
+                                <input type="number" name="minGrandTotal" placeholder="Số tiền nhập từ"
+                                       value="${minGrandTotal}" class="GrandTotal-input">
+                                <input type="number" name="maxGrandTotal" placeholder="Số tiền nhập đến"
+                                       value="${maxGrandTotal}" class="GrandTotal-input">
+                            </div>
+                        </div>
+                    </div>
 
 
-        <!-- Action Buttons -->
-        <div class="filter-actions">
-            <a href="so-customer?page=1" class="btn-clear">
-                <i class="fas fa-eraser"></i> Xóa bộ lọc
-            </a>
-            <button type="submit" class="btn-apply">
-                <i class="fas fa-filter"></i> Áp dụng lọc
-            </button>
-        </div>
-    </form>
-</aside>
+                    <!-- Action Buttons -->
+                    <div class="filter-actions">
+                        <a href="so-customer?page=1" class="btn-clear">
+                            <i class="fas fa-eraser"></i> Xóa bộ lọc
+                        </a>
+                        <button type="submit" class="btn-apply">
+                            <i class="fas fa-filter"></i> Áp dụng lọc
+                        </button>
+                    </div>
+                </form>
+            </aside>
 
             <!-- Main Content -->
             <main class="main-content">
@@ -170,86 +170,86 @@
                         </button>
                     </div>
                 </div>
-<c:if test="${not empty sessionScope.successMessage}">
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        ${sessionScope.successMessage}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <c:remove var="successMessage" scope="session"/>
-</c:if>
+                <c:if test="${not empty sessionScope.successMessage}">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        ${sessionScope.successMessage}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <c:remove var="successMessage" scope="session"/>
+                </c:if>
 
-<c:if test="${not empty sessionScope.errorMessage}">
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        ${sessionScope.errorMessage}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <c:remove var="errorMessage" scope="session"/>
-</c:if>
+                <c:if test="${not empty sessionScope.errorMessage}">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        ${sessionScope.errorMessage}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <c:remove var="errorMessage" scope="session"/>
+                </c:if>
 
-    <div class="table-container">
-    <table class="products-table table table-bordered">
-        <thead class="table-light">
-            <tr>
-                <th>Mã Nhà cung cấp</th>
-                <th>Tên Công Ty</th>
-                <th>Người giao dịch</th>
-                <th>Số điện thoại</th>
-                <th>Gmail</th>
-            </tr>
-        </thead>
-        <tbody>
-            <c:forEach var="supplier" items="${suppliers}" varStatus="loop">
-                <!-- Dòng chính -->
-                <tr onclick="toggleDetails(${loop.index})" style="cursor: pointer;">
-                    <td>${supplier.supplierID}</td>
-                    <td>${supplier.supplierName}</td>
-                    <td>${supplier.contactName}</td>
-                    <td>${supplier.phone}</td>
-                    <td>${supplier.email}</td>
-                </tr>
+                <div class="table-container">
+                    <table class="products-table table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã Nhà cung cấp</th>
+                                <th>Tên Công Ty</th>
+                                <th>Người giao dịch</th>
+                                <th>Số điện thoại</th>
+                                <th>Gmail</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="supplier" items="${suppliers}" varStatus="loop">
+                                <!-- Dòng chính -->
+                                <tr onclick="toggleDetails(${loop.index})" style="cursor: pointer;">
+                                    <td>${supplier.supplierID}</td>
+                                    <td>${supplier.supplierName}</td>
+                                    <td>${supplier.contactName}</td>
+                                    <td>${supplier.phone}</td>
+                                    <td>${supplier.email}</td>
+                                </tr>
 
-                <!-- Dòng chi tiết để chỉnh sửa -->
-                <tr id="details-${loop.index}" class="detail-row" style="display: none;">
-                    <td colspan="5">
-                        <form method="post" action="so-supplier">
-                            <input type="hidden" name="id" value="${supplier.supplierID}" />
+                                <!-- Dòng chi tiết để chỉnh sửa -->
+                                <tr id="details-${loop.index}" class="detail-row" style="display: none;">
+                                    <td colspan="5">
+                                        <form method="post" action="so-supplier">
+                                            <input type="hidden" name="id" value="${supplier.supplierID}" />
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <p><strong>Tên công ty:</strong>
-                                        <input type="text" name="supplierName" class="form-control"
-                                               value="${supplier.supplierName}" />
-                                    </p>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>Tên công ty:</strong>
+                                                        <input type="text" name="supplierName" class="form-control"
+                                                               value="${supplier.supplierName}" />
+                                                    </p>
 
-                                    <p><strong>Người giao dịch:</strong>
-                                        <input type="text" name="contactName" class="form-control"
-                                               value="${supplier.contactName}" />
-                                    </p>
-                                </div>
+                                                    <p><strong>Người giao dịch:</strong>
+                                                        <input type="text" name="contactName" class="form-control"
+                                                               value="${supplier.contactName}" />
+                                                    </p>
+                                                </div>
 
-                                <div class="col-md-6">
-                                    <p><strong>Số điện thoại:</strong>
-                                        <input type="text" name="phone" class="form-control"
-                                               value="${supplier.phone}" />
-                                    </p>
+                                                <div class="col-md-6">
+                                                    <p><strong>Số điện thoại:</strong>
+                                                        <input type="text" name="phone" class="form-control"
+                                                               value="${supplier.phone}" />
+                                                    </p>
 
-                                    <p><strong>Email:</strong>
-                                        <input type="email" name="email" class="form-control"
-                                               value="${supplier.email}" />
-                                    </p>
-                                </div>
-                            </div>
+                                                    <p><strong>Email:</strong>
+                                                        <input type="email" name="email" class="form-control"
+                                                               value="${supplier.email}" />
+                                                    </p>
+                                                </div>
+                                            </div>
 
-                            <div class="mt-2 text-end">
-                                <button type="submit" class="btn btn-sm btn-success">Lưu</button>
-                            </div>
-                        </form>
-                    </td>
-                </tr>
-            </c:forEach>
-        </tbody>
-    </table>
-</div>
+                                            <div class="mt-2 text-end">
+                                                <button type="submit" class="btn btn-sm btn-success">Lưu</button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </div>
 
                 <!-- Scripts -->
                 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -274,55 +274,58 @@
                                         }
                                     });
                 </script>
-                
-<script>
-function enableEdit(index) {
-    // Hiện input và ẩn text
-    const fields = ['fullName', 'email', 'gender', 'phone', 'address'];
-    fields.forEach(field => {
-        document.getElementById(`${field}-text-${index}`).style.display = 'none';
-        document.getElementById(`${field}-input-${index}`).classList.remove('d-none');
-    });
 
-    // Hiện nút "Lưu"
-    document.getElementById(`save-btn-${index}`).classList.remove('d-none');
-}
-</script>
+                <script>
+                    function enableEdit(index) {
+                        // Hiện input và ẩn text
+                        const fields = ['fullName', 'email', 'gender', 'phone', 'address'];
+                        fields.forEach(field => {
+                            document.getElementById(`${field}-text-${index}`).style.display = 'none';
+                                        document.getElementById(`${field}-input-${index}`).classList.remove('d-none');
+                                                });
 
-<script>
-function enableEdit(index) {
-    const fields = ['fullName', 'email', 'gender', 'phone', 'address'];
-    
-    fields.forEach(field => {
-        const span = document.getElementById(`${field}-text-${index}`);
-        const input = document.getElementById(`${field}-input-${index}`);
-        if (span && input) {
-            span.classList.add('d-none');
-            input.classList.remove('d-none');
-        }
-    });
+                                                // Hiện nút "Lưu"
+                                                document.getElementById(`save-btn-${index}`).classList.remove('d-none');
+                                            }
+                </script>
 
-    const saveBtn = document.getElementById(`save-btn-${index}`);
-    if (saveBtn) saveBtn.classList.remove('d-none');
+                <script>
+                    function enableEdit(index) {
+                        const fields = ['fullName', 'email', 'gender', 'phone', 'address'];
 
-    const cancelBtn = document.getElementById(`cancel-btn-${index}`);
-    if (cancelBtn) cancelBtn.classList.remove('d-none');
+                        fields.forEach(field => {
+                            const span = document.getElementById(`${field}-text-${index}`);
+                                        const input = document.getElementById(`${field}-input-${index}`);
+                                                    if (span && input) {
+                                                        span.classList.add('d-none');
+                                                        input.classList.remove('d-none');
+                                                    }
+                                                });
 
-    const editBtn = document.querySelector(`#details-${index} button[onclick*="enableEdit"]`);
-    if (editBtn) editBtn.classList.add('d-none'); // Ẩn nút "Chỉnh sửa"
-}
+                                                const saveBtn = document.getElementById(`save-btn-${index}`);
+                                                if (saveBtn)
+                                                    saveBtn.classList.remove('d-none');
 
-</script>
-                
-<script>
-    setTimeout(() => {
-        const alert = document.querySelector(".alert");
-        if (alert) {
-            alert.style.transition = "opacity 0.5s";
-            alert.style.opacity = 0;
-            setTimeout(() => alert.remove(), 500);
-        }
-    }, 3000);
-</script>
-</html>
+                                                const cancelBtn = document.getElementById(`cancel-btn-${index}`);
+                                                if (cancelBtn)
+                                                    cancelBtn.classList.remove('d-none');
+
+                                                const editBtn = document.querySelector(`#details-${index} button[onclick*="enableEdit"]`);
+                                                if (editBtn)
+                                                    editBtn.classList.add('d-none'); // Ẩn nút "Chỉnh sửa"
+                                            }
+
+                </script>
+
+                <script>
+                    setTimeout(() => {
+                        const alert = document.querySelector(".alert");
+                        if (alert) {
+                            alert.style.transition = "opacity 0.5s";
+                            alert.style.opacity = 0;
+                            setTimeout(() => alert.remove(), 500);
+                        }
+                    }, 3000);
+                </script>
+                </html>
 

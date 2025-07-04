@@ -25,7 +25,7 @@ public class ShopOwner {
     private String address;
     private String phone;
     private int isActive;
-    private Date createdAt; 
+    private Date createdAt;
 
     public ShopOwner() {
     }
