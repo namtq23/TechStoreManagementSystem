@@ -274,7 +274,7 @@ public List<CustomerDTO> getTopCustomersBySpending(double minTotal, double maxTo
             c.CustomerID, c.FullName, c.PhoneNumber, c.Email, c.Address,
             c.Gender, c.DateOfBirth, c.CreatedAt, c.UpdatedAt
         HAVING SUM(o.GrandTotal) BETWEEN ? AND ?
-        ORDER BY TotalSpent DESC
+  
         
     """;
 

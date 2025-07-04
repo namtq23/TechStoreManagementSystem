@@ -15,7 +15,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TSMS - Nhân Viên</title>
-        <link rel="stylesheet" href="css/khachhang.css">
+        <link rel="stylesheet" href="css/so-customer.css">
         <link rel="stylesheet" href="css/header.css"/>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     </head>
@@ -123,22 +123,7 @@
         <!-- Thêm dòng này để kích hoạt lọc theo khoảng giá -->
         <input type="hidden" name="showTop" value="true" />
 
-        <!-- Category Filter -->
-        <div class="filter-section">
-            <div class="filter-header">
-                <h3>Nhóm khách hàng</h3>
-            </div>
-            <div class="filter-content">
-                <div class="category-tree">
-                    <div class="category-item">
-                        <input type="checkbox" id="all-categories" name="categories" value="all">
-                        <label for="all-categories" class="category-label">
-                            <span>Tất cả</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Price Range Filter -->
         <div class="filter-section">
@@ -192,7 +177,20 @@
 
 
             </aside> 
-                             
+                                         <!-- Main Content -->
+            <main class="main-content">
+                <c:if test="${not empty successMessage}">
+    <div class="alert alert-success" style="padding: 10px; background-color: #d4edda; color: #155724; border-radius: 5px; margin-bottom: 15px;">
+        ${successMessage}
+    </div>
+</c:if>
+
+<c:if test="${not empty errorMessage}">
+    <div class="alert alert-danger" style="padding: 10px; background-color: #f8d7da; color: #721c24; border-radius: 5px; margin-bottom: 15px;">
+        ${errorMessage}
+    </div>
+</c:if>
+
             <!-- Main Content -->
             <main class="main-content">
                 <div class="page-header">
@@ -208,11 +206,7 @@
                             </button>
                         </form>
 
-                        <button class="btn btn-success">
-                            <i class="fas fa-plus"></i>
-                            Thêm mới
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
+
                     </div>
                 </div>
                 <!-- Products Table -->
@@ -244,24 +238,23 @@
 <!--                                    <td>${customer.createdAt}</td>-->
                                 </tr>
                                 
+                                
 <tr id="details-${loop.index}" class="detail-row" style="display: none;">
     <td colspan="8">
-        <div class="border rounded p-3 bg-light">
+        <div class="detail-container">
+
             <form method="post" action="bm-customer">
                 <input type="hidden" name="id" value="${customer.customerId}" />
 
                 <div class="row">
-                    <!-- Cột trái: ảnh -->
-                    <div class="col-md-3 text-center">
-                        <img src="https://via.placeholder.com/250x250?text=Ảnh"
-                             class="img-fluid border rounded" alt="Avatar" />
-                    </div>
+
 
                     <!-- Cột phải: thông tin -->
                     <div class="col-md-9">
                         <div class="row">
                             <div class="col-md-6">
                                 <p><strong>Mã KH:</strong> ${customer.customerId}</p>
+                                <p><strong>Mã Chi nhánh</strong> ${customer.branchID}</p>
 
                                 <p><strong>Tên khách:</strong>
                                     <input type="text" name="fullName" class="form-control"
@@ -295,10 +288,10 @@
                                 <p><strong>Ngày tạo:</strong>
                                     <fmt:formatDate value="${customer.createdAt}" pattern="dd/MM/yyyy HH:mm" />
                                 </p>
-
+<!--
                                 <p><strong>Cập nhật lần cuối:</strong>
                                     <fmt:formatDate value="${customer.updatedAt}" pattern="dd/MM/yyyy HH:mm" />
-                                </p>
+                                </p>-->
 
                                 <p><strong>Tổng chi tiêu:</strong>
                                     <fmt:formatNumber value="${customer.grandTotal}" type="number" groupingUsed="true" /> ₫
@@ -330,28 +323,143 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="pagination-container mt-3 d-flex justify-content-between align-items-center">
-                    <div class="pagination-info">
-                        Hiển thị ${startCustomer} - ${endCustomer} / Tổng số ${totalCustomers} Khách hàng
-                    </div>
-                    <div class="pagination">
-                        <a href="bm-customer?page=1" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
-                            <i class="fas fa-angle-double-left"></i>
-                        </a>
-                        <a href="bm-customer?page=${currentPage - 1}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
-                            <i class="fas fa-angle-left"></i>
-                        </a>
-                        <c:forEach begin="1" end="${totalPages}" var="i">
-                            <a href="bm-customer?page=${i}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
-                        </c:forEach>
-                        <a href="bm-customer?page=${currentPage + 1}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
-                            <i class="fas fa-angle-right"></i>
-                        </a>
-                        <a href="bm-customer?page=${totalPages}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
-                            <i class="fas fa-angle-double-right"></i>
-                        </a>
-                    </div>
-                </div>
+
+<div class="pagination-container mt-3 d-flex justify-content-between align-items-center">
+    <div class="pagination-info">
+        Hiển thị ${startCustomer} - ${endCustomer} / Tổng số ${totalCustomers} Khách hàng
+    </div>
+    <div class="pagination">
+        <%-- First Page --%>
+        <c:url var="firstPageUrl" value="bm-customer">
+            <c:param name="page" value="1"/>
+            <c:if test="${not empty keyword}">
+                <c:param name="keyword" value="${keyword}"/>
+            </c:if>
+            <c:if test="${not empty genderFilter}">
+                <c:param name="gender" value="${genderFilter}"/>
+            </c:if>
+            <c:if test="${branchID > 0}">
+                <c:param name="branchID" value="${branchID}"/>
+            </c:if>
+            <c:if test="${showTop eq 'true'}">
+                <c:param name="showTop" value="true"/>
+                <c:if test="${not empty minGrandTotal}">
+                    <c:param name="minGrandTotal" value="${minGrandTotal}"/>
+                </c:if>
+                <c:if test="${not empty maxGrandTotal}">
+                    <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
+                </c:if>
+            </c:if>
+        </c:url>
+        <a href="${firstPageUrl}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+            <i class="fas fa-angle-double-left"></i>
+        </a>
+
+        <%-- Previous Page --%>
+        <c:url var="prevPageUrl" value="bm-customer">
+            <c:param name="page" value="${currentPage - 1}"/>
+            <c:if test="${not empty keyword}">
+                <c:param name="keyword" value="${keyword}"/>
+            </c:if>
+            <c:if test="${not empty genderFilter}">
+                <c:param name="gender" value="${genderFilter}"/>
+            </c:if>
+            <c:if test="${branchID > 0}">
+                <c:param name="branchID" value="${branchID}"/>
+            </c:if>
+            <c:if test="${showTop eq 'true'}">
+                <c:param name="showTop" value="true"/>
+                <c:if test="${not empty minGrandTotal}">
+                    <c:param name="minGrandTotal" value="${minGrandTotal}"/>
+                </c:if>
+                <c:if test="${not empty maxGrandTotal}">
+                    <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
+                </c:if>
+            </c:if>
+        </c:url>
+        <a href="${prevPageUrl}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+            <i class="fas fa-angle-left"></i>
+        </a>
+
+        <%-- Page numbers --%>
+        <c:forEach begin="1" end="${totalPages}" var="i">
+            <c:url var="pageUrl" value="bm-customer">
+                <c:param name="page" value="${i}"/>
+                <c:if test="${not empty keyword}">
+                    <c:param name="keyword" value="${keyword}"/>
+                </c:if>
+                <c:if test="${not empty genderFilter}">
+                    <c:param name="gender" value="${genderFilter}"/>
+                </c:if>
+                <c:if test="${branchID > 0}">
+                    <c:param name="branchID" value="${branchID}"/>
+                </c:if>
+                <c:if test="${showTop eq 'true'}">
+                    <c:param name="showTop" value="true"/>
+                    <c:if test="${not empty minGrandTotal}">
+                        <c:param name="minGrandTotal" value="${minGrandTotal}"/>
+                    </c:if>
+                    <c:if test="${not empty maxGrandTotal}">
+                        <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
+                    </c:if>
+                </c:if>
+            </c:url>
+            <a href="${pageUrl}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+        </c:forEach>
+
+        <%-- Next Page --%>
+        <c:url var="nextPageUrl" value="bm-customer">
+            <c:param name="page" value="${currentPage + 1}"/>
+            <c:if test="${not empty keyword}">
+                <c:param name="keyword" value="${keyword}"/>
+            </c:if>
+            <c:if test="${not empty genderFilter}">
+                <c:param name="gender" value="${genderFilter}"/>
+            </c:if>
+            <c:if test="${branchID > 0}">
+                <c:param name="branchID" value="${branchID}"/>
+            </c:if>
+            <c:if test="${showTop eq 'true'}">
+                <c:param name="showTop" value="true"/>
+                <c:if test="${not empty minGrandTotal}">
+                    <c:param name="minGrandTotal" value="${minGrandTotal}"/>
+                </c:if>
+                <c:if test="${not empty maxGrandTotal}">
+                    <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
+                </c:if>
+            </c:if>
+        </c:url>
+        <a href="${nextPageUrl}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+            <i class="fas fa-angle-right"></i>
+        </a>
+
+        <%-- Last Page --%>
+        <c:url var="lastPageUrl" value="bm-customer">
+            <c:param name="page" value="${totalPages}"/>
+            <c:if test="${not empty keyword}">
+                <c:param name="keyword" value="${keyword}"/>
+            </c:if>
+            <c:if test="${not empty genderFilter}">
+                <c:param name="gender" value="${genderFilter}"/>
+            </c:if>
+            <c:if test="${branchID > 0}">
+                <c:param name="branchID" value="${branchID}"/>
+            </c:if>
+            <c:if test="${showTop eq 'true'}">
+                <c:param name="showTop" value="true"/>
+                <c:if test="${not empty minGrandTotal}">
+                    <c:param name="minGrandTotal" value="${minGrandTotal}"/>
+                </c:if>
+                <c:if test="${not empty maxGrandTotal}">
+                    <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
+                </c:if>
+            </c:if>
+        </c:url>
+        <a href="${lastPageUrl}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+            <i class="fas fa-angle-double-right"></i>
+        </a>
+    </div>
+</div>
 
                 <!-- Scripts -->
                 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

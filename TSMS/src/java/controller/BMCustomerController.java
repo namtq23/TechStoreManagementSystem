@@ -15,11 +15,33 @@ import model.CustomerDTO;
 @WebServlet(name = "BMCustomerController", urlPatterns = {"/bm-customer"})
 public class BMCustomerController extends HttpServlet {
 
-    @Override
+   @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        if (session == null || session.getAttribute("userId") == null ||
-            session.getAttribute("roleId") == null || session.getAttribute("dbName") == null) {
+
+        //Check active status
+        if ((Integer) session.getAttribute("isActive") == 0) {
+            resp.sendRedirect(req.getContextPath() + "/subscription");
+            return;
+        }
+
+        // Lấy thông báo từ session nếu có
+        if (session != null) {
+            String successMsg = (String) session.getAttribute("successMessage");
+            if (successMsg != null) {
+                req.setAttribute("successMessage", successMsg);
+                session.removeAttribute("successMessage");
+            }
+
+            String errorMsg = (String) session.getAttribute("errorMessage");
+            if (errorMsg != null) {
+                req.setAttribute("errorMessage", errorMsg);
+                session.removeAttribute("errorMessage");
+            }
+        }
+
+        if (session == null || session.getAttribute("userId") == null
+                || session.getAttribute("roleId") == null || session.getAttribute("dbName") == null) {
             resp.sendRedirect("login");
             return;
         }
@@ -37,13 +59,33 @@ public class BMCustomerController extends HttpServlet {
 
         String minStr = req.getParameter("minGrandTotal");
         String maxStr = req.getParameter("maxGrandTotal");
-
         Double minGrandTotal = parseDoubleOrNull(minStr);
         Double maxGrandTotal = parseDoubleOrNull(maxStr);
 
         int page = parseIntOrDefault(req.getParameter("page"), 1);
         int pageSize = 10;
         int offset = (page - 1) * pageSize;
+
+        // ✅ Parse branchID an toàn
+        int branchID = (session.getAttribute("branchID") != null)
+    ? Integer.parseInt(session.getAttribute("branchID").toString())
+    : 0;
+
+
+        // Thông báo từ session
+        if (session != null) {
+            String successMsg = (String) session.getAttribute("successMessage");
+            if (successMsg != null) {
+                req.setAttribute("successMessage", successMsg);
+                session.removeAttribute("successMessage");
+            }
+
+            String errorMsg = (String) session.getAttribute("errorMessage");
+            if (errorMsg != null) {
+                req.setAttribute("errorMessage", errorMsg);
+                session.removeAttribute("errorMessage");
+            }
+        }
 
         try {
             CustomerDAO customerDAO = new CustomerDAO();
@@ -58,16 +100,20 @@ public class BMCustomerController extends HttpServlet {
                 double min = (minGrandTotal != null) ? minGrandTotal : 0.0;
                 double max = (maxGrandTotal != null) ? maxGrandTotal : Double.MAX_VALUE;
 
-                // Lấy tất cả khách hàng theo chi tiêu
                 customers = customerDAO.getTopCustomersBySpending(min, max, dbName);
 
-                // Lọc theo keyword nếu có
+                // ✅ Lọc theo branchID
+                if (branchID > 0 && customers != null) {
+                    customers.removeIf(c -> c.getBranchID() != branchID);
+                }
+
+                // ✅ Lọc keyword
                 if (hasKeyword) {
                     String lowerKeyword = keyword.toLowerCase();
                     customers.removeIf(c -> !c.getFullName().toLowerCase().contains(lowerKeyword));
                 }
 
-                // Lọc theo giới tính nếu có
+                // ✅ Lọc giới tính
                 if ("male".equalsIgnoreCase(genderFilter)) {
                     customers.removeIf(c -> c.getGender() == null || !c.getGender());
                 } else if ("female".equalsIgnoreCase(genderFilter)) {
@@ -80,26 +126,33 @@ public class BMCustomerController extends HttpServlet {
                 offset = (page - 1) * pageSize;
 
                 int toIndex = Math.min(offset + pageSize, totalCustomers);
-                if (offset > toIndex) offset = 0;
+                if (offset > toIndex) {
+                    offset = 0;
+                }
                 customers = customers.subList(offset, toIndex);
+
             } else if (hasKeyword) {
-                customers = customerDAO.filterCustomers(dbName, keyword, genderFilter);
+                customers = customerDAO.filterCustomers(dbName, keyword, genderFilter, branchID);
                 totalCustomers = customers.size();
                 totalPages = (int) Math.ceil((double) totalCustomers / pageSize);
                 page = Math.min(page, totalPages);
                 offset = (page - 1) * pageSize;
 
                 int toIndex = Math.min(offset + pageSize, totalCustomers);
-                if (offset > toIndex) offset = 0;
+                if (offset > toIndex) {
+                    offset = 0;
+                }
                 customers = customers.subList(offset, toIndex);
+
             } else {
-                totalCustomers = customerDAO.countCustomers(dbName, genderFilter);
+                totalCustomers = customerDAO.countCustomers(dbName, genderFilter, branchID);
                 totalPages = (int) Math.ceil((double) totalCustomers / pageSize);
                 page = Math.min(page, totalPages == 0 ? 1 : totalPages);
                 offset = (page - 1) * pageSize;
-                customers = customerDAO.getCustomerListByPage(dbName, offset, pageSize, genderFilter);
+                customers = customerDAO.getCustomerListByPage(dbName, offset, pageSize, genderFilter, branchID);
             }
 
+            // ✅ Truyền thông tin về view
             req.setAttribute("customers", customers);
             req.setAttribute("currentPage", page);
             req.setAttribute("totalPages", totalPages);
@@ -111,6 +164,7 @@ public class BMCustomerController extends HttpServlet {
             req.setAttribute("showTop", showTop);
             req.setAttribute("minGrandTotal", minGrandTotal);
             req.setAttribute("maxGrandTotal", maxGrandTotal);
+            req.setAttribute("branchID", branchID);
             req.setAttribute("service", "active");
 
             req.getRequestDispatcher("/WEB-INF/jsp/manager/customer.jsp").forward(req, resp);
@@ -130,6 +184,7 @@ public class BMCustomerController extends HttpServlet {
                 return;
             }
 
+            HttpSession session = req.getSession(false);
             int customerId = Integer.parseInt(idStr.trim());
             String fullName = getSafeParam(req, "fullName");
             String email = getSafeParam(req, "email");
@@ -138,13 +193,13 @@ public class BMCustomerController extends HttpServlet {
             String address = getSafeParam(req, "address");
 
             if (fullName == null || email == null || genderStr == null || phone == null || address == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Dữ liệu không hợp lệ.");
+                session.setAttribute("errorMessage", "Cập nhật thất bại. Vui lòng thử lại.");
+                resp.sendRedirect("bm-customer");
                 return;
             }
 
             boolean gender = Boolean.parseBoolean(genderStr.trim());
 
-            HttpSession session = req.getSession(false);
             if (session == null || session.getAttribute("dbName") == null) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không xác định được cơ sở dữ liệu.");
                 return;
@@ -156,11 +211,11 @@ public class BMCustomerController extends HttpServlet {
             boolean success = dao.updateCustomer(customerId, fullName, email, gender, phone, address, dbName);
 
             if (success) {
-                resp.sendRedirect("bm-customer");
+                session.setAttribute("successMessage", "Cập nhật thông tin khách hàng thành công!");
             } else {
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Cập nhật thất bại.");
+                session.setAttribute("errorMessage", "Cập nhật thất bại. Vui lòng thử lại.");
             }
-
+            resp.sendRedirect("bm-customer");
         } catch (NumberFormatException e) {
             e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID không hợp lệ.");
