@@ -418,10 +418,11 @@
             }
 
             .service-package {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: white;
+                color: black;
                 padding: 4px 12px;
                 border-radius: 16px;
+                border: 1px solid black;
                 font-size: 12px;
                 font-weight: 600;
                 text-transform: uppercase;
@@ -627,8 +628,8 @@
                 <div class="sidebar">
                     <h3>Gian hàng</h3>
                     <ul class="sidebar-menu">
-                        <li><a href="#" class="active"><i class="fas fa-info-circle"></i> Thông tin gian hàng</a></li>
-                        <li><a href="#"><i class="fas fa-lock"></i> Đổi mật khẩu</a></li>
+                        <li><a href="so-information" class="active"><i class="fas fa-info-circle"></i> Thông tin gian hàng</a></li>
+                        <li><a href="so-change-password"><i class="fas fa-lock"></i> Đổi mật khẩu</a></li>
                         <li><a href="#"><i class="fas fa-code-branch"></i> Tạo chi nhánh</a></li>
                         <li><a href="#"><i class="fas fa-warehouse"></i> Tạo kho tổng</a></li>
                         <li><a href="#"><i class="fas fa-shopping-cart"></i> Gói dịch vụ</a></li>
@@ -774,7 +775,7 @@
                                     <div class="info-item">
                                         <span class="info-label">Số chi nhánh:</span>
                                         <span class="info-value">
-                                            <span class="branch-count">2 chi nhánh</span>
+                                            <span class="branch-count">${countBranches}</span>
                                         </span>
                                     </div>
 

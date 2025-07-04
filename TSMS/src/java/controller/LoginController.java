@@ -102,7 +102,7 @@ public class LoginController extends HttpServlet {
             try {
                 if (user != null && BCrypt.checkpw(password, user.getPassword())) {
                     //Check subscription
-                    String phone = ShopDAO.getPhoneByUserId(dbNameStaff);
+                    String phone = ShopDAO.getSOPhone(dbNameStaff);
                     
                     if (phone == null) {
                         req.setAttribute("error", "Không tìm thấy tài khoản chủ sở hữu!");

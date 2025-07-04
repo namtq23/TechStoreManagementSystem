@@ -4,6 +4,7 @@
  */
 package controller;
 
+import dao.BranchDAO;
 import dao.ShopOwnerDAO;
 import dao.UserDAO;
 import java.io.IOException;
@@ -55,7 +56,9 @@ public class SOInformationController extends HttpServlet {
 
             User u = UserDAO.getUserById(1, dbName);
             ShopOwnerDTO so = UserDAO.getShopOwnerByEmail(u.getEmail());
+            int countBranches = BranchDAO.countBranches(dbName);
             req.setAttribute("user", so);
+            req.setAttribute("countBranches", countBranches);
             req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/so-information.jsp").forward(req, resp);
         } catch (SQLException ex) {
             Logger.getLogger(SOInformationController.class.getName()).log(Level.SEVERE, null, ex);
