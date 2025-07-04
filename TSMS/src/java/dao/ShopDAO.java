@@ -32,7 +32,7 @@ public class ShopDAO {
         }
     }
     
-    public static String getPhoneByUserId(String dbName) throws SQLException {
+    public static String getSOPhone(String dbName) throws SQLException {
         String sql = "SELECT Phone FROM Users WHERE UserId = 1";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
@@ -45,6 +45,6 @@ public class ShopDAO {
     
     public static void main(String[] args) throws SQLException {
         ShopDAO shop = new ShopDAO();
-        System.out.println(shop.getPhoneByUserId("DTB_P"));
+        System.out.println(shop.getSOPhone("DTB_P"));
     }
 }
