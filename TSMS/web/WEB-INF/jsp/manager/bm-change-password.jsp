@@ -1,6 +1,6 @@
 <%-- 
-    Document   : so-change-password
-    Created on : Jul 3, 2025, 11:50:53 AM
+    Document   : bm-change-password
+    Created on : Jul 5, 2025, 11:28:33 PM
     Author     : admin
 --%>
 
@@ -465,109 +465,107 @@
         </style>
     </head>
     <body>
-
-        <!-- Header -->
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="so-overview" class="logo">
+                    <a href="bm-overview" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="so-overview" class="nav-item">
+                    <a href="bm-overview" class="nav-item active">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
 
-                    <a href="so-products?page=1" class="nav-item">
+                    <a href="bm-products?page=1" class="nav-item">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
 
                     <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
+                        <a href="" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
                             Giao dịch
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="so-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="so-createimport" class="dropdown-item">Tạo đơn nhập hàng</a>
-                            <a href="so-ienoti" class="dropdown-item">Thông báo nhập/xuất</a>
+                            <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
+                            <a href="bm-stockmovement?type=import" class="dropdown-item">Nhập hàng</a>
+                            <a href="request-stock" class="dropdown-item">Yêu cầu nhập hàng</a>
                         </div>
                     </div>
 
                     <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
+                        <a href="" class="dropdown-toggle">
                             <i class="fas fa-handshake"></i>
                             Đối tác
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="so-customer" class="dropdown-item">Khách hàng</a>
-                            <a href="so-supplier" class="dropdown-item">Nhà cung cấp</a>
+                            <a href="bm-customer" class="dropdown-item">Khách hàng</a>
+                            <a href="bm-supplier" class="dropdown-item">Nhà cung cấp</a>
                         </div>
                     </div>
 
                     <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
+                        <a href="" class="dropdown-toggle">
                             <i class="fas fa-users"></i>
                             Nhân viên
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="so-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="so-commission" class="dropdown-item">Hoa hồng</a>
+                            <a href="bm-staff" class="dropdown-item">Danh sách nhân viên</a>
+                            <a href="#" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
-
-                    <a href="so-promotions" class="nav-item">
-                        <i class="fas fa-gift"></i>
+                    <a href="bm-promotions" class="nav-item">
+                        <i class="fas fa-ticket"></i>
                         Khuyến mãi
                     </a>
 
                     <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
+                        <a href="" class="dropdown-toggle">
                             <i class="fas fa-chart-bar"></i>
                             Báo cáo
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="so-invoices?reportType=income" class="dropdown-item">Doanh Thu thuần</a>
-                            <a href="so-outcome" class="dropdown-item">Khoảng chi</a>
+                            <a href="#" class="dropdown-item">Tài chính</a>
+                            <a href="#" class="dropdown-item">Đật hàng</a>
+                            <a href="#" class="dropdown-item">Hàng hoá</a>
+                            <a href="#" class="dropdown-item">Khách hàng</a>
                         </div>
                     </div>
 
+                    <a href="bm-cart" class="nav-item">
+                        <i class="fas fa-cash-register"></i>
+                        Bán hàng
+                    </a>
                 </nav>
 
                 <div class="header-right">
                     <div class="user-dropdown">
-                        <a href="#" class="user-icon gradient" id="dropdownToggle">
+                        <a href="" class="user-icon gradient" id="dropdownToggle">
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="so-information" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="bm-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
                 </div>
-            </div>
         </header>
         <!-- Main Content -->
         <main class="main-content">
             <div class="container">
                 <!-- Left Sidebar -->
                 <div class="sidebar">
-                    <h3>Gian hàng</h3>
+                    <h3>Cá nhân</h3>
                     <ul class="sidebar-menu">
-                        <li><a href="so-information"><i class="fas fa-info-circle"></i> Thông tin gian hàng</a></li>
-                        <li><a href="so-change-password" class="active"><i class="fas fa-lock"></i> Đổi mật khẩu</a></li>
-                        <li><a href="so-branches"><i class="fas fa-code-branch"></i> Quản lý chi nhánh</a></li>
-                        <li><a href="so-warehouses"><i class="fas fa-warehouse"></i> Quản lý kho tổng</a></li>
-                        <li><a href="subscription"><i class="fas fa-shopping-cart"></i> Gói dịch vụ</a></li>
-                        <li><a href="subscription-logs"><i class="fas fa-history"></i> Lịch sử mua hàng</a></li>
+                        <li><a href="bm-information"  class="active"><i class="fas fa-info-circle"></i> Thông tin cá nhân</a></li>
+                        <li><a href="bm-change-password"><i class="fas fa-lock"></i> Đổi mật khẩu</a></li>
                     </ul>
                 </div>
 
@@ -581,7 +579,7 @@
                     </div>
 
                     <div class="change-password-content">
-                        <form id="changePasswordForm" action="so-change-password" method="post" class="password-form">
+                        <form id="changePasswordForm" action="bm-change-password" method="post" class="password-form">
                             <!-- Security Notice -->
                             <div class="security-notice">
                                 <i class="fas fa-shield-alt"></i>

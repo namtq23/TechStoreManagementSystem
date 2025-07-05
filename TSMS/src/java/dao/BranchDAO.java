@@ -81,7 +81,7 @@ public class BranchDAO {
     }
 
     //lấy ra thông tin BracnhByID  
-    public Branch getBranchById(int branchId, String dbName) throws SQLException {
+    public static Branch getBranchById(String branchId, String dbName) throws SQLException {
         String sql = """
         SELECT 
             BranchID,
@@ -96,7 +96,7 @@ public class BranchDAO {
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, branchId);
+            stmt.setString(1, branchId);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -161,7 +161,7 @@ public class BranchDAO {
     }
 
     public static void main(String[] args) throws SQLException {
-        System.out.println(BranchDAO.countBranches("DTB_TechStore"));
+        System.out.println(BranchDAO.getBranchById("1", "DTB_TechStore"));
     }
 
 }
