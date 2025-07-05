@@ -6,6 +6,7 @@ package controller;
 
 import dao.BranchDAO;
 import dao.UserDAO;
+import dao.WareHouseDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -20,13 +21,14 @@ import java.util.logging.Logger;
 import model.Branch;
 import model.ShopOwnerDTO;
 import model.User;
+import model.Warehouse;
 
 /**
  *
  * @author admin
  */
-@WebServlet(name = "BMInformationController", urlPatterns = {"/bm-information"})
-public class BMInformationController extends HttpServlet {
+@WebServlet(name = "StaffInformationController", urlPatterns = {"/staff-information"})
+public class StaffInformationController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -42,7 +44,7 @@ public class BMInformationController extends HttpServlet {
             }
 
             int roleId = Integer.parseInt(roleIdObj.toString());
-            if (roleId != 1) {
+            if (roleId != 1 && roleId != 2 && roleId != 3) {
                 resp.sendRedirect("login");
                 return;
             }
@@ -53,11 +55,23 @@ public class BMInformationController extends HttpServlet {
             ShopOwnerDTO so = UserDAO.getShopOwnerByEmail(u1.getEmail());
             User u = UserDAO.getUserById(userId, dbName);
             Branch branch = BranchDAO.getBranchById(u.getBranchId(), dbName);
-            
+            Warehouse wh = WareHouseDAO.getWarehouseById(u.getWarehouseId(), dbName);
+
             req.setAttribute("user", u);
             req.setAttribute("branch", branch);
             req.setAttribute("shop", so.getShopName());
-            req.getRequestDispatcher("/WEB-INF/jsp/manager/bm-information.jsp").forward(req, resp);
+            req.setAttribute("wh", wh);
+            switch (roleId) {
+                case 1:
+                    req.getRequestDispatcher("/WEB-INF/jsp/manager/bm-information.jsp").forward(req, resp);
+                    break;
+                case 2:
+                    req.getRequestDispatcher("/WEB-INF/jsp/sale/sale-information.jsp").forward(req, resp);
+                    break;
+                case 3:
+                    req.getRequestDispatcher("/WEB-INF/jsp/warehouse-manager/wh-information.jsp").forward(req, resp);
+                    break;
+            }
         } catch (SQLException ex) {
             Logger.getLogger(SOInformationController.class.getName()).log(Level.SEVERE, null, ex);
         }

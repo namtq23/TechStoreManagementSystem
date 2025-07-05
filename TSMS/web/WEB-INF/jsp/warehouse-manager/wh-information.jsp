@@ -1,8 +1,9 @@
 <%-- 
-    Document   : user-profile
-    Created on : Jul 3, 2025, 10:00:00 AM
+    Document   : wh-information
+    Created on : Jul 6, 2025, 1:08:33 AM
     Author     : admin
 --%>
+
 <%@ page import="java.util.*, model.ShopOwnerDTO, util.Validate" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -514,83 +515,44 @@
         </style>
     </head>
     <body>
+        <!-- Header -->
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="bm-overview" class="logo">
+                    <a href="wh-products?page=1" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="bm-overview" class="nav-item">
-                        <i class="fas fa-chart-line"></i>
-                        Tổng quan
-                    </a>
-
-                    <a href="bm-products?page=1" class="nav-item">
+                    <a href="wh-products?page=1" class="nav-item">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
 
-                    <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
-                            <i class="fas fa-exchange-alt"></i>
-                            Giao dịch
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="bm-stockmovement?type=import" class="dropdown-item">Nhập hàng</a>
-                            <a href="request-stock" class="dropdown-item">Yêu cầu nhập hàng</a>
-                        </div>
-                    </div>
-
-                    <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
-                            <i class="fas fa-handshake"></i>
-                            Đối tác
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="bm-customer" class="dropdown-item">Khách hàng</a>
-                            <a href="bm-supplier" class="dropdown-item">Nhà cung cấp</a>
-                        </div>
-                    </div>
-
-                    <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
-                            <i class="fas fa-users"></i>
-                            Nhân viên
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="bm-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="#" class="dropdown-item">Hoa hồng</a>
-                        </div>
-                    </div>
-                    <a href="bm-promotions" class="nav-item">
-                        <i class="fas fa-ticket"></i>
-                        Khuyến mãi
+                    <a href="wh-import" class="nav-item">
+                        <i class="fa-solid fa-download"></i>
+                        Nhập hàng
                     </a>
 
-                    <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
-                            <i class="fas fa-chart-bar"></i>
-                            Báo cáo
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">Tài chính</a>
-                            <a href="#" class="dropdown-item">Đật hàng</a>
-                            <a href="#" class="dropdown-item">Hàng hoá</a>
-                            <a href="#" class="dropdown-item">Khách hàng</a>
-                        </div>
-                    </div>
+                    <a href="" class="nav-item">
+                        <i class="fa-solid fa-upload"></i>
+                        Xuất hàng
+                    </a>
 
-                    <a href="bm-cart" class="nav-item">
-                        <i class="fas fa-cash-register"></i>
-                        Bán hàng
+                    <a href="" class="nav-item">
+                        <i class="fa-solid fa-bell"></i>
+                        Thông báo
+                    </a>
+
+                    <a href="" class="nav-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        Yêu cầu nhập hàng
+                    </a>
+
+                    <a href="" class="nav-item">
+                        <i class="fas fa-chart-bar"></i>
+                        Báo cáo
                     </a>
                 </nav>
 
@@ -605,6 +567,7 @@
                         </div>
                     </div>      
                 </div>
+            </div>
         </header>
 
         <!-- Main Content -->
@@ -652,7 +615,7 @@
                                 <div class="avatar-info">
                                     <h3>${user.fullName}</h3>
                                     <span class="user-role">
-                                        Quản lý cửa hàng
+                                        Quản lý kho tổng
                                     </span>
                                 </div>
                             </div>
@@ -749,9 +712,9 @@
                                     </div>
 
                                     <div class="info-item">
-                                        <span class="info-label">Chi nhánh đang công tác:</span>
+                                        <span class="info-label">Kho tổng đang công tác:</span>
                                         <span class="info-value">
-                                            <span class="branch-count">${branch.branchName}</span>
+                                            <span class="branch-count">${wh.wareHouseName}</span>
                                         </span>
                                     </div>
                                 </div>
