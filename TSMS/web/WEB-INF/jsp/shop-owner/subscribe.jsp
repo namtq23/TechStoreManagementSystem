@@ -406,6 +406,60 @@
                     transform: translateY(0);
                 }
             }
+
+            /* Styles cho subscription info */
+            .subscription-info {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                border: 1px solid #e9ecef;
+                margin-bottom: 20px;
+            }
+
+            .subscription-info h4 {
+                margin: 0 0 15px 0;
+                font-size: 16px;
+                font-weight: 600;
+                color: #333;
+            }
+
+            .subscription-details {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .subscription-detail-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 0;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .subscription-detail-item:last-child {
+                border-bottom: none;
+            }
+
+            .subscription-detail-item label {
+                font-weight: 500;
+                color: #666;
+            }
+
+            .subscription-detail-item span {
+                font-weight: 600;
+                color: #333;
+            }
+
+            .status-active {
+                color: #28a745;
+                font-weight: 600;
+            }
+
+            .status-expired {
+                color: #dc3545;
+                font-weight: 600;
+            }
         </style>
     </head>
     <body>
@@ -519,99 +573,132 @@
                     <!-- Main Form -->
                     <div class="main-form">
                         <div class="form-header">
-                            <i class="fas fa-arrow-left"></i>
-                            <h2>Mua Gói hỗ trợ</h2>
+                            <i class="fas fa-shopping-cart"></i>
+                            <c:choose>
+                                <c:when test="${status == 'TRIAL'}">
+                                    <h2>Mua Gói hỗ trợ</h2>
+                                </c:when>
+                                <c:otherwise>
+                                    <h2>Gia hạn Gói dịch vụ</h2>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
 
                         <div class="form-content">
-                            <!-- Form Fields -->
-                            <!-- Plan Selection -->
-                            <div class="plan-options">
-                                <div class="plan-option">
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="radio" name="plan" value="1" id="plan1">
-                                        <label for="plan1" class="plan-duration">3 tháng</label>
+                            <!-- Hiển thị thông tin subscription nếu khác TRIAL -->
+                            <c:if test="${status != 'TRIAL'}">
+                                <div class="subscription-info">
+                                    <h4>Thông tin gói dịch vụ hiện tại</h4>
+                                    <div class="subscription-details">
+                                        <div class="subscription-detail-item">
+                                            <label>Tên gói:</label>
+                                            <span>${status}</span>
+                                        </div>
+                                        <div class="subscription-detail-item">
+                                            <label>Trạng thái:</label>
+                                            <span class="status-active">Đang hoạt động</span>
+                                        </div>
+                                        <div class="subscription-detail-item">
+                                            <label>Ngày bắt đầu:</label>
+                                            <span>${startDate}</span>
+                                        </div>
+                                        <div class="subscription-detail-item">
+                                            <label>Ngày kết thúc:</label>
+                                            <span>${endDate}</span>
+                                        </div>
                                     </div>
-                                    <div class="plan-price">700,000đ</div>
                                 </div>
+                            </c:if>
 
-                                <div class="plan-option selected">
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="radio" name="plan" value="2" id="plan2" checked>
-                                        <label for="plan2" class="plan-duration">6 tháng</label>
+                            <!-- Form gốc - luôn hiển thị -->
+                            <form action="subscription-payment" method="post">
+                                <!-- Plan Selection -->
+                                <div class="plan-options">
+                                    <div class="plan-option">
+                                        <div style="display: flex; align-items: center;">
+                                            <input type="radio" name="plan" value="1" id="plan1">
+                                            <label for="plan1" class="plan-duration">3 tháng</label>
+                                        </div>
+                                        <div class="plan-price">700,000đ</div>
                                     </div>
-                                    <div class="plan-price">1,200,000đ</div>
-                                </div>
 
-                                <div class="plan-option">
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="radio" name="plan" value="3" id="plan3">
-                                        <label for="plan3" class="plan-duration">1 năm</label>
+                                    <div class="plan-option selected">
+                                        <div style="display: flex; align-items: center;">
+                                            <input type="radio" name="plan" value="2" id="plan2" checked>
+                                            <label for="plan2" class="plan-duration">6 tháng</label>
+                                        </div>
+                                        <div class="plan-price">1,200,000đ</div>
                                     </div>
-                                    <div class="plan-price">2,000,000đ</div>
-                                </div>
 
-                                <div class="plan-option">
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="radio" name="plan" value="4" id="plan4">
-                                        <label for="plan5" class="plan-duration">2 năm</label>
+                                    <div class="plan-option">
+                                        <div style="display: flex; align-items: center;">
+                                            <input type="radio" name="plan" value="3" id="plan3">
+                                            <label for="plan3" class="plan-duration">1 năm</label>
+                                        </div>
+                                        <div class="plan-price">2,000,000đ</div>
                                     </div>
-                                    <div class="plan-price">3,700,000đ</div>
-                                </div>
-                            </div>
 
-                            <div class="form-tabs">
-                                <button type="button" class="tab-button active">Thông tin người mua</button>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="fullname" class="required">Họ và tên</label>
-                                    <input type="text" id="fullname" name="fullname" value="${user.fullName}" required>
+                                    <div class="plan-option">
+                                        <div style="display: flex; align-items: center;">
+                                            <input type="radio" name="plan" value="4" id="plan4">
+                                            <label for="plan4" class="plan-duration">2 năm</label>
+                                        </div>
+                                        <div class="plan-price">3,700,000đ</div>
+                                    </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label>Giới tính</label>
-                                    <div class="gender-options">
-                                        <div class="gender-option">
-                                            <input type="radio" name="gender" value="male" id="male"
-                                                   <c:if test="${user.gender == '1'}">checked</c:if>>
-                                                   <label for="male">Nam</label>
-                                            </div>
+                                <div class="form-tabs">
+                                    <button type="button" class="tab-button active">Thông tin người mua</button>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="fullname" class="required">Họ và tên</label>
+                                        <input type="text" id="fullname" name="fullname" value="${user.fullName}" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Giới tính</label>
+                                        <div class="gender-options">
                                             <div class="gender-option">
-                                                <input type="radio" name="gender" value="female" id="female"
-                                                <c:if test="${user.gender == '0'}">checked</c:if>>
-                                                <label for="female">Nữ</label>
+                                                <input type="radio" name="gender" value="male" id="male"
+                                                       <c:if test="${user.gender == '1'}">checked</c:if>>
+                                                       <label for="male">Nam</label>
+                                                </div>
+                                                <div class="gender-option">
+                                                    <input type="radio" name="gender" value="female" id="female"
+                                                    <c:if test="${user.gender == '0'}">checked</c:if>>
+                                                    <label for="female">Nữ</label>
+                                                </div>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="phone" class="required">Số điện thoại</label>
+                                            <div class="phone-input">
+                                                <input type="number" id="phone" name="phone" value="${user.phone}" required style="width: 100%;">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="email">Email</label>
+                                        <input type="email" id="email" name="email" value="${user.email}">
                                     </div>
                                 </div>
 
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="phone" class="required">Số điện thoại</label>
-                                        <div class="phone-input">
-                                            <input type="number" id="phone" name="phone" value="${user.phone}" required style="width: 100%;">
+                                        <label for="cccd" class="required">CCCD/Hộ chiếu</label>
+                                        <input type="text" id="cccd" name="cccd" value="${user.identificationID}" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="address" class="required">Địa chỉ</label>
+                                        <input type="text" id="address" name="address" value="${user.address}" required>
                                     </div>
                                 </div>
-
-                                <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input type="email" id="email" name="email" value="${user.email}">
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="cccd" class="required">CCCD/Hộ chiếu</label>
-                                    <input type="text" id="cccd" name="cccd" value="${user.identificationID}" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="address" class="required">Địa chỉ</label>
-                                    <input type="text" id="address" name="address" value="${user.address}" required>
-                                </div>
-                            </div>
-
+                            </form>
                         </div>
                     </div>
 
@@ -635,7 +722,6 @@
 
                         <button type="submit" class="btn-primary">Tiếp tục thanh toán</button>
                     </div>
-                </div>
             </form>
         </main>
 

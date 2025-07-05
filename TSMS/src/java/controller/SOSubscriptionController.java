@@ -15,7 +15,9 @@ import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.ShopOwnerDTO;
 import model.User;
+import util.Validate;
 
 /**
  *
@@ -45,7 +47,14 @@ public class SOSubscriptionController extends HttpServlet {
             if (status != null && status == 0) {
                 req.setAttribute("expired", "expired");
             }
-            
+
+            User u = UserDAO.getUserById(1, dbName);
+            ShopOwnerDTO so = UserDAO.getShopOwnerByEmail(u.getEmail());
+            req.setAttribute("status", so.getStatus());
+            req.setAttribute("so", so);
+            req.setAttribute("startDate", Validate.toInputDate(so.getSubscriptionStart()));
+            req.setAttribute("endDate", Validate.toInputDate(so.getSubscriptionEnd()));
+
             req.setAttribute("user", user);
             req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/subscribe.jsp").forward(req, resp);
         } catch (SQLException ex) {
