@@ -1,16 +1,19 @@
 <%-- 
-    Document   : so-change-password
-    Created on : Jul 3, 2025, 11:50:53 AM
+    Document   : so-create-branch
+    Created on : Jul 4, 2025, 11:30:48 PM
     Author     : admin
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page import="java.util.*, model.ShopOwnerDTO, util.Validate" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Đổi mật khẩu - TSMS</title>
+        <title>Tạo chi nhánh mới - TSMS</title>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="css/header.css"/>
@@ -93,7 +96,7 @@
                 font-size: 16px;
             }
 
-            .change-password-container {
+            .profile-container {
                 flex: 1;
                 background: white;
                 border-radius: 8px;
@@ -102,7 +105,7 @@
                 overflow: hidden;
             }
 
-            .change-password-header {
+            .profile-header {
                 background: #f8f9fa;
                 padding: 20px 30px;
                 border-bottom: 1px solid #e9ecef;
@@ -111,90 +114,66 @@
                 justify-content: space-between;
             }
 
-            .change-password-header h2 {
+            .profile-header-left {
+                display: flex;
+                align-items: center;
+            }
+
+            .profile-header i {
+                margin-right: 10px;
+                color: #1976d2;
+            }
+
+            .profile-header h2 {
                 margin: 0;
                 font-size: 20px;
+                font-weight: 600;
+                color: #333;
+            }
+
+            .profile-content {
+                padding: 30px;
+            }
+
+            .form-section {
+                background: #f8f9fa;
+                padding: 25px;
+                border-radius: 8px;
+                border: 1px solid #e9ecef;
+                margin-bottom: 20px;
+            }
+
+            .form-section h4 {
+                margin: 0 0 20px 0;
+                font-size: 18px;
                 font-weight: 600;
                 color: #333;
                 display: flex;
                 align-items: center;
-                gap: 10px;
-            }
-
-            .change-password-header i {
-                color: #1976d2;
-            }
-
-            .change-password-content {
-                padding: 40px;
-                display: flex;
-                justify-content: center;
-            }
-
-            .password-form {
-                width: 100%;
-                max-width: 500px;
-            }
-
-            .security-notice {
-                background: #e3f2fd;
-                border: 1px solid #bbdefb;
-                border-radius: 8px;
-                padding: 20px;
-                margin-bottom: 30px;
-                display: flex;
-                align-items: flex-start;
-                gap: 12px;
-            }
-
-            .security-notice i {
-                color: #1976d2;
-                font-size: 20px;
-                margin-top: 2px;
-            }
-
-            .security-notice-content h4 {
-                margin: 0 0 8px 0;
-                font-size: 16px;
-                font-weight: 600;
-                color: #1976d2;
-            }
-
-            .security-notice-content p {
-                margin: 0;
-                color: #666;
-                font-size: 14px;
-                line-height: 1.5;
+                gap: 8px;
             }
 
             .form-group {
-                margin-bottom: 24px;
+                margin-bottom: 20px;
             }
 
-            .form-label {
+            .form-group label {
                 display: block;
                 margin-bottom: 8px;
                 font-weight: 500;
                 color: #333;
-                font-size: 14px;
             }
 
-            .form-label.required::after {
-                content: " *";
+            .required {
                 color: #dc3545;
-            }
-
-            .password-input-wrapper {
-                position: relative;
             }
 
             .form-input {
                 width: 100%;
                 padding: 12px 16px;
-                padding-right: 48px;
                 border: 1px solid #ddd;
-                border-radius: 6px;
-                font-size: 16px;
+                border-radius: 8px;
+                font-size: 14px;
                 transition: all 0.3s ease;
                 background-color: white;
             }
@@ -205,156 +184,20 @@
                 box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
             }
 
-            .form-input.error {
+            .form-input:invalid {
                 border-color: #dc3545;
             }
 
-            .form-input.success {
-                border-color: #28a745;
-            }
-
-            .password-toggle {
-                position: absolute;
-                right: 16px;
-                top: 50%;
-                transform: translateY(-50%);
-                background: none;
-                border: none;
-                color: #666;
-                cursor: pointer;
-                font-size: 16px;
-                padding: 0;
-                width: 20px;
-                height: 20px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .password-toggle:hover {
-                color: #1976d2;
-            }
-
-            .form-help {
-                margin-top: 6px;
-                font-size: 12px;
-                color: #666;
-            }
-
-            .form-error {
-                margin-top: 6px;
-                font-size: 12px;
-                color: #dc3545;
-                display: none;
-            }
-
-            .form-success {
-                margin-top: 6px;
-                font-size: 12px;
-                color: #28a745;
-                display: none;
-            }
-
-            .password-strength {
-                margin-top: 8px;
-            }
-
-            .password-strength-label {
-                font-size: 12px;
-                color: #666;
-                margin-bottom: 4px;
-            }
-
-            .password-strength-bar {
-                height: 4px;
-                background-color: #e9ecef;
-                border-radius: 2px;
-                overflow: hidden;
-            }
-
-            .password-strength-fill {
-                height: 100%;
-                width: 0%;
-                transition: all 0.3s ease;
-                border-radius: 2px;
-            }
-
-            .password-strength-fill.weak {
-                background-color: #dc3545;
-                width: 25%;
-            }
-
-            .password-strength-fill.medium {
-                background-color: #ffc107;
-                width: 50%;
-            }
-
-            .password-strength-fill.strong {
-                background-color: #fd7e14;
-                width: 75%;
-            }
-
-            .password-strength-fill.very-strong {
-                background-color: #28a745;
-                width: 100%;
-            }
-
-            .password-requirements {
-                margin-top: 12px;
-                background: #f8f9fa;
-                border: 1px solid #e9ecef;
-                border-radius: 6px;
-                padding: 16px;
-            }
-
-            .requirements-title {
-                font-size: 13px;
-                font-weight: 600;
-                color: #333;
-                margin-bottom: 8px;
-            }
-
-            .requirement-item {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-bottom: 6px;
-                font-size: 12px;
-            }
-
-            .requirement-item:last-child {
-                margin-bottom: 0;
-            }
-
-            .requirement-icon {
-                width: 16px;
-                height: 16px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 10px;
-                color: white;
-                background-color: #6c757d;
-            }
-
-            .requirement-icon.met {
-                background-color: #28a745;
-            }
-
-            .requirement-text {
-                color: #666;
-            }
-
-            .requirement-text.met {
-                color: #28a745;
+            .form-input:invalid:focus {
+                border-color: #dc3545;
+                box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
             }
 
             .form-buttons {
                 display: flex;
-                gap: 12px;
+                gap: 16px;
                 justify-content: flex-end;
-                margin-top: 40px;
+                margin-top: 30px;
                 padding-top: 20px;
                 border-top: 1px solid #e9ecef;
             }
@@ -362,8 +205,8 @@
             .btn {
                 padding: 12px 24px;
                 border: none;
-                border-radius: 6px;
-                font-weight: 500;
+                border-radius: 8px;
+                font-weight: 600;
                 cursor: pointer;
                 transition: all 0.3s ease;
                 text-decoration: none;
@@ -371,11 +214,8 @@
                 align-items: center;
                 gap: 8px;
                 font-size: 14px;
-            }
-
-            .btn:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
+                min-width: 120px;
+                justify-content: center;
             }
 
             .btn-primary {
@@ -383,8 +223,10 @@
                 color: white;
             }
 
-            .btn-primary:hover:not(:disabled) {
+            .btn-primary:hover {
                 background: #1565c0;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
             }
 
             .btn-secondary {
@@ -392,40 +234,77 @@
                 color: white;
             }
 
-            .btn-secondary:hover:not(:disabled) {
+            .btn-secondary:hover {
                 background: #5a6268;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
             }
 
-            .notification {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 8px;
-                font-size: 16px;
+            .btn-success {
+                background: #28a745;
                 color: white;
-                z-index: 9999;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-                animation: slideIn 0.4s ease;
             }
 
-            .notification.success {
-                background-color: #28a745;
+            .btn-success:hover {
+                background: #218838;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
             }
 
-            .notification.error {
-                background-color: #dc3545;
+            .flash-message {
+                position: fixed;
+                top: 20px;
+                right: 30px;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                color: white;
+                z-index: 1000;
+                font-size: 16px;
+                animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-in-out 4.5s forwards;
+            }
+
+            .flash-message.success {
+                background-color: #4CAF50;
+            }
+
+            .flash-message.error {
+                background-color: #f44336;
             }
 
             @keyframes slideIn {
                 from {
                     opacity: 0;
-                    transform: translateX(100%);
+                    transform: translateX(100px);
                 }
                 to {
                     opacity: 1;
                     transform: translateX(0);
                 }
+            }
+
+            @keyframes fadeOut {
+                to {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                    visibility: hidden;
+                }
+            }
+
+            .help-text {
+                font-size: 12px;
+                color: #666;
+                margin-top: 5px;
+            }
+
+            .form-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+
+            .form-grid .form-group.full-width {
+                grid-column: 1 / -1;
             }
 
             @media (max-width: 768px) {
@@ -437,8 +316,8 @@
                     width: 100%;
                 }
 
-                .change-password-content {
-                    padding: 20px;
+                .form-grid {
+                    grid-template-columns: 1fr;
                 }
 
                 .form-buttons {
@@ -447,7 +326,6 @@
 
                 .btn {
                     width: 100%;
-                    justify-content: center;
                 }
             }
 
@@ -465,7 +343,6 @@
         </style>
     </head>
     <body>
-
         <!-- Header -->
         <header class="header">
             <div class="header-container">
@@ -539,7 +416,6 @@
                             <a href="so-outcome" class="dropdown-item">Khoảng chi</a>
                         </div>
                     </div>
-
                 </nav>
 
                 <div class="header-right">
@@ -555,6 +431,7 @@
                 </div>
             </div>
         </header>
+
         <!-- Main Content -->
         <main class="main-content">
             <div class="container">
@@ -563,74 +440,92 @@
                     <h3>Gian hàng</h3>
                     <ul class="sidebar-menu">
                         <li><a href="so-information"><i class="fas fa-info-circle"></i> Thông tin gian hàng</a></li>
-                        <li><a href="so-change-password" class="active"><i class="fas fa-lock"></i> Đổi mật khẩu</a></li>
+                        <li><a href="so-change-password"><i class="fas fa-lock"></i> Đổi mật khẩu</a></li>
                         <li><a href="so-branches"><i class="fas fa-code-branch"></i> Quản lý chi nhánh</a></li>
-                        <li><a href="so-warehouses"><i class="fas fa-warehouse"></i> Quản lý kho tổng</a></li>
+                        <li><a href="so-warehouses" class="active"><i class="fas fa-warehouse"></i> Quản lý kho tổng</a></li>
                         <li><a href="subscription"><i class="fas fa-shopping-cart"></i> Gói dịch vụ</a></li>
                         <li><a href="subscription-logs"><i class="fas fa-history"></i> Lịch sử mua hàng</a></li>
                     </ul>
                 </div>
 
-                <!-- Change Password Container -->
-                <div class="change-password-container">
-                    <div class="change-password-header">
-                        <h2>
-                            <i class="fas fa-lock"></i>
-                            Đổi mật khẩu
-                        </h2>
+                <!-- Create Branch Container -->
+                <div class="profile-container">
+                    <!-- Profile Header -->
+                    <div class="profile-header">
+                        <div class="profile-header-left">
+                            <i class="fas fa-warehouse"></i>
+                            <h2>Tạo kho tổng mới</h2>
+                        </div>
                     </div>
 
-                    <div class="change-password-content">
-                        <form id="changePasswordForm" action="so-change-password" method="post" class="password-form">
-                            <!-- Security Notice -->
-                            <div class="security-notice">
-                                <i class="fas fa-shield-alt"></i>
-                                <div class="security-notice-content">
-                                    <h4>Bảo mật tài khoản</h4>
-                                    <p>Để đảm bảo an toàn cho tài khoản, vui lòng chọn mật khẩu mạnh và không chia sẻ với bất kỳ ai. Mật khẩu mới phải khác với mật khẩu hiện tại.</p>
-                                </div>
-                            </div>
+                    <div class="profile-content">
+                        <form id="warehouseForm" action="so-create-warehouse" method="POST">
+                            <!-- Warehouse Information -->
+                            <div class="form-section">
+                                <h4><i class="fas fa-warehouse"></i> Thông tin kho tổng</h4>
 
-                            <!-- Current Password -->
-                            <div class="form-group">
-                                <label for="currentPassword" class="form-label required">Mật khẩu hiện tại</label>
-                                <div class="password-input-wrapper">
-                                    <input type="password" id="currentPassword" name="currentPassword" class="form-input" required>
-                                </div>
-                                <div class="form-error" id="currentPasswordError"></div>
-                            </div>
+                                <div class="form-grid">
+                                    <div class="form-group full-width">
+                                        <label for="warehouseName">
+                                            Tên kho tổng <span class="required">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               id="warehouseName" 
+                                               name="warehouseName" 
+                                               class="form-input" 
+                                               placeholder="Nhập tên kho tổng"
+                                               required 
+                                               maxlength="100">
+                                        <div class="help-text">Tên kho tổng sẽ hiển thị trên tài liệu và hệ thống</div>
+                                    </div>
 
-                            <!-- New Password -->
-                            <div class="form-group">
-                                <label for="newPassword" class="form-label required">Mật khẩu mới</label>
-                                <div class="password-input-wrapper">
-                                    <input type="password" id="newPassword" name="newPassword" class="form-input" required>
-                                </div>
-                                <div class="form-error" id="newPasswordError"></div>
-                            </div>
+                                    <div class="form-group full-width">
+                                        <label for="warehouseAddress">
+                                            Địa chỉ kho tổng <span class="required">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               id="warehouseAddress" 
+                                               name="warehouseAddress" 
+                                               class="form-input" 
+                                               placeholder="Nhập địa chỉ đầy đủ của kho tổng"
+                                               required 
+                                               maxlength="200">
+                                        <div class="help-text">Địa chỉ chi tiết gồm số, đường, phường/xã, quận/huyện, tỉnh/thành</div>
+                                    </div>
 
-                            <!-- Confirm Password -->
-                            <div class="form-group">
-                                <label for="confirmPassword" class="form-label required">Xác nhận mật khẩu mới</label>
-                                <div class="password-input-wrapper">
-                                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" required>
+                                    <div class="form-group full-width">
+                                        <label for="warehousePhone">
+                                            Số điện thoại <span class="required">*</span>
+                                        </label>
+                                        <input type="tel" 
+                                               id="warehousePhone" 
+                                               name="warehousePhone" 
+                                               class="form-input" 
+                                               placeholder="Nhập số điện thoại kho tổng"
+                                               required 
+                                               pattern="[0-9]{10,11}" 
+                                               maxlength="11">
+                                        <div class="help-text">Số điện thoại gồm 10-11 chữ số</div>
+                                    </div>
                                 </div>
-                                <div class="form-error" id="confirmPasswordError"></div>
-                                <div class="form-success" id="confirmPasswordSuccess"></div>
-                            </div>
 
-                            <p class="error-message">${error}</p>
-                            <p class="success-message">${success}</p>
+                                <p class="error-message">${error}</p>
+                                <p class="success-message">${success}</p>
+                            </div>
 
                             <!-- Form Buttons -->
                             <div class="form-buttons">
+                                <a href="so-warehouses" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Quay lại
+                                </a>
                                 <button type="button" class="btn btn-secondary" onclick="resetForm()">
                                     <i class="fas fa-undo"></i>
-                                    Hủy bỏ
+                                    Đặt lại
                                 </button>
-                                <button type="submit" class="btn btn-primary" id="submitBtn">
-                                    <i class="fas fa-key"></i>
-                                    Đổi mật khẩu
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-plus"></i>
+                                    Tạo kho tổng
                                 </button>
                             </div>
                         </form>
@@ -640,12 +535,49 @@
         </main>
 
         <script>
-            // Form handling functions
+            // Handle dropdown menu
+            const toggle = document.getElementById("dropdownToggle");
+            const menu = document.getElementById("dropdownMenu");
+
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                menu.style.display = menu.style.display === "block" ? "none" : "block";
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener("click", function (e) {
+                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                    menu.style.display = "none";
+                }
+            });
+
             function resetForm() {
                 if (confirm('Bạn có chắc chắn muốn đặt lại form?')) {
-                    document.getElementById('changePasswordForm').reset();
+                    document.getElementById('warehouseForm').reset();
                 }
             }
+
+            document.getElementById('warehouseForm').addEventListener('submit', function (e) {
+                const name = document.getElementById('warehouseName').value.trim();
+                const address = document.getElementById('warehouseAddress').value.trim();
+                const phone = document.getElementById('warehousePhone').value.trim();
+
+                if (!name || !address || !phone) {
+                    e.preventDefault();
+                    alert('Vui lòng nhập đầy đủ thông tin bắt buộc (Tên, Địa chỉ, Số điện thoại)');
+                    return false;
+                }
+
+                if (!/^[0-9]{10,11}$/.test(phone)) {
+                    e.preventDefault();
+                    alert('Số điện thoại phải có 10-11 chữ số');
+                    return false;
+                }
+            });
+
+            document.getElementById('warehousePhone').addEventListener('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
         </script>
     </body>
 </html>

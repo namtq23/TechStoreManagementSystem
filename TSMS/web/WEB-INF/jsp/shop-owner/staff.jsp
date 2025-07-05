@@ -312,12 +312,14 @@
         </div>
 
 
-        <c:if test="${not empty success}">
-            <div class="notification success" id="notification">${success}</div>
+        <c:if test="${not empty sessionScope.success}">
+            <div class="notification success" id="notification">${sessionScope.success}</div>
+            <c:remove var="success" scope="session"/>
         </c:if>
 
-        <c:if test="${not empty error}">
-            <div class="notification error" id="notification">${error}</div>
+        <c:if test="${not empty sessionScope.error}">
+            <div class="notification error" id="notification">${sessionScope.error}</div>
+            <c:remove var="error" scope="session"/>
         </c:if>
 
 

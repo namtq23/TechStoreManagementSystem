@@ -40,12 +40,6 @@ public class SOInformationController extends HttpServlet {
                 return;
             }
 
-            //Check active status
-            if ((Integer) session.getAttribute("isActive") == 0) {
-                resp.sendRedirect(req.getContextPath() + "/subscription");
-                return;
-            }
-
             int roleId = Integer.parseInt(roleIdObj.toString());
             if (roleId != 0) {
                 resp.sendRedirect("login");
