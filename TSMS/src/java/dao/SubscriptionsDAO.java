@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import model.SubscriptionLogDTO;
 import util.DBUtil;
 import util.Validate;
@@ -125,8 +126,92 @@ public class SubscriptionsDAO {
         return false;
     }
 
+    public List<SubscriptionLogDTO> getSubscriptionLogsByOwnerId(int ownerId, int offset, int limit, LocalDate fromDate, LocalDate toDate) throws SQLException {
+        List<SubscriptionLogDTO> list = new ArrayList<>();
+
+        // Câu SQL base
+        StringBuilder sql = new StringBuilder("""
+        SELECT sl.LogID, sl.OwnerID,
+               CONCAT(smp.SubscriptionMonths, ' tháng') AS PackageName,
+               FORMAT(smp.Price, 'N0') AS Price,
+               sl.Status, sl.CreatedAt,
+               DATEDIFF(MINUTE, sl.CreatedAt, GETDATE()) AS MinutesAgo
+        FROM SubscriptionLogs sl
+        JOIN ServiceMethodPrice smp ON sl.MethodID = smp.MethodID AND sl.SubscriptionMonths = smp.SubscriptionMonths
+        WHERE sl.OwnerID = ?
+    """);
+
+        // Thêm điều kiện lọc ngày nếu fromDate và toDate khác null
+        boolean hasDateFilter = (fromDate != null && toDate != null);
+        if (hasDateFilter) {
+            sql.append(" AND CAST(sl.CreatedAt AS DATE) BETWEEN ? AND ? ");
+        }
+
+        sql.append(" ORDER BY sl.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            stmt.setInt(paramIndex++, ownerId);
+
+            if (hasDateFilter) {
+                stmt.setDate(paramIndex++, java.sql.Date.valueOf(fromDate));
+                stmt.setDate(paramIndex++, java.sql.Date.valueOf(toDate));
+            }
+
+            stmt.setInt(paramIndex++, offset);
+            stmt.setInt(paramIndex++, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    SubscriptionLogDTO dto = new SubscriptionLogDTO(
+                            rs.getInt("LogID"),
+                            rs.getInt("OwnerID"),
+                            null,
+                            rs.getString("PackageName"),
+                            rs.getString("Price"),
+                            rs.getString("Status"),
+                            rs.getTimestamp("CreatedAt"),
+                            rs.getInt("MinutesAgo")
+                    );
+                    list.add(dto);
+                }
+            }
+        }
+
+        return list;
+    }
+
+    public int countSubscriptionLogsByOwnerId(int ownerId, LocalDate fromDate, LocalDate toDate) throws SQLException {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM SubscriptionLogs WHERE OwnerID = ?");
+
+        boolean hasDateFilter = (fromDate != null && toDate != null);
+        if (hasDateFilter) {
+            sql.append(" AND CAST(CreatedAt AS DATE) BETWEEN ? AND ?");
+        }
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            stmt.setInt(paramIndex++, ownerId);
+
+            if (hasDateFilter) {
+                stmt.setDate(paramIndex++, java.sql.Date.valueOf(fromDate));
+                stmt.setDate(paramIndex++, java.sql.Date.valueOf(toDate));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
     public static void main(String[] args) throws SQLException {
         System.out.println(SubscriptionsDAO.getAllSubscriptionSummaryByMethodId(1));
     }
 
 }
+
