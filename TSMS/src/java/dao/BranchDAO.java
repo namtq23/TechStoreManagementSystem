@@ -125,6 +125,41 @@ public class BranchDAO {
         return result;
     }
 
+    public static boolean insertBranch(String dbName, String branchName, String address, String phone) throws SQLException {
+        String sql = "INSERT INTO Branches (BranchName, Address, Phone, IsActive) VALUES (?, ?, ?, 1)";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, branchName);
+            ps.setString(2, address);
+            ps.setString(3, phone);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    public static void updateBranch(int branchId, String name, String address, String phone, boolean isActive, String dbName) throws SQLException {
+        String sql = "UPDATE Branches SET BranchName = ?, Address = ?, Phone = ?, IsActive = ? WHERE BranchID = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, name);
+            ps.setString(2, address);
+            ps.setString(3, phone);
+            ps.setBoolean(4, isActive);
+            ps.setInt(5, branchId);
+            ps.executeUpdate();
+        }
+    }
+
+    public static void deleteBranch(int branchId, String dbName) throws SQLException {
+        String sql = "DELETE FROM Branches WHERE BranchID = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, branchId);
+            ps.executeUpdate();
+        }
+    }
+
     public static void main(String[] args) throws SQLException {
         System.out.println(BranchDAO.countBranches("DTB_TechStore"));
     }

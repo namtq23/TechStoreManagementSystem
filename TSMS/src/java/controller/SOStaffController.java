@@ -27,7 +27,6 @@ import org.mindrot.jbcrypt.BCrypt;
 import util.Validate;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import model.Role;
 

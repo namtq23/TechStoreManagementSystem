@@ -20,7 +20,7 @@ import java.sql.ResultSet;
  */
 public class WareHouseDAO {
 
-    public static List<Warehouse> getBranchList(String dbName) throws SQLException {
+    public static List<Warehouse> getWarehouseList(String dbName) throws SQLException {
         List<Warehouse> warehouses = new ArrayList<>();
 
         String sql = """
@@ -51,8 +51,7 @@ public class WareHouseDAO {
         """;
 
         try (
-                Connection conn = DBUtil.getConnectionTo(dbName); 
-                 PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+                Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 names.add(rs.getString("Name"));
             }
@@ -60,13 +59,12 @@ public class WareHouseDAO {
 
         return names;
     }
+
     public List<Warehouse> getAllWarehouses(String dbName) {
         List<Warehouse> warehouses = new ArrayList<>();
         String query = "SELECT WarehouseID, WarehouseName FROM Warehouses";
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 Warehouse warehouse = new Warehouse();
                 warehouse.setWareHouseId(rs.getInt("WarehouseID"));
@@ -80,13 +78,46 @@ public class WareHouseDAO {
         return warehouses;
     }
 
+    public static boolean createWarehouse(Warehouse warehouse, String dbName) throws SQLException {
+        String sql = "INSERT INTO Warehouses (WarehouseName, Address, Phone, IsActive) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, warehouse.getWareHouseName());
+            stmt.setString(2, warehouse.getWareHouseAddress());
+            stmt.setString(3, warehouse.getPhone());
+            stmt.setInt(4, warehouse.getIsActive());
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    public boolean updateWarehouse(Warehouse warehouse, String dbName) throws SQLException {
+        String sql = "UPDATE Warehouses SET WarehouseName = ?, Address = ?, Phone = ?, IsActive = ? WHERE WarehouseID = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, warehouse.getWareHouseName());
+            stmt.setString(2, warehouse.getWareHouseAddress());
+            stmt.setString(3, warehouse.getPhone());
+            stmt.setInt(4, warehouse.getIsActive());
+            stmt.setInt(5, warehouse.getWareHouseId());
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    public boolean deleteWarehouse(int warehouseId, String dbName) throws SQLException {
+        String sql = "DELETE FROM Warehouses WHERE WarehouseID = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, warehouseId);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
     private static Warehouse extractWareHouseFromResultSet(ResultSet rs) throws SQLException {
-        Warehouse wh = new Warehouse(rs.getInt("WarehouseId"), rs.getNString("WarehouseName"), rs.getNString("Address"));
+        Warehouse wh = new Warehouse(rs.getInt("WarehouseId"), rs.getNString("WarehouseName"), rs.getNString("Address"), rs.getNString("Phone"), rs.getInt("IsActive"));
         return wh;
     }
 
     public static void main(String[] args) throws SQLException {
-        List<Warehouse> warehouses = WareHouseDAO.getBranchList("DTB_Bm");
+        List<Warehouse> warehouses = WareHouseDAO.getWarehouseList("DTB_Bm");
         System.out.println(warehouses);
     }
 }

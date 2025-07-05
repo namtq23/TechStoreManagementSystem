@@ -628,12 +628,12 @@
                 <div class="sidebar">
                     <h3>Gian hàng</h3>
                     <ul class="sidebar-menu">
-                        <li><a href="so-information" class="active"><i class="fas fa-info-circle"></i> Thông tin gian hàng</a></li>
+                        <li><a href="so-information"  class="active"><i class="fas fa-info-circle"></i> Thông tin gian hàng</a></li>
                         <li><a href="so-change-password"><i class="fas fa-lock"></i> Đổi mật khẩu</a></li>
-                        <li><a href="#"><i class="fas fa-code-branch"></i> Tạo chi nhánh</a></li>
-                        <li><a href="#"><i class="fas fa-warehouse"></i> Tạo kho tổng</a></li>
-                        <li><a href="#"><i class="fas fa-shopping-cart"></i> Gói dịch vụ</a></li>
-                        <li><a href="#"><i class="fas fa-history"></i> Lịch sử mua hàng</a></li>
+                        <li><a href="so-branches"><i class="fas fa-code-branch"></i> Quản lý chi nhánh</a></li>
+                        <li><a href="so-warehouses"><i class="fas fa-warehouse"></i> Quản lý kho tổng</a></li>
+                        <li><a href="subscription"><i class="fas fa-shopping-cart"></i> Gói dịch vụ</a></li>
+                        <li><a href="subscription-logs"><i class="fas fa-history"></i> Lịch sử mua hàng</a></li>
                     </ul>
                 </div>
 
@@ -641,6 +641,7 @@
                 <div class="profile-container">
                     <div class="profile-header">
                         <div class="profile-header-left">
+                            <i class="fas fa-info-circle"></i>
                             <h2>Thông tin gian hàng</h2>
                         </div>
                     </div>

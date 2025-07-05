@@ -121,7 +121,7 @@ public class UserDAO {
 
         return shopOwner;
     }
-    
+
     public static ShopOwnerDTO getShopOwnerByEmail(String email) throws SQLException {
         ShopOwnerDTO shopOwner = null;
 
@@ -145,7 +145,6 @@ public class UserDAO {
 
         return shopOwner;
     }
-    
 
     //Phuong
     public static User getUserByEmail(String email, String dbName) throws SQLException {
@@ -411,7 +410,6 @@ public class UserDAO {
                 rs.getString("WebUrl"),
                 rs.getDate("TrialEndDate"),
                 rs.getDate("DOB")
-                
         );
         return shopOwnerDTO;
     }
@@ -766,6 +764,26 @@ public class UserDAO {
         String sql = "UPDATE Users SET IsActive = 1 WHERE IsActive = 0";
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.executeUpdate();
+        }
+    }
+
+    public static void updateUsersStatusByBranchId(int branchId, boolean branchIsActive, String dbName) throws SQLException {
+        String sql = "UPDATE Users SET IsActive = ? WHERE BranchID = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setBoolean(1, branchIsActive);
+            ps.setInt(2, branchId);
+            ps.executeUpdate();
+        }
+    }
+    
+    public static void updateUsersStatusByWHId(int whId, int whIsActive, String dbName) throws SQLException {
+        String sql = "UPDATE Users SET IsActive = ? WHERE WarehouseID = ?";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, whIsActive);
+            ps.setInt(2, whId);
             ps.executeUpdate();
         }
     }
