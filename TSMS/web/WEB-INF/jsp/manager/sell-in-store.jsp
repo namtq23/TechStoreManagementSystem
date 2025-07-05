@@ -75,7 +75,7 @@ Author     : admin
                             <a href="#" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
-                    
+
                     <a href="bm-promotions" class="nav-item">
                         <i class="fas fa-ticket"></i>
                         Khuyến mãi
@@ -107,7 +107,7 @@ Author     : admin
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="staff-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
@@ -239,14 +239,14 @@ Author     : admin
             <div class="product-panel">
                 <div class="panel-header">
                     <h2>Danh sách sản phẩm</h2>
-<!--                    <div class="product-filters">
-                        <select class="filter-select">
-                            <option>Tất cả danh mục</option>
-                            <option>Điện thoại</option>
-                            <option>Laptop</option>
-                            <option>Phụ kiện</option>
-                        </select>
-                    </div>-->
+                    <!--                    <div class="product-filters">
+                                            <select class="filter-select">
+                                                <option>Tất cả danh mục</option>
+                                                <option>Điện thoại</option>
+                                                <option>Laptop</option>
+                                                <option>Phụ kiện</option>
+                                            </select>
+                                        </div>-->
                 </div>
 
                 <div class="search-section">

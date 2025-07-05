@@ -75,7 +75,7 @@
                             <a href="#" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
-                    
+
                     <a href="bm-promotions" class="nav-item">
                         <i class="fas fa-ticket"></i>
                         Khuyến mãi
@@ -107,7 +107,7 @@
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="staff-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
@@ -228,19 +228,19 @@
                                     <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
                                     <input type="text" name="search" placeholder="Theo tên hàng" value="${param.search}"
                                        style="padding: 10px 10px 10px 35px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
-                                </div>
+                            </div>
                             <c:forEach var="catId" items="${paramValues.categories}">
                                 <input type="hidden" name="categories" value="${catId}" />
                             </c:forEach>
-                                <input type="hidden" name="inventory" value="${param.inventory}" />
-                                <input type="hidden" name="minPrice" value="${param.minPrice}" />
-                                <input type="hidden" name="maxPrice" value="${param.maxPrice}" />
-                                <input type="hidden" name="status" value="${param.status}" />
-                                <input type="hidden" name="recordsPerPage" value="${recordsPerPage}" />
-                                <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
-                            </form>
-                        </div>
+                            <input type="hidden" name="inventory" value="${param.inventory}" />
+                            <input type="hidden" name="minPrice" value="${param.minPrice}" />
+                            <input type="hidden" name="maxPrice" value="${param.maxPrice}" />
+                            <input type="hidden" name="status" value="${param.status}" />
+                            <input type="hidden" name="recordsPerPage" value="${recordsPerPage}" />
+                            <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
+                        </form>
                     </div>
+                </div>
 
                 <!-- Products Table -->
                 <div class="table-container">

@@ -127,6 +127,7 @@
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="staff-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
@@ -430,20 +431,20 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                            const toggle = document.getElementById("dropdownToggle");
-                            const menu = document.getElementById("dropdownMenu");
+                                const toggle = document.getElementById("dropdownToggle");
+                                const menu = document.getElementById("dropdownMenu");
 
-                            toggle.addEventListener("click", function (e) {
-                                e.preventDefault();
-                                menu.style.display = menu.style.display === "block" ? "none" : "block";
-                            });
+                                toggle.addEventListener("click", function (e) {
+                                    e.preventDefault();
+                                    menu.style.display = menu.style.display === "block" ? "none" : "block";
+                                });
 
-                            // Đóng dropdown nếu click ra ngoài
-                            document.addEventListener("click", function (e) {
-                                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-                                    menu.style.display = "none";
-                                }
-                            });
+                                // Đóng dropdown nếu click ra ngoài
+                                document.addEventListener("click", function (e) {
+                                    if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                                        menu.style.display = "none";
+                                    }
+                                });
         </script>
         <script>
             // Filter functions

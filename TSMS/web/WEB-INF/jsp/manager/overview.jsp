@@ -102,7 +102,7 @@
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="bm-information" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="staff-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
@@ -211,29 +211,6 @@
 
             <!-- Sidebar -->
             <aside class="sidebar">
-                <!-- Promotion Banner -->
-                <div class="promo-banner">
-                    <div class="promo-content">
-                        <h4>Nhận Hóa đơn điện tử & Chữ ký số</h4>
-                        <span class="promo-badge">MIỄN PHÍ</span>
-                        <button class="promo-btn">Kích hoạt ngay</button>
-                    </div>
-                    <div class="promo-image">
-                        <i class="fas fa-file-invoice"></i>
-                    </div>
-                </div>
-
-                <!-- QR Code Section -->
-                <div class="qr-section">
-                    <div class="qr-content">
-                        <h4>KiotViet ra mắt kênh CSKH Zalo Official Account</h4>
-                        <button class="qr-btn">QUÉT TẠI NGAY</button>
-                    </div>
-                    <div class="qr-code">
-                        <i class="fas fa-qrcode"></i>
-                    </div>
-                </div>
-
                 <!-- THÔNG BÁO -->
                 <div class="notifications" style="padding: 16px; background: #fff; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);">
                     <h4 style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 12px; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">THÔNG BÁO</h4>

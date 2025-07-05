@@ -22,8 +22,8 @@ import util.Validate;
  *
  * @author admin
  */
-@WebServlet(name = "BMUpdateInformationController", urlPatterns = {"/bm-information-update"})
-public class BMUpdateInformationController extends HttpServlet {
+@WebServlet(name = "StaffUpdateInformationController", urlPatterns = {"/staff-information-update"})
+public class StaffUpdateInformationController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -42,7 +42,7 @@ public class BMUpdateInformationController extends HttpServlet {
             }
 
             int roleId = Integer.parseInt(roleIdObj.toString());
-            if (roleId != 1) {
+            if (roleId != 1 && roleId != 2 && roleId != 3) {
                 response.sendRedirect("login");
                 return;
             }
@@ -67,13 +67,13 @@ public class BMUpdateInformationController extends HttpServlet {
             String identificationID = request.getParameter("identificationID");
             String address = request.getParameter("address");
             UserDAO.updateUser(userId, fullName, email, phone, gender, address, dob, identificationID, dbName);
-            response.sendRedirect("bm-information?id=" + userId + "&update=success");
+            response.sendRedirect("staff-information?id=" + userId + "&update=success");
         } catch (IOException | NumberFormatException ex) {
-            int userId = Integer.parseInt(request.getParameter("userId"));
-            response.sendRedirect("bm-information?id=" + userId + "&update=error");
+            int userId = Integer.parseInt(request.getParameter("userId"));  
+            response.sendRedirect("staff-information?id=" + userId + "&update=error");
             System.out.println(ex);
         } catch (SQLException ex) {
-            Logger.getLogger(BMUpdateInformationController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(StaffUpdateInformationController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

@@ -48,11 +48,11 @@
                 </nav>
                 <div class="header-right">
                     <div class="user-dropdown">
-                        <a href="#" class="user-icon gradient" id="dropdownToggle">
+                        <a href="" class="user-icon gradient" id="dropdownToggle">
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="staff-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      

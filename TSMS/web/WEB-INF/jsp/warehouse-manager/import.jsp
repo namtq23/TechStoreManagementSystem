@@ -60,11 +60,11 @@
 
                 <div class="header-right">
                     <div class="user-dropdown">
-                        <a href="#" class="user-icon gradient" id="dropdownToggle">
+                        <a href="" class="user-icon gradient" id="dropdownToggle">
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="staff-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
@@ -167,71 +167,71 @@
                 <!-- Import Orders Table -->
                 <div class="table-container">
                     <table class="invoices-table">
-                            <thead>
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã đơn nhập</th>
+                                <th>Nhà cung cấp</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th>Người tạo</th>
+                                <th>Tổng tiền</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="req" items="${importRequests}" varStatus="loop">
                                 <tr>
-                                    <th>STT</th>
-                                    <th>Mã đơn nhập</th>
-                                    <th>Nhà cung cấp</th>
-                                    <th>Trạng thái</th>
-                                    <th>Ngày tạo</th>
-                                    <th>Người tạo</th>
-                                    <th>Tổng tiền</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach var="req" items="${importRequests}" varStatus="loop">
-                                    <tr>
-                                        <td>${loop.index + 1}</td>
-                                        <td>${req.movementID}</td>
-                                        <td>${req.fromSupplierName}</td>
-                                        <td>
+                                    <td>${loop.index + 1}</td>
+                                    <td>${req.movementID}</td>
+                                    <td>${req.fromSupplierName}</td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${req.responseStatus eq 'pending'}">
+                                                <span class="status-badge pending">Chờ xử lý</span>
+                                            </c:when>
+                                            <c:when test="${req.responseStatus eq 'processing'}">
+                                                <span class="status-badge processing">Đang xử lý</span>
+                                            </c:when>
+                                            <c:when test="${req.responseStatus eq 'completed'}">
+                                                <span class="status-badge completed">Hoàn thành</span>
+                                            </c:when>
+                                            <c:when test="${req.responseStatus eq 'cancelled'}">
+                                                <span class="status-badge cancelled">Đã huỷ</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="status-badge unknown">Không rõ</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>${req.formattedDate}</td>
+                                    <td>${req.createdByName}</td>
+                                    <td>${req.formattedTotalAmount}</td>
+                                    <td>
+                                        <div class="action-buttons">
                                             <c:choose>
                                                 <c:when test="${req.responseStatus eq 'pending'}">
-                                                    <span class="status-badge pending">Chờ xử lý</span>
+                                                    <button class="btn-action edit" onclick="editOrder('${req.movementID}')">Xử lý</button>
                                                 </c:when>
                                                 <c:when test="${req.responseStatus eq 'processing'}">
-                                                    <span class="status-badge processing">Đang xử lý</span>
+                                                    <button class="btn-action process" onclick="editOrder('${req.movementID}')">Tiếp tục nhập</button>
                                                 </c:when>
                                                 <c:when test="${req.responseStatus eq 'completed'}">
-                                                    <span class="status-badge completed">Hoàn thành</span>
+                                                    <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
                                                 </c:when>
                                                 <c:when test="${req.responseStatus eq 'cancelled'}">
-                                                    <span class="status-badge cancelled">Đã huỷ</span>
+                                                    <button class="btn-action cancelled" disabled>Đã huỷ</button>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <span class="status-badge unknown">Không rõ</span>
+                                                    <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
                                                 </c:otherwise>
                                             </c:choose>
-                                        </td>
-                                        <td>${req.formattedDate}</td>
-                                        <td>${req.createdByName}</td>
-                                        <td>${req.formattedTotalAmount}</td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <c:choose>
-                                                    <c:when test="${req.responseStatus eq 'pending'}">
-                                                        <button class="btn-action edit" onclick="editOrder('${req.movementID}')">Xử lý</button>
-                                                    </c:when>
-                                                    <c:when test="${req.responseStatus eq 'processing'}">
-                                                        <button class="btn-action process" onclick="editOrder('${req.movementID}')">Tiếp tục nhập</button>
-                                                    </c:when>
-                                                    <c:when test="${req.responseStatus eq 'completed'}">
-                                                        <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
-                                                    </c:when>
-                                                    <c:when test="${req.responseStatus eq 'cancelled'}">
-                                                        <button class="btn-action cancelled" disabled>Đã huỷ</button>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </tbody>
-                        </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
                 </div>
 
 
@@ -313,7 +313,7 @@
             }
 
             // Export to Excel function
-           
+
 
             // Action functions
             function viewOrder(orderId) {

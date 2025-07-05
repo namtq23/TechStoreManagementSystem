@@ -74,7 +74,7 @@
                             <a href="#" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
-                    
+
                     <a href="bm-promotions" class="nav-item">
                         <i class="fas fa-ticket"></i>
                         Khuyến mãi
@@ -106,7 +106,7 @@
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="profile" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="staff-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      

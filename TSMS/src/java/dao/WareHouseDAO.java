@@ -116,6 +116,38 @@ public class WareHouseDAO {
         return wh;
     }
 
+    public static Warehouse getWarehouseById(String WarehouseId, String dbName) throws SQLException {
+        String sql = """
+        SELECT 
+            WarehouseID,
+            WarehouseName,
+            Address,
+            Phone,
+            IsActive
+        FROM Warehouses 
+        WHERE WarehouseID = ? 
+          AND IsActive = 1
+    """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, WarehouseId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Warehouse wh = new Warehouse();
+                    wh.setWareHouseId(rs.getInt("WarehouseID"));
+                    wh.setWareHouseName(rs.getString("WarehouseName"));
+                    wh.setWareHouseAddress(rs.getString("Address"));
+                    wh.setPhone(rs.getString("Phone"));
+                    wh.setIsActive(rs.getInt("IsActive"));
+                    return wh;
+                }
+            }
+        }
+        return null;
+    }
+
     public static void main(String[] args) throws SQLException {
         List<Warehouse> warehouses = WareHouseDAO.getWarehouseList("DTB_Bm");
         System.out.println(warehouses);
