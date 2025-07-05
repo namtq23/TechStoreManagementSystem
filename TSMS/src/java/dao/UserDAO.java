@@ -777,7 +777,7 @@ public class UserDAO {
             ps.executeUpdate();
         }
     }
-    
+
     public static void updateUsersStatusByWHId(int whId, int whIsActive, String dbName) throws SQLException {
         String sql = "UPDATE Users SET IsActive = ? WHERE WarehouseID = ?";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -785,6 +785,27 @@ public class UserDAO {
             ps.setInt(1, whIsActive);
             ps.setInt(2, whId);
             ps.executeUpdate();
+        }
+    }
+
+    public static boolean updateUser(int userId, String fullName, String email, String phone,
+            String gender, String address, Date dob, String identificationID, String dbName) throws SQLException {
+        String sql = "UPDATE Users SET FullName = ?, Email = ?, Phone = ?, Gender = ?, "
+                + "Address = ?, DOB = ?, IdentificationID = ? WHERE UserID = ?";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, fullName);
+            stmt.setString(2, email);
+            stmt.setString(3, phone);
+            stmt.setString(4, gender);
+            stmt.setString(5, address);
+            stmt.setObject(6, dob);
+            stmt.setString(7, identificationID);
+            stmt.setInt(8, userId);
+
+            int affectedRows = stmt.executeUpdate();
+            return affectedRows > 0;
         }
     }
 

@@ -719,6 +719,22 @@
                     });
                 });
             </script>
+            <script>
+                const toggle = document.getElementById("dropdownToggle");
+                const menu = document.getElementById("dropdownMenu");
+
+                toggle.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    menu.style.display = menu.style.display === "block" ? "none" : "block";
+                });
+
+                // Đóng dropdown nếu click ra ngoài
+                document.addEventListener("click", function (e) {
+                    if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                        menu.style.display = "none";
+                    }
+                });
+            </script>
         </body>
     </html>
 
