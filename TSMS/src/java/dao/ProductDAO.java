@@ -958,19 +958,20 @@ public class ProductDAO {
 
     //Phuong
     public static boolean markSerialAsSold(String dbName, int productDetailId, int orderId, int branchId) {
-        String query = "WITH RandomSerial AS (\n"
-                + "    SELECT TOP (1) ProductDetailID, SerialNumber\n"
-                + "    FROM ProductDetailSerialNumber\n"
-                + "    WHERE ProductDetailID = ? AND Status = 1 AND BranchID = ?\n"
-                + "    ORDER BY NEWID()\n"
-                + ")\n"
-                + "UPDATE p\n"
-                + "SET Status = 0, OrderID = ?\n"
-                + "FROM ProductDetailSerialNumber p\n"
-                + "INNER JOIN RandomSerial r \n"
-                + "    ON p.ProductDetailID = r.ProductDetailID \n"
-                + "    AND p.SerialNumber = r.SerialNumber\n"
-                + "WHERE p.Status = 1 AND p.BranchID = ?";
+        String query = """
+                       WITH RandomSerial AS (
+                           SELECT TOP (1) ProductDetailID, SerialNumber
+                           FROM ProductDetailSerialNumber
+                           WHERE ProductDetailID = ? AND Status = 1 AND BranchID = ?
+                           ORDER BY NEWID()
+                       )
+                       UPDATE p
+                       SET Status = 0, OrderID = ?
+                       FROM ProductDetailSerialNumber p
+                       INNER JOIN RandomSerial r 
+                           ON p.ProductDetailID = r.ProductDetailID 
+                           AND p.SerialNumber = r.SerialNumber
+                       WHERE p.Status = 1 AND p.BranchID = ?""";
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
 

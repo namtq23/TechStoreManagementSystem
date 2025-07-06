@@ -15,15 +15,62 @@
         <link rel="stylesheet" href="css/header.css">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <style>
-            /* Professional enhancements */
-            .filter-section {
-                border: 1px solid #e8ecef;
+            /* Custom styles for date range inputs */
+            .date-range-container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .date-input-wrapper {
+                flex: 1;
+                position: relative;
+            }
+
+            .date-input-wrapper label {
+                display: block;
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 5px;
+                font-weight: 500;
+            }
+
+            .date-input-wrapper input {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
                 transition: all 0.3s ease;
             }
 
-            .filter-section:hover {
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                transform: translateY(-2px);
+            .date-input-wrapper input:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+                outline: none;
+            }
+
+            /* Dropdown styles for branch filter */
+            .branch-dropdown {
+                position: relative;
+                width: 100%;
+            }
+
+            .branch-select {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
+                background: white;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .branch-select:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+                outline: none;
             }
 
             /* Loading state for date input */
@@ -95,9 +142,7 @@
                 align-items: center;
                 gap: 12px;
                 background: white;
-                padding: 8px;
                 border-radius: 12px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
                 border: 1px solid #e8ecef;
             }
 
@@ -170,8 +215,6 @@
                 text-transform: none;
                 transition: all 0.3s ease;
             }
-
-
 
             /* Search Results Info */
             .search-results-info {
@@ -254,6 +297,11 @@
                     gap: 8px;
                     align-items: flex-start;
                 }
+
+                .date-range-container {
+                    flex-direction: column;
+                    gap: 8px;
+                }
             }
 
             /* Enhanced pagination info for search results */
@@ -300,14 +348,21 @@
             }
             /* Bố cục nút Chi tiết và Xoá đẹp hơn */
             .action-buttons {
-                display: inline;
-                gap: 100px; /* Khoảng cách giữa nút */
+                display: flex;
+                gap: 8px; /* Khoảng cách giữa nút */
             }
 
             .action-buttons .btn {
-                min-width: 90px; /* Đảm bảo độ rộng bằng nhau */
                 text-align: center;
                 justify-content: center;
+            }
+            .btn-detail{
+                background-color: #2196F3;
+                color: white;
+            }
+
+            .btn-detail:hover{
+                background-color: #1976D2;
             }
 
         </style>            
@@ -408,156 +463,46 @@
                 <input type="hidden" name="page" value="1">
                 <!-- Sidebar -->
                 <aside class="sidebar">
-                    <!-- Branch Filter - FIXED -->
+                    <!-- Branch Filter - UPDATED TO DROPDOWN -->
                     <div class="filter-section">
                         <div class="filter-header">
                             <h3>Chi nhánh</h3>
-                            <i class="fas fa-question-circle"></i>
-                            <i class="fas fa-chevron-up"></i>
                         </div>
                         <div class="filter-content">
-                            <div class="checkbox-group">
-                                <c:forEach var="branch" items="${branchesList}">
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" name="branchIDs" value="${branch.branchId}"
-                                               <c:forEach var="selectedBranch" items="${selectedBranches}">
-                                                   <c:if test="${selectedBranch == branch.branchId}">checked</c:if>
-                                               </c:forEach>>
-                                        <span class="checkbox-mark"></span>
-                                        ${branch.branchName}
-                                    </label>
-                                </c:forEach>
+                            <div class="branch-dropdown">
+                                <select name="branchID" class="branch-select" id="branchSelect">
+                                    <option value="">Tất cả chi nhánh</option>
+                                    <c:forEach var="branch" items="${branchesList}">
+                                        <option value="${branch.branchId}" 
+                                                <c:if test="${selectedBranch == branch.branchId}">selected</c:if>>
+                                            ${branch.branchName}
+                                        </option>
+                                    </c:forEach>
+                                </select>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Time Filter -->
                     <div class="filter-section time-filter-section">
                         <div class="filter-header">
-                            <h3><i class="fas fa-clock"></i> Thời gian</h3>
-                            <i class="fas fa-chevron-up"></i>
+                            <h3>Thời gian</h3>
                         </div>
                         <div class="filter-content">
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="this-month" 
-                                       ${empty param.timeFilter || param.timeFilter == 'this-month' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-calendar-alt"></i> Tháng này</span>
-                            </label>
-
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="this-week"
-                                       ${param.timeFilter == 'this-week' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-calendar-week"></i> Tuần này</span>
-                            </label>
-
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="today"
-                                       ${param.timeFilter == 'today' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-calendar-day"></i> Ngày hôm nay</span>
-                            </label>
-
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="custom"
-                                       ${param.timeFilter == 'custom' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-calendar-plus"></i> Lựa chọn khác</span>
-                            </label>
-
-                            <div class="custom-date-container ${param.timeFilter == 'custom' ? 'show' : ''}" id="customDateContainer">
-                                <label class="date-label">
-                                    <i class="fas fa-calendar-check"></i> Chọn ngày
-                                </label>
-                                <input type="date" name="customDate" value="${param.customDate}"
-                                       class="custom-date-input" id="customDateInput"
-                                       placeholder="Chọn ngày...">
-                            </div>
-                        </div>
-                    </div>
-                    <!--                                       <div class="filter-section time-filter-section">
-                                            <div class="filter-header">
-                                                <h3><i class="fas fa-clock"></i> Thời gian</h3>
-                                                <i class="fas fa-chevron-up"></i>
-                                            </div>
-                                            <div class="filter-content">
-                                                 ADDED: All time filter option 
-                                                <label class="radio-item">
-                                                    <input type="radio" name="timeFilter" value="all"
-                    ${param.timeFilter == 'all' ? 'checked' : ''}>
-             <span class="radio-mark"></span>
-             <span><i class="fas fa-globe"></i> Tất cả</span>
-         </label>
-
-         <label class="radio-item">
-             <input type="radio" name="timeFilter" value="this-month" 
-                    ${empty param.timeFilter || param.timeFilter == 'this-month' ? 'checked' : ''}>
-             <span class="radio-mark"></span>
-             <span><i class="fas fa-calendar-alt"></i> Tháng này</span>
-         </label>
-
-         <label class="radio-item">
-             <input type="radio" name="timeFilter" value="this-week"
-                    ${param.timeFilter == 'this-week' ? 'checked' : ''}>
-             <span class="radio-mark"></span>
-             <span><i class="fas fa-calendar-week"></i> Tuần này</span>
-         </label>
-
-         <label class="radio-item">
-             <input type="radio" name="timeFilter" value="today"
-                    ${param.timeFilter == 'today' ? 'checked' : ''}>
-             <span class="radio-mark"></span>
-             <span><i class="fas fa-calendar-day"></i> Ngày hôm nay</span>
-         </label>
-
-         <label class="radio-item">
-             <input type="radio" name="timeFilter" value="custom"
-                    ${param.timeFilter == 'custom' ? 'checked' : ''}>
-             <span class="radio-mark"></span>
-             <span><i class="fas fa-calendar-plus"></i> Lựa chọn khác</span>
-         </label>
-
-          MODIFIED: Changed custom date to include start and end date 
-         <div class="custom-date-container ${param.timeFilter == 'custom' ? 'show' : ''}" id="customDateContainer">
-             <label class="date-label">
-                 <i class="fas fa-calendar-check"></i> Chọn khoảng thời gian
-             </label>
-             <div class="date-input-group">
-                 <input type="date" name="startDate" value="${param.startDate}"
-                        class="custom-date-input" id="startDateInput"
-                        placeholder="Từ ngày...">
-                 <input type="date" name="endDate" value="${param.endDate}"
-                        class="custom-date-input" id="endDateInput"
-                        placeholder="Đến ngày...">
-             </div>
-         </div>
-     </div>
- </div>-->
-
-                    <!-- Creator Filter -->
-                    <div class="filter-section">
-                        <div class="filter-header">
-                            <h3>Người tạo</h3>
-                            <i class="fas fa-chevron-up"></i>
-                        </div>
-                        <div class="filter-content">
-                            <div class="checkbox-group">
-                                <c:forEach var="creator" items="${creatorsList}">
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" name="creatorIDs" value="${creator.userID}"
-                                               <c:forEach var="selectedCreator" items="${selectedCreators}">
-                                                   <c:if test="${selectedCreator == creator.userID}">checked</c:if>
-                                               </c:forEach>>
-                                        <span class="checkbox-mark"></span>
-                                        ${creator.fullName}
-                                    </label>
-                                </c:forEach>
+                            <div class="date-range-container">
+                                <div class="date-input-wrapper">
+                                    <label for="startDate">Từ ngày:</label>
+                                    <input type="date" name="startDate" id="startDate" 
+                                           value="${param.startDate}" class="custom-date-input">
+                                </div>
+                                <div class="date-input-wrapper">
+                                    <label for="endDate">Đến ngày:</label>
+                                    <input type="date" name="endDate" id="endDate" 
+                                           value="${param.endDate}" class="custom-date-input">
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Price Range Filter -->
                     <div class="filter-section">
                         <div class="filter-header">
                             <h3>Khoảng giá</h3>
@@ -592,29 +537,20 @@
                     <h1>Trang đơn hàng</h1>
                     <div class="header-actions">
                         <form class="search-form" method="get" action="so-orders">
-                            <!-- Hidden inputs to maintain filter state -->
-                            <c:if test="${not empty selectedBranches}">
-                                <c:forEach var="branchID" items="${selectedBranches}">
-                                    <input type="hidden" name="branchIDs" value="${branchID}">
-                                </c:forEach>
+                            <c:if test="${not empty selectedBranch}">
+                                <input type="hidden" name="branchID" value="${selectedBranch}">
                             </c:if>
                             <c:if test="${not empty selectedCreators}">
                                 <c:forEach var="creatorID" items="${selectedCreators}">
                                     <input type="hidden" name="creatorIDs" value="${creatorID}">
                                 </c:forEach>
                             </c:if>
-                            <c:if test="${not empty timeFilter}">
-                                <input type="hidden" name="timeFilter" value="${timeFilter}">
+                            <c:if test="${not empty param.startDate}">
+                                <input type="hidden" name="startDate" value="${param.startDate}">
                             </c:if>
-                            <c:if test="${not empty customDate}">
-                                <input type="hidden" name="customDate" value="${customDate}">
+                            <c:if test="${not empty param.endDate}">
+                                <input type="hidden" name="endDate" value="${param.endDate}">   
                             </c:if>
-                            <%--<c:if test="${not empty startDate}">
-                            <input type="hidden" name="startDate" value="${startDate}">
-                        </c:if>
-                        <c:if test="${not empty endDate}">
-                            <input type="hidden" name="endDate" value="${endDate}">
-                        </c:if>--%>
                             <c:if test="${not empty minPrice}">
                                 <input type="hidden" name="minPrice" value="${minPrice}">
                             </c:if>
@@ -633,15 +569,7 @@
                                     </a>
                                 </c:if>
                             </div>
-                            <button type="submit" class="btn-search">
-                                <i class="fas fa-search"></i>
-                                <span>Tìm kiếm</span>
-                            </button>
                         </form>
-                        <button class="btn btn-menu">
-                            <i class="fas fa-bars"></i>
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
                     </div>
                 </div>
 
@@ -651,14 +579,13 @@
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Mã đơn hàng</th>
-                                <th>Tên sản phẩm</th>
+                                <th>Mã</th>
                                 <th>Chi nhánh</th>
                                 <th>Khách hàng</th>
                                 <th>Nhân viên tạo</th>
                                 <th>Trạng thái đơn</th>
                                 <th>Tổng tiền</th>
-                                <th style="justify-content: center; text-align: center">Thao tác</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -679,52 +606,23 @@
                             <tr>
                                 <td> </td>
                                 <td><strong>#<%=order.getOrderID()%></strong></td>
-                                <td style="max-width: 250px; word-wrap: break-word;">
-                                    <div class="product-details">
-                                        <%
-                                            String productDetails = order.getProductName();
-                                            if (productDetails != null && !productDetails.trim().isEmpty() && !productDetails.equals("Không có sản phẩm")) {
-                                                String[] products = productDetails.split(";");
-                                                for (String product : products) {
-                                                    if (product.trim().length() > 0) {
-                                        %>
-                                        <div class="product-item">
-                                            <i class="fas fa-box"></i> <%=product.trim()%>
-                                        </div>
-                                        <%
-                                                    }
-                                                }
-                                            } else {
-                                        %>
-                                        <div class="product-item no-product">
-                                            <i class="fas fa-exclamation-triangle"></i> Không có sản phẩm
-                                        </div>
-                                        <%
-                                            }
-                                        %>
-                                    </div>
-                                </td>
                                 <td>
                                     <div class="branch-info">
-                                        <i class="fas fa-store"></i>
                                         <%=order.getBranchName() != null ? order.getBranchName() : "N/A"%>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="customer-info">
-                                        <i class="fas fa-user"></i>
                                         <%=order.getCustomerName() != null ? order.getCustomerName() : "N/A"%>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="creator-info">
-                                        <i class="fas fa-user-tie"></i>
                                         <%=order.getCreatedByName() != null ? order.getCreatedByName() : "N/A"%>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="date-info">
-                                        <i class="fas fa-calendar"></i>
                                         <%=order.getCreatedAt() != null ? sdf.format(order.getCreatedAt()) : "N/A"%>
                                     </div>
                                 </td>
@@ -738,19 +636,18 @@
                                         <form action="so-orders" method="get" style="display:inline;">
                                             <input type="hidden" name="action" value="view"/>
                                             <input type="hidden" name="orderID" value="<%=order.getOrderID()%>"/>
-                                            <button type="submit" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-eye"></i> Chi tiết
+                                            <button type="submit" class="btn btn-primary btn-detail">
+                                                <i class="fas fa-info-circle"></i>
                                             </button>
                                         </form>
                                         <form action="so-orders" method="post" style="display:inline;" 
                                               onsubmit="return confirm('Bạn có chắc chắn muốn xoá đơn hàng #<%=order.getOrderID()%> không?');">
                                             <input type="hidden" name="action" value="delete"/>
                                             <input type="hidden" name="orderID" value="<%=order.getOrderID()%>"/>
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="fas fa-trash"></i> Xoá
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </form>
-
                                     </div>
                                 </td>
                             </tr>
@@ -788,48 +685,43 @@
                     </div>
                     <div class="pagination">
                         <%
-                            // Build filter parameters for pagination links including search
                             StringBuilder filterParams = new StringBuilder();
-                            String[] selectedBranches = (String[]) request.getAttribute("selectedBranches");
+
+                            String selectedBranch = (String) request.getAttribute("selectedBranch");
                             String[] selectedCreators = (String[]) request.getAttribute("selectedCreators");
-                            String timeFilter = (String) request.getAttribute("timeFilter");
-                            String customDate = (String) request.getAttribute("customDate");
-                            //String startDate = (String) request.getAttribute("startDate"); // MODIFIED: Changed from customDate to startDate
-                            //String endDate = (String) request.getAttribute("endDate");
+                            String startDate = (String) request.getAttribute("startDate");
+                            String endDate = (String) request.getAttribute("endDate");
                             Double minPrice = (Double) request.getAttribute("minPrice");
                             Double maxPrice = (Double) request.getAttribute("maxPrice");
                             String searchKeyword = (String) request.getAttribute("searchKeyword");
-            
-                            if (selectedBranches != null) {
-                                for (String branchID : selectedBranches) {
-                                    filterParams.append("&branchIDs=").append(branchID);
-                                }
+
+                            if (selectedBranch != null && !selectedBranch.trim().isEmpty()) {
+                                filterParams.append("&branchID=").append(selectedBranch);
                             }
+
                             if (selectedCreators != null) {
                                 for (String creatorID : selectedCreators) {
                                     filterParams.append("&creatorIDs=").append(creatorID);
                                 }
                             }
-                            if (timeFilter != null && !timeFilter.trim().isEmpty()) {
-                                filterParams.append("&timeFilter=").append(timeFilter);
+
+                            if (startDate != null && !startDate.trim().isEmpty()) {
+                                filterParams.append("&startDate=").append(startDate);
                             }
-                            if (customDate != null && !customDate.trim().isEmpty()) {
-                                filterParams.append("&customDate=").append(customDate);
+                            if (endDate != null && !endDate.trim().isEmpty()) {
+                                filterParams.append("&endDate=").append(endDate);
                             }
-//                            if (startDate != null && !startDate.trim().isEmpty()) { // MODIFIED: Changed from customDate to startDate
-//                                filterParams.append("&startDate=").append(startDate);
-//                            }
-//                            if (endDate != null && !endDate.trim().isEmpty()) { // ADDED: Added endDate
-//                                filterParams.append("&endDate=").append(endDate);
-//                            }
+
                             if (minPrice != null) {
                                 filterParams.append("&minPrice=").append(minPrice);
                             }
+
                             if (maxPrice != null) {
                                 filterParams.append("&maxPrice=").append(maxPrice);
                             }
+
                             if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-                                filterParams.append("&search=").append(java.net.URLEncoder.encode(searchKeyword, "UTF-8"));
+                                filterParams.append("&search=").append(searchKeyword);
                             }
             
                             String filterParamsStr = filterParams.toString();
@@ -855,93 +747,6 @@
                 </div>
             </main>
         </div>
-
-        <script>
-            document.getElementById('selectAll').addEventListener('change', function () {
-                const checkboxes = document.querySelectorAll('input[name="selectedOrders"]');
-                checkboxes.forEach(cb => cb.checked = this.checked);
-            });
-
-            // Show/hide custom date input based on radio selection
-            document.querySelectorAll('input[name="timeFilter"]').forEach(radio => {
-                radio.addEventListener('change', function () {
-                    const customDateInput = document.getElementById('customDateInput');
-                    if (this.value === 'custom') {
-                        customDateInput.style.display = 'block';
-                    } else {
-                        customDateInput.style.display = 'none';
-                    }
-                });
-            });
-            // Enhanced JavaScript for smooth animations
-            document.addEventListener('DOMContentLoaded', function () {
-                const radioButtons = document.querySelectorAll('input[name="timeFilter"]');
-                const customDateContainer = document.getElementById('customDateContainer');
-                const customDateInput = document.getElementById('customDateInput');
-
-                radioButtons.forEach(radio => {
-                    radio.addEventListener('change', function () {
-                        if (this.value === 'custom') {
-                            customDateContainer.classList.add('show');
-                            setTimeout(() => {
-                                customDateInput.focus();
-                            }, 300);
-                        } else {
-                            customDateContainer.classList.remove('show');
-                        }
-                    });
-                });
-
-                // Add ripple effect to radio items
-                const radioItems = document.querySelectorAll('.radio-item');
-                radioItems.forEach(item => {
-                    item.addEventListener('click', function (e) {
-                        const ripple = document.createElement('span');
-                        const rect = this.getBoundingClientRect();
-                        const size = Math.max(rect.width, rect.height);
-                        const x = e.clientX - rect.left - size / 2;
-                        const y = e.clientY - rect.top - size / 2;
-
-                        ripple.style.cssText = `
-                position: absolute;
-                width: ${size}px;
-                height: ${size}px;
-                left: ${x}px;
-                top: ${y}px;
-                background: rgba(102, 126, 234, 0.3);
-                border-radius: 50%;
-                transform: scale(0);
-                animation: ripple 0.6s ease-out;
-                pointer-events: none;
-                z-index: 1;
-            `;
-
-                        this.style.position = 'relative';
-                        this.appendChild(ripple);
-
-                        setTimeout(() => {
-                            ripple.remove();
-                        }, 600);
-                    });
-                });
-
-                // Set today as max date for custom input
-                const today = new Date().toISOString().split('T')[0];
-                customDateInput.setAttribute('max', today);
-            });
-
-
-            const style = document.createElement('style');
-            style.textContent = `
-    @keyframes ripple {
-        to {
-            transform: scale(2);
-            opacity: 0;
-        }
-    }
-`;
-            document.head.appendChild(style);
-        </script>
         <script>
             const toggle = document.getElementById("dropdownToggle");
             const menu = document.getElementById("dropdownMenu");

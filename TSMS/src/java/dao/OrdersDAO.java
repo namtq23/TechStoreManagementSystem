@@ -21,120 +21,122 @@ import util.DBUtil;
 public class OrdersDAO {
 
     public List<OrdersDTO> getFilteredOrdersListByPage(String dbName, int page, int pageSize,
-            String[] branchIDs, String[] creatorIDs, String startDate, String endDate,
+            String branchID, String[] creatorIDs, String startDate, String endDate,
             Double minPrice, Double maxPrice, String searchKeyword) {
 
         List<OrdersDTO> orders = new ArrayList<>();
 
-        // Sửa lại SQL query để đảm bảo lấy hết tất cả đơn hàng
         StringBuilder query = new StringBuilder("""
-        SELECT 
-            o.OrderID,
-            o.BranchID,
-            o.CreatedBy,
-            o.OrderStatus,
-            o.CreatedAt,
-            o.CustomerID,
-            o.PaymentMethod,
-            o.Notes,
-            o.GrandTotal,
-            o.CustomerPay,
-            o.Change,
-            b.BranchName,
-            c.FullName AS CustomerName,
-            u.FullName AS CreatedByName,
-            COALESCE(
-                STRING_AGG(
-                    CASE 
-                        WHEN p.ProductName IS NOT NULL 
-                        THEN CONCAT(od.Quantity, ' ', p.ProductName)
-                        ELSE NULL
-                    END, 
-                    '; '
-                ), 
-                'Không có sản phẩm'
-            ) AS ProductDetails
-        FROM Orders o
-        INNER JOIN Branches b ON o.BranchID = b.BranchID
-        INNER JOIN Customers c ON o.CustomerID = c.CustomerID
-        INNER JOIN Users u ON o.CreatedBy = u.UserID
-        LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID
-        LEFT JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID
-        LEFT JOIN Products p ON pd.ProductID = p.ProductID
-        WHERE 1=1
-        """);
+                SELECT 
+                    o.OrderID,
+                    o.BranchID,
+                    o.CreatedBy,
+                    o.OrderStatus,
+                    o.CreatedAt,
+                    o.CustomerID,
+                    o.PaymentMethod,
+                    o.Notes,
+                    o.GrandTotal,
+                    o.CustomerPay,
+                    o.Change,
+                    b.BranchName,
+                    c.FullName AS CustomerName,
+                    u.FullName AS CreatedByName,
+                    COALESCE(
+                        STRING_AGG(
+                            CASE 
+                                WHEN p.ProductName IS NOT NULL 
+                                THEN CONCAT(od.Quantity, ' ', p.ProductName)
+                                ELSE NULL
+                            END, 
+                            '; '
+                        ), 
+                        'Không có sản phẩm'
+                    ) AS ProductDetails
+                FROM Orders o
+                INNER JOIN Branches b ON o.BranchID = b.BranchID
+                INNER JOIN Customers c ON o.CustomerID = c.CustomerID
+                INNER JOIN Users u ON o.CreatedBy = u.UserID
+                LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID
+                LEFT JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID
+                LEFT JOIN Products p ON pd.ProductID = p.ProductID
+                WHERE 1=1
+            """);
 
         List<Object> parameters = new ArrayList<>();
 
-        // Branch filter
-        if (branchIDs != null && branchIDs.length > 0) {
-            query.append(" AND o.BranchID IN (");
-            for (int i = 0; i < branchIDs.length; i++) {
-                query.append("?");
-                if (i < branchIDs.length - 1) {
-                    query.append(",");
-                }
-                parameters.add(Integer.parseInt(branchIDs[i]));
-            }
-            query.append(")");
+        // Filter by single branch ID
+        if (branchID != null && !branchID.trim().isEmpty()) {
+            query.append(" AND o.BranchID = ?");
+            parameters.add(Integer.parseInt(branchID));
         }
 
-        // Creator filter
+        // Filter by multiple creator IDs (giữ nguyên vì có thể cần multiple creators)
         if (creatorIDs != null && creatorIDs.length > 0) {
             query.append(" AND o.CreatedBy IN (");
-            for (int i = 0; i < creatorIDs.length; i++) {
-                query.append("?");
-                if (i < creatorIDs.length - 1) {
-                    query.append(",");
-                }
-                parameters.add(Integer.parseInt(creatorIDs[i]));
-            }
+            query.append("?,".repeat(creatorIDs.length));
+            query.setLength(query.length() - 1);
             query.append(")");
+            for (String id : creatorIDs) {
+                parameters.add(Integer.parseInt(id));
+            }
         }
 
-        // Date filter
         if (startDate != null && !startDate.trim().isEmpty()) {
             query.append(" AND CAST(o.CreatedAt AS DATE) >= ?");
             parameters.add(startDate);
         }
+
         if (endDate != null && !endDate.trim().isEmpty()) {
             query.append(" AND CAST(o.CreatedAt AS DATE) <= ?");
             parameters.add(endDate);
         }
 
-        // Price range filter
         if (minPrice != null) {
             query.append(" AND o.GrandTotal >= ?");
             parameters.add(minPrice);
         }
+
         if (maxPrice != null) {
             query.append(" AND o.GrandTotal <= ?");
             parameters.add(maxPrice);
         }
 
-        // Search filter - Sửa lại để tìm kiếm chính xác hơn
         if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
             query.append(" AND (");
             query.append("c.FullName LIKE ? OR ");
             query.append("CAST(o.OrderID AS NVARCHAR) LIKE ? OR ");
-            query.append("EXISTS (");
-            query.append("    SELECT 1 FROM OrderDetails od2 ");
-            query.append("    INNER JOIN ProductDetails pd2 ON od2.ProductDetailID = pd2.ProductDetailID ");
-            query.append("    INNER JOIN Products p2 ON pd2.ProductID = p2.ProductID ");
-            query.append("    WHERE od2.OrderID = o.OrderID AND p2.ProductName LIKE ?");
+            query.append("EXISTS (SELECT 1 FROM OrderDetails od2 ");
+            query.append("JOIN ProductDetails pd2 ON od2.ProductDetailID = pd2.ProductDetailID ");
+            query.append("JOIN Products p2 ON pd2.ProductID = p2.ProductID ");
+            query.append("WHERE od2.OrderID = o.OrderID AND p2.ProductName LIKE ?)");
             query.append(")");
-            query.append(")");
-
-            String searchPattern = "%" + searchKeyword + "%";
-            parameters.add(searchPattern); // Customer name
-            parameters.add(searchPattern); // Order ID
-            parameters.add(searchPattern); // Product name
+            String pattern = "%" + searchKeyword + "%";
+            parameters.add(pattern);
+            parameters.add(pattern);
+            parameters.add(pattern);
         }
 
-        query.append(" GROUP BY o.OrderID, o.BranchID, o.CreatedBy, o.OrderStatus, o.CreatedAt, o.CustomerID, ");
-        query.append("o.PaymentMethod, o.Notes, o.GrandTotal, o.CustomerPay, o.Change, b.BranchName, c.FullName, u.FullName");
-        query.append(" ORDER BY o.CreatedAt DESC");
-        query.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        // GROUP BY
+        query.append("""
+                    GROUP BY 
+                        o.OrderID,
+                        o.BranchID,
+                        o.CreatedBy,
+                        o.OrderStatus,
+                        o.CreatedAt,
+                        o.CustomerID,
+                        o.PaymentMethod,
+                        o.Notes,
+                        o.GrandTotal,
+                        o.CustomerPay,
+                        o.Change,
+                        b.BranchName,
+                        c.FullName,
+                        u.FullName
+                    ORDER BY o.CreatedAt DESC
+                    OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+                """);
 
         parameters.add((page - 1) * pageSize);
         parameters.add(pageSize);
@@ -145,7 +147,7 @@ public class OrdersDAO {
                 stmt.setObject(i + 1, parameters.get(i));
             }
 
-            System.out.println("Executing query: " + query.toString());
+            System.out.println("Executing query: " + query);
             System.out.println("Parameters: " + parameters);
 
             ResultSet rs = stmt.executeQuery();
@@ -159,55 +161,43 @@ public class OrdersDAO {
             e.printStackTrace();
         }
 
-        System.out.println("Found " + orders.size() + " orders");
         return orders;
     }
 
-    public int countFilteredOrders(String dbName, String[] branchIDs, String[] creatorIDs,
+    public int countFilteredOrders(String dbName, String branchID, String[] creatorIDs,
             String startDate, String endDate, Double minPrice, Double maxPrice, String searchKeyword) {
-
         int count = 0;
-
-        // Sửa lại count query để đồng bộ với main query
         StringBuilder query = new StringBuilder("""
-        SELECT COUNT(DISTINCT o.OrderID)
-        FROM Orders o
-        INNER JOIN Branches b ON o.BranchID = b.BranchID
-        INNER JOIN Customers c ON o.CustomerID = c.CustomerID
-        INNER JOIN Users u ON o.CreatedBy = u.UserID
-        LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID
-        LEFT JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID
-        LEFT JOIN Products p ON pd.ProductID = p.ProductID
-        WHERE 1=1
+            SELECT COUNT(DISTINCT o.OrderID)
+            FROM Orders o
+            INNER JOIN Branches b ON o.BranchID = b.BranchID
+            INNER JOIN Customers c ON o.CustomerID = c.CustomerID
+            INNER JOIN Users u ON o.CreatedBy = u.UserID
+            LEFT JOIN OrderDetails od ON o.OrderID = od.OrderID
+            LEFT JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID
+            LEFT JOIN Products p ON pd.ProductID = p.ProductID
+            WHERE 1=1
         """);
-
         List<Object> parameters = new ArrayList<>();
 
-        // Áp dụng cùng các filter như main query
-        if (branchIDs != null && branchIDs.length > 0) {
-            query.append(" AND o.BranchID IN (");
-            for (int i = 0; i < branchIDs.length; i++) {
-                query.append("?");
-                if (i < branchIDs.length - 1) {
-                    query.append(",");
-                }
-                parameters.add(Integer.parseInt(branchIDs[i]));
-            }
-            query.append(")");
+        // Filter by single branch ID
+        if (branchID != null && !branchID.trim().isEmpty()) {
+            query.append(" AND o.BranchID = ?");
+            parameters.add(Integer.parseInt(branchID));
         }
 
+        // Filter theo Creator (giữ nguyên vì có thể cần multiple creators)
         if (creatorIDs != null && creatorIDs.length > 0) {
             query.append(" AND o.CreatedBy IN (");
-            for (int i = 0; i < creatorIDs.length; i++) {
-                query.append("?");
-                if (i < creatorIDs.length - 1) {
-                    query.append(",");
-                }
-                parameters.add(Integer.parseInt(creatorIDs[i]));
-            }
+            query.append("?,".repeat(creatorIDs.length));
+            query.setLength(query.length() - 1);
             query.append(")");
+            for (String id : creatorIDs) {
+                parameters.add(Integer.parseInt(id));
+            }
         }
 
+        // Filter theo ngày
         if (startDate != null && !startDate.trim().isEmpty()) {
             query.append(" AND CAST(o.CreatedAt AS DATE) >= ?");
             parameters.add(startDate);
@@ -217,6 +207,7 @@ public class OrdersDAO {
             parameters.add(endDate);
         }
 
+        // Filter theo giá
         if (minPrice != null) {
             query.append(" AND o.GrandTotal >= ?");
             parameters.add(minPrice);
@@ -226,18 +217,18 @@ public class OrdersDAO {
             parameters.add(maxPrice);
         }
 
+        // Filter theo từ khoá tìm kiếm
         if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
             query.append(" AND (");
             query.append("c.FullName LIKE ? OR ");
             query.append("CAST(o.OrderID AS NVARCHAR) LIKE ? OR ");
             query.append("EXISTS (");
             query.append("    SELECT 1 FROM OrderDetails od2 ");
-            query.append("    INNER JOIN ProductDetails pd2 ON od2.ProductDetailID = pd2.ProductDetailID ");
-            query.append("    INNER JOIN Products p2 ON pd2.ProductID = p2.ProductID ");
+            query.append("    JOIN ProductDetails pd2 ON od2.ProductDetailID = pd2.ProductDetailID ");
+            query.append("    JOIN Products p2 ON pd2.ProductID = p2.ProductID ");
             query.append("    WHERE od2.OrderID = o.OrderID AND p2.ProductName LIKE ?");
             query.append(")");
             query.append(")");
-
             String searchPattern = "%" + searchKeyword + "%";
             parameters.add(searchPattern);
             parameters.add(searchPattern);
@@ -245,21 +236,17 @@ public class OrdersDAO {
         }
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query.toString())) {
-
             for (int i = 0; i < parameters.size(); i++) {
                 stmt.setObject(i + 1, parameters.get(i));
             }
-
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 count = rs.getInt(1);
             }
-
         } catch (SQLException e) {
             System.err.println("Error in countFilteredOrders: " + e.getMessage());
             e.printStackTrace();
         }
-
         return count;
     }
 
