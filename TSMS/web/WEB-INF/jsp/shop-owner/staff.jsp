@@ -129,7 +129,6 @@
                     <div class="filter-section">
                         <div class="filter-header">
                             <h3>Trạng thái nhân viên</h3>
-                            <i class="fas fa-chevron-up"></i>
                         </div>
                         <div class="filter-content">
                             <div class="category-tree">
@@ -212,7 +211,7 @@
                             <div style="position: relative; flex: 1;">
                                 <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
                                 <input type="text" name="search" placeholder="Theo mã, tên nhân viên"  value="${search}"
-                                       style="padding: 10px 10px 10px 60px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
+                                       style="padding: 10px 10px 10px 30px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
                                 <c:if test="${selectedStatus != null}">
                                     <input type="hidden" name="status" value="${selectedStatus}">
                                 </c:if>
@@ -220,7 +219,6 @@
                                     <input type="hidden" name="role" value="${selectedRole}">
                                 </c:if>
                             </div>
-                            <button type="submit" class="btn btn-successs">Tìm Kiếm</button>
                         </form>
                         <div>
                             <button class="btn btn-success">

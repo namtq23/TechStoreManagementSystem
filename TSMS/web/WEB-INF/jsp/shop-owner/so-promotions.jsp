@@ -106,25 +106,6 @@
         <div class="main-container">
             <!-- Sidebar -->
             <aside class="sidebar">
-                <!-- Category Filter -->
-                <div class="filter-section">
-                    <div class="filter-header">
-                        <h3> Lọc khuyến mãi</h3>
-                    </div>
-                    <div class="filter-content">
-                        <div class="search-box">
-                        </div>
-                        <div class="category-tree">
-                            <c:forEach var="category" items="${categories}">
-                                <div class="category-item expandable ${selectedCategoryId == category.categoryID ? 'selected' : ''}">
-                                    <i class="fas fa-plus"></i>
-                                    <span class="category-label" onclick="filterPromotions(${category.categoryID})">${category.categoryName}</span>
-                                </div>
-                            </c:forEach>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Status Filter -->
                 <div class="filter-section">
                     <div class="filter-header">
@@ -134,25 +115,21 @@
                         <label class="radio-item">
                             <input type="radio" name="statusFilter" value="all" ${selectedStatus == null || selectedStatus == 'all' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator all"></span>
                             Tất cả
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="statusFilter" value="active" ${selectedStatus == 'active' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator in-stock"></span>
                             Đang hoạt động
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="statusFilter" value="scheduled" ${selectedStatus == 'scheduled' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator out-stock"></span>
                             Đã lên lịch
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="statusFilter" value="expired" ${selectedStatus == 'expired' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator out-stock"></span>
                             Đã hết hạn
                         </label>
                     </div>
@@ -167,25 +144,21 @@
                         <label class="radio-item">
                             <input type="radio" name="discountFilter" value="all" ${selectedDiscount == null || selectedDiscount == 'all' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator all"></span>
                             Tất cả
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="discountFilter" value="low" ${selectedDiscount == 'low' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator below"></span>
                             Dưới 15%
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="discountFilter" value="medium" ${selectedDiscount == 'medium' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator in-stock"></span>
                             15% - 25%
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="discountFilter" value="high" ${selectedDiscount == 'high' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator above"></span>
                             Trên 25%
                         </label>
                     </div>
@@ -206,9 +179,6 @@
                                 <i class="fas fa-search"></i>
                                 <input type="text" name="search" placeholder="Theo tên khuyến mãi" value="${searchTerm}">
                             </div>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-search"></i> Tìm Kiếm
-                            </button>
                         </form>
 
                         <a href="so-promotions?action=create" class="btn btn-success">
@@ -290,14 +260,13 @@
                                     <th class="checkbox-col">
                                         <input type="checkbox" id="selectAll">
                                     </th>
-                                    <th></th>
                                     <th>Mã KM</th>
                                     <th>Tên khuyến mãi</th>
                                     <th>Giảm giá</th>
                                     <th>Thời gian</th>
                                     <th>Phạm vi</th>
                                     <th>Trạng thái</th>
-                                    <th class="text-center" style="text-align: center">Thao tác</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -318,11 +287,6 @@
                                         <c:forEach var="promotion" items="${promotions}">
                                             <tr class="promotion-row" data-status="${promotion.status}">
                                                 <td><input type="checkbox" class="product-checkbox"></td>
-                                                <td>
-                                                    <div class = "fas fa-ticket"
-                                                         style = "color: #2196F3; font-size: 20px">
-                                                    </div>
-                                                </td>
                                                 <td style="text-align: center;"><strong>${promotion.promotionID}</strong></td>
                                                 <td>
                                                     <div class="promotion-info">
@@ -375,7 +339,7 @@
                                                             <input type="hidden" name="action" value="view">
                                                             <input type="hidden" name="promotionId" value="${promotion.promotionID}">
                                                             <button type="submit" class="btn btn-detail">
-                                                                <i class="fas fa-eye"></i> Chi tiết
+                                                                <i class="fas fa-info-circle"></i>
                                                             </button>
                                                         </form>
                                                         <form action="so-promotions" method="post" style="display:inline;"
@@ -383,7 +347,7 @@
                                                             <input type="hidden" name="action" value="delete">
                                                             <input type="hidden" name="promotionId" value="${promotion.promotionID}">
                                                             <button type="submit" class="btn-delete">
-                                                                <i class="fas fa-trash"></i> Xoá
+                                                                <i class="fas fa-trash"></i>
                                                             </button>
                                                         </form>
 
@@ -679,21 +643,21 @@
 
         </script>
         <script>
-        const toggle = document.getElementById("dropdownToggle");
-        const menu = document.getElementById("dropdownMenu");
+            const toggle = document.getElementById("dropdownToggle");
+            const menu = document.getElementById("dropdownMenu");
 
-        toggle.addEventListener("click", function (e) {
-            e.preventDefault();
-            menu.style.display = menu.style.display === "block" ? "none" : "block";
-        });
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                menu.style.display = menu.style.display === "block" ? "none" : "block";
+            });
 
-        // Đóng dropdown nếu click ra ngoài
-        document.addEventListener("click", function (e) {
-            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-                menu.style.display = "none";
-            }
-        });
-    </script>
+            // Đóng dropdown nếu click ra ngoài
+            document.addEventListener("click", function (e) {
+                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                    menu.style.display = "none";
+                }
+            });
+        </script>
 
     </body>
 
