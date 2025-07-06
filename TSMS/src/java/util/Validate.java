@@ -253,7 +253,7 @@ public class Validate {
 
         System.out.println(standardizeName("       an       d     "));
 
-        System.out.println(formatGrowthPercent(100.00));
+        System.out.println(formatCostPriceToVND(10000000.00));
     }
 
 }

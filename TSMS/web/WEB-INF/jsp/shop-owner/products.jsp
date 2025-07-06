@@ -142,21 +142,18 @@
                                 <input type="radio" name="inventory" value="all"
                                        <c:if test="${param.inventory == 'all' || param.inventory == null}">checked</c:if>>
                                        <span class="radio-mark"></span>
-                                       <span class="status-indicator all"></span>
                                        Tất cả
                                 </label>
                                 <label class="radio-item">
                                     <input type="radio" name="inventory" value="in-stock"
                                     <c:if test="${param.inventory == 'in-stock'}">checked</c:if>>
                                     <span class="radio-mark"></span>
-                                    <span class="status-indicator in-stock"></span>
                                     Còn hàng trong kho
                                 </label>
                                 <label class="radio-item">
                                     <input type="radio" name="inventory" value="out-stock"
                                     <c:if test="${param.inventory == 'out-stock'}">checked</c:if>>
                                     <span class="radio-mark"></span>
-                                    <span class="status-indicator out-stock"></span>
                                     Hết hàng trong kho
                                 </label>
                             </div>
@@ -229,13 +226,12 @@
                             <input type="hidden" name="maxPrice" value="${param.maxPrice}" />
                             <input type="hidden" name="status" value="${param.status}" />
                             <input type="hidden" name="recordsPerPage" value="${recordsPerPage}" />
-                            <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
                         </form>
 
                         <form action="so-add-product" method="get" style="display: inline; margin-left: 10px;">
                             <button type="submit" class="btn btn-success" 
-                                    style="padding: 10px 18px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                                <i class="fas fa-plus"></i> Thêm mới
+                                    style="padding: 10px 18px;">
+                                <i class="fas fa-plus"></i> Thêm sản phẩm
                             </button>
                         </form>
                     </div>
@@ -274,17 +270,21 @@
                                     <span class="status-badge active">Đang bán</span>
                                     <% } %>
                                 </td>
-                                <td style="justify-content: center;align-content: center; display: flex;gap: 5px">
-                                    <form action="so-products" method="get" style="display:inline;">
-                                        <input type="hidden" name="action" value="view">
-                                        <input type="hidden" name="productDetailId" value="<%= product.getProductDetailID() %>">
-                                        <button type="submit" class="btn btn-success" style="text-decoration: none; width: 79px;background:#2196F3">Chi tiết</button>
-                                    </form>
-                                    <form action="so-products" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xoá sản phẩm này không?');">
-                                        <input type="hidden" name="action" value="delete" />
-                                        <input type="hidden" name="productDetailId" value="<%= product.getProductDetailID() %>" />
-                                        <button type="submit" class="btn btn-success" style="background: #f44336;">Xoá</button>
-                                    </form>
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <form action="so-products" method="get" style="display:inline;">
+                                            <input type="hidden" name="action" value="view">
+                                            <input type="hidden" name="productDetailId" value="<%= product.getProductDetailID() %>">
+                                            <button type="submit" class="btn btn-success" style="text-decoration: none;"><i class="fas fa-info-circle"></i></button>
+                                        </form>
+                                        <form action="so-products" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xoá sản phẩm này không?');">
+                                            <input type="hidden" name="action" value="delete" />
+                                            <input type="hidden" name="productDetailId" value="<%= product.getProductDetailID() %>" />
+                                            <button type="submit" class="btn btn-danger" title="Xoá">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             <% 

@@ -43,10 +43,9 @@
                 font-weight: 700;
                 color: #1a202c;
                 margin: 0;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: #2196F3;
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
-                background-clip: text;
             }
 
             .btn {
@@ -70,12 +69,8 @@
                 box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             }
 
-            .btn-success {
-                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            }
-
             .btn-success:hover {
-                background: linear-gradient(135deg, #43a3f5 0%, #00d9fe 100%);
+                background: #1976D2 ;
             }
 
             .btn-danger {
@@ -87,20 +82,18 @@
             }
 
             .btn-secondary {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: #2196F3;
             }
 
             .btn-secondary:hover {
-                background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+                background: #1976D2;
             }
 
             .form-container {
                 background: rgba(255, 255, 255, 0.95);
                 backdrop-filter: blur(10px);
                 padding: 2.5rem;
-                border-radius: 1.5rem;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-                border: 1px solid rgba(255, 255, 255, 0.2);
+                padding-top: 0px;
             }
 
             .form-grid {
@@ -212,8 +205,6 @@
                 gap: 1rem;
                 justify-content: flex-end;
                 margin-top: 2.5rem;
-                padding-top: 2rem;
-                border-top: 1px solid #e2e8f0;
             }
 
             /* Toast Notifications */
@@ -327,6 +318,7 @@
                 }
 
                 .page-header {
+                    margin-top: 20px;
                     flex-direction: column;
                     gap: 1rem;
                     text-align: center;
@@ -466,9 +458,9 @@
                 List<Brand> brands = (List<Brand>) request.getAttribute("brands");
                 List<Category> categories = (List<Category>) request.getAttribute("categories");
                 List<Supplier> suppliers = (List<Supplier>) request.getAttribute("suppliers");
-                
+
                 // Tạo DecimalFormat để format số
-                DecimalFormat df = new DecimalFormat("#");
+                DecimalFormat df = new DecimalFormat("#,###");
                 df.setMaximumFractionDigits(0);
                 %>
 
@@ -543,7 +535,7 @@
                                     } else {
                                         selectedBrandId = product.getBrandID();
                                     }
-                                    
+
                                     if (brands != null) {
                                         for (Brand brand : brands) {
                                     %>
@@ -573,7 +565,7 @@
                                     } else {
                                         selectedCategoryId = product.getCategoryID();
                                     }
-                                    
+
                                     if (categories != null) {
                                         for (Category category : categories) {
                                     %>
@@ -603,7 +595,7 @@
                                     } else {
                                         selectedSupplierId = product.getSupplierID();
                                     }
-                                    
+
                                     if (suppliers != null) {
                                         for (Supplier supplier : suppliers) {
                                     %>
@@ -713,9 +705,6 @@
                             <button type="submit" class="btn btn-success" id="submitBtn">
                                 <i class="fas fa-save"></i> Cập nhật
                             </button>
-                            <a href="so-products?page=1" class="btn btn-danger">
-                                <i class="fas fa-times"></i> Hủy
-                            </a>
                         </div>
                     </form>
                 </div>
@@ -733,6 +722,49 @@
         </div>
 
         <script>
+            // Hàm format số với dấu phẩy
+            function formatNumber(value) {
+                // Loại bỏ tất cả dấu phẩy cũ
+                const numStr = value.toString().replace(/,/g, '');
+                // Kiểm tra xem có phải là số hợp lệ không
+                if (numStr === '' || isNaN(numStr)) {
+                    return value;
+                }
+                // Format với dấu phẩy
+                return parseFloat(numStr).toLocaleString('en-US');
+            }
+
+            // Hàm loại bỏ dấu phẩy để lấy giá trị số
+            function unformatNumber(value) {
+                return value.toString().replace(/,/g, '');
+            }
+
+            // Hàm xử lý khi user nhập liệu
+            function handleNumberInput(input) {
+                // Lưu vị trí con trỏ
+                const cursorPosition = input.selectionStart;
+                const oldValue = input.value;
+
+                // Loại bỏ dấu phẩy và các ký tự không phải số
+                let newValue = unformatNumber(oldValue);
+                newValue = newValue.replace(/[^0-9]/g, '');
+
+                // Format lại với dấu phẩy
+                const formattedValue = formatNumber(newValue);
+
+                // Cập nhật giá trị
+                input.value = formattedValue;
+
+                // Tính toán lại vị trí con trỏ
+                const lengthDiff = formattedValue.length - oldValue.length;
+                const newCursorPosition = cursorPosition + lengthDiff;
+
+                // Đặt lại vị trí con trỏ
+                setTimeout(() => {
+                    input.setSelectionRange(newCursorPosition, newCursorPosition);
+                }, 0);
+            }
+
             // Validation functions
             function showError(fieldId, message) {
                 const group = document.getElementById(fieldId + 'Group');
@@ -802,27 +834,23 @@
 
             // Validate number input (only allow numbers and decimal point)
             function validateNumberInput(input, fieldId, fieldName, min = 0, max = 999999999) {
+                if (!input)
+                    return false;
+
                 const value = input.value.trim();
 
-                // Remove any non-numeric characters except decimal point
-                const cleanValue = value.replace(/[^0-9.]/g, '');
-
-                // Check if value changed after cleaning
-                if (cleanValue !== value) {
-                    input.value = cleanValue;
-                    showError(fieldId, fieldName + ' chỉ được nhập số');
-                    return false;
-                }
-
-                if (cleanValue === '') {
+                if (value === '') {
                     showError(fieldId, fieldName + ' không được để trống');
                     return false;
                 }
 
-                // Check for multiple decimal points
-                const decimalCount = (cleanValue.match(/\./g) || []).length;
-                if (decimalCount > 1) {
-                    showError(fieldId, fieldName + ' không hợp lệ');
+                // Remove commas and validate
+                const cleanValue = value.replace(/,/g, '');
+
+                // Check if it's a valid number (including decimal)
+                const numberPattern = /^\d+(\.\d+)?$/;
+                if (!numberPattern.test(cleanValue)) {
+                    showError(fieldId, fieldName + ' chỉ được nhập số');
                     return false;
                 }
 
@@ -884,12 +912,27 @@
 
             // Validate price comparison (retail > cost)
             function validatePriceComparison() {
-                const costPrice = parseFloat(document.getElementById('costPrice').value.replace(/[^0-9.]/g, ''));
-                const retailPrice = parseFloat(document.getElementById('retailPrice').value.replace(/[^0-9.]/g, ''));
+                const costPriceInput = document.getElementById('costPrice');
+                const retailPriceInput = document.getElementById('retailPrice');
 
-                if (!isNaN(costPrice) && !isNaN(retailPrice) && retailPrice <= costPrice) {
-                    showError('retailPrice', 'Giá bán phải lớn hơn giá vốn');
-                    return false;
+                if (!costPriceInput || !retailPriceInput)
+                    return true;
+
+                const costPrice = parseFloat(costPriceInput.value.replace(/,/g, ''));
+                const retailPrice = parseFloat(retailPriceInput.value.replace(/,/g, ''));
+
+                // Kiểm tra nếu cả hai giá đều hợp lệ
+                if (!isNaN(costPrice) && !isNaN(retailPrice)) {
+                    if (retailPrice <= costPrice) {
+                        showError('retailPrice', 'Giá bán phải lớn hơn giá vốn');
+                        return false;
+                    } else {
+                        // Nếu giá bán > giá vốn, xóa error của retailPrice (nếu có)
+                        const retailGroup = document.getElementById('retailPriceGroup');
+                        if (retailGroup && retailGroup.classList.contains('error')) {
+                            showSuccess('retailPrice');
+                        }
+                    }
                 }
 
                 return true;
@@ -981,23 +1024,31 @@
 
                 if (costPrice) {
                     costPrice.addEventListener('input', function () {
-                        validateNumberInput(this, 'costPrice', 'Giá vốn');
-                        validatePriceComparison();
+                        handleNumberInput(this);
+                        if (validateNumberInput(this, 'costPrice', 'Giá vốn')) {
+                            // Sau khi validate costPrice thành công, check price comparison
+                            setTimeout(() => validatePriceComparison(), 100);
+                        }
                     });
                     costPrice.addEventListener('blur', function () {
-                        validateNumberInput(this, 'costPrice', 'Giá vốn');
-                        validatePriceComparison();
+                        if (validateNumberInput(this, 'costPrice', 'Giá vốn')) {
+                            validatePriceComparison();
+                        }
                     });
                 }
 
                 if (retailPrice) {
                     retailPrice.addEventListener('input', function () {
-                        validateNumberInput(this, 'retailPrice', 'Giá bán');
-                        validatePriceComparison();
+                        handleNumberInput(this);
+                        if (validateNumberInput(this, 'retailPrice', 'Giá bán')) {
+                            // Sau khi validate retailPrice thành công, check price comparison
+                            setTimeout(() => validatePriceComparison(), 100);
+                        }
                     });
                     retailPrice.addEventListener('blur', function () {
-                        validateNumberInput(this, 'retailPrice', 'Giá bán');
-                        validatePriceComparison();
+                        if (validateNumberInput(this, 'retailPrice', 'Giá bán')) {
+                            validatePriceComparison();
+                        }
                     });
                 }
 
@@ -1012,22 +1063,70 @@
                     productForm.addEventListener('submit', function (e) {
                         let isValid = true;
 
-                        // Validate all fields
-                        if (!validateWarrantyPeriod())
+                        // Validate product name
+                        const productName = document.getElementById('productName');
+                        if (productName && productName.value.trim() === '') {
+                            showError('productName', 'Tên sản phẩm không được để trống');
                             isValid = false;
-                        if (!validateNumberInput(costPrice, 'costPrice', 'Giá vốn'))
+                        }
+
+                        // Validate warranty period
+                        if (!validateWarrantyPeriod()) {
                             isValid = false;
-                        if (!validateNumberInput(retailPrice, 'retailPrice', 'Giá bán'))
+                        }
+
+                        // Validate cost price
+                        if (!validateNumberInput(costPrice, 'costPrice', 'Giá vốn')) {
                             isValid = false;
-                        if (!validateVAT())
+                        }
+
+                        // Validate retail price
+                        if (!validateNumberInput(retailPrice, 'retailPrice', 'Giá bán')) {
                             isValid = false;
-                        if (!validatePriceComparison())
+                        }
+
+                        // Validate VAT
+                        if (!validateVAT()) {
                             isValid = false;
+                        }
+
+                        // Validate price comparison
+                        if (!validatePriceComparison()) {
+                            isValid = false;
+                        }
+
+                        // Validate select fields
+                        const brandSelect = document.querySelector('select[name="brandId"]');
+                        const categorySelect = document.querySelector('select[name="categoryId"]');
+                        const supplierSelect = document.querySelector('select[name="supplierId"]');
+
+                        if (brandSelect && brandSelect.value === '') {
+                            showToast('Vui lòng chọn thương hiệu', 'error');
+                            isValid = false;
+                        }
+
+                        if (categorySelect && categorySelect.value === '') {
+                            showToast('Vui lòng chọn danh mục', 'error');
+                            isValid = false;
+                        }
+
+                        if (supplierSelect && supplierSelect.value === '') {
+                            showToast('Vui lòng chọn nhà cung cấp', 'error');
+                            isValid = false;
+                        }
 
                         if (!isValid) {
                             e.preventDefault();
                             showToast('Vui lòng kiểm tra lại thông tin đã nhập', 'error');
                             return false;
+                        }
+
+                        // Remove commas from price fields before submit
+                        if (costPrice) {
+                            costPrice.value = costPrice.value.replace(/,/g, '');
+                        }
+                        if (retailPrice) {
+                            retailPrice.value = retailPrice.value.replace(/,/g, '');
                         }
 
                         // Show loading state
@@ -1056,6 +1155,38 @@
                     });
                 }
             });
+
+            // Validate product name
+            function validateProductName() {
+                const productName = document.getElementById('productName');
+                const value = productName.value.trim();
+
+                if (value === '') {
+                    showError('productName', 'Tên sản phẩm không được để trống');
+                    return false;
+                } else if (value.length < 2) {
+                    showError('productName', 'Tên sản phẩm phải có ít nhất 2 ký tự');
+                    return false;
+                } else if (value.length > 100) {
+                    showError('productName', 'Tên sản phẩm không được vượt quá 100 ký tự');
+                    return false;
+                } else {
+                    showSuccess('productName');
+                    return true;
+                }
+            }
+
+// Thêm vào phần addEventListener
+            if (productName) {
+                productName.addEventListener('blur', validateProductName);
+                productName.addEventListener('input', function () {
+                    if (this.value.trim() !== '') {
+                        validateProductName();
+                    } else {
+                        clearValidation('productName');
+                    }
+                });
+            }
         </script>
     </body>
 </html>
