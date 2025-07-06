@@ -134,7 +134,7 @@
                     </div>
 
                     <div class="filter-section">
-                        <div class="filter-header">
+<!--                        <div class="filter-header">
                             <h3>Tồn kho</h3>
                         </div>
                         <div class="filter-content">
@@ -157,7 +157,7 @@
                                     Hết hàng trong kho
                                 </label>
                             </div>
-                        </div>
+                        </div>-->
 
                         <!-- Price Range Filter -->
                         <div class="filter-section">
