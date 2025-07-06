@@ -633,7 +633,7 @@
                             <button type="submit" class="btn-primary" style="margin-bottom: 10px;
                                     margin-top: 10px;">Xác nhận thanh toán</button>
                         </a>
-                        <a href=""><button type="submit" class="btn-cancel">Huỷ</button></a> 
+                        <a href="subscription"><button type="button" class="btn-cancel">Huỷ</button></a> 
                     </form>
                 </div>
             </div>

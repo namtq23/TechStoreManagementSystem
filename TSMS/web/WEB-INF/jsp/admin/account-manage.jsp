@@ -125,7 +125,7 @@
                                         <th>Tên shop</th>
                                         <th>Trạng thái</th>
                                         <th>Gói dịch vụ</th>
-                                        <th>Ngày đăng ký</th>
+                                        <th>Ngày tạo</th>
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>

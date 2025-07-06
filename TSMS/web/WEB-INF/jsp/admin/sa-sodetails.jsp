@@ -173,7 +173,7 @@
 
                                         <div class="info-item">
                                             <label class="info-label">Website:</label>
-                                            <input type="text" name="webUrl" class="info-input" value="<%= shopOwner.getWebUrl() != null ?  shopOwner.getWebUrl() : "Chưa cập nhật"%>" readonly=""/>
+                                            <input type="text" name="webUrl" class="info-input" value="<%= shopOwner.getWebURL() != null ?  shopOwner.getWebURL() : "Chưa cập nhật"%>" readonly=""/>
                                         </div>
                                     </div>
                                 </div>

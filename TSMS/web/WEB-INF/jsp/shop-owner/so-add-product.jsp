@@ -124,38 +124,13 @@
                 margin-top: 10px;
                 word-break: break-all;
             }
+
+            .price-input {
+                text-align: left;
+                font-family: monospace;
+            }
         </style>
-        <script>
-            function openModal(modalId) {
-                document.getElementById(modalId).style.display = 'flex';
-            }
-            function closeModal(modalId) {
-                document.getElementById(modalId).style.display = 'none';
-            }
-            function previewImage(event) {
-                const file = event.target.files[0];
-                const preview = document.getElementById('imagePreview');
-                const imageUrl = document.getElementById('imageUrl');
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        preview.src = e.target.result;
-                        preview.style.display = 'block';
-                        imageUrl.textContent = 'Tệp đã chọn: ' + file.name;
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    preview.style.display = 'none';
-                    imageUrl.textContent = '';
-                }
-            }
-            // Redirect after success message
-            <c:if test="${not empty successMessage && param.action == 'addProduct'}">
-            setTimeout(function () {
-                window.location.href = 'so-products';
-            }, 1000);
-            </c:if>
-        </script>
+
     </head>
     <body>
         <header class="header">
@@ -273,13 +248,13 @@
                     <div class="error">${descriptionError}</div>
                 </div>
                 <div class="form-group">
-                    <label>Giá nhập: <span style="color: #f44336;">*</span></label>
-                    <input type="number" name="costPrice" step="0.01" value="${param.costPrice}" required>
+                    <label>Giá nhập (VNĐ): <span style="color: #f44336;">*</span></label>
+                    <input type="text" name="costPrice" class="price-input" value="${param.costPrice}" required>
                     <div class="error">${costPriceError}</div>
                 </div>
                 <div class="form-group">
-                    <label>Giá bán: <span style="color: #f44336;">*</span></label>
-                    <input type="number" name="retailPrice" step="0.01" value="${param.retailPrice}" required>
+                    <label>Giá bán (VNĐ): <span style="color: #f44336;">*</span></label>
+                    <input type="text" name="retailPrice" class="price-input" value="${param.retailPrice}" required>
                     <div class="error">${retailPriceError}</div>
                 </div>
                 <div class="form-group">
@@ -328,7 +303,7 @@
                 </div>
                 <div class="form-group">
                     <label>VAT (%): <span style="color: #f44336;">*</span></label>
-                    <input type="number" name="vat" step="0.01" value="${param.vat}" required>
+                    <input type="text" name="vat" class="price-input" value="${param.vat}" required>
                     <div class="error">${vatError}</div>
                 </div>
                 <div class="form-group">
@@ -339,8 +314,8 @@
                     <div class="error">${imageError}</div>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-success">Lưu sản phẩm</button>
-                    <a href="so-products" class="btn btn-danger">Hủy</a>
+                    <button type="submit" class="btn btn-success">Thêm</button>
+                    <a href="so-products"><button type="button" class="btn btn-danger">Hủy</button></a>
                 </div>
             </form>
 
@@ -449,3 +424,133 @@
                 </div>
             </div>
         </div>
+    </body>
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function unformatNumber(str) {
+            return str.replace(/,/g, '');
+        }
+
+        function formatPriceInput(event) {
+            let input = event.target;
+            let value = input.value.replace(/,/g, '');
+
+            if (!/^\d*\.?\d*$/.test(value)) {
+                value = value.replace(/[^\d.]/g, '');
+            }
+
+            let parts = value.split('.');
+            if (parts[0]) {
+                parts[0] = formatNumber(parts[0]);
+            }
+
+            input.value = parts.join('.');
+        }
+
+        function handleFormSubmit(event) {
+            let costPriceInput = document.querySelector('input[name="costPrice"]');
+            let retailPriceInput = document.querySelector('input[name="retailPrice"]');
+            let vatInput = document.querySelector('input[name="vat"]');
+
+            if (costPriceInput)
+                costPriceInput.value = unformatNumber(costPriceInput.value);
+            if (retailPriceInput)
+                retailPriceInput.value = unformatNumber(retailPriceInput.value);
+            if (vatInput)
+                vatInput.value = unformatNumber(vatInput.value);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            let priceInputs = document.querySelectorAll('input[name="costPrice"], input[name="retailPrice"], input[name="vat"]');
+            priceInputs.forEach(function (input) {
+                input.addEventListener('input', formatPriceInput);
+                if (input.value) {
+                    input.value = formatNumber(input.value);
+                }
+            });
+
+            let forms = document.querySelectorAll('form');
+            forms.forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!validateFormBeforeSubmit(event))
+                        return;
+                    handleFormSubmit(event);
+                });
+            });
+        });
+    </script>
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            const imageUrl = document.getElementById('imageUrl');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    imageUrl.textContent = 'Tệp đã chọn: ' + file.name;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+                imageUrl.textContent = '';
+            }
+        }
+        // Redirect after success message
+        <c:if test="${not empty successMessage && param.action == 'addProduct'}">
+        setTimeout(function () {
+            window.location.href = 'so-products';
+        }, 1000);
+        </c:if>
+    </script>
+    <script>
+        function validateFormBeforeSubmit(event) {
+            const costInput = document.querySelector('input[name="costPrice"]');
+            const retailInput = document.querySelector('input[name="retailPrice"]');
+            const vatInput = document.querySelector('input[name="vat"]');
+
+            const cost = parseFloat(unformatNumber(costInput.value));
+            const retail = parseFloat(unformatNumber(retailInput.value));
+            const vat = parseFloat(unformatNumber(vatInput.value));
+
+            let errorMessage = "";
+
+            if (isNaN(cost) || cost <= 0) {
+                errorMessage += "- Giá nhập phải lớn hơn 0\n";
+            }
+            if (isNaN(retail) || retail <= 0) {
+                errorMessage += "- Giá bán phải lớn hơn 0\n";
+            }
+            if (isNaN(vat) || vat < 0 || vat > 99) {
+                errorMessage += "- VAT phải nằm trong khoảng từ 0 đến 99\n";
+            }
+
+            if (errorMessage !== "") {
+                alert("Lỗi dữ liệu:\n" + errorMessage);
+                event.preventDefault();
+                return false;
+            }
+
+            return true;
+        }
+
+        let mainForm = document.querySelector('form[action="so-add-product"]');
+        if (mainForm) {
+            mainForm.addEventListener('submit', function (event) {
+                if (!validateFormBeforeSubmit(event))
+                    return;
+                handleFormSubmit(event);
+            });
+        }
+    </script>
+</html>
