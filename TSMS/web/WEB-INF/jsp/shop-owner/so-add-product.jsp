@@ -230,7 +230,7 @@
             <c:if test="${not empty errorMessage}">
                 <div class="error">${errorMessage}</div>
             </c:if>
-            <form action="so-add-product" method="post" enctype="multipart/form-data">
+            <form id="productForm" action="so-add-product" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="addProduct">
                 <div class="form-group">
                     <label>Tên sản phẩm: <span style="color: #f44336;">*</span></label>
@@ -442,6 +442,14 @@
                 value = value.replace(/[^\d.]/g, '');
             }
 
+            // Giới hạn VAT không quá 100
+            if (input.name === 'vat') {
+                let numValue = parseFloat(value);
+                if (numValue > 100) {
+                    value = '100';
+                }
+            }
+
             let parts = value.split('.');
             if (parts[0]) {
                 parts[0] = formatNumber(parts[0]);
@@ -451,9 +459,9 @@
         }
 
         function handleFormSubmit(event) {
-            let costPriceInput = document.querySelector('input[name="costPrice"]');
-            let retailPriceInput = document.querySelector('input[name="retailPrice"]');
-            let vatInput = document.querySelector('input[name="vat"]');
+            let costPriceInput = document.querySelector('#productForm input[name="costPrice"]');
+            let retailPriceInput = document.querySelector('#productForm input[name="retailPrice"]');
+            let vatInput = document.querySelector('#productForm input[name="vat"]');
 
             if (costPriceInput)
                 costPriceInput.value = unformatNumber(costPriceInput.value);
@@ -463,23 +471,66 @@
                 vatInput.value = unformatNumber(vatInput.value);
         }
 
+        function validateFormBeforeSubmit(event) {
+            const costInput = document.querySelector('#productForm input[name="costPrice"]');
+            const retailInput = document.querySelector('#productForm input[name="retailPrice"]');
+            const vatInput = document.querySelector('#productForm input[name="vat"]');
+
+            const cost = parseFloat(unformatNumber(costInput.value));
+            const retail = parseFloat(unformatNumber(retailInput.value));
+            const vat = parseFloat(unformatNumber(vatInput.value));
+
+            let errorMessage = "";
+
+            if (isNaN(cost) || cost <= 0) {
+                errorMessage += "- Giá nhập phải lớn hơn 0\n";
+            }
+            if (isNaN(retail) || retail <= 0) {
+                errorMessage += "- Giá bán phải lớn hơn 0\n";
+            }
+            if (isNaN(vat) || vat < 0 || vat > 99) {
+                errorMessage += "- VAT phải nằm trong khoảng từ 0 đến 99\n";
+            }
+
+            if (errorMessage !== "") {
+                alert("Lỗi dữ liệu:\n" + errorMessage);
+                event.preventDefault();
+                return false;
+            }
+
+            return true;
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
-            let priceInputs = document.querySelectorAll('input[name="costPrice"], input[name="retailPrice"], input[name="vat"]');
+            // Chỉ áp dụng format cho các input price trong form chính
+            let priceInputs = document.querySelectorAll('#productForm input[name="costPrice"], #productForm input[name="retailPrice"], #productForm input[name="vat"]');
             priceInputs.forEach(function (input) {
                 input.addEventListener('input', formatPriceInput);
+
+                // Thêm validation riêng cho VAT
+                if (input.name === 'vat') {
+                    input.addEventListener('blur', function () {
+                        let value = parseFloat(unformatNumber(this.value));
+                        if (value > 100) {
+                            this.value = '100';
+                        }
+                    });
+                }
+
                 if (input.value) {
                     input.value = formatNumber(input.value);
                 }
             });
 
-            let forms = document.querySelectorAll('form');
-            forms.forEach(function (form) {
-                form.addEventListener('submit', function (event) {
+            // Chỉ áp dụng validation cho form chính
+            let productForm = document.getElementById('productForm');
+            if (productForm) {
+                productForm.addEventListener('submit', function (event) {
                     if (!validateFormBeforeSubmit(event))
                         return;
                     handleFormSubmit(event);
                 });
-            });
+            }
         });
     </script>
     <script>
@@ -512,45 +563,5 @@
             window.location.href = 'so-products';
         }, 1000);
         </c:if>
-    </script>
-    <script>
-        function validateFormBeforeSubmit(event) {
-            const costInput = document.querySelector('input[name="costPrice"]');
-            const retailInput = document.querySelector('input[name="retailPrice"]');
-            const vatInput = document.querySelector('input[name="vat"]');
-
-            const cost = parseFloat(unformatNumber(costInput.value));
-            const retail = parseFloat(unformatNumber(retailInput.value));
-            const vat = parseFloat(unformatNumber(vatInput.value));
-
-            let errorMessage = "";
-
-            if (isNaN(cost) || cost <= 0) {
-                errorMessage += "- Giá nhập phải lớn hơn 0\n";
-            }
-            if (isNaN(retail) || retail <= 0) {
-                errorMessage += "- Giá bán phải lớn hơn 0\n";
-            }
-            if (isNaN(vat) || vat < 0 || vat > 99) {
-                errorMessage += "- VAT phải nằm trong khoảng từ 0 đến 99\n";
-            }
-
-            if (errorMessage !== "") {
-                alert("Lỗi dữ liệu:\n" + errorMessage);
-                event.preventDefault();
-                return false;
-            }
-
-            return true;
-        }
-
-        let mainForm = document.querySelector('form[action="so-add-product"]');
-        if (mainForm) {
-            mainForm.addEventListener('submit', function (event) {
-                if (!validateFormBeforeSubmit(event))
-                    return;
-                handleFormSubmit(event);
-            });
-        }
     </script>
 </html>
