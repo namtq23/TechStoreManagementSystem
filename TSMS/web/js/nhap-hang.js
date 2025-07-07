@@ -12,22 +12,26 @@ const addProductBtn = document.getElementById('addProductBtn');
 const addProductModal = document.getElementById('addProductModal');
 const searchInput = document.getElementById('searchInput');
 
-// Initialize the page
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     initializeEventListeners();
     setupDragAndDrop();
     setupKeyboardShortcuts();
-    updateUI();
+    showUploadSection();
 });
 
 // Event listeners
 function initializeEventListeners() {
-    // Upload button
-    uploadBtn.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', handleFileUpload);
+    // Upload functionality
+    document.getElementById('uploadBtn').addEventListener('click', () => {
+        document.getElementById('fileInput').click();
+    });
     
-    // Add product button
-    addProductBtn.addEventListener('click', openAddProductModal);
+    document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+    document.getElementById('downloadTemplate').addEventListener('click', downloadTemplate);
+    
+    // Product management
+    document.getElementById('addProductBtn').addEventListener('click', openAddProductModal);
     
     // Modal events
     document.getElementById('addProductModal').addEventListener('click', function(e) {
@@ -36,25 +40,21 @@ function initializeEventListeners() {
         }
     });
     
-    // Save and complete buttons
-    document.getElementById('saveBtn').addEventListener('click', saveInvoice);
-    document.getElementById('completeBtn').addEventListener('click', completeInvoice);
-    
-    // Search functionality
-    searchInput.addEventListener('input', handleSearch);
-    
-    // Select all checkbox
+    // Actions
+    document.getElementById('saveBtn').addEventListener('click', saveRequest);
+    document.getElementById('submitBtn').addEventListener('click', submitRequest);
+    document.getElementById('searchInput').addEventListener('input', handleSearch);
     document.getElementById('selectAll').addEventListener('change', handleSelectAll);
-    
-    // Delete selected button
     document.getElementById('deleteSelected').addEventListener('click', deleteSelectedProducts);
     
-    // Download template
-    document.getElementById('downloadTemplate').addEventListener('click', downloadTemplate);
+    // Discount calculation
+    document.getElementById('discountAmount').addEventListener('input', updateSummary);
 }
 
-// Drag and drop functionality
+// Drag and drop setup
 function setupDragAndDrop() {
+    const uploadArea = document.getElementById('uploadArea');
+    
     uploadArea.addEventListener('dragover', function(e) {
         e.preventDefault();
         this.classList.add('dragover');
@@ -81,19 +81,16 @@ function setupDragAndDrop() {
 // Keyboard shortcuts
 function setupKeyboardShortcuts() {
     document.addEventListener('keydown', function(e) {
-        // F3 for search
         if (e.key === 'F3') {
             e.preventDefault();
-            searchInput.focus();
+            document.getElementById('searchInput').focus();
         }
         
-        // Ctrl+S for save
         if (e.ctrlKey && e.key === 's') {
             e.preventDefault();
-            saveInvoice();
+            saveRequest();
         }
         
-        // Escape to close modal
         if (e.key === 'Escape') {
             closeAddProductModal();
         }
@@ -121,45 +118,45 @@ function isExcelFile(file) {
 }
 
 function processExcelFile(file) {
-    showLoading(true);
+    showNotification('Đang xử lý file Excel...', 'info');
     
-    // Simulate file processing
+    // Simulate processing delay
     setTimeout(() => {
         const sampleProducts = [
             {
                 id: ++productCounter,
-                code: 'DH000002',
-                name: 'Apple Watch Series 9 GPS + Cellular 45mm',
+                code: 'IP001',
+                name: 'iPhone 15 Pro Max 256GB',
                 unit: 'Cái',
-                quantity: 1,
-                price: 0,
+                quantity: 5,
+                price: 25000000,
                 discount: 0
             },
             {
                 id: ++productCounter,
-                code: 'DH000003',
-                name: 'Apple Watch Series 9 GPS + Cellular 45mm',
+                code: 'SM001',
+                name: 'Samsung Galaxy S24 Ultra 512GB',
                 unit: 'Cái',
-                quantity: 1,
-                price: 0,
+                quantity: 3,
+                price: 22000000,
                 discount: 0
             },
             {
                 id: ++productCounter,
-                code: 'LT000001',
-                name: 'Macbook Air 13 inch M2 256GB',
+                code: 'AW001',
+                name: 'Apple Watch Ultra 2',
                 unit: 'Cái',
-                quantity: 1,
-                price: 0,
+                quantity: 2,
+                price: 18000000,
                 discount: 0
             },
             {
                 id: ++productCounter,
-                code: 'PK000004',
-                name: 'Tai nghe AirPods Max Fullbox',
+                code: 'MB001',
+                name: 'MacBook Pro 14 inch M3 Pro',
                 unit: 'Cái',
                 quantity: 1,
-                price: 0,
+                price: 45000000,
                 discount: 0
             }
         ];
@@ -168,14 +165,25 @@ function processExcelFile(file) {
         showProductsSection();
         updateProductsTable();
         updateSummary();
-        showLoading(false);
-        showNotification('Đã thêm ' + sampleProducts.length + ' sản phẩm từ file Excel', 'success');
+        showNotification(`Đã thêm ${sampleProducts.length} sản phẩm từ file Excel`, 'success');
     }, 1500);
 }
 
-// Product management
+// UI state management
+function showUploadSection() {
+    document.getElementById('uploadSection').style.display = 'block';
+    document.getElementById('productsSection').style.display = 'none';
+}
+
+function showProductsSection() {
+    document.getElementById('uploadSection').style.display = 'none';
+    document.getElementById('productsSection').style.display = 'block';
+}
+
+// Product modal management
 function openAddProductModal() {
-    addProductModal.classList.add('show');
+    const modal = document.getElementById('addProductModal');
+    modal.classList.add('show');
     document.body.style.overflow = 'hidden';
     
     // Clear form
@@ -191,8 +199,14 @@ function openAddProductModal() {
 }
 
 function closeAddProductModal() {
-    addProductModal.classList.remove('show');
+    const modal = document.getElementById('addProductModal');
+    modal.classList.remove('show');
     document.body.style.overflow = 'auto';
+    
+    // Reset modal state
+    document.querySelector('#addProductModal .modal-header h3').textContent = 'Thêm sản phẩm vào yêu cầu';
+    document.querySelector('#addProductModal .btn-add').textContent = 'Thêm vào yêu cầu';
+    document.querySelector('#addProductModal .btn-add').onclick = addProduct;
 }
 
 function addProduct() {
@@ -209,9 +223,9 @@ function addProduct() {
         return;
     }
     
-    // Check if product code already exists
+    // Check duplicate code
     if (products.some(p => p.code === code)) {
-        showNotification('Mã hàng đã tồn tại', 'error');
+        showNotification('Mã hàng đã tồn tại trong yêu cầu', 'error');
         return;
     }
     
@@ -234,14 +248,14 @@ function addProduct() {
     updateProductsTable();
     updateSummary();
     closeAddProductModal();
-    showNotification('Đã thêm sản phẩm thành công', 'success');
+    showNotification('Đã thêm sản phẩm vào yêu cầu thành công', 'success');
 }
 
 function editProduct(id) {
     const product = products.find(p => p.id === id);
     if (!product) return;
     
-    // Fill form with product data
+    // Fill form
     document.getElementById('productCode').value = product.code;
     document.getElementById('productName').value = product.name;
     document.getElementById('productUnit').value = product.unit;
@@ -250,7 +264,7 @@ function editProduct(id) {
     document.getElementById('productDiscount').value = product.discount;
     
     // Change modal title and button
-    document.querySelector('#addProductModal .modal-header h3').textContent = 'Sửa sản phẩm';
+    document.querySelector('#addProductModal .modal-header h3').textContent = 'Sửa sản phẩm trong yêu cầu';
     document.querySelector('#addProductModal .btn-add').textContent = 'Cập nhật';
     document.querySelector('#addProductModal .btn-add').onclick = () => updateProduct(id);
     
@@ -271,9 +285,9 @@ function updateProduct(id) {
         return;
     }
     
-    // Check if product code already exists (except current product)
+    // Check duplicate code (except current)
     if (products.some(p => p.code === code && p.id !== id)) {
-        showNotification('Mã hàng đã tồn tại', 'error');
+        showNotification('Mã hàng đã tồn tại trong yêu cầu', 'error');
         return;
     }
     
@@ -281,29 +295,18 @@ function updateProduct(id) {
     if (productIndex !== -1) {
         products[productIndex] = {
             ...products[productIndex],
-            code,
-            name,
-            unit,
-            quantity,
-            price,
-            discount
+            code, name, unit, quantity, price, discount
         };
         
         updateProductsTable();
         updateSummary();
         closeAddProductModal();
-        
-        // Reset modal
-        document.querySelector('#addProductModal .modal-header h3').textContent = 'Thêm sản phẩm';
-        document.querySelector('#addProductModal .btn-add').textContent = 'Thêm';
-        document.querySelector('#addProductModal .btn-add').onclick = addProduct;
-        
         showNotification('Đã cập nhật sản phẩm thành công', 'success');
     }
 }
 
 function deleteProduct(id) {
-    if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+    if (confirm('Bạn có chắc muốn xóa sản phẩm này khỏi yêu cầu?')) {
         products = products.filter(p => p.id !== id);
         updateProductsTable();
         updateSummary();
@@ -312,43 +315,11 @@ function deleteProduct(id) {
             showUploadSection();
         }
         
-        showNotification('Đã xóa sản phẩm thành công', 'success');
+        showNotification('Đã xóa sản phẩm khỏi yêu cầu thành công', 'success');
     }
 }
 
-function deleteSelectedProducts() {
-    const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
-    if (selectedCheckboxes.length === 0) {
-        showNotification('Vui lòng chọn sản phẩm cần xóa', 'warning');
-        return;
-    }
-    
-    if (confirm(`Bạn có chắc muốn xóa ${selectedCheckboxes.length} sản phẩm đã chọn?`)) {
-        const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.value));
-        products = products.filter(p => !selectedIds.includes(p.id));
-        
-        updateProductsTable();
-        updateSummary();
-        
-        if (products.length === 0) {
-            showUploadSection();
-        }
-        
-        showNotification(`Đã xóa ${selectedCheckboxes.length} sản phẩm thành công`, 'success');
-    }
-}
-
-// UI Updates
-function showUploadSection() {
-    uploadSection.style.display = 'block';
-    productsSection.style.display = 'none';
-}
-
-function showProductsSection() {
-    uploadSection.style.display = 'none';
-    productsSection.style.display = 'block';
-}
-
+// Table management
 function updateProductsTable() {
     const tbody = document.getElementById('productsTableBody');
     
@@ -357,7 +328,7 @@ function updateProductsTable() {
             <tr>
                 <td colspan="10" class="empty-state">
                     <i class="fas fa-box-open"></i>
-                    <h3>Chưa có sản phẩm nào</h3>
+                    <h3>Chưa có sản phẩm nào trong yêu cầu</h3>
                     <p>Thêm sản phẩm từ file Excel hoặc thêm thủ công</p>
                 </td>
             </tr>
@@ -382,7 +353,8 @@ function updateProductsTable() {
             <td>
                 <input type="number" value="${product.price}" min="0" 
                        onchange="updateProductPrice(${product.id}, this.value)"
-                       style="width: 100px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                       style="width: 120px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 4px;"
+                       placeholder="Kho sẽ điền giá">
             </td>
             <td>
                 <input type="number" value="${product.discount}" min="0" 
@@ -401,10 +373,10 @@ function updateProductsTable() {
         </tr>
     `).join('');
     
-    // Update product count
     document.getElementById('totalProducts').textContent = products.length;
 }
 
+// Product value updates
 function updateProductQuantity(id, value) {
     const product = products.find(p => p.id === id);
     if (product) {
@@ -438,10 +410,12 @@ function calculateProductTotal(product) {
 }
 
 function updateSummary() {
-    const totalAmount = products.reduce((sum, product) => sum + calculateProductTotal(product), 0);
+    const subtotal = products.reduce((sum, product) => sum + calculateProductTotal(product), 0);
+    const discountAmount = parseFloat(document.getElementById('discountAmount').value) || 0;
+    const totalAmount = subtotal - discountAmount;
     
-    document.getElementById('totalAmount').textContent = formatCurrency(totalAmount);
-    document.getElementById('sidebarTotal').textContent = formatCurrency(totalAmount);
+    document.getElementById('totalAmount').textContent = formatCurrency(subtotal);
+    document.getElementById('sidebarTotal').textContent = formatCurrency(subtotal);
     document.getElementById('totalPayable').textContent = formatCurrency(totalAmount);
 }
 
@@ -459,7 +433,7 @@ function handleSearch(e) {
         product.name.toLowerCase().includes(searchTerm)
     );
     
-    // Temporarily replace products for display
+    // Show filtered results
     const originalProducts = [...products];
     products = filteredProducts;
     updateProductsTable();
@@ -474,46 +448,129 @@ function handleSelectAll(e) {
     });
 }
 
-// Invoice actions
-function saveInvoice() {
-    if (products.length === 0) {
-        showNotification('Vui lòng thêm ít nhất một sản phẩm', 'warning');
+function deleteSelectedProducts() {
+    const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
+    if (selectedCheckboxes.length === 0) {
+        showNotification('Vui lòng chọn sản phẩm cần xóa', 'warning');
         return;
     }
     
-    showLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-        showLoading(false);
-        showNotification('Đã lưu phiếu nhập thành công', 'success');
-    }, 1000);
+    if (confirm(`Bạn có chắc muốn xóa ${selectedCheckboxes.length} sản phẩm đã chọn khỏi yêu cầu?`)) {
+        const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.value));
+        products = products.filter(p => !selectedIds.includes(p.id));
+        
+        updateProductsTable();
+        updateSummary();
+        
+        if (products.length === 0) {
+            showUploadSection();
+        }
+        
+        showNotification(`Đã xóa ${selectedCheckboxes.length} sản phẩm khỏi yêu cầu thành công`, 'success');
+    }
 }
 
-function completeInvoice() {
+// Request actions
+function saveRequest() {
     if (products.length === 0) {
-        showNotification('Vui lòng thêm ít nhất một sản phẩm', 'warning');
+        showNotification('Vui lòng thêm ít nhất một sản phẩm vào yêu cầu', 'warning');
         return;
     }
     
-    // Check if all products have price
-    const productsWithoutPrice = products.filter(p => p.price <= 0);
-    if (productsWithoutPrice.length > 0) {
-        showNotification('Vui lòng nhập đơn giá cho tất cả sản phẩm', 'warning');
+    const warehouseId = document.getElementById('warehouseId').value;
+    if (!warehouseId) {
+        showNotification('Vui lòng chọn kho nhận hàng', 'warning');
         return;
     }
     
-    if (confirm('Bạn có chắc muốn hoàn thành phiếu nhập này?')) {
-        showLoading(true);
+    const supplierId = document.getElementById('supplierId').value;
+    if (!supplierId) {
+        showNotification('Vui lòng chọn nhà cung cấp', 'warning');
+        return;
+    }
+    
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('action', 'save');
+    formData.append('warehouseId', warehouseId);
+    formData.append('supplierId', supplierId);
+    formData.append('orderCode', document.querySelector('input[name="orderCode"]').value);
+    formData.append('notes', document.querySelector('textarea[name="notes"]').value);
+    formData.append('priority', document.querySelector('select[name="priority"]').value);
+    formData.append('discountAmount', document.getElementById('discountAmount').value);
+    formData.append('products', JSON.stringify(products));
+    
+    showNotification('Đang lưu nháp yêu cầu nhập hàng...', 'info');
+    
+    // Submit to server
+    fetch('nhap-hang', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Đã lưu nháp yêu cầu nhập hàng thành công', 'success');
+        } else {
+            showNotification(data.message || 'Có lỗi xảy ra khi lưu yêu cầu', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Có lỗi xảy ra khi lưu yêu cầu', 'error');
+    });
+}
+
+function submitRequest() {
+    if (products.length === 0) {
+        showNotification('Vui lòng thêm ít nhất một sản phẩm vào yêu cầu', 'warning');
+        return;
+    }
+    
+    const warehouseId = document.getElementById('warehouseId').value;
+    if (!warehouseId) {
+        showNotification('Vui lòng chọn kho nhận hàng', 'warning');
+        return;
+    }
+    
+    const supplierId = document.getElementById('supplierId').value;
+    if (!supplierId) {
+        showNotification('Vui lòng chọn nhà cung cấp', 'warning');
+        return;
+    }
+    
+    if (confirm('Bạn có chắc muốn gửi yêu cầu nhập hàng này đến kho? Sau khi gửi sẽ không thể chỉnh sửa.')) {
+        const formData = new FormData();
+        formData.append('action', 'submit');
+        formData.append('warehouseId', warehouseId);
+        formData.append('supplierId', supplierId);
+        formData.append('orderCode', document.querySelector('input[name="orderCode"]').value);
+        formData.append('notes', document.querySelector('textarea[name="notes"]').value);
+        formData.append('priority', document.querySelector('select[name="priority"]').value);
+        formData.append('discountAmount', document.getElementById('discountAmount').value);
+        formData.append('products', JSON.stringify(products));
         
-        // Simulate API call
-        setTimeout(() => {
-            showLoading(false);
-            showNotification('Đã hoàn thành phiếu nhập thành công', 'success');
-            
-            // Redirect or reset form
-            // window.location.href = 'inventory-list.html';
-        }, 1500);
+        showNotification('Đang gửi yêu cầu nhập hàng...', 'info');
+        
+        fetch('nhap-hang', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Đã gửi yêu cầu nhập hàng thành công', 'success');
+                setTimeout(() => {
+                    window.location.href = 'so-overview'; // Redirect to overview
+                }, 2000);
+            } else {
+                showNotification(data.message || 'Có lỗi xảy ra khi gửi yêu cầu', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Có lỗi xảy ra khi gửi yêu cầu', 'error');
+        });
     }
 }
 
@@ -521,22 +578,32 @@ function completeInvoice() {
 function downloadTemplate(e) {
     e.preventDefault();
     
-    // Create a simple CSV template
-    const csvContent = `STT,Mã hàng,Tên hàng,Đơn vị tính,Số lượng,Đơn giá,Giảm giá
-1,SP001,Sản phẩm mẫu 1,Cái,10,100000,0
-2,SP002,Sản phẩm mẫu 2,Chiếc,5,200000,10000`;
+    const csvContent = `STT,Mã hàng,Tên hàng,Đơn vị tính,Số lượng yêu cầu,Đơn giá dự kiến,Giảm giá
+1,IP001,iPhone 15 Pro Max 256GB,Cái,5,25000000,0
+2,SM001,Samsung Galaxy S24 Ultra 512GB,Cái,3,22000000,0
+3,AW001,Apple Watch Ultra 2,Cái,2,18000000,0`;
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'mau_nhap_hang.csv');
+    link.setAttribute('download', 'mau_yeu_cau_nhap_hang.csv');
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     
-    showNotification('Đã tải file mẫu thành công', 'success');
+    showNotification('Đã tải file mẫu yêu cầu nhập hàng thành công', 'success');
+}
+
+// Priority display
+function getPriorityBadge(priority) {
+    const badges = {
+        'normal': '<span class="priority-badge priority-normal">Bình thường</span>',
+        'high': '<span class="priority-badge priority-high">Cao</span>',
+        'urgent': '<span class="priority-badge priority-urgent">Khẩn cấp</span>'
+    };
+    return badges[priority] || badges['normal'];
 }
 
 // Utility functions
@@ -547,37 +614,20 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
-function showLoading(show) {
-    if (show) {
-        document.body.classList.add('loading');
-    } else {
-        document.body.classList.remove('loading');
-    }
-}
-
 function showNotification(message, type = 'info') {
-    // Create notification element
     const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 12px 20px;
-        background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
-        color: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 1001;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-        max-width: 300px;
-        font-size: 14px;
-    `;
+    notification.className = `notification ${type}`;
+    
+    const icons = {
+        'success': 'check-circle',
+        'error': 'exclamation-circle',
+        'warning': 'exclamation-triangle',
+        'info': 'info-circle'
+    };
     
     notification.innerHTML = `
         <div style="display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+            <i class="fas fa-${icons[type] || 'info-circle'}"></i>
             <span>${message}</span>
         </div>
     `;
@@ -586,21 +636,74 @@ function showNotification(message, type = 'info') {
     
     // Show notification
     setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
+        notification.classList.add('show');
     }, 100);
     
-    // Hide notification after 3 seconds
+    // Hide notification after 4 seconds (longer for import requests)
     setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
+        notification.classList.remove('show');
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.parentNode.removeChild(notification);
             }
         }, 300);
-    }, 3000);
+    }, 4000);
 }
 
-function updateUI() {
-    // Initialize with upload section visible
-    showUploadSection();
+// Auto-save functionality (save draft every 2 minutes)
+let autoSaveInterval;
+
+function startAutoSave() {
+    if (autoSaveInterval) {
+        clearInterval(autoSaveInterval);
+    }
+    
+    autoSaveInterval = setInterval(() => {
+        if (products.length > 0) {
+            const warehouseId = document.getElementById('warehouseId').value;
+            const supplierId = document.getElementById('supplierId').value;
+            
+            if (warehouseId && supplierId) {
+                // Silent auto-save
+                const formData = new FormData();
+                formData.append('action', 'autosave');
+                formData.append('warehouseId', warehouseId);
+                formData.append('supplierId', supplierId);
+                formData.append('orderCode', document.querySelector('input[name="orderCode"]').value);
+                formData.append('notes', document.querySelector('textarea[name="notes"]').value);
+                formData.append('priority', document.querySelector('select[name="priority"]').value);
+                formData.append('discountAmount', document.getElementById('discountAmount').value);
+                formData.append('products', JSON.stringify(products));
+                
+                fetch('nhap-hang', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Auto-saved draft successfully');
+                    }
+                })
+                .catch(error => {
+                    console.error('Auto-save error:', error);
+                });
+            }
+        }
+    }, 120000); // Auto-save every 2 minutes
 }
+
+// Start auto-save when products are added
+function enableAutoSave() {
+    if (products.length > 0 && !autoSaveInterval) {
+        startAutoSave();
+    }
+}
+
+// Modify the addProduct and other functions to enable auto-save
+const originalAddProduct = addProduct;
+addProduct = function() {
+    const result = originalAddProduct.apply(this, arguments);
+    enableAutoSave();
+    return result;
+};

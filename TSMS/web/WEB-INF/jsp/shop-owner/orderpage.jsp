@@ -395,7 +395,7 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="so-createimport" class="dropdown-item">Tạo đơn nhập hàng</a>
+                            <a href="nhap-hang" class="dropdown-item">Tạo đơn nhập hàng</a>
                             <a href="so-ienoti" class="dropdown-item">Thông báo nhập/xuất</a>
                         </div>
                     </div>

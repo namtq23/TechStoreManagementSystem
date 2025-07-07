@@ -47,7 +47,7 @@
                         Thông báo
                     </a>
 
-                    <a href="wh-create-import" class="nav-item">
+                    <a href="" class="nav-item">
                         <i class="fas fa-exchange-alt"></i>
                         Yêu cầu nhập hàng
                     </a>
@@ -157,10 +157,7 @@
                 <div class="page-header">
                     <h1>Danh sách đơn nhập hàng</h1>
                     <div class="header-actions">
-                        <a href="wh-create-import" class="btn btn-primary" style="text-decoration: none; margin-right: 12px;">
-                            <i class="fas fa-plus"></i>
-                            Tạo phiếu nhập
-                        </a>
+
                         <button class="btn btn-success" onclick="exportToExcel()">
                             <i class="fas fa-file-excel"></i>
                             Export Excel
