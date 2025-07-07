@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,7 +7,7 @@
     <title>Nhập hàng - TSMS</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
 </head>
 <body>
     <!-- Header -->
@@ -23,15 +24,9 @@
                 <input type="text" class="search-input" placeholder="Tìm hàng hóa theo mã hoặc tên (F3)" id="searchInput">
                 <span class="search-shortcut">F3</span>
             </div>
-            <button class="header-btn">
-                <i class="fas fa-list"></i>
-            </button>
-            <button class="header-btn">
-                <i class="fas fa-plus"></i>
-            </button>
-            <button class="header-btn">
-                <i class="fas fa-print"></i>
-            </button>
+            <button class="header-btn"><i class="fas fa-list"></i></button>
+            <button class="header-btn"><i class="fas fa-plus"></i></button>
+            <button class="header-btn"><i class="fas fa-print"></i></button>
             <div class="user-info">
                 <span>Nguyen Van A</span>
                 <i class="fas fa-chevron-down"></i>
@@ -135,9 +130,6 @@
                     <span>Tổng tiền hàng</span>
                     <span class="summary-value" id="sidebarTotal">0</span>
                 </div>
-                <div class="summary-row">
-                    <span class="summary-value">0</span>
-                </div>
             </div>
 
             <div class="sidebar-section">
@@ -215,6 +207,6 @@
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
