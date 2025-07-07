@@ -363,6 +363,14 @@ Author     : admin
                             <option value="Chuyển khoản">Chuyển khoản</option>
                         </select>
                     </div>
+                    <div class="form-row">
+                        <label>Nhân viên bán hàng:</label>
+                        <select name="sale">
+                            <c:forEach var="s" items="${sale}">
+                                <option value="${s.userID}">${s.fullName}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
                     <div class="form-row discount-wrapper">
                         <label>Giảm giá (%):</label>
                         <div class="input-percent">

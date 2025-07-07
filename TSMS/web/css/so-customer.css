@@ -408,6 +408,7 @@ body {
     justify-content: center;
     font-size: 14px;
     transition: all 0.3s;
+    text-decoration: none;
 }
 
 .page-btn:hover:not(:disabled) {

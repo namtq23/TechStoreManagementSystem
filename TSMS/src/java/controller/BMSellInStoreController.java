@@ -10,6 +10,7 @@ import dao.CashFlowDAO;
 import dao.CustomerDAO;
 import dao.OrderDAO;
 import dao.ProductDAO;
+import dao.SalesDAO;
 import dao.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -28,6 +29,7 @@ import model.Customer;
 import model.Order;
 import model.ProductDTO;
 import model.User;
+import model.UserDTO;
 import util.Validate;
 
 /**
@@ -73,6 +75,8 @@ public class BMSellInStoreController extends HttpServlet {
             List<ProductDTO> products = p.getInventoryProductListByPageByBranchId(dbName, branchId, offset, pageSize);
             int totalProducts = p.countProductsByBranchId(dbName, branchId);
             int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
+            
+            List<UserDTO> sale = SalesDAO.getAllSalesStaff("DTB_TechStore");
 
             req.setAttribute("currentPage", page);
             req.setAttribute("totalPages", totalPages);
@@ -80,6 +84,7 @@ public class BMSellInStoreController extends HttpServlet {
             req.setAttribute("startProduct", offset + 1);
             req.setAttribute("endProduct", Math.min(offset + pageSize, totalProducts));
             req.setAttribute("products", products);
+            req.setAttribute("sale", sale);
 
             req.getRequestDispatcher("/WEB-INF/jsp/manager/sell-in-store.jsp").forward(req, resp);
         } catch (ServletException | IOException | NumberFormatException e) {
@@ -112,6 +117,7 @@ public class BMSellInStoreController extends HttpServlet {
             String customerAddress = req.getParameter("address");
             String customerMail = req.getParameter("email");
             String dobStr = req.getParameter("dob");
+            int createdBy = Integer.parseInt(req.getParameter("sale"));
             boolean gender = true;
             switch (customerGender) {
                 case "1":
@@ -146,7 +152,7 @@ public class BMSellInStoreController extends HttpServlet {
             if (CustomerDAO.checkCustomerExist(dbName, customerPhone)) {
                 System.out.println("Khách hàng cũ");
                 int customerId = CustomerDAO.getCustomerId(dbName, customerPhone);
-                order = new Order(0, branchId, userId, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven,
+                order = new Order(0, branchId, createdBy, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven,
                         changeDue);
                 ProductDAO.updateProductQuantityOfInventory(dbName, cartItems, branchId);
             } else {
@@ -155,7 +161,7 @@ public class BMSellInStoreController extends HttpServlet {
                         null, null);
                 CustomerDAO.insertCustomer(dbName, customer);
                 int customerId = CustomerDAO.getCustomerId(dbName, customerPhone);
-                order = new Order(0, branchId, userId, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven,
+                order = new Order(0, branchId, createdBy, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven,
                         changeDue);
                 ProductDAO.updateProductQuantityOfInventory(dbName, cartItems, branchId);
             }
@@ -169,7 +175,7 @@ public class BMSellInStoreController extends HttpServlet {
                 }
             }
 
-            User user = UserDAO.getUserById(userId, dbName);
+            User user = UserDAO.getUserById(createdBy, dbName);
 
             CashFlowDAO.insertCashFlow(dbName, "income", amountDue, "Tiền hoá đơn", "Tiền hoá đơn của chi nhánh" + branchId, paymentMethod, latestOrderId, branchId, user.getFullName());
 

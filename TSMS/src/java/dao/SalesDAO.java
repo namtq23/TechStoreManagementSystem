@@ -9,6 +9,7 @@ import java.util.List;
 import model.SalesStatisticsDTO;
 import model.SalesTransactionDTO;
 import model.PromotionDTO;
+import model.UserDTO;
 import util.DBUtil;
 
 public class SalesDAO {
@@ -362,4 +363,44 @@ public class SalesDAO {
 
         return transactions;
     }
+
+    public static List<UserDTO> getAllSalesStaff(String dbName) {
+        List<UserDTO> users = new ArrayList<>();
+        String sql = """
+        SELECT UserID, PasswordHash, FullName, Email, Phone, BranchID, WarehouseID,
+               RoleID, IsActive, Gender, AvaUrl, Address, TaxNumber, WebURL, DOB, IdentificationID
+        FROM Users
+        WHERE RoleID = 2
+    """;
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                UserDTO user = new UserDTO();
+                user.setUserID(rs.getInt("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setPhone(rs.getString("Phone"));
+                user.setBranchID(rs.getObject("BranchID") != null ? rs.getInt("BranchID") : null);
+                user.setWarehouseID(rs.getObject("WarehouseID") != null ? rs.getInt("WarehouseID") : null);
+                user.setRoleID(rs.getInt("RoleID"));
+                user.setIsActive(rs.getInt("IsActive"));
+                user.setGender(rs.getInt("Gender"));
+                user.setAvaUrl(rs.getString("AvaUrl"));
+                user.setAddress(rs.getString("Address"));
+                user.setDOB(rs.getDate("DOB"));
+                users.add(user);
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+
+        return users;
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(SalesDAO.getAllSalesStaff("DTB_TechStore"));
+    }
+
 }
