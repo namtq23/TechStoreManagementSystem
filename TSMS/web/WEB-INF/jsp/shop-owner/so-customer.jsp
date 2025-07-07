@@ -329,136 +329,145 @@
 
             <!-- Pagination -->
                     <%-- First Page --%>
-                    <c:url var="firstPageUrl" value="so-customer">
-                        <c:param name="page" value="1"/>
-                        <c:if test="${not empty keyword}">
-                            <c:param name="keyword" value="${keyword}"/>
-                        </c:if>
-                        <c:if test="${not empty genderFilter}">
-                            <c:param name="gender" value="${genderFilter}"/>
-                        </c:if>
-                        <c:if test="${branchID > 0}">
-                            <c:param name="branchID" value="${branchID}"/>
-                        </c:if>
-                        <c:if test="${showTop eq 'true'}">
-                            <c:param name="showTop" value="true"/>
-                            <c:if test="${not empty minGrandTotal}">
-                                <c:param name="minGrandTotal" value="${minGrandTotal}"/>
-                            </c:if>
-                            <c:if test="${not empty maxGrandTotal}">
-                                <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
-                            </c:if>
-                        </c:if>
-                    </c:url>
-                    <a href="${firstPageUrl}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
-                        <i class="fas fa-angle-double-left"></i>
-                    </a>
-
-                    <%-- Previous Page --%>
-                    <c:url var="prevPageUrl" value="so-customer">
-                        <c:param name="page" value="${currentPage - 1}"/>
-                        <c:if test="${not empty keyword}">
-                            <c:param name="keyword" value="${keyword}"/>
-                        </c:if>
-                        <c:if test="${not empty genderFilter}">
-                            <c:param name="gender" value="${genderFilter}"/>
-                        </c:if>
-                        <c:if test="${branchID > 0}">
-                            <c:param name="branchID" value="${branchID}"/>
-                        </c:if>
-                        <c:if test="${showTop eq 'true'}">
-                            <c:param name="showTop" value="true"/>
-                            <c:if test="${not empty minGrandTotal}">
-                                <c:param name="minGrandTotal" value="${minGrandTotal}"/>
-                            </c:if>
-                            <c:if test="${not empty maxGrandTotal}">
-                                <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
-                            </c:if>
-                        </c:if>
-                    </c:url>
-                    <a href="${prevPageUrl}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
-                        <i class="fas fa-angle-left"></i>
-                    </a>
-
-                    <%-- Page numbers --%>
-                    <c:forEach begin="1" end="${totalPages}" var="i">
-                        <c:url var="pageUrl" value="so-customer">
-                            <c:param name="page" value="${i}"/>
-                            <c:if test="${not empty keyword}">
-                                <c:param name="keyword" value="${keyword}"/>
-                            </c:if>
-                            <c:if test="${not empty genderFilter}">
-                                <c:param name="gender" value="${genderFilter}"/>
-                            </c:if>
-                            <c:if test="${branchID > 0}">
-                                <c:param name="branchID" value="${branchID}"/>
-                            </c:if>
-                            <c:if test="${showTop eq 'true'}">
-                                <c:param name="showTop" value="true"/>
-                                <c:if test="${not empty minGrandTotal}">
-                                    <c:param name="minGrandTotal" value="${minGrandTotal}"/>
+<div class="pagination-container mt-3 d-flex justify-content-between align-items-center">
+                        <div class="pagination-info">
+                            Hiển thị ${startCustomer} - ${endCustomer} / Tổng số ${totalCustomers} Khách hàng
+                        </div>
+                        <div class="pagination">
+                            <%-- First Page --%>
+                            <c:url var="firstPageUrl" value="so-customer">
+                                <c:param name="page" value="1"/>
+                                <c:if test="${not empty keyword}">
+                                    <c:param name="keyword" value="${keyword}"/>
                                 </c:if>
-                                <c:if test="${not empty maxGrandTotal}">
-                                    <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
+                                <c:if test="${not empty genderFilter}">
+                                    <c:param name="gender" value="${genderFilter}"/>
                                 </c:if>
-                            </c:if>
-                        </c:url>
-                        <a href="${pageUrl}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
-                    </c:forEach>
+                                <c:if test="${branchID > 0}">
+                                    <c:param name="branchID" value="${branchID}"/>
+                                </c:if>
+                                <c:if test="${showTop eq 'true'}">
+                                    <c:param name="showTop" value="true"/>
+                                    <c:if test="${not empty minGrandTotal}">
+                                        <c:param name="minGrandTotal" value="${minGrandTotal}"/>
+                                    </c:if>
+                                    <c:if test="${not empty maxGrandTotal}">
+                                        <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
+                                    </c:if>
+                                </c:if>
+                            </c:url>
+                            <a href="${firstPageUrl}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
 
-                    <%-- Next Page --%>
-                    <c:url var="nextPageUrl" value="so-customer">
-                        <c:param name="page" value="${currentPage + 1}"/>
-                        <c:if test="${not empty keyword}">
-                            <c:param name="keyword" value="${keyword}"/>
-                        </c:if>
-                        <c:if test="${not empty genderFilter}">
-                            <c:param name="gender" value="${genderFilter}"/>
-                        </c:if>
-                        <c:if test="${branchID > 0}">
-                            <c:param name="branchID" value="${branchID}"/>
-                        </c:if>
-                        <c:if test="${showTop eq 'true'}">
-                            <c:param name="showTop" value="true"/>
-                            <c:if test="${not empty minGrandTotal}">
-                                <c:param name="minGrandTotal" value="${minGrandTotal}"/>
-                            </c:if>
-                            <c:if test="${not empty maxGrandTotal}">
-                                <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
-                            </c:if>
-                        </c:if>
-                    </c:url>
-                    <a href="${nextPageUrl}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
-                        <i class="fas fa-angle-right"></i>
-                    </a>
+                            <%-- Previous Page --%>
+                            <c:url var="prevPageUrl" value="so-customer">
+                                <c:param name="page" value="${currentPage - 1}"/>
+                                <c:if test="${not empty keyword}">
+                                    <c:param name="keyword" value="${keyword}"/>
+                                </c:if>
+                                <c:if test="${not empty genderFilter}">
+                                    <c:param name="gender" value="${genderFilter}"/>
+                                </c:if>
+                                <c:if test="${branchID > 0}">
+                                    <c:param name="branchID" value="${branchID}"/>
+                                </c:if>
+                                <c:if test="${showTop eq 'true'}">
+                                    <c:param name="showTop" value="true"/>
+                                    <c:if test="${not empty minGrandTotal}">
+                                        <c:param name="minGrandTotal" value="${minGrandTotal}"/>
+                                    </c:if>
+                                    <c:if test="${not empty maxGrandTotal}">
+                                        <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
+                                    </c:if>
+                                </c:if>
+                            </c:url>
+                            <a href="${prevPageUrl}" class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
 
-                    <%-- Last Page --%>
-                    <c:url var="lastPageUrl" value="so-customer">
-                        <c:param name="page" value="${totalPages}"/>
-                        <c:if test="${not empty keyword}">
-                            <c:param name="keyword" value="${keyword}"/>
-                        </c:if>
-                        <c:if test="${not empty genderFilter}">
-                            <c:param name="gender" value="${genderFilter}"/>
-                        </c:if>
-                        <c:if test="${branchID > 0}">
-                            <c:param name="branchID" value="${branchID}"/>
-                        </c:if>
-                        <c:if test="${showTop eq 'true'}">
-                            <c:param name="showTop" value="true"/>
-                            <c:if test="${not empty minGrandTotal}">
-                                <c:param name="minGrandTotal" value="${minGrandTotal}"/>
-                            </c:if>
-                            <c:if test="${not empty maxGrandTotal}">
-                                <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
-                            </c:if>
-                        </c:if>
-                    </c:url>
-                    <a href="${lastPageUrl}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
-                        <i class="fas fa-angle-double-right"></i>
-                    </a>
-                </div>
-            </div>
+                            <%-- Page numbers --%>
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <c:url var="pageUrl" value="so-customer">
+                                    <c:param name="page" value="${i}"/>
+                                    <c:if test="${not empty keyword}">
+                                        <c:param name="keyword" value="${keyword}"/>
+                                    </c:if>
+                                    <c:if test="${not empty genderFilter}">
+                                        <c:param name="gender" value="${genderFilter}"/>
+                                    </c:if>
+                                    <c:if test="${branchID > 0}">
+                                        <c:param name="branchID" value="${branchID}"/>
+                                    </c:if>
+                                    <c:if test="${showTop eq 'true'}">
+                                        <c:param name="showTop" value="true"/>
+                                        <c:if test="${not empty minGrandTotal}">
+                                            <c:param name="minGrandTotal" value="${minGrandTotal}"/>
+                                        </c:if>
+                                        <c:if test="${not empty maxGrandTotal}">
+                                            <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
+                                        </c:if>
+                                    </c:if>
+                                </c:url>
+                                <a href="${pageUrl}" class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
+                            </c:forEach>
+
+                            <%-- Next Page --%>
+                            <c:url var="nextPageUrl" value="so-customer">
+                                <c:param name="page" value="${currentPage + 1}"/>
+                                <c:if test="${not empty keyword}">
+                                    <c:param name="keyword" value="${keyword}"/>
+                                </c:if>
+                                <c:if test="${not empty genderFilter}">
+                                    <c:param name="gender" value="${genderFilter}"/>
+                                </c:if>
+                                <c:if test="${branchID > 0}">
+                                    <c:param name="branchID" value="${branchID}"/>
+                                </c:if>
+                                <c:if test="${showTop eq 'true'}">
+                                    <c:param name="showTop" value="true"/>
+                                    <c:if test="${not empty minGrandTotal}">
+                                        <c:param name="minGrandTotal" value="${minGrandTotal}"/>
+                                    </c:if>
+                                    <c:if test="${not empty maxGrandTotal}">
+                                        <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
+                                    </c:if>
+                                </c:if>
+                            </c:url>
+                            <a href="${nextPageUrl}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+
+                            <%-- Last Page --%>
+                            <c:url var="lastPageUrl" value="so-customer">
+                                <c:param name="page" value="${totalPages}"/>
+                                <c:if test="${not empty keyword}">
+                                    <c:param name="keyword" value="${keyword}"/>
+                                </c:if>
+                                <c:if test="${not empty genderFilter}">
+                                    <c:param name="gender" value="${genderFilter}"/>
+                                </c:if>
+                                <c:if test="${branchID > 0}">
+                                    <c:param name="branchID" value="${branchID}"/>
+                                </c:if>
+                                <c:if test="${showTop eq 'true'}">
+                                    <c:param name="showTop" value="true"/>
+                                    <c:if test="${not empty minGrandTotal}">
+                                        <c:param name="minGrandTotal" value="${minGrandTotal}"/>
+                                    </c:if>
+                                    <c:if test="${not empty maxGrandTotal}">
+                                        <c:param name="maxGrandTotal" value="${maxGrandTotal}"/>
+                                    </c:if>
+                                </c:if>
+                            </c:url>
+                            <a href="${lastPageUrl}" class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </main>
+        </div>
+
 
             <!-- Scripts -->
             <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
