@@ -5,18 +5,33 @@
 --%>
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.*, model.User" %>
+<%@ page import="java.util.*, model.UserDTO" %>
 <%@ page import="util.Validate" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TSMS - Nhân Viên</title>
-        <link rel="stylesheet" href="css/bm-staff.css">
-        <link rel="stylesheet" href="css/header.css"/>
+        <link rel="stylesheet" href="css/header.css"> 
+        <link rel="stylesheet" href="css/so-staff.css">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    </head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <title>JSP Page</title>
+        <style>
+            .btn-successs {
+                background-color: #2196F3;
+            }
+
+            .btn-successs:hover {
+                background-color: #1976D2;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+            }
+        </style>
     <body>
         <!-- Header -->
         <header class="header">
@@ -45,9 +60,9 @@
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">Đơn hàng</a>
-                            <a href="#" class="dropdown-item">Nhập hàng</a>
-                            <a href="#" class="dropdown-item">Yêu cầu nhập hàng</a>
+                            <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
+                            <a href="bm-stockmovement?type=import" class="dropdown-item">Nhập hàng</a>
+                            <a href="request-stock" class="dropdown-item">Yêu cầu nhập hàng</a>
                         </div>
                     </div>
 
@@ -116,25 +131,47 @@
         <div class="main-container">
             <!-- Sidebar -->
             <aside class="sidebar">
-                <!--Product Type Filter--> 
-                <div class="filter-section">
-                    <div class="filter-header">
-                        <h3>Trạng thái nhân viên</h3>
-                        <i class="fas fa-chevron-up"></i>
+                <form action="bm-staff" method="get" id="filterForm">
+                    <!-- Status Filter -->
+                    <div class="filter-section">
+                        <div class="filter-header">
+                            <h3>Trạng thái nhân viên</h3>
+                        </div>
+                        <div class="filter-content">
+                            <div class="category-tree">
+                                <div class="category-item">
+                                    <input type="radio" id="status-all" name="status" value="" ${selectedStatus == null ? 'checked' : ''}>
+                                    <label for="status-all" class="category-label">
+                                        <span>Tất cả</span>
+                                    </label>
+                                </div>
+                                <div class="category-item">
+                                    <input type="radio" id="status-1" name="status" value="1" ${selectedStatus == 1 ? 'checked' : ''}>
+                                    <label for="status-1" class="category-label">
+                                        <span>Đang làm việc</span>
+                                    </label>
+                                </div>
+                                <div class="category-item">
+                                    <input type="radio" id="status-0" name="status" value="0" ${selectedStatus == 0 ? 'checked' : ''}>
+                                    <label for="status-0" class="category-label">
+                                        <span>Nghỉ việc</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="filter-content">
-                        <form action="action">
-                            <label class="checkbox-item">
-                                <input type="radio" id="active" name="employeeStatus" value="active" checked="">
-                                <span for="active">Đang làm việc</span><br>
-                            </label>
-                            <label class="checkbox-item">
-                                <input type="radio" id="inactive" name="employeeStatus" value="inactive">
-                                <span for="inactive">Nghỉ việc</span><br>
-                            </label>
-                        </form>
-                    </div>
-                </div>
+                    <!-- Action Buttons -->
+                    <div class="filter-actions">
+                        <a href="bm-staff?page=1" class="btn-clear">
+                            <i class="fas fa-eraser"></i>
+                            Xóa bộ lọc
+                        </a>
+                        <button type="submit" class="btn-apply">
+                            <i class="fas fa-filter"></i>
+                            Áp dụng lọc
+                        </button>
+                    </div>             
+                </form>
             </aside>
 
             <!-- Main Content -->
@@ -142,43 +179,71 @@
                 <div class="page-header">
                     <h1>Nhân viên</h1>
                     <div class="header-actions">
-                        <div class="search-container">
-                            <i class="fas fa-search"></i>
-                            <input type="text" placeholder="Theo mã, tên hàng" class="search-input">
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <button class="btn btn-success">
-                            <i class="fas fa-plus"></i>
-                            Thêm mới
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
+                        <form class="search-input" action="bm-staff" method="get" style="display: flex; align-items: center; gap: 20px;">
+                            <div style="position: relative; flex: 1;">
+                                <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
+                                <input type="text" name="search" placeholder="Theo mã, tên nhân viên"  value="${search}"
+                                       style="padding: 10px 10px 10px 30px; width: 100%; border: 1px solid #ccc; border-radius: 15px;">
+                                <c:if test="${selectedStatus != null}">
+                                    <input type="hidden" name="status" value="${selectedStatus}">
+                                </c:if>
+                                <c:if test="${selectedRole != null}">
+                                    <input type="hidden" name="role" value="${selectedRole}">
+                                </c:if>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-                <!-- Products Table -->
+                <!-- Staff Table -->
                 <div class="table-container">
                     <table class="products-table">
                         <thead>
                             <tr>
+                                <th class="checkbox-col"><input type="checkbox" id="selectAll"></th>
                                 <th>Mã nhân viên</th>
                                 <th>Tên nhân viên</th>
                                 <th>Chức danh</th>
+                                <th>Chi nhánh/Kho</th>
                                 <th>Số điện thoại</th>
                                 <th>Trạng thái</th>
+                                <th style="justify-content: center; text-align: center">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-
-                            <% List<User> users = (List<User>) request.getAttribute("staffs");
-                                for (User user : users) { %>
-                            <tr class="">
-                                <td>NV<%= user.getUserID() %></td>
-                                <td><%= user.getFullName() %></td>
-                                <td>Nhân viên bán hàng</td>
-                                <td><%= user.getPhone() %></td>
-                                <td><%= user.getIsActive() == 1 ? "Đang hoạt động" : "Không hoạt động"%></td>
+                            <%
+                                List<UserDTO> staffList = (List<UserDTO>) request.getAttribute("staffList");
+                                if (staffList != null && !staffList.isEmpty()) {
+                                    for (UserDTO staff : staffList) {
+                            %>
+                            <tr>
+                                <td class="checkbox-col">
+                                    <input type="checkbox" name="selectedStaff" value="<%=staff.getUserID()%>">
+                                </td>
+                                <td><%=staff.getUserID()%></td>
+                                <td><%=staff.getFullName()%></td>
+                                <td><%=staff.getRoleName()%></td>
+                                <td><%=staff.getBranchName() != null ? staff.getBranchName() : (staff.getWarehouseName() != null ? staff.getWarehouseName() : "")%></td>
+                                <td><%=staff.getPhone() != null ? staff.getPhone() : ""%></td>
+                                <td><%=staff.getIsActive() == 1 ? "Đang làm việc" : "Nghỉ việc"%></td>
+                                <td class="actions-col" style="justify-content: center; display: flex; gap: 5px">
+                                    <form action="bm-staff" method="get" style="display:inline;">
+                                        <input type="hidden" name="action" value="view"/>
+                                        <input type="hidden" name="userID" value="<%=staff.getUserID()%>"/>
+                                        <button type="submit" class="btn btn-success" style="text-decoration: none; width: 79px; background:#2196F3">Chi tiết</button>
+                                    </form>
+                                </td>
                             </tr>
-                            <%}%>
+                            <%
+                                    }
+                                } else {
+                            %>
+                            <tr>
+                                <td colspan="8" style="text-align:center;">Không có nhân viên nào!</td>
+                            </tr>
+                            <%
+                                }
+                            %>
                         </tbody>
                     </table>
                 </div>
@@ -186,25 +251,27 @@
                 <!-- Pagination -->
                 <div class="pagination-container">
                     <div class="pagination-info">
-                        Hiển thị 1 - 15 / Tổng số 30 nhân viên
+                        Hiển thị ${startStaff} - ${endStaff} / Tổng số ${totalStaff} nhân viên
                     </div>
                     <div class="pagination">
-                        <button class="page-btn" disabled>
+                        <a href="bm-staff?page=1${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (currentPage == 1 ? 'disabled' : '')}">
                             <i class="fas fa-angle-double-left"></i>
-                        </button>
-                        <button class="page-btn" disabled>
+                        </a>
+                        <a href="bm-staff?page=${currentPage - 1}${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (currentPage == 1 ? 'disabled' : '')}">
                             <i class="fas fa-angle-left"></i>
-                        </button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">
+                        </a>
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <a href="bm-staff?page=${i}${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (i == currentPage ? 'active' : '')}">${i}</a>
+                        </c:forEach>
+                        <a href="bm-staff?page=${currentPage + 1}${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (currentPage == totalPages ? 'disabled' : '')}">
                             <i class="fas fa-angle-right"></i>
-                        </button>
-                        <button class="page-btn">
+                        </a>
+                        <a href="bm-staff?page=${totalPages}${selectedStatus != null ? '&status=' += selectedStatus : ''}${selectedRole != null ? '&role=' += selectedRole : ''}" class="page-btn ${totalStaff == 0 ? 'disabled' : (currentPage == totalPages ? 'disabled' : '')}">
                             <i class="fas fa-angle-double-right"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
+
             </main>
         </div>
 

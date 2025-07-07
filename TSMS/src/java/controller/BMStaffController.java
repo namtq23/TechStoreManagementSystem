@@ -4,7 +4,10 @@
  */
 package controller;
 
+import dao.BranchDAO;
+import dao.RoleDAO;
 import dao.UserDAO;
+import dao.WareHouseDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,6 +18,7 @@ import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.util.List;
 import model.User;
+import model.UserDTO;
 
 /**
  *
@@ -46,12 +50,67 @@ public class BMStaffController extends HttpServlet {
                 resp.sendRedirect("login");
                 return;
             }
-
+            
             UserDAO userDAO = new UserDAO();
-            List<User> staffs = userDAO.getStaffsByBranchID(branchId, dbName);
-            req.setAttribute("staffs", staffs);
+            
+            int page = 1;
+            int pageSize = 10;
+            Integer status = null;
+            Integer role = null;
+            String search = req.getParameter("search");
+
+            if (req.getParameter("page") != null) {
+                try {
+                    page = Integer.parseInt(req.getParameter("page"));
+                    if (page < 1) {
+                        page = 1;
+                    }
+                } catch (NumberFormatException e) {
+                    page = 1;
+                }
+            }
+
+            if (req.getParameter("status") != null && !req.getParameter("status").isEmpty()) {
+                try {
+                    status = Integer.parseInt(req.getParameter("status"));
+                    if (status != 0 && status != 1) {
+                        status = null;
+                    }
+                } catch (NumberFormatException e) {
+                    status = null;
+                }
+            }
+
+            if (req.getParameter("role") != null && !req.getParameter("role").isEmpty()) {
+                try {
+                    role = Integer.parseInt(req.getParameter("role"));
+                    if (role < 1 || role > 3) {
+                        role = null;
+                    }
+                } catch (NumberFormatException e) {
+                    role = null;
+                }
+            }
+            
+            
+            List<UserDTO> staffList = userDAO.getStaffListByPage(dbName, page, pageSize, status, 2, search);
+            int totalStaff = userDAO.countStaff(dbName, status, 2, search);
+            int totalPages = (int) Math.ceil((double) totalStaff / pageSize);
+            System.out.println(totalPages + "----------------------");
+            int startStaff = (page - 1) * pageSize + 1;
+            int endStaff = Math.min(page * pageSize, totalStaff);
+
+            req.setAttribute("staffList", staffList);
+            req.setAttribute("currentPage", page);
+            req.setAttribute("totalPages", totalPages);
+            req.setAttribute("totalStaff", totalStaff);
+            req.setAttribute("startStaff", startStaff);
+            req.setAttribute("endStaff", endStaff);
+            req.setAttribute("selectedStatus", status);
+            req.setAttribute("selectedRole", role);
+            req.setAttribute("search", search);
             req.getRequestDispatcher("/WEB-INF/jsp/manager/staff.jsp").forward(req, resp);
-        } catch (ServletException | IOException | NumberFormatException | SQLException e) {
+        } catch (ServletException | IOException | NumberFormatException  e) {
             System.out.println(e);
         }
     }

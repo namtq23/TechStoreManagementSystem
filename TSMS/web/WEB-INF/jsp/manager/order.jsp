@@ -11,13 +11,363 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TSMS - Đơn hàng</title>
-        <!-- Add the new CSS file -->
-        <link rel="stylesheet" href="css/bm-orders.css">
+        <link rel="stylesheet" href="css/so-products.css">
         <link rel="stylesheet" href="css/header.css">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <style>
+            /* Custom styles for date range inputs */
+            .date-range-container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .date-input-wrapper {
+                flex: 1;
+                position: relative;
+            }
+
+            .date-input-wrapper label {
+                display: block;
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 5px;
+                font-weight: 500;
+            }
+
+            .date-input-wrapper input {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
+                transition: all 0.3s ease;
+            }
+
+            .date-input-wrapper input:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+                outline: none;
+            }
+
+            /* Dropdown styles for branch filter */
+            .branch-dropdown {
+                position: relative;
+                width: 100%;
+            }
+
+            .branch-select {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
+                background: white;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .branch-select:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+                outline: none;
+            }
+
+            /* Loading state for date input */
+            .custom-date-input.loading {
+                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                background-size: 200% 100%;
+                animation: loading 1.5s infinite;
+            }
+
+            @keyframes loading {
+                0% {
+                    background-position: 200% 0;
+                }
+                100% {
+                    background-position: -200% 0;
+                }
+            }
+
+            /* Success state for selected date */
+            .custom-date-input.selected {
+                border-color: #28a745;
+                background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            }
+
+            /* Tooltip for date input */
+            .custom-date-container {
+                position: relative;
+            }
+
+            .custom-date-container::after {
+                position: absolute;
+                bottom: -30px;
+                left: 0;
+                right: 0;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 8px 12px;
+                border-radius: 4px;
+                font-size: 12px;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+                z-index: 1000;
+            }
+
+            .custom-date-container:hover::after {
+                opacity: 1;
+            }
+
+            .date-label {
+                color: #333;
+            }
+
+            /* Print styles */
+            @media print {
+                .filter-section {
+                    box-shadow: none;
+                    border: 1px solid #000;
+                }
+
+                .filter-header {
+                    background: #000 !important;
+                    color: #fff !important;
+                }
+            }
+            /* Enhanced Search Form Styling */
+            .search-form {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                background: white;
+                border-radius: 12px;
+                border: 1px solid #e8ecef;
+            }
+
+            .search-input-container {
+                position: relative;
+                flex: 1;
+                min-width: 300px;
+            }
+
+            .search-icon {
+                position: absolute;
+                top: 50%;
+                left: 16px;
+                transform: translateY(-50%);
+                color: #667eea;
+                font-size: 14px;
+                z-index: 2;
+            }
+
+            .search-input {
+                width: 100%;
+                padding: 12px 16px 12px 45px;
+                border: 2px solid #e1e5e9;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #333;
+                background: #fafbfc;
+                transition: all 0.3s ease;
+                outline: none;
+            }
+
+            .search-input:focus {
+                border-color: #667eea;
+                background: white;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                transform: translateY(-1px);
+            }
+
+            .search-input::placeholder {
+                color: #999;
+                font-weight: 400;
+            }
+
+            .clear-search {
+                position: absolute;
+                top: 50%;
+                right: 12px;
+                transform: translateY(-50%);
+                color: #dc3545;
+                font-size: 14px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                z-index: 2;
+            }
+
+            .clear-search:hover {
+                color: #c82333;
+                transform: translateY(-50%) scale(1.1);
+            }
+
+            .btn-search {
+                background-color: #2196F3 ;
+                border: none;
+                color: #fff;
+                border-radius: 8px;
+                padding: 12px 20px;
+                font-size: 14px;
+                font-weight: bold;
+                text-transform: none;
+                transition: all 0.3s ease;
+            }
+
+            /* Search Results Info */
+            .search-results-info {
+                background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+                border: 1px solid #90caf9;
+                border-radius: 8px;
+                padding: 12px 16px;
+                margin: 16px 0;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .search-info-content {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex: 1;
+            }
+
+            .search-info-content i {
+                color: #1976d2;
+                font-size: 14px;
+            }
+
+            .search-info-content span {
+                color: #1565c0;
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            .results-count {
+                color: #1976d2 !important;
+                font-weight: 600 !important;
+            }
+
+            .clear-all-search {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 12px;
+                background: #1976d2;
+                color: white;
+                text-decoration: none;
+                border-radius: 6px;
+                font-size: 12px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .clear-all-search:hover {
+                background: #1565c0;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+            }
+
+            .clear-all-search i {
+                font-size: 11px;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .search-form {
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .search-input-container {
+                    min-width: auto;
+                    width: 100%;
+                }
+
+                .btn-search {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                .search-results-info {
+                    flex-direction: column;
+                    gap: 8px;
+                    align-items: flex-start;
+                }
+
+                .date-range-container {
+                    flex-direction: column;
+                    gap: 8px;
+                }
+            }
+
+            /* Enhanced pagination info for search results */
+            .pagination-info {
+                font-size: 14px;
+                color: #666;
+                font-weight: 500;
+            }
+
+            .pagination-info strong {
+                color: #667eea;
+                font-weight: 600;
+            }
+            /* Style cho nút Chi tiết */
+            .btn-primary.btn-sm {
+                background-color: #2196F3 !important;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 6px 12px;
+                font-size: 13px;
+                transition: all 0.3s ease;
+            }
+
+            .btn-primary.btn-sm:hover {
+                background-color: #333 !important;
+                box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            }
+
+            /* Style cho nút Xoá */
+            .btn-danger.btn-sm {
+                background-color: #f44336 !important;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 6px 12px;
+                font-size: 13px;
+                transition: all 0.3s ease;
+            }
+
+            .btn-danger.btn-sm:hover {
+                background-color: #d32f2f !important;
+                box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+            }
+            /* Bố cục nút Chi tiết và Xoá đẹp hơn */
+            .action-buttons {
+                display: flex;
+                gap: 8px; /* Khoảng cách giữa nút */
+            }
+
+            .action-buttons .btn {
+                text-align: center;
+                justify-content: center;
+            }
+            .btn-detail{
+                background-color: #2196F3;
+                color: white;
+            }
+
+            .btn-detail:hover{
+                background-color: #1976D2;
+            }
+
+        </style>            
     </head>
     <body>
-        <!-- Header -->
         <header class="header">
             <div class="header-container">
                 <div class="logo">
@@ -45,8 +395,8 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="#" class="dropdown-item">Nhập hàng</a>
-                            <a href="#" class="dropdown-item">Tạo yêu cầu nhập</a>
+                            <a href="bm-stockmovement?type=import" class="dropdown-item">Nhập hàng</a>
+                            <a href="request-stock" class="dropdown-item">Yêu cầu nhập hàng</a>
                         </div>
                     </div>
 
@@ -73,7 +423,6 @@
                             <a href="#" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
-
                     <a href="bm-promotions" class="nav-item">
                         <i class="fas fa-ticket"></i>
                         Khuyến mãi
@@ -110,114 +459,44 @@
                         </div>
                     </div>      
                 </div>
-            </div>
         </header>
 
-        <div class="main-container">
+        <div class="main-container">            
             <!-- Filter Form -->
             <form id="filterForm" action="bm-orders" method="get">
                 <input type="hidden" name="page" value="1">
-
+                <!-- Sidebar -->
                 <aside class="sidebar">
-                    <!-- Time Filter -->
                     <div class="filter-section time-filter-section">
                         <div class="filter-header">
-                            <h3><i class="fas fa-clock"></i> Thời gian</h3>
-                            <div class="header-actions">
-                                <i class="fas fa-question-circle" title="Chọn khoảng thời gian để lọc"></i>
-                                <i class="fas fa-chevron-up"></i>
-                            </div>
+                            <h3>Thời gian</h3>
                         </div>
                         <div class="filter-content">
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="this-month" 
-                                       ${empty param.timeFilter || param.timeFilter == 'this-month' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-calendar-alt"></i> Tháng này</span>
-                            </label>
-
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="this-week"
-                                       ${param.timeFilter == 'this-week' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-calendar-week"></i> Tuần này</span>
-                            </label>
-
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="today"
-                                       ${param.timeFilter == 'today' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-calendar-day"></i> Ngày hôm nay</span>
-                            </label>
-
-                            <label class="radio-item">
-                                <input type="radio" name="timeFilter" value="custom"
-                                       ${param.timeFilter == 'custom' ? 'checked' : ''}>
-                                <span class="radio-mark"></span>
-                                <span><i class="fas fa-calendar-plus"></i> Lựa chọn khác</span>
-                            </label>
-
-                            <div class="custom-date-container ${param.timeFilter == 'custom' ? 'show' : ''}" id="customDateContainer">
-                                <label class="date-label">
-                                    <i class="fas fa-calendar-check"></i> Chọn ngày bắt đầu
-                                </label>
-                                <input type="date" name="customDate" value="${param.customDate}"
-                                       class="custom-date-input" id="customDateInput"
-                                       placeholder="Chọn ngày...">
+                            <div class="date-range-container">
+                                <div class="date-input-wrapper">
+                                    <label for="startDate">Từ ngày:</label>
+                                    <input type="date" name="startDate" id="startDate" 
+                                           value="${param.startDate}" class="custom-date-input">
+                                </div>
+                                <div class="date-input-wrapper">
+                                    <label for="endDate">Đến ngày:</label>
+                                    <input type="date" name="endDate" id="endDate" 
+                                           value="${param.endDate}" class="custom-date-input">
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Creator Filter -->
                     <div class="filter-section">
                         <div class="filter-header">
-                            <h3><i class="fas fa-user-tie"></i> Người tạo</h3>
-                            <div class="header-actions">
-                                <i class="fas fa-question-circle" title="Chọn nhân viên tạo đơn hàng"></i>
-                                <i class="fas fa-chevron-up"></i>
-                            </div>
-                        </div>
-                        <div class="filter-content">
-                            <div class="checkbox-group">
-                                <c:forEach var="creator" items="${creatorsList}">
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" name="creatorIDs" value="${creator.userID}"
-                                               <c:forEach var="selectedCreator" items="${selectedCreators}">
-                                                   <c:if test="${selectedCreator == creator.userID}">checked</c:if>
-                                               </c:forEach>>
-                                        <span class="checkbox-mark"></span>
-                                        <span><i class="fas fa-user"></i> ${creator.fullName}</span>
-                                    </label>
-                                </c:forEach>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Price Range Filter -->
-                    <div class="filter-section">
-                        <div class="filter-header">
-                            <h3><i class="fas fa-dollar-sign"></i> Khoảng giá</h3>
-                            <div class="header-actions">
-                                <i class="fas fa-question-circle" title="Nhập khoảng giá để lọc đơn hàng"></i>
-                                <i class="fas fa-chevron-up"></i>
-                            </div>
+                            <h3>Khoảng giá</h3>
                         </div>
                         <div class="filter-content">
                             <div class="price-range">
-                                <div class="price-input-group">
-                                    <label class="price-label">
-                                        <i class="fas fa-arrow-up"></i> Giá từ
-                                    </label>
-                                    <input type="number" name="minPrice" placeholder="Nhập giá tối thiểu" min="0" 
-                                           class="price-input" value="${minPrice}">
-                                </div>
-                                <div class="price-input-group">
-                                    <label class="price-label">
-                                        <i class="fas fa-arrow-down"></i> Giá đến
-                                    </label>
-                                    <input type="number" name="maxPrice" placeholder="Nhập giá tối đa" min="0" 
-                                           class="price-input" value="${maxPrice}">
-                                </div>
+                                <input type="number" name="minPrice" placeholder="Giá từ" min="0" 
+                                       class="price-input" value="${minPrice}">
+                                <input type="number" name="maxPrice" placeholder="Giá đến" min="0" 
+                                       class="price-input" value="${maxPrice}">
                             </div>
                         </div>
                     </div>
@@ -238,22 +517,23 @@
 
             <!-- Main Content -->
             <main class="main-content">
-                <!-- Enhanced Search Form -->
                 <div class="page-header">
-                    <h1> Trang Đơn hàng chi nhánh</h1>
+                    <h1>Trang đơn hàng</h1>
                     <div class="header-actions">
                         <form class="search-form" method="get" action="bm-orders">
-                            <!-- Hidden inputs to maintain filter state -->
+                            <c:if test="${not empty selectedBranch}">
+                                <input type="hidden" name="branchID" value="${selectedBranch}">
+                            </c:if>
                             <c:if test="${not empty selectedCreators}">
                                 <c:forEach var="creatorID" items="${selectedCreators}">
                                     <input type="hidden" name="creatorIDs" value="${creatorID}">
                                 </c:forEach>
                             </c:if>
-                            <c:if test="${not empty timeFilter}">
-                                <input type="hidden" name="timeFilter" value="${timeFilter}">
+                            <c:if test="${not empty param.startDate}">
+                                <input type="hidden" name="startDate" value="${param.startDate}">
                             </c:if>
-                            <c:if test="${not empty customDate}">
-                                <input type="hidden" name="customDate" value="${customDate}">
+                            <c:if test="${not empty param.endDate}">
+                                <input type="hidden" name="endDate" value="${param.endDate}">   
                             </c:if>
                             <c:if test="${not empty minPrice}">
                                 <input type="hidden" name="minPrice" value="${minPrice}">
@@ -265,7 +545,7 @@
 
                             <div class="search-input-container">
                                 <i class="fas fa-search search-icon"></i>
-                                <input type="text" name="search" placeholder="Tìm theo tên sản phẩm, khách hàng"
+                                <input type="text" name="search" placeholder="Tìm theo tên sản phẩm và khách hàng"
                                        class="search-input" value="${searchKeyword}">
                                 <c:if test="${not empty searchKeyword}">
                                     <a href="bm-orders?page=1" class="clear-search" title="Xóa tìm kiếm">
@@ -273,240 +553,106 @@
                                     </a>
                                 </c:if>
                             </div>
-                            <button type="submit" class="btn-search">
-                                <i class="fas fa-search"></i>
-                                <span>Tìm kiếm</span>
-                            </button>
                         </form>
-                        <button class="btn btn-menu">
-                            <i class="fas fa-bars"></i>
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
                     </div>
                 </div>
 
-                <!-- Search Results Info -->
-                <c:if test="${not empty searchKeyword}">
-                    <div class="search-results-info">
-                        <div class="search-info-content">
-                            <i class="fas fa-search"></i>
-                            <span>Kết quả tìm kiếm cho: "<strong>${searchKeyword}</strong>"</span>
-                            <span class="results-count">(${totalOrders} kết quả)</span>
-                            <a href="bm-orders?page=1" class="clear-all-search">
-                                <i class="fas fa-times-circle"></i>
-                                Xóa tìm kiếm
-                            </a>
-                        </div>
-                    </div>
-                </c:if>
-
                 <!-- Orders Table -->
                 <div class="table-container">
-                    <div class="table-wrapper">
-                        <table class="orders-table">
-                            <thead>
-                                <tr>
-                                    <th class="checkbox-col">
-                                        <label class="checkbox-container">
-                                            <input type="checkbox" id="selectAll">
-                                            <span class="checkmark"></span>
-                                        </label>
-                                    </th>
-                                    <th class="order-info-col">
-                                        <i class="fas fa-receipt"></i>
-                                        Thông tin đơn hàng
-                                    </th>
-                                    <th class="product-col">
-                                        <i class="fas fa-box"></i>
-                                        Sản phẩm
-                                    </th>
-                                    <th class="customer-col">
-                                        <i class="fas fa-user"></i>
-                                        Khách hàng
-                                    </th>
-                                    <th class="staff-col">
-                                        <i class="fas fa-user-tie"></i>
-                                        Nhân viên
-                                    </th>
-                                    <th class="datetime-col">
-                                        <i class="fas fa-clock"></i>
-                                        Thời gian
-                                    </th>
-                                    <th class="status-col">
-                                        <i class="fas fa-info-circle"></i>
-                                        Trạng thái
-                                    </th>
-                                    <th class="payment-col">
-                                        <i class="fas fa-credit-card"></i>
-                                        Thanh toán
-                                    </th>
-                                    <th class="actions-col">
-                                        <i class="fas fa-cogs"></i>
-                                        Thao tác
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <%
-                                    List<OrdersDTO> ordersList = (List<OrdersDTO>) request.getAttribute("ordersList");
-                                    if (ordersList != null && !ordersList.isEmpty()) {
-                                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm");
-                                        java.text.NumberFormat currencyFormat = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
-                                        for (OrdersDTO order : ordersList) {
-                                %>
-                                <tr class="order-row" data-order-id="<%=order.getOrderID()%>">
-                                    <td class="checkbox-col">
-                                        <label class="checkbox-container">
-                                            <input type="checkbox" name="selectedOrders" value="<%=order.getOrderID()%>">
-                                            <span class="checkmark"></span>
-                                        </label>
-                                    </td>
-
-                                    <!-- Order Info Column -->
-                                    <td class="order-info-col">
-                                        <div class="order-info-card">
-                                            <div class="order-id">
-                                                <span class="label">Mã ĐH:</span>
-                                                <span class="value">#<%=order.getOrderID()%></span>
-                                            </div>
-                                            <div class="order-total">
-                                                <span class="total-amount"><%=currencyFormat.format(order.getGrandTotal())%></span>
-                                            </div>
-                                            <% if (order.getNotes() != null && !order.getNotes().trim().isEmpty()) { %>
-                                            <div class="order-notes">
-                                                <i class="fas fa-sticky-note"></i>
-                                                <span class="notes-text"><%=order.getNotes()%></span>
-                                            </div>
-                                            <% } %>
-                                        </div>
-                                    </td>
-
-                                    <!-- Product Column -->
-                                    <td class="product-col">
-                                        <div class="product-info-card">
-                                            <div class="product-name">
-                                                <i class="fas fa-tag"></i>
-                                                <span class="product-title"><%=order.getProductName() != null ? order.getProductName() : "N/A"%></span>
-                                            </div>
-                                            <div class="product-quantity">
-                                                <span class="quantity-badge">
-                                                    <i class="fas fa-cubes"></i>
-                                                    SL: <%=order.getQuantity()%>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <!-- Customer Column -->
-                                    <td class="customer-col">
-                                        <div class="customer-info-card">
-                                            <div class="customer-avatar">
-                                                <i class="fas fa-user-circle"></i>
-                                            </div>
-                                            <div class="customer-details">
-                                                <div class="customer-name"><%=order.getCustomerName()%></div>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <!-- Staff Column -->
-                                    <td class="staff-col">
-                                        <div class="staff-info-card">
-                                            <div class="staff-avatar">
-                                                <i class="fas fa-user-tie"></i>
-                                            </div>
-                                            <div class="staff-details">
-                                                <div class="staff-name"><%=order.getCreatedByName()%></div>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <!-- DateTime Column -->
-                                    <td class="datetime-col">
-                                        <div class="datetime-info-card">
-                                            <div class="date-part">
-                                                <i class="fas fa-calendar"></i>
-                                                <span><%=sdf.format(order.getCreatedAt()).split(" ")[0]%></span>
-                                            </div>
-                                            <div class="time-part">
-                                                <i class="fas fa-clock"></i>
-                                                <span><%=sdf.format(order.getCreatedAt()).split(" ")[1]%></span>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <!-- Status Column -->
-                                    <td class="status-col">
-                                        <div class="status-badge status-<%=order.getOrderStatus().toLowerCase().replace(" ", "-")%>">
-                                            <i class="fas fa-circle"></i>
-                                            <span><%=order.getOrderStatus()%></span>
-                                        </div>
-                                    </td>
-
-                                    <!-- Payment Column -->
-                                    <td class="payment-col">
-                                        <div class="payment-info-card">
-                                            <div class="payment-method">
-                                                <i class="fas fa-credit-card"></i>
-                                                <span><%=order.getPaymentMethod()%></span>
-                                            </div>
-                                            <div class="payment-details">
-                                                <div class="payment-row">
-                                                    <span class="label">Khách trả:</span>
-                                                    <span class="value"><%=currencyFormat.format(order.getCustomerPay())%></span>
-                                                </div>
-                                                <% if (order.getChange() > 0) { %>
-                                                <div class="payment-row change">
-                                                    <span class="label">Tiền thừa:</span>
-                                                    <span class="value"><%=currencyFormat.format(order.getChange())%></span>
-                                                </div>
-                                                <% } %>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <!-- Actions Column -->
-                                    <td class="actions-col">
-                                        <div class="action-buttons">
-                                            <form action="bm-orders" method="get" style="display:inline;">
-                                                <input type="hidden" name="action" value="view"/>
-                                                <input type="hidden" name="orderID" value="<%=order.getOrderID()%>"/>
-                                                <button type="submit" class="btn btn-view" title="Xem chi tiết">
-                                                    <i class="fas fa-eye"></i>
-                                                    <span>Chi tiết</span>
-                                                </button>
-                                            </form>
-                                            <form action="bm-orders" method="post" style="display:inline;">
-                                                <input type="hidden" name="action" value="delete"/>
-                                                <input type="hidden" name="orderID" value="<%=order.getOrderID()%>"/>
-                                                <button type="submit" class="btn btn-delete" title="Xóa đơn hàng"
-                                                        onclick="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">
-                                                    <i class="fas fa-trash"></i>
-                                                    <span>Xóa</span>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <%
-                                        }
-                                    } else {
-                                %>
-                                <tr class="empty-row">
-                                    <td colspan="9" class="empty-state">
-                                        <div class="empty-content">
-                                            <i class="fas fa-inbox"></i>
-                                            <h3>Không có đơn hàng nào!</h3>
-                                            <p>Hiện tại không có đơn hàng nào phù hợp với bộ lọc của bạn.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <%
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Mã</th>
+                                <th>Chi nhánh</th>
+                                <th>Khách hàng</th>
+                                <th>Nhân viên tạo</th>
+                                <th>Trạng thái đơn</th>
+                                <th>Tổng tiền</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <%
+                                List<OrdersDTO> ordersList = (List<OrdersDTO>) request.getAttribute("ordersList");
+                                Integer currentPage = (Integer) request.getAttribute("currentPage");
+                                Integer pageSize = 10;
+                                int startIndex = (currentPage - 1) * pageSize;
+                
+                                if (ordersList != null && !ordersList.isEmpty()) {
+                                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm");
+                                    java.text.NumberFormat currencyFormat = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
+                    
+                                    for (int i = 0; i < ordersList.size(); i++) {
+                                        OrdersDTO order = ordersList.get(i);
+                                        int stt = startIndex + i + 1;
+                            %>
+                            <tr>
+                                <td> </td>
+                                <td><strong>#<%=order.getOrderID()%></strong></td>
+                                <td>
+                                    <div class="branch-info">
+                                        <%=order.getBranchName() != null ? order.getBranchName() : "N/A"%>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="customer-info">
+                                        <%=order.getCustomerName() != null ? order.getCustomerName() : "N/A"%>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="creator-info">
+                                        <%=order.getCreatedByName() != null ? order.getCreatedByName() : "N/A"%>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="date-info">
+                                        <%=order.getCreatedAt() != null ? sdf.format(order.getCreatedAt()) : "N/A"%>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="price-info">
+                                        <strong><%=currencyFormat.format(order.getGrandTotal())%></strong>
+                                    </div>
+                                </td>
+                                <td class="actions-col">
+                                    <div class="action-buttons">
+                                        <form action="bm-orders" method="get" style="display:inline;">
+                                            <input type="hidden" name="action" value="view"/>
+                                            <input type="hidden" name="orderID" value="<%=order.getOrderID()%>"/>
+                                            <button type="submit" class="btn btn-primary btn-detail">
+                                                <i class="fas fa-info-circle"></i>
+                                            </button>
+                                        </form>
+                                        <form action="bm-orders" method="post" style="display:inline;" 
+                                              onsubmit="return confirm('Bạn có chắc chắn muốn xoá đơn hàng #<%=order.getOrderID()%> không?');">
+                                            <input type="hidden" name="action" value="delete"/>
+                                            <input type="hidden" name="orderID" value="<%=order.getOrderID()%>"/>
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <%
                                     }
-                                %>
-                            </tbody>
-                        </table>
-                    </div>
+                                } else {
+                            %>
+                            <tr>
+                                <td colspan="11" style="text-align:center; padding: 40px;">
+                                    <div class="no-data">
+                                        <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+                                        <p style="color: #666; font-size: 16px;">Không tìm thấy đơn hàng nào!</p>
+                                        <p style="color: #999; font-size: 14px;">Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            <%
+                                }
+                            %>
+                        </tbody>
+                    </table>
                 </div>
 
                 <!-- Pagination -->
@@ -523,36 +669,45 @@
                     </div>
                     <div class="pagination">
                         <%
-                            // Build filter parameters for pagination links
                             StringBuilder filterParams = new StringBuilder();
+
+                            String selectedBranch = (String) request.getAttribute("selectedBranch");
                             String[] selectedCreators = (String[]) request.getAttribute("selectedCreators");
-                            String timeFilter = (String) request.getAttribute("timeFilter");
-                            String customDate = (String) request.getAttribute("customDate");
+                            String startDate = (String) request.getAttribute("startDate");
+                            String endDate = (String) request.getAttribute("endDate");
                             Double minPrice = (Double) request.getAttribute("minPrice");
                             Double maxPrice = (Double) request.getAttribute("maxPrice");
                             String searchKeyword = (String) request.getAttribute("searchKeyword");
-                        
+
+                            if (selectedBranch != null && !selectedBranch.trim().isEmpty()) {
+                                filterParams.append("&branchID=").append(selectedBranch);
+                            }
+
                             if (selectedCreators != null) {
                                 for (String creatorID : selectedCreators) {
                                     filterParams.append("&creatorIDs=").append(creatorID);
                                 }
                             }
-                            if (timeFilter != null && !timeFilter.trim().isEmpty()) {
-                                filterParams.append("&timeFilter=").append(timeFilter);
+
+                            if (startDate != null && !startDate.trim().isEmpty()) {
+                                filterParams.append("&startDate=").append(startDate);
                             }
-                            if (customDate != null && !customDate.trim().isEmpty()) {
-                                filterParams.append("&customDate=").append(customDate);
+                            if (endDate != null && !endDate.trim().isEmpty()) {
+                                filterParams.append("&endDate=").append(endDate);
                             }
+
                             if (minPrice != null) {
                                 filterParams.append("&minPrice=").append(minPrice);
                             }
+
                             if (maxPrice != null) {
                                 filterParams.append("&maxPrice=").append(maxPrice);
                             }
+
                             if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-                                filterParams.append("&search=").append(java.net.URLEncoder.encode(searchKeyword, "UTF-8"));
+                                filterParams.append("&search=").append(searchKeyword);
                             }
-                        
+            
                             String filterParamsStr = filterParams.toString();
                             pageContext.setAttribute("filterParams", filterParamsStr);
                         %>
@@ -576,35 +731,20 @@
                 </div>
             </main>
         </div>
-
         <script>
-            document.getElementById('selectAll').addEventListener('change', function () {
-                const checkboxes = document.querySelectorAll('input[name="selectedOrders"]');
-                checkboxes.forEach(cb => cb.checked = this.checked);
+            const toggle = document.getElementById("dropdownToggle");
+            const menu = document.getElementById("dropdownMenu");
+
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                menu.style.display = menu.style.display === "block" ? "none" : "block";
             });
 
-            // Enhanced JavaScript for smooth animations
-            document.addEventListener('DOMContentLoaded', function () {
-                const radioButtons = document.querySelectorAll('input[name="timeFilter"]');
-                const customDateContainer = document.getElementById('customDateContainer');
-                const customDateInput = document.getElementById('customDateInput');
-
-                radioButtons.forEach(radio => {
-                    radio.addEventListener('change', function () {
-                        if (this.value === 'custom') {
-                            customDateContainer.classList.add('show');
-                            setTimeout(() => {
-                                customDateInput.focus();
-                            }, 300);
-                        } else {
-                            customDateContainer.classList.remove('show');
-                        }
-                    });
-                });
-
-                // Set today as max date for custom input
-                const today = new Date().toISOString().split('T')[0];
-                customDateInput.setAttribute('max', today);
+            // Đóng dropdown nếu click ra ngoài
+            document.addEventListener("click", function (e) {
+                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                    menu.style.display = "none";
+                }
             });
         </script>
     </body>
