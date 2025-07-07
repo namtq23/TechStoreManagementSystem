@@ -305,7 +305,7 @@
 
                     <!-- Action Buttons -->
                     <div class="filter-actions">
-                        <a href="bm-products?page=1" class="btn-clear">
+                        <a href="sale-products?page=1" class="btn-clear">
                             <i class="fas fa-eraser"></i>
                             Xóa bộ lọc
                         </a>
@@ -323,7 +323,7 @@
                 <div class="page-header">
                     <h1>Hàng hóa</h1>
                     <div class="header-actions">
-                        <form action="bm-products" method="get" class="search-form" style="display: flex; align-items: center; gap: 8px;">
+                        <form action="sale-products" method="get" class="search-form" style="display: flex; align-items: center; gap: 8px;">
                             <div style="position: relative; flex: 1;">
                                 <i class="fas fa-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa;"></i>
                                 <input type="text" name="search" placeholder="Theo tên hàng"
