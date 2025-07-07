@@ -27,15 +27,29 @@
                 margin-left: 10px;
             }
 
-            .action-buttons .btn {
-                background: #4CAF50;
-                border-color: #4CAF50;
+            .btn-detail {
+                background-color: #2196F3;
                 color: white;
+                border: 2px solid #2196f3;
+                padding: 8px 16px;
+                border-radius: 10px;
+                font-size: 12px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                text-decoration: none;
+                white-space: nowrap;
+                box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
             }
 
-            .action-buttons .btn:hover {
-                background: #138496;
-                border-color: #117a8b;
+            .btn-detail:hover {
+                background-color: #1976d2;
+                transform: translateY(-2px);
+                color: white;
+                ;
             }
         </style>
     </head>
@@ -66,9 +80,9 @@
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">Đơn hàng</a>
-                            <a href="#" class="dropdown-item">Nhập hàng</a>
-                            <a href="#" class="dropdown-item">Tạo yêu cầu nhập</a>
+                            <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
+                            <a href="bm-stockmovement?type=import" class="dropdown-item">Nhập hàng</a>
+                            <a href="request-stock" class="dropdown-item">Yêu cầu nhập hàng</a>
                         </div>
                     </div>
 
@@ -141,31 +155,26 @@
                 <div class="filter-section">
                     <div class="filter-header">
                         <h3>Trạng thái</h3>
-                        <i class="fas fa-chevron-up"></i>
                     </div>
                     <div class="filter-content">
                         <label class="radio-item">
                             <input type="radio" name="statusFilter" value="all" ${selectedStatus == null || selectedStatus == 'all' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator all"></span>
                             Tất cả
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="statusFilter" value="active" ${selectedStatus == 'active' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator in-stock"></span>
                             Đang hoạt động
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="statusFilter" value="scheduled" ${selectedStatus == 'scheduled' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator out-stock"></span>
                             Đã lên lịch
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="statusFilter" value="expired" ${selectedStatus == 'expired' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator out-stock"></span>
                             Đã hết hạn
                         </label>
                     </div>
@@ -175,31 +184,26 @@
                 <div class="filter-section">
                     <div class="filter-header">
                         <h3>Mức giảm giá</h3>
-                        <i class="fas fa-chevron-up"></i>
                     </div>
                     <div class="filter-content">
                         <label class="radio-item">
                             <input type="radio" name="discountFilter" value="all" ${selectedDiscount == null || selectedDiscount == 'all' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator all"></span>
                             Tất cả
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="discountFilter" value="low" ${selectedDiscount == 'low' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator below"></span>
                             Dưới 15%
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="discountFilter" value="medium" ${selectedDiscount == 'medium' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator in-stock"></span>
                             15% - 25%
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="discountFilter" value="high" ${selectedDiscount == 'high' ? 'checked' : ''} onchange="filterPromotions()">
                             <span class="radio-mark"></span>
-                            <span class="status-indicator above"></span>
                             Trên 25%
                         </label>
                     </div>
@@ -218,7 +222,6 @@
                                 <i class="fas fa-search"></i>
                                 <input type="text" name="search" placeholder="Theo tên khuyến mãi" value="${searchTerm}">
                             </div>
-                            <button type="submit" class="btn btn-success">Tìm Kiếm</button>
                         </form>
                     </div>
                 </div>
@@ -366,8 +369,8 @@
                                                     <form action="bm-promotions" method="get" style="display:inline;">
                                                         <input type="hidden" name="action" value="view">
                                                         <input type="hidden" name="promotionId" value="${promotion.promotionID}">
-                                                        <button type="submit" class="btn btn-info">
-                                                            <i class="fas fa-eye"></i> Chi tiết
+                                                        <button type="submit" class="btn btn-detail">
+                                                            <i class="fas fa-info-circle"></i>
                                                         </button>
                                                     </form>
                                                 </div>

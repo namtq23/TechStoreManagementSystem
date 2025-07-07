@@ -43,16 +43,16 @@
                         Hàng hóa
                     </a>
 
-                    <div class="nav-item dropdown active" >
+                    <div class="nav-item dropdown">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
                             Giao dịch
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">Đơn hàng</a>
-                            <a href="#" class="dropdown-item">Nhập hàng</a>
-                            <a href="#" class="dropdown-item">Yêu cầu nhập hàng</a>
+                            <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
+                            <a href="bm-stockmovement?type=import" class="dropdown-item">Nhập hàng</a>
+                            <a href="request-stock" class="dropdown-item">Yêu cầu nhập hàng</a>
                         </div>
                     </div>
 

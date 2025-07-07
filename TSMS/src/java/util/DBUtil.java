@@ -33,9 +33,9 @@ public class DBUtil {
 //            dataSource.setPassword("123456");
 
             //Kien
-            dataSource.setUrl("jdbc:sqlserver://localhost:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
-            dataSource.setUsername("sa");
-            dataSource.setPassword("123");
+//            dataSource.setUrl("jdbc:sqlserver://localhost:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
+//            dataSource.setUsername("sa");
+//            dataSource.setPassword("123");
             
             //Phung
 //            dataSource.setUrl("jdbc:sqlserver://PHUNGPDHE189026\\SQL2019:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
@@ -43,9 +43,9 @@ public class DBUtil {
 //            dataSource.setPassword("1");
             
 //            Dat
-//            dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
-//            dataSource.setUsername("sa");
-//            dataSource.setPassword("123");
+            dataSource.setUrl("jdbc:sqlserver://ND2P\\PHUONG:1433;databaseName=SuperAdminDB;encrypt=true;trustServerCertificate=true");
+            dataSource.setUsername("sa");
+            dataSource.setPassword("123");
 
             dataSource.setInitialSize(5);
             dataSource.setMaxTotal(10);
