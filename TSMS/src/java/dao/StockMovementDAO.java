@@ -16,10 +16,11 @@ public class StockMovementDAO {
 
         String sql = """
             SELECT pd.ProductDetailID, pd.ProductCode, pd.Description, pd.ProductNameUnsigned,
-                   pd.WarrantyPeriod, pd.CreatedAt, pd.UpdatedAt , ip.Quantity
+                   pd.WarrantyPeriod, pd.CreatedAt, pd.UpdatedAt, ip.Quantity, p.SupplierID
             FROM InventoryProducts ip
             JOIN Inventory i ON ip.InventoryID = i.InventoryID
             JOIN ProductDetails pd ON ip.ProductDetailID = pd.ProductDetailID
+            JOIN Products p ON pd.ProductID = p.ProductID
             WHERE i.BranchID = ?
         """;
 
@@ -37,6 +38,7 @@ public class StockMovementDAO {
                     pd.setDetailCreatedAt(rs.getTimestamp("CreatedAt"));
                     pd.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
                     pd.setQuantity(rs.getInt("Quantity"));
+                    pd.setSupplierID(rs.getInt("SupplierID"));
 
                     result.add(pd);
                 }
@@ -51,7 +53,7 @@ public class StockMovementDAO {
 
         String sql = """
             SELECT pd.ProductDetailID, pd.ProductCode, pd.Description, pd.ProductNameUnsigned,
-                   pd.WarrantyPeriod, pd.CreatedAt, pd.UpdatedAt
+                   pd.WarrantyPeriod, pd.CreatedAt, pd.UpdatedAt, ip.Quantity, p.SupplierID
             FROM InventoryProducts ip
             JOIN Inventory i ON ip.InventoryID = i.InventoryID
             JOIN ProductDetails pd ON ip.ProductDetailID = pd.ProductDetailID
@@ -74,6 +76,8 @@ public class StockMovementDAO {
                     pd.setWarrantyPeriod(rs.getString("WarrantyPeriod"));
                     pd.setDetailCreatedAt(rs.getTimestamp("CreatedAt"));
                     pd.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
+                    pd.setQuantity(rs.getInt("Quantity"));
+                    pd.setSupplierID(rs.getInt("SupplierID"));
                     result.add(pd);
                 }
             }

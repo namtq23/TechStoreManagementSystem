@@ -19,7 +19,8 @@ public class ProductDetails {
     private Timestamp detailCreatedAt;
     private Timestamp updatedAt;
     private String productNameUnsigned;  
-    private int quantity;  
+    private int quantity;
+    private int supplierID;  
     
     // Constructor
     public ProductDetails(int productDetailID, String description, String productCode,
@@ -65,6 +66,10 @@ public class ProductDetails {
     public int getQuantity() {
         return quantity;
     }
+    
+    public int getSupplierID() {
+        return supplierID;
+    }
 
     
 
@@ -99,6 +104,10 @@ public class ProductDetails {
     
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+    
+    public void setSupplierID(int supplierID) {
+        this.supplierID = supplierID;
     }
     
     // toString()

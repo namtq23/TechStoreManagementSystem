@@ -126,6 +126,7 @@
                     <form method="post" action="request-stock" style="display: inline;">
                         <input type="hidden" name="action" value="reset" />
                         <input type="hidden" name="keyword" value="<%= request.getParameter("keyword") != null ? request.getParameter("keyword") : "" %>" />
+                        <input type="hidden" name="supplierId" value="<%= request.getParameter("supplierId") != null ? request.getParameter("supplierId") : "" %>" />
                         <button type="submit" class="btn-secondary" onclick="return confirm('Bạn có chắc muốn xóa tất cả sản phẩm?')">
                             <i class="fa fa-trash"></i> Xóa tất cả
                         </button>
@@ -133,6 +134,7 @@
                     <% } %></div>
 
                 <form action="request-stock" method="post" id="requestForm">
+                    <input type="hidden" name="supplierId" value="<%= request.getParameter("supplierId") != null ? request.getParameter("supplierId") : "" %>" />
                     <div class="invoice-table-body">
                         <table>
                             <thead>
@@ -210,6 +212,7 @@
                     <input type="hidden" name="action" value="remove" />
                     <input type="hidden" name="productDetailID" id="removeProductDetailID" />
                     <input type="hidden" name="toWarehouseID" id="removeToWarehouseID" />
+                    <input type="hidden" name="supplierId" value="<%= request.getParameter("supplierId") != null ? request.getParameter("supplierId") : "" %>" />
                 </form>
             </div>
 
@@ -221,7 +224,7 @@
                 </div>
 
                 <div class="search-section">
-                    <form method="get" action="request-stock" id="searchForm" class="search-form">
+                    <form method="get" action="<%= request.getParameter("supplierId") != null ? "import-request" : "request-stock" %>" id="searchForm" class="search-form">
                         <div class="search-container">
                             <i class="fa fa-search"></i>
                             <input
@@ -231,6 +234,9 @@
                                 placeholder="Tìm kiếm sản phẩm..."
                                 value="<%= request.getParameter("keyword") != null ? request.getParameter("keyword") : "" %>"
                                 />
+                            <% if (request.getParameter("supplierId") != null) { %>
+                            <input type="hidden" name="supplierId" value="<%= request.getParameter("supplierId") %>" />
+                            <% } %>
                             <button type="submit" class="btn-primary">Tìm kiếm</button>
                         </div>
                     </form>
@@ -248,6 +254,7 @@
                         <form action="request-stock" method="post">
                             <input type="hidden" name="action" value="add" />
                             <input type="hidden" name="productDetailID" value="<%= p.getProductDetailID() %>" />
+                            <input type="hidden" name="supplierId" value="<%= request.getParameter("supplierId") != null ? request.getParameter("supplierId") : "" %>" />
                             <button type="submit" class="add-to-cart"><i class="fa fa-plus"></i></button>
                         </form>
                     </div>

@@ -55,6 +55,7 @@ public class BMStockMovementController extends HttpServlet {
             }
 
             String keyword = req.getParameter("keyword");
+            String supplierIdStr = req.getParameter("supplierId");
             if (keyword != null && keyword.isBlank()) {
                 resp.sendRedirect("request-stock");
                 return;
@@ -69,6 +70,16 @@ public class BMStockMovementController extends HttpServlet {
             if (keyword != null && !keyword.isBlank()) {
                 keyword = Validate.standardizeName(keyword);
                 products = dao.searchProductsByName(branchId, keyword, dbName);
+            } else if (supplierIdStr != null && !supplierIdStr.isBlank()) {
+                // Lấy sản phẩm theo supplierId
+                try {
+                    int supplierId = Integer.parseInt(supplierIdStr);
+                    products = dao.getAvailableProductsByBranch(branchId, dbName);
+                    // Filter theo supplier (cần implement method mới trong DAO)
+                    // products = dao.getAvailableProductsByBranchAndSupplier(branchId, supplierId, dbName);
+                } catch (NumberFormatException e) {
+                    products = dao.getAvailableProductsByBranch(branchId, dbName);
+                }
             } else {
                 products = dao.getAvailableProductsByBranch(branchId, dbName);
             }
