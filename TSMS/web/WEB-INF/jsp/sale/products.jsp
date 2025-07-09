@@ -449,12 +449,6 @@
             </main>
         </div>
 
-        <!-- Support Chat Button -->
-        <div class="support-chat">
-            <i class="fas fa-headset"></i>
-            <span>Hỗ trợ:1900 9999</span>
-        </div>
-
         <script>
             // User dropdown functionality
             const toggle = document.getElementById("dropdownToggle");

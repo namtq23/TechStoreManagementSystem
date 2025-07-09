@@ -116,6 +116,22 @@ Author     : admin
 
         <!-- Main Content -->
         <div class="main-container">
+            <c:if test="${not empty successMessage}">
+                <div id="toast" class="custom-toast">
+                    ${successMessage}
+                </div>
+                <script>
+                    // Ẩn sau 3 giây
+                    setTimeout(() => {
+                        const toast = document.getElementById("toast");
+                        if (toast) {
+                            toast.style.opacity = "0";
+                            setTimeout(() => toast.remove(), 500); // Xoá khỏi DOM sau khi mờ
+                        }
+                    }, 3000);
+                </script>
+            </c:if>
+
             <!-- Left Panel - Invoice -->
             <div class="invoice-panel">
                 <div class="panel-header">
@@ -490,6 +506,33 @@ Author     : admin
                 } else if (rawValue > 100) {
                     discountInput.value = 100;
                 }
+            });
+        </script>
+        <script>
+            const addCustomerBtn = document.getElementById('addCustomerBtn');
+            const createCustomerForm = document.getElementById('createCustomerForm');
+            const overlay = document.getElementById('overlay');
+            const closeCustomerBtn = document.getElementById('closeCustomerSubmit');
+            const createCustomerSubmit = document.getElementById('createCustomerSubmit');
+
+            addCustomerBtn.addEventListener('click', () => {
+                createCustomerForm.classList.remove('hidden');
+                overlay.classList.remove('hidden');
+            });
+
+            closeCustomerBtn.addEventListener('click', () => {
+                createCustomerForm.classList.add('hidden');
+                overlay.classList.add('hidden');
+            });
+
+            createCustomerSubmit.addEventListener('click', () => {
+                createCustomerForm.classList.add('hidden');
+                overlay.classList.add('hidden');
+            });
+
+            overlay.addEventListener('click', () => {
+                createCustomerForm.classList.add('hidden');
+                overlay.classList.add('hidden');
             });
         </script>
         <script src="js/bm-cart.js"></script>

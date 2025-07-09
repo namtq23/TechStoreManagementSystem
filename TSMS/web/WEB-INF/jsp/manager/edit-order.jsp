@@ -28,181 +28,6 @@
                 line-height: 1.6;
             }
 
-            /* Header Styles */
-            .header {
-                background: linear-gradient(135deg, #2196F3 0%, #1976D2 50%, #0D47A1 100%);
-                height: 60px;
-                display: flex;
-                align-items: center;
-                padding: 0 20px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                position: sticky;
-                top: 0;
-                z-index: 1000;
-            }
-
-            .header-container {
-                width: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
-
-            /* Logo Styles */
-            .logo {
-                display: flex;
-                align-items: center;
-                text-decoration: none;
-                color: white;
-                margin-right: 30px;
-            }
-
-            .logo-icon {
-                width: 36px;
-                height: 36px;
-                background: white;
-                color: #2196F3;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 18px;
-                font-weight: bold;
-                margin-right: 12px;
-            }
-
-            .logo-text {
-                font-size: 20px;
-                font-weight: 700;
-                color: white;
-            }
-
-            /* Navigation Styles */
-            .main-nav {
-                display: flex;
-                align-items: center;
-                flex: 1;
-                gap: 0;
-            }
-
-            .nav-item {
-                position: relative;
-                color: white;
-                text-decoration: none;
-                padding: 18px 20px;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                transition: all 0.3s ease;
-                font-size: 14px;
-                font-weight: 500;
-                white-space: nowrap;
-            }
-
-            .nav-item:hover, .nav-item.active {
-                background: rgba(255,255,255,0.15);
-                color: white;
-                text-decoration: none;
-            }
-
-            .nav-item i {
-                font-size: 16px;
-            }
-
-            /* Dropdown Styles */
-            .dropdown {
-                position: relative;
-            }
-
-            .dropdown-toggle {
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .dropdown-toggle .fa-caret-down {
-                font-size: 12px;
-                margin-left: 4px;
-            }
-
-            .dropdown-menu {
-                position: absolute;
-                top: 100%;
-                left: 0;
-                background: white;
-                min-width: 200px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-                border-radius: 8px;
-                padding: 8px 0;
-                opacity: 0;
-                visibility: hidden;
-                transform: translateY(-10px);
-                transition: all 0.3s ease;
-                z-index: 1000;
-                border: 1px solid rgba(0,0,0,0.1);
-            }
-
-            .dropdown:hover .dropdown-menu {
-                opacity: 1;
-                visibility: visible;
-                transform: translateY(0);
-            }
-
-            .dropdown-item {
-                display: block;
-                padding: 12px 20px;
-                color: #333;
-                text-decoration: none;
-                transition: background-color 0.3s ease;
-                font-size: 14px;
-            }
-
-            .dropdown-item:hover {
-                background-color: #f8f9fa;
-                color: #2196F3;
-                text-decoration: none;
-            }
-
-            /* Header Right - User Section */
-            .header-right {
-                display: flex;
-                align-items: center;
-            }
-
-            .user-dropdown {
-                position: relative;
-            }
-
-            .user-icon {
-                color: white;
-                text-decoration: none;
-                padding: 8px;
-                border-radius: 50%;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 40px;
-                height: 40px;
-                background: rgba(255,255,255,0.1);
-            }
-
-            .user-icon:hover {
-                background: rgba(255,255,255,0.2);
-                color: white;
-                text-decoration: none;
-            }
-
-            .user-icon i {
-                font-size: 20px;
-            }
-
-            .user-dropdown .dropdown-menu {
-                right: 0;
-                left: auto;
-                min-width: 180px;
-            }
 
             /* Main Content Styles */
             .main-content {
@@ -681,82 +506,94 @@
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="so-overview" class="logo">
+                    <a href="bm-overview" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="so-overview" class="nav-item">
+                    <a href="bm-overview" class="nav-item">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
-                    <a href="so-products?page=1" class="nav-item">
+
+                    <a href="bm-products?page=1" class="nav-item">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
+
                     <div class="nav-item dropdown active">
-                        <a href="#" class="dropdown-toggle">
+                        <a href="" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
                             Giao dịch
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="so-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="so-createimport" class="dropdown-item">Tạo đơn nhập hàng</a>
-                            <a href="so-ienoti" class="dropdown-item">Thông báo nhập/xuất</a>
+                            <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
+                            <a href="bm-stockmovement?type=import" class="dropdown-item">Nhập hàng</a>
+                            <a href="request-stock" class="dropdown-item">Yêu cầu nhập hàng</a>
                         </div>
                     </div>
+
                     <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
+                        <a href="" class="dropdown-toggle">
                             <i class="fas fa-handshake"></i>
                             Đối tác
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="so-customer" class="dropdown-item">Khách hàng</a>
-                            <a href="so-supplier" class="dropdown-item">Nhà cung cấp</a>
+                            <a href="bm-customer" class="dropdown-item">Khách hàng</a>
+                            <a href="bm-supplier" class="dropdown-item">Nhà cung cấp</a>
                         </div>
                     </div>
+
                     <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
+                        <a href="" class="dropdown-toggle">
                             <i class="fas fa-users"></i>
                             Nhân viên
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="so-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="so-commission" class="dropdown-item">Hoa hồng</a>
+                            <a href="bm-staff" class="dropdown-item">Danh sách nhân viên</a>
+                            <a href="#" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
-                    <a href="so-promotions" class="nav-item">
-                        <i class="fas fa-gift"></i>
+                    <a href="bm-promotions" class="nav-item">
+                        <i class="fas fa-ticket"></i>
                         Khuyến mãi
                     </a>
+
                     <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
+                        <a href="" class="dropdown-toggle">
                             <i class="fas fa-chart-bar"></i>
                             Báo cáo
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="so-invoices?reportType=income" class="dropdown-item">Doanh Thu thuần</a>
-                            <a href="so-invoices?reportType=outcome" class="dropdown-item">Khoảng chi</a>
+                            <a href="#" class="dropdown-item">Tài chính</a>
+                            <a href="#" class="dropdown-item">Đật hàng</a>
+                            <a href="#" class="dropdown-item">Hàng hoá</a>
+                            <a href="#" class="dropdown-item">Khách hàng</a>
                         </div>
                     </div>
+
+                    <a href="bm-cart" class="nav-item">
+                        <i class="fas fa-cash-register"></i>
+                        Bán hàng
+                    </a>
                 </nav>
+
                 <div class="header-right">
                     <div class="user-dropdown">
-                        <a href="#" class="user-icon gradient" id="dropdownToggle">
+                        <a href="" class="user-icon gradient" id="dropdownToggle">
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="so-information" class="dropdown-item">Thông tin chi tiết</a>
+                            <a href="staff-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      
                 </div>
-            </div>
         </header>
 
         <!-- Main Content -->
@@ -963,8 +800,8 @@
                         </div>
                     </div>
                 </div>
-                            
-                             <!-- Phần 4: Thông tin khách hàng -->
+
+                <!-- Phần 4: Thông tin khách hàng -->
                 <div class="info-card">
                     <div class="card-header">
                         <i class="fas fa-user"></i>
@@ -1055,7 +892,7 @@
                         </div>
                     </div>
                 </div>
-               
+
                 <!--
                              Edit Section 
                             <form action="so-orders" method="post" id="updateOrderForm">

@@ -47,6 +47,11 @@ public class BMSellInStoreController extends HttpServlet {
             Object roleIdObj = session.getAttribute("roleId");
             Object dbNameObj = session.getAttribute("dbName");
             Object branchIdObj = session.getAttribute("branchId");
+            String successMessage = (String) session.getAttribute("successMessage");
+            if (successMessage != null) {
+                req.setAttribute("successMessage", successMessage);
+                session.removeAttribute("successMessage"); 
+            }
 
             if (userIdObj == null || roleIdObj == null || dbNameObj == null) {
                 resp.sendRedirect("login");
@@ -75,7 +80,7 @@ public class BMSellInStoreController extends HttpServlet {
             List<ProductDTO> products = p.getInventoryProductListByPageByBranchId(dbName, branchId, offset, pageSize);
             int totalProducts = p.countProductsByBranchId(dbName, branchId);
             int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
-            
+
             List<UserDTO> sale = SalesDAO.getAllSalesStaff("DTB_TechStore");
 
             req.setAttribute("currentPage", page);
@@ -179,6 +184,7 @@ public class BMSellInStoreController extends HttpServlet {
 
             CashFlowDAO.insertCashFlow(dbName, "income", amountDue, "Tiền hoá đơn", "Tiền hoá đơn của chi nhánh" + branchId, paymentMethod, latestOrderId, branchId, user.getFullName());
 
+            session.setAttribute("successMessage", "Tạo đơn hàng thành công!");
             resp.sendRedirect(req.getContextPath() + "/bm-cart");
         } catch (SQLException ex) {
             Logger.getLogger(BMSellInStoreController.class.getName()).log(Level.SEVERE, null, ex);
