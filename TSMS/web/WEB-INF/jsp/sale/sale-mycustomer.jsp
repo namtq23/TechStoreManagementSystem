@@ -20,83 +20,46 @@
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="bm-overview" class="logo">
+                    <a href="sale-products?page=1" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
                 </div>
 
-                <nav class="main-nav">
-                    <a href="bm-overview" class="nav-item">
-                        <i class="fas fa-chart-line"></i>
-                        Tổng quan
-                    </a>
+                <!-- Hamburger Menu -->
+                <div class="hamburger-menu" id="hamburgerMenu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
 
-                    <a href="bm-products?page=1" class="nav-item">
+                <nav class="main-nav" id="mainNav">
+                    <a href="sale-products?page=1" class="nav-item">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
 
-                    <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
-                            <i class="fas fa-exchange-alt"></i>
-                            Giao dịch
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="bm-stockmovement?type=import" class="dropdown-item">Nhập hàng</a>
-                            <a href="request-stock" class="dropdown-item">Yêu cầu nhập hàng</a>
-                        </div>
-                    </div>
-
-                    <div class="nav-item dropdown active">
-                        <a href="" class="dropdown-toggle">
-                            <i class="fas fa-handshake"></i>
-                            Đối tác
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="bm-customer" class="dropdown-item">Khách hàng</a>
-                            <a href="bm-supplier" class="dropdown-item">Nhà cung cấp</a>
-                        </div>
-                    </div>
-
-                    <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
-                            <i class="fas fa-users"></i>
-                            Nhân viên
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="bm-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="#" class="dropdown-item">Hoa hồng</a>
-                        </div>
-                    </div>
-
-                    <a href="bm-promotions" class="nav-item">
-                        <i class="fas fa-ticket"></i>
-                        Khuyến mãi
+                    <a href="sale-sendnoti" class="nav-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        Gửi yêu cầu 
                     </a>
 
-                    <div class="nav-item dropdown">
+                    <a href="sale-mycustomer" class="nav-item active">
+                        <i class="fas fa-users"></i>
+                        Khách hàng của tôi
+                    </a>
+
+                    <div class="nav-item dropdown" id="reportDropdown">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-chart-bar"></i>
                             Báo cáo
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">Tài chính</a>
-                            <a href="#" class="dropdown-item">Đật hàng</a>
-                            <a href="#" class="dropdown-item">Hàng hoá</a>
-                            <a href="#" class="dropdown-item">Khách hàng</a>
+                            <a href="sale-mycommissions" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
 
-                    <a href="bm-cart" class="nav-item">
-                        <i class="fas fa-cash-register"></i>
-                        Bán hàng
-                    </a>
                 </nav>
 
                 <div class="header-right">
@@ -108,7 +71,7 @@
                             <a href="staff-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
-                    </div>
+                    </div>      
                 </div>
             </div>
         </header>
