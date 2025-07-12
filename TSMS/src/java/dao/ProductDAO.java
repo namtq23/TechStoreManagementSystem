@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import model.BMProductFilter;
 import model.Brand;
 import model.ProductDetailDTO;
+import model.ProductDetails;
 import model.Supplier;
 import util.Validate;
 
@@ -1507,5 +1508,198 @@ public class ProductDAO {
 
     public static void main(String[] args) {
     }
+
+public static List<ProductDetailDTO> getProductDetailDTOsBySupplierPaged(String dbName, int supplierId, int offset, int limit) throws SQLException {
+    List<ProductDetailDTO> list = new ArrayList<>();
+
+    String sql = """
+        SELECT 
+            pd.ProductDetailID,
+            pd.ProductID,
+            p.ProductName,
+            p.ProductName + ' - ' + pd.ProductCode AS FullName,
+            pd.ProductCode,
+            pd.Description,
+            pd.WarrantyPeriod,
+            p.BrandID,
+            p.CategoryID,
+            p.SupplierID,
+            p.CostPrice,
+            p.RetailPrice,
+            p.VAT,
+            p.ImageURL,
+            p.IsActive,
+            pd.ProductNameUnsigned,
+            p.CreatedAt AS ProductCreatedAt,
+            pd.CreatedAt AS DetailCreatedAt,
+            pd.UpdatedAt
+        FROM ProductDetails pd
+        JOIN Products p ON pd.ProductID = p.ProductID
+        WHERE p.SupplierID = ?
+        ORDER BY pd.ProductDetailID DESC
+        OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setInt(1, supplierId);
+        stmt.setInt(2, offset);
+        stmt.setInt(3, limit);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                ProductDetailDTO dto = new ProductDetailDTO(
+                        rs.getInt("ProductDetailID"),
+                        rs.getInt("ProductID"),
+                        rs.getString("ProductName"),
+                        rs.getString("FullName"),
+                        rs.getString("ProductCode"),
+                        rs.getString("Description"),
+                        rs.getString("WarrantyPeriod"),
+                        rs.getInt("BrandID"),
+                        rs.getInt("CategoryID"),
+                        rs.getInt("SupplierID"),
+                        rs.getDouble("CostPrice"),
+                        rs.getDouble("RetailPrice"),
+                        rs.getDouble("VAT"),
+                        rs.getString("ImageURL"),
+                        rs.getBoolean("IsActive"),
+                        rs.getString("ProductNameUnsigned"),
+                        rs.getTimestamp("ProductCreatedAt"),
+                        rs.getTimestamp("DetailCreatedAt"),
+                        rs.getTimestamp("UpdatedAt")
+                );
+                list.add(dto);
+            }
+        }
+    }
+
+    return list;
+}
+
+public static int countProductDetailBySupplier(String dbName, int supplierId) throws SQLException {
+    String sql = "SELECT COUNT(*) FROM ProductDetails pd JOIN Products p ON pd.ProductID = p.ProductID WHERE p.SupplierID = ?";
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, supplierId);
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+    }
+    return 0;
+}
+
+// DAO
+public static List<ProductDetailDTO> searchProductDetailDTOsBySupplier(String dbName, int supplierId, String keyword, int offset, int limit) throws SQLException {
+    List<ProductDetailDTO> list = new ArrayList<>();
+
+    String sql = """
+        SELECT 
+            pd.ProductDetailID,
+            pd.ProductID,
+            p.ProductName,
+            p.ProductName + ' - ' + pd.ProductCode AS FullName,
+            pd.ProductCode,
+            pd.Description,
+            pd.WarrantyPeriod,
+            p.BrandID,
+            p.CategoryID,
+            p.SupplierID,
+            p.CostPrice,
+            p.RetailPrice,
+            p.VAT,
+            p.ImageURL,
+            p.IsActive,
+            pd.ProductNameUnsigned,
+            p.CreatedAt AS ProductCreatedAt,
+            pd.CreatedAt AS DetailCreatedAt,
+            pd.UpdatedAt
+        FROM ProductDetails pd
+        JOIN Products p ON pd.ProductID = p.ProductID
+        WHERE p.SupplierID = ?
+          AND (pd.ProductNameUnsigned LIKE ? OR pd.ProductCode LIKE ?)
+        ORDER BY pd.ProductDetailID DESC
+        OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setInt(1, supplierId);
+        stmt.setString(2, "%" + keyword + "%");
+        stmt.setString(3, "%" + keyword + "%");
+        stmt.setInt(4, offset);
+        stmt.setInt(5, limit);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                ProductDetailDTO dto = new ProductDetailDTO(
+                        rs.getInt("ProductDetailID"),
+                        rs.getInt("ProductID"),
+                        rs.getString("ProductName"),
+                        rs.getString("FullName"),
+                        rs.getString("ProductCode"),
+                        rs.getString("Description"),
+                        rs.getString("WarrantyPeriod"),
+                        rs.getInt("BrandID"),
+                        rs.getInt("CategoryID"),
+                        rs.getInt("SupplierID"),
+                        rs.getDouble("CostPrice"),
+                        rs.getDouble("RetailPrice"),
+                        rs.getDouble("VAT"),
+                        rs.getString("ImageURL"),
+                        rs.getBoolean("IsActive"),
+                        rs.getString("ProductNameUnsigned"),
+                        rs.getTimestamp("ProductCreatedAt"),
+                        rs.getTimestamp("DetailCreatedAt"),
+                        rs.getTimestamp("UpdatedAt")
+                );
+                list.add(dto);
+            }
+        }
+    }
+
+    return list;
+}
+
+
+    
+
+
+public static int countSearchProductDetailBySupplier(String dbName, int supplierId, String keyword) throws SQLException {
+    String sql = """
+        SELECT COUNT(*)
+        FROM ProductDetails pd
+        JOIN Products p ON pd.ProductID = p.ProductID
+        WHERE p.SupplierID = ?
+          AND (pd.ProductNameUnsigned LIKE ? OR pd.ProductCode LIKE ?)
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setInt(1, supplierId);
+        stmt.setString(2, "%" + keyword + "%");
+        stmt.setString(3, "%" + keyword + "%");
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+    }
+
+    return 0;
+}
+
+
+
+
+
+
 
 }

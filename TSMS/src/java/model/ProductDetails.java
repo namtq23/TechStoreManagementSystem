@@ -9,6 +9,7 @@ package model;
  *
  * @author phungpdhe189026
  */
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 public class ProductDetails {
@@ -20,7 +21,8 @@ public class ProductDetails {
     private Timestamp updatedAt;
     private String productNameUnsigned;  
     private int quantity;  
-    
+
+ 
     // Constructor
     public ProductDetails(int productDetailID, String description, String productCode,
                          String warrantyPeriod, Timestamp detailCreatedAt, Timestamp updatedAt) {
@@ -100,7 +102,7 @@ public class ProductDetails {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-    
+   
     // toString()
     @Override
     public String toString() {

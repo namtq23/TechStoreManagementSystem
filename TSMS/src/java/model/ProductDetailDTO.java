@@ -5,6 +5,7 @@
 package model;
 
 import java.sql.Timestamp;
+import util.Validate;
 
 /**
  *
@@ -31,6 +32,28 @@ public class ProductDetailDTO {
     private java.sql.Timestamp productCreatedAt;
     private java.sql.Timestamp detailCreatedAt;
     private java.sql.Timestamp updatedAt;
+    private int quantity;
+    private String formattedCostPrice;
+
+    public ProductDetailDTO() {
+    }
+
+  
+public String getFormattedCostPrice() {
+    if (formattedCostPrice == null || formattedCostPrice.isEmpty()) {
+        formattedCostPrice = Validate.formatCostPriceToVND(this.costPrice);
+    }
+    return formattedCostPrice;
+}
+
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 
     // Getters, setters & constructors
     public ProductDetailDTO(int productDetailID, int productID, String productName, String fullName,

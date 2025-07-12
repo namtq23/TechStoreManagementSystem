@@ -85,4 +85,72 @@ public class StockMovementsRequestDAO {
         return list;
     }
 
+public int insertMovementRequest(
+        String dbName,
+        int fromSupplierId,
+        int toWarehouseId,
+        String movementType,
+        String note,
+        int createdBy
+) throws SQLException {
+    String sql = """
+        INSERT INTO StockMovementsRequest (
+            FromSupplierID, FromBranchID, FromWarehouseID, 
+            ToBranchID, ToWarehouseID, 
+            MovementType, Note, CreatedBy, CreatedAt
+        ) VALUES (?, NULL, NULL, NULL, ?, ?, ?, ?, GETDATE());
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+        ps.setInt(1, fromSupplierId);
+        ps.setInt(2, toWarehouseId);
+        ps.setString(3, movementType);
+        ps.setString(4, note);
+        ps.setInt(5, createdBy);
+
+        ps.executeUpdate();
+
+        try (ResultSet rs = ps.getGeneratedKeys()) {
+            if (rs.next()) {
+                return rs.getInt(1); // MovementID
+            }
+        }
+    }
+
+    throw new SQLException("Không thể lấy MovementID sau khi insert StockMovementsRequest.");
+}
+public static void insertMovementResponse(
+        String dbName,
+        int movementId,
+        int userId,
+        String status,
+        String note
+) throws SQLException {
+    String sql = """
+        INSERT INTO StockMovementResponses (
+            MovementID, ResponsedBy, ResponseAt, ResponseStatus, Note
+        ) VALUES (?, ?, GETDATE(), ?, ?);
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setInt(1, movementId);
+        ps.setInt(2, userId);
+        ps.setString(3, status);
+        if (note != null) {
+            ps.setString(4, note);
+        } else {
+            ps.setNull(4, java.sql.Types.NVARCHAR);
+        }
+
+        ps.executeUpdate();
+    }
+}
+
+
+
+
 }
