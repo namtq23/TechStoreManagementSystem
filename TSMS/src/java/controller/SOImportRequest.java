@@ -1,5 +1,6 @@
 package controller;
 
+import dao.AnnouncementDAO;
 import dao.ProductDAO;
 import dao.StockMovementDetailDAO;
 import dao.StockMovementsRequestDAO;
@@ -23,7 +24,7 @@ import util.Validate;
 
 @WebServlet(name = "SOImportRequest", urlPatterns = {"/import-request"})
 public class SOImportRequest extends HttpServlet {
-    
+    private final AnnouncementDAO announcementDAO = new AnnouncementDAO();
     private final StockMovementsRequestDAO StockMovementsRequestDAO = new StockMovementsRequestDAO();
     private final StockMovementDetailDAO StockMovementDetailDAO = new StockMovementDetailDAO();
     private final SuppliersDAO suppliersDAO = new SuppliersDAO();
@@ -170,19 +171,10 @@ public class SOImportRequest extends HttpServlet {
         
 if ("submitRequest".equals(action)) {
     try {
-        // 0. Lấy thông tin cơ bản từ session & request
+        // 0. Lấy thông tin từ session & request
         Integer userId = (Integer) session.getAttribute("userId");
         Integer supplierId = (Integer) session.getAttribute("cartSupplierId");
-        System.out.println(supplierId);
-        
         String toWarehouseIdRaw = request.getParameter("toWarehouseID");
-        if (toWarehouseIdRaw == null || toWarehouseIdRaw.trim().isEmpty()) {
-            session.setAttribute("errorMessage", "Vui lòng chọn kho đích trước khi gửi yêu cầu.");
-            response.sendRedirect("import-request");
-            return;
-        }
-        int toWarehouseId = Integer.parseInt(toWarehouseIdRaw);
-        
         String note = request.getParameter("overallNote");
 
         if (userId == null || dbName == null || supplierId == null) {
@@ -191,6 +183,13 @@ if ("submitRequest".equals(action)) {
             return;
         }
 
+        if (toWarehouseIdRaw == null || toWarehouseIdRaw.trim().isEmpty()) {
+            session.setAttribute("errorMessage", "Vui lòng chọn kho đích trước khi gửi yêu cầu.");
+            response.sendRedirect("import-request");
+            return;
+        }
+
+        int toWarehouseId = Integer.parseInt(toWarehouseIdRaw);
         List<ProductDetailDTO> cartItems = (List<ProductDetailDTO>) session.getAttribute("cartItems");
         if (cartItems == null || cartItems.isEmpty()) {
             session.setAttribute("errorMessage", "Không có sản phẩm nào trong phiếu yêu cầu.");
@@ -198,25 +197,28 @@ if ("submitRequest".equals(action)) {
             return;
         }
 
-        // 2. Insert request
+        // 1. Insert phiếu nhập
         int movementId = StockMovementsRequestDAO.insertMovementRequest(
             dbName, supplierId, toWarehouseId, "import", (note != null ? note : ""), userId
         );
 
-        // 3. Insert từng dòng chi tiết
+        // 2. Insert từng dòng chi tiết
         for (ProductDetailDTO item : cartItems) {
             StockMovementDetailDAO.insertMovementDetail(dbName, movementId, item.getProductDetailID(), item.getQuantity());
         }
 
-        // 4. Ghi trạng thái pending
+        // 3. Ghi trạng thái pending
         StockMovementsRequestDAO.insertMovementResponse(dbName, movementId, userId, "pending", null);
+
+        // 4. Ghi thông báo vào bảng Announcements (NEW)
+        announcementDAO.insertImportRequestAnnouncement(dbName, userId, toWarehouseId, note);
 
         // 5. Dọn giỏ
         session.removeAttribute("cartItems");
         session.removeAttribute("cartSupplierId");
 
         session.setAttribute("successMessage", "Đã gửi yêu cầu nhập hàng thành công.");
-        response.sendRedirect("import-request-list?warehouseId=" + toWarehouseId);
+        response.sendRedirect("import-request");
         return;
 
     } catch (Exception e) {
@@ -225,6 +227,7 @@ if ("submitRequest".equals(action)) {
         response.sendRedirect("import-request");
     }
 }
+
 
 
     }
