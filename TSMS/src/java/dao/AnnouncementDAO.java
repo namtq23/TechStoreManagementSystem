@@ -11,6 +11,9 @@ import model.Announcement;
 
 public class AnnouncementDAO {
 
+    public AnnouncementDAO() {
+    }
+
     public List<AnnouncementDTO> getRecentAnnouncementsForShopOwner(String dbName) throws SQLException {
         List<AnnouncementDTO> list = new ArrayList<>();
         String sql = """
@@ -328,6 +331,23 @@ public class AnnouncementDAO {
 
         return list;
     }
+     public static void insertImportRequestAnnouncement(String dbName, int fromUserID, int toWarehouseID, String note) throws SQLException {
+        String query = "INSERT INTO Announcements " +
+                       "(FromUserID, FromBranchID, FromWarehouseID, ToWarehouseID, Title, Description, CreatedAt) " +
+                       "VALUES (?, (SELECT BranchID FROM Users WHERE UserID = ?), NULL, ?, ?, ?, GETDATE())";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, fromUserID); // FromUserID
+            stmt.setInt(2, fromUserID); // for subquery: get BranchID
+            stmt.setInt(3, toWarehouseID); // ToWarehouseID
+            stmt.setString(4, "Tạo thành công yêu cầu nhập hàng"); // Title
+            stmt.setString(5, note != null ? note : ""); // Description
+
+            stmt.executeUpdate();
+        }
+    }
 
     public static void insertAnnouncement(String dbName, int fromUserId, int toBranchId,
             String title, String description) throws SQLException {
@@ -345,5 +365,7 @@ public class AnnouncementDAO {
     public static void main(String[] args) throws SQLException {
         System.out.println(AnnouncementDAO.getSentAnnouncements("DTB_TechStore", 1));
     }
+    
+    
 
 }
