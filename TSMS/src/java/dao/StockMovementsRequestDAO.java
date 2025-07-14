@@ -121,7 +121,47 @@ public int insertMovementRequest(
 
     throw new SQLException("Không thể lấy MovementID sau khi insert StockMovementsRequest.");
 }
-public static void insertMovementResponse(
+//Được sử dụng khi export tạo ra một MovementRequest
+public int insertExportMovementRequest(
+        String dbName,
+        int fromBranchId,
+        int toWarehouseId,
+        String movementType,
+        String note,
+        int createdBy
+) throws SQLException {
+    String sql = """
+        INSERT INTO StockMovementsRequest (
+            FromSupplierID, FromBranchID, FromWarehouseID, 
+            ToBranchID, ToWarehouseID, 
+            MovementType, Note, CreatedBy, CreatedAt
+        ) VALUES (NULL, ?, NULL, NULL, ?, ?, ?, ?, GETDATE());
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+        ps.setInt(1, fromBranchId);     // FromBranchID
+        ps.setInt(2, toWarehouseId);    // ToWarehouseID
+        ps.setString(3, movementType);  // "export"
+        ps.setString(4, note);
+        ps.setInt(5, createdBy);
+
+        ps.executeUpdate();
+
+        try (ResultSet rs = ps.getGeneratedKeys()) {
+            if (rs.next()) {
+                return rs.getInt(1); // MovementID
+            }
+        }
+    }
+
+    throw new SQLException("Không thể lấy MovementID sau khi insert StockMovementsRequest.");
+}
+
+
+
+public  void insertMovementResponse(
         String dbName,
         int movementId,
         int userId,
@@ -148,6 +188,66 @@ public static void insertMovementResponse(
 
         ps.executeUpdate();
     }
+}
+public List<StockMovementsRequest> getExportRequests(String dbName, String warehouseId) {
+    List<StockMovementsRequest> list = new ArrayList<>();
+
+    StringBuilder sql = new StringBuilder();
+    sql.append("""
+        SELECT 
+            smr.MovementID,
+            smr.FromBranchID,
+            b.BranchName AS FromBranchName,
+            smr.MovementType,
+            smr.CreatedAt,
+            smr.CreatedBy,
+            u.FullName AS CreatedByName,
+            smr.Note,
+            ISNULL(SUM(smd.Quantity * p.CostPrice), 0) AS TotalAmount,
+            MAX(smrsp.ResponseStatus) AS ResponseStatus
+        FROM StockMovementsRequest smr
+        LEFT JOIN Branches b ON smr.FromBranchID = b.BranchID
+        LEFT JOIN Users u ON smr.CreatedBy = u.UserID
+        LEFT JOIN StockMovementDetail smd ON smr.MovementID = smd.MovementID
+        LEFT JOIN ProductDetails pd ON smd.ProductDetailID = pd.ProductDetailID
+        LEFT JOIN Products p ON pd.ProductID = p.ProductID
+        LEFT JOIN StockMovementResponses smrsp ON smr.MovementID = smrsp.MovementID
+        WHERE smr.ToWarehouseID = ?
+          AND smr.MovementType = 'export'
+        GROUP BY 
+            smr.MovementID, smr.FromBranchID, b.BranchName,
+            smr.MovementType, smr.CreatedAt, smr.CreatedBy, u.FullName, smr.Note
+        ORDER BY smr.CreatedAt DESC
+    """);
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+        ps.setString(1, warehouseId);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                StockMovementsRequest smr = new StockMovementsRequest();
+                smr.setMovementID(rs.getInt("MovementID"));
+                smr.setFromBranchID(rs.getObject("FromBranchID") != null ? rs.getInt("FromBranchID") : null);
+                smr.setFromBranchName(rs.getString("FromBranchName"));
+                smr.setMovementType(rs.getString("MovementType"));
+                smr.setCreatedAt(rs.getTimestamp("CreatedAt").toLocalDateTime());
+                smr.setCreatedBy(rs.getInt("CreatedBy"));
+                smr.setCreatedByName(rs.getString("CreatedByName"));
+                smr.setNote(rs.getString("Note"));
+                smr.setTotalAmount(rs.getBigDecimal("TotalAmount"));
+                smr.setResponseStatus(rs.getString("ResponseStatus"));
+
+                list.add(smr);
+            }
+        }
+
+    } catch (SQLException e) {
+        System.err.println("Error in getExportRequests(): " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    return list;
 }
 
 

@@ -121,9 +121,18 @@
                     <div class="page-header">
                         <h2>Chi tiết đơn nhập hàng #${movementID}</h2>
                         <div class="header-actions">
-                            <button class="btn btn-success" onclick="saveCheck('${movementID}')">
-                                Lưu & Hoàn thành
-                            </button>
+                            <c:if test="${allCompleted}">
+                                <form id="completeForm" method="post" action="${pageContext.request.contextPath}/complete-stock">
+                                    <input type="hidden" name="movementID" value="${movementID}">
+                                    <input type="hidden" name="warehouseID" value="${warehouseID}">
+                                    <input type="hidden" name="backURL" value="${pageContext.request.requestURI}?id=${movementID}">
+                                    <button type="submit" class="btn btn-success" onclick="saveCheck('${movementID}')">
+                                        Hoàn thành
+                                    </button>
+                                </form>
+
+
+                            </c:if>
                             <button class="btn btn-secondary" onclick="cancelCheck('${movementID}')">
                                 Hủy đơn nhập
                             </button>
@@ -559,7 +568,7 @@
                     showNotification('Đang xử lý...', 'info');
                     // TODO: Implement API call
                     // Sau khi API call thành công, có thể redirect hoặc reload trang
-                    // window.location.href = '${pageContext.request.contextPath}/inventory-list';
+                    window.location.href = '${pageContext.request.contextPath}/inventory-list';
                 }
             }
 

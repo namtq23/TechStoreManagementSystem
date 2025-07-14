@@ -12,7 +12,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>TSMS - Danh sách đơn nhập hàng</title>
+        <title>TSMS - Danh sách xuất hàng đến chi nhánh</title>
         <link rel="stylesheet" href="css/import.css">
         <link rel="stylesheet" href="css/header.css"/>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -32,12 +32,12 @@
                         Hàng hóa
                     </a>
 
-                    <a href="wh-import" class="nav-item active">
+                    <a href="wh-import" class="nav-item ">
                         <i class="fa-solid fa-download"></i>
                         Nhập hàng
                     </a>
 
-                    <a href="wh-export" class="nav-item">
+                    <a href="" class="nav-item active">
                         <i class="fa-solid fa-upload"></i>
                         Xuất hàng
                     </a>
@@ -152,31 +152,31 @@
             <!-- Main Content -->
             <main class="main-content">
                 <div class="page-header">
-                    <h1>Danh sách đơn nhập hàng</h1>
+                    <h1>Danh sách hàng xuất</h1>
 
                 </div>
 
                 <!-- Import Orders Table -->
+                <!-- Export Orders Table -->
                 <div class="table-container">
                     <table class="invoices-table">
                         <thead>
                             <tr>
                                 <th>STT</th>
-                                <th>Mã đơn nhập</th>
-                                <th>Nhà cung cấp</th>
+                                <th>Mã đơn xuất</th>
+                                <th>Chi nhánh gửi</th>
                                 <th>Trạng thái</th>
                                 <th>Ngày tạo</th>
                                 <th>Người tạo</th>
-                                <th>Tổng tiền</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <c:forEach var="req" items="${importRequests}" varStatus="loop">
+                            <c:forEach var="req" items="${exportRequests}" varStatus="loop">
                                 <tr>
                                     <td>${loop.index + 1}</td>
                                     <td>${req.movementID}</td>
-                                    <td>${req.fromSupplierName}</td>
+                                    <td>${req.fromBranchName}</td>
                                     <td>
                                         <c:choose>
                                             <c:when test="${req.responseStatus eq 'pending'}">
@@ -198,15 +198,14 @@
                                     </td>
                                     <td>${req.formattedDate}</td>
                                     <td>${req.createdByName}</td>
-                                    <td>${req.formattedTotalAmount}</td>
                                     <td>
                                         <div class="action-buttons">
                                             <c:choose>
                                                 <c:when test="${req.responseStatus eq 'pending'}">
-                                                    <button class="btn-action edit" onclick="editOrder('${req.movementID}', '${req.movementType}')">Xử lý</button>
+                                                    <button class="btn-action edit"  onclick="editOrder('${req.movementID}', '${req.movementType}')">Xử lý</button>
                                                 </c:when>
                                                 <c:when test="${req.responseStatus eq 'processing'}">
-                                                    <button class="btn-action process" onclick="editOrder('${req.movementID}', '${req.movementType}')">Tiếp tục nhập</button>
+                                                    <button class="btn-action process" onclick="editOrder('${req.movementID}', '${req.movementType}')">Tiếp tục xuất</button>
                                                 </c:when>
                                                 <c:when test="${req.responseStatus eq 'completed'}">
                                                     <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
@@ -225,6 +224,7 @@
                         </tbody>
                     </table>
                 </div>
+
 
 
 
@@ -318,6 +318,7 @@
                 console.log('Chỉnh sửa đơn hàng: ' + orderId + ' - ' + movementType);
                 window.location.href = 'serial-check?id=' + orderId + '&movementType=' + movementType;
             }
+
 
 
         </script>

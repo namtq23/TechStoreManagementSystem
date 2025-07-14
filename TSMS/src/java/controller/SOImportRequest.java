@@ -15,15 +15,16 @@ import jakarta.servlet.http.HttpSession;
 import model.ProductDetailDTO;
 import model.Supplier;
 import model.Warehouse;
+import util.Validate;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import util.Validate;
 
 @WebServlet(name = "SOImportRequest", urlPatterns = {"/import-request"})
 public class SOImportRequest extends HttpServlet {
+
     private final AnnouncementDAO announcementDAO = new AnnouncementDAO();
     private final StockMovementsRequestDAO StockMovementsRequestDAO = new StockMovementsRequestDAO();
     private final StockMovementDetailDAO StockMovementDetailDAO = new StockMovementDetailDAO();
@@ -124,9 +125,19 @@ public class SOImportRequest extends HttpServlet {
                 List<ProductDetailDTO> cartItems = (List<ProductDetailDTO>) session.getAttribute("cartItems");
                 if (cartItems != null) {
                     cartItems.removeIf(item -> item.getProductDetailID() == productDetailID);
+
+                    // Nếu sau khi xóa mà giỏ hàng rỗng thì xóa luôn cartSupplierId
+                    if (cartItems.isEmpty()) {
+                        session.removeAttribute("cartItems");
+                        session.removeAttribute("cartSupplierId");
+
+                        // Gắn cờ để không set lại cartSupplierId trong loadCommonData()
+                        session.setAttribute("justReset", true);
+                    } else {
+                        session.setAttribute("cartItems", cartItems);
+                    }
                 }
 
-                session.setAttribute("cartItems", cartItems);
                 session.setAttribute("successMessage", "Đã xóa sản phẩm khỏi phiếu yêu cầu.");
 
             } catch (Exception e) {
@@ -148,6 +159,10 @@ public class SOImportRequest extends HttpServlet {
             try {
                 session.removeAttribute("cartItems");
                 session.removeAttribute("cartSupplierId");
+
+                //️ Gắn cờ tạm để loadCommonData biết không gán lại cartSupplierId nữa
+                session.setAttribute("justReset", true);
+
                 session.setAttribute("successMessage", "Đã xóa tất cả sản phẩm khỏi phiếu yêu cầu.");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -168,68 +183,59 @@ public class SOImportRequest extends HttpServlet {
             response.sendRedirect(redirectURL);
             return;
         }
-        
-if ("submitRequest".equals(action)) {
-    try {
-        // 0. Lấy thông tin từ session & request
-        Integer userId = (Integer) session.getAttribute("userId");
-        Integer supplierId = (Integer) session.getAttribute("cartSupplierId");
-        String toWarehouseIdRaw = request.getParameter("toWarehouseID");
-        String note = request.getParameter("overallNote");
 
-        if (userId == null || dbName == null || supplierId == null) {
-            session.setAttribute("errorMessage", "Thiếu thông tin người dùng hoặc nhà cung cấp.");
-            response.sendRedirect("import-request");
-            return;
+        if ("submitRequest".equals(action)) {
+            try {
+                Integer userId = (Integer) session.getAttribute("userId");
+                Integer supplierId = (Integer) session.getAttribute("cartSupplierId");
+                String toWarehouseIdRaw = request.getParameter("toWarehouseID");
+                String note = request.getParameter("overallNote");
+
+                if (userId == null || dbName == null || supplierId == null) {
+                    session.setAttribute("errorMessage", "Thiếu thông tin người dùng hoặc nhà cung cấp.");
+                    response.sendRedirect("import-request");
+                    return;
+                }
+
+                if (toWarehouseIdRaw == null || toWarehouseIdRaw.trim().isEmpty()) {
+                    session.setAttribute("errorMessage", "Vui lòng chọn kho đích trước khi gửi yêu cầu.");
+                    response.sendRedirect("import-request");
+                    return;
+                }
+
+                int toWarehouseId = Integer.parseInt(toWarehouseIdRaw);
+                List<ProductDetailDTO> cartItems = (List<ProductDetailDTO>) session.getAttribute("cartItems");
+                if (cartItems == null || cartItems.isEmpty()) {
+                    session.setAttribute("errorMessage", "Không có sản phẩm nào trong phiếu yêu cầu.");
+                    response.sendRedirect("import-request?supplierId=" + supplierId + "&toWarehouseID=" + toWarehouseId);
+                    return;
+                }
+
+                int movementId = StockMovementsRequestDAO.insertMovementRequest(
+                        dbName, supplierId, toWarehouseId, "import", (note != null ? note : ""), userId
+                );
+
+                for (ProductDetailDTO item : cartItems) {
+                    StockMovementDetailDAO.insertMovementDetail(dbName, movementId, item.getProductDetailID(), item.getQuantity());
+                }
+
+                StockMovementsRequestDAO.insertMovementResponse(dbName, movementId, userId, "pending", null);
+
+                announcementDAO.insertImportRequestAnnouncement(dbName, userId, toWarehouseId, note);
+
+                session.removeAttribute("cartItems");
+                session.removeAttribute("cartSupplierId");
+
+                session.setAttribute("successMessage", "Đã gửi yêu cầu nhập hàng thành công.");
+                response.sendRedirect("import-request");
+                return;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("errorMessage", "Lỗi khi gửi yêu cầu nhập hàng: " + e.getMessage());
+                response.sendRedirect("import-request");
+            }
         }
-
-        if (toWarehouseIdRaw == null || toWarehouseIdRaw.trim().isEmpty()) {
-            session.setAttribute("errorMessage", "Vui lòng chọn kho đích trước khi gửi yêu cầu.");
-            response.sendRedirect("import-request");
-            return;
-        }
-
-        int toWarehouseId = Integer.parseInt(toWarehouseIdRaw);
-        List<ProductDetailDTO> cartItems = (List<ProductDetailDTO>) session.getAttribute("cartItems");
-        if (cartItems == null || cartItems.isEmpty()) {
-            session.setAttribute("errorMessage", "Không có sản phẩm nào trong phiếu yêu cầu.");
-            response.sendRedirect("import-request?supplierId=" + supplierId + "&toWarehouseID=" + toWarehouseId);
-            return;
-        }
-
-        // 1. Insert phiếu nhập
-        int movementId = StockMovementsRequestDAO.insertMovementRequest(
-            dbName, supplierId, toWarehouseId, "import", (note != null ? note : ""), userId
-        );
-
-        // 2. Insert từng dòng chi tiết
-        for (ProductDetailDTO item : cartItems) {
-            StockMovementDetailDAO.insertMovementDetail(dbName, movementId, item.getProductDetailID(), item.getQuantity());
-        }
-
-        // 3. Ghi trạng thái pending
-        StockMovementsRequestDAO.insertMovementResponse(dbName, movementId, userId, "pending", null);
-
-        // 4. Ghi thông báo vào bảng Announcements (NEW)
-        announcementDAO.insertImportRequestAnnouncement(dbName, userId, toWarehouseId, note);
-
-        // 5. Dọn giỏ
-        session.removeAttribute("cartItems");
-        session.removeAttribute("cartSupplierId");
-
-        session.setAttribute("successMessage", "Đã gửi yêu cầu nhập hàng thành công.");
-        response.sendRedirect("import-request");
-        return;
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        session.setAttribute("errorMessage", "Lỗi khi gửi yêu cầu nhập hàng: " + e.getMessage());
-        response.sendRedirect("import-request");
-    }
-}
-
-
-
     }
 
     private void processDisplay(HttpServletRequest request, HttpServletResponse response)
@@ -247,6 +253,8 @@ if ("submitRequest".equals(action)) {
     }
 
     private void loadCommonData(HttpServletRequest request, String dbName) throws SQLException {
+        HttpSession session = request.getSession();
+
         String keywordRaw = request.getParameter("keyword");
         String keyword = null;
         if (keywordRaw != null && !keywordRaw.trim().isEmpty()) {
@@ -260,7 +268,6 @@ if ("submitRequest".equals(action)) {
         List<Warehouse> listWarehouse = warehouseDAO.getAllWarehouses(dbName);
         request.setAttribute("listWarehouse", listWarehouse);
 
-        String supplierIdRaw = request.getParameter("supplierId");
         String pageRaw = request.getParameter("page");
         int page = 1;
         int limit = 5;
@@ -278,8 +285,25 @@ if ("submitRequest".equals(action)) {
 
         int offset = (page - 1) * limit;
 
-        if (supplierIdRaw != null && !supplierIdRaw.isEmpty()) {
-            int selectedSupplierID = Integer.parseInt(supplierIdRaw);
+        String supplierIdRaw = request.getParameter("supplierId");
+        Integer selectedSupplierID = null;
+
+        // ⚠️ Nếu vừa reset, không set lại cartSupplierId
+        boolean justReset = session.getAttribute("justReset") != null;
+
+        if (!justReset && supplierIdRaw != null && !supplierIdRaw.isEmpty()) {
+            selectedSupplierID = Integer.parseInt(supplierIdRaw);
+            if (session.getAttribute("cartSupplierId") == null) {
+                session.setAttribute("cartSupplierId", selectedSupplierID);
+            }
+        } else if (session.getAttribute("cartSupplierId") != null) {
+            selectedSupplierID = (Integer) session.getAttribute("cartSupplierId");
+        }
+
+        // ❌ Xóa flag "justReset" sau khi xử lý xong
+        session.removeAttribute("justReset");
+
+        if (selectedSupplierID != null) {
             request.setAttribute("selectedSupplierID", selectedSupplierID);
 
             List<ProductDetailDTO> listProductDetails;

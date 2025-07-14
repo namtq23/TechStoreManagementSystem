@@ -12,18 +12,29 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.StockMovementDetail;
 import util.Validate;
 
-@WebServlet(name="WHStockSerialCheckController", urlPatterns={"/serial-check"})
+@WebServlet(name = "WHStockSerialCheckController", urlPatterns = {"/serial-check"})
 public class WHStockSerialCheckController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
         String dbName = (String) request.getSession().getAttribute("dbName");
+        
 
+            if (dbName == null || dbName.isEmpty()) {
+               response.sendRedirect("login");
+                return;
+            }
+        
         String idParam = request.getParameter("id");
         if (idParam == null && request.getAttribute("id") != null) {
             idParam = request.getAttribute("id").toString();
+        }
+
+        String movementType = request.getParameter("movementType");
+        if (movementType == null && request.getAttribute("movementType") != null) {
+            movementType = request.getAttribute("movementType").toString();
         }
 
         if (idParam == null) {
@@ -39,39 +50,51 @@ public class WHStockSerialCheckController extends HttpServlet {
 
         request.setAttribute("movementID", movementID);
         request.setAttribute("movementDetails", details);
-        System.out.println("📦 Đơn nhập #" + movementID+ " có " + details.size() + " dòng sản phẩm.");
+        request.setAttribute("movementType", movementType);
 
+        System.out.println("📦 Đơn " + (movementType != null ? movementType : "") + " #" + movementID + " có " + details.size() + " dòng sản phẩm.");
+        
+        //Kiểm tra tất cả các sản phẩm trong đã hoàn thành chưa. 10 sản phẩm 2/2 => đã hoàn thành
+        boolean allCompleted = true;
+        for (StockMovementDetail item : details) {
+            if (item.getScanned() < item.getQuantity()) {
+                allCompleted = false;
+                break;
+            }
+        }
+        request.setAttribute("allCompleted", allCompleted);
         request.getRequestDispatcher("/WEB-INF/jsp/warehouse-manager/stock-check.jsp").forward(request, response);
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         processRequest(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-         response.setContentType("text/html;charset=UTF-8");
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+
         String dbName = (String) request.getSession().getAttribute("dbName");
         String serial = request.getParameter("scannedSerial");
         String detailIDStr = request.getParameter("detailID");
-       
         String movementIDStr = request.getParameter("movementID");
-System.out.println("Serial nhận được: [" + serial + "]");
+        String movementType = request.getParameter("movementType");
+
+        System.out.println("Serial nhận được: [" + serial + "]");
 
         if (serial == null || detailIDStr == null || serial.trim().isEmpty() || !Validate.validateSerialFormat(serial)) {
             request.setAttribute("error", "Vui lòng nhập Serial hợp lệ.");
+            request.setAttribute("movementType", movementType);
             processRequest(request, response);
             return;
         }
 
-         int detailID = Integer.parseInt(detailIDStr);
-         System.out.println(detailID);
+        int detailID = Integer.parseInt(detailIDStr);
         int movementID = Integer.parseInt(movementIDStr);
 
-   
         SerialNumberDAO serialDAO = new SerialNumberDAO();
 
         // Kiểm tra trùng serial
@@ -79,6 +102,7 @@ System.out.println("Serial nhận được: [" + serial + "]");
             System.err.println("❌ Serial đã tồn tại trong hệ thống: " + serial);
             request.setAttribute("error", "Serial đã tồn tại trong hệ thống.");
             request.setAttribute("movementID", movementID);
+            request.setAttribute("movementType", movementType);
             processRequest(request, response);
             return;
         }
@@ -95,12 +119,12 @@ System.out.println("Serial nhận được: [" + serial + "]");
         }
 
         request.setAttribute("movementID", movementID);
-       processRequest(request, response);
-
+        request.setAttribute("movementType", movementType);
+        processRequest(request, response);
     }
 
     @Override
     public String getServletInfo() {
-        return "Quản lý kiểm tra serial sản phẩm khi nhập kho";
+        return "Quản lý kiểm tra serial sản phẩm khi nhập hoặc xuất kho";
     }
 }

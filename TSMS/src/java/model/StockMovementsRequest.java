@@ -19,7 +19,7 @@ public class StockMovementsRequest {
     private String createdByName;
     private BigDecimal totalAmount;
     private String responseStatus; //pending-processing-completed-cancelled
-
+    private String fromBranchName;
 
 
 
@@ -210,4 +210,16 @@ public void setResponseStatus(String responseStatus) {
                 ", note='" + note + '\'' +
                 '}';
     }
+
+    public String getFromBranchName() {
+        return fromBranchName;
+    }
+
+    public void setFromBranchName(String fromBranchName) {
+        this.fromBranchName = fromBranchName;
+    }
+
+    
+
+   
 }

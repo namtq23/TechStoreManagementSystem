@@ -12,7 +12,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>TSMS - Danh sách đơn nhập hàng</title>
+        <title>TSMS - Theo dõi đơn nhập xuât</title>
         <link rel="stylesheet" href="css/import.css">
         <link rel="stylesheet" href="css/header.css"/>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -37,7 +37,7 @@
                         Nhập hàng
                     </a>
 
-                    <a href="wh-export" class="nav-item">
+                    <a href="" class="nav-item">
                         <i class="fa-solid fa-upload"></i>
                         Xuất hàng
                     </a>
@@ -52,7 +52,10 @@
                         Yêu cầu nhập hàng
                     </a>
 
-
+                    <a href="" class="nav-item">
+                        <i class="fas fa-chart-bar"></i>
+                        Báo cáo
+                    </a>
                 </nav>
 
                 <div class="header-right">
@@ -106,6 +109,14 @@
                                 <option value="4">Công ty GHI</option>
                             </select>
                         </div>
+                        <div class="filter-item">
+                            <label for="movementType">Loại đơn:</label>
+                            <select id="movementType" name="movementType" class="form-select">
+                                <option value="">-- Tất cả --</option>
+                                <option value="import">Đơn nhập</option>
+                                <option value="export">Đơn xuất</option>
+                            </select>
+                        </div>
 
                         <div class="filter-item">
                             <label>Trạng thái:</label>
@@ -152,8 +163,7 @@
             <!-- Main Content -->
             <main class="main-content">
                 <div class="page-header">
-                    <h1>Danh sách đơn nhập hàng</h1>
-
+                    <h1>Theo dõi đơn nhập/xuất hàng</h1>                
                 </div>
 
                 <!-- Import Orders Table -->
@@ -162,7 +172,7 @@
                         <thead>
                             <tr>
                                 <th>STT</th>
-                                <th>Mã đơn nhập</th>
+                                <th>Loại đơn</th>
                                 <th>Nhà cung cấp</th>
                                 <th>Trạng thái</th>
                                 <th>Ngày tạo</th>
@@ -175,7 +185,14 @@
                             <c:forEach var="req" items="${importRequests}" varStatus="loop">
                                 <tr>
                                     <td>${loop.index + 1}</td>
-                                    <td>${req.movementID}</td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${req.movementType eq 'import'}">Nhập hàng</c:when>
+                                            <c:when test="${req.movementType eq 'export'}">Xuất hàng</c:when>
+                                            <c:otherwise>Không rõ</c:otherwise>
+                                        </c:choose>
+                                    </td>
+
                                     <td>${req.fromSupplierName}</td>
                                     <td>
                                         <c:choose>
@@ -198,28 +215,7 @@
                                     </td>
                                     <td>${req.formattedDate}</td>
                                     <td>${req.createdByName}</td>
-                                    <td>${req.formattedTotalAmount}</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <c:choose>
-                                                <c:when test="${req.responseStatus eq 'pending'}">
-                                                    <button class="btn-action edit" onclick="editOrder('${req.movementID}', '${req.movementType}')">Xử lý</button>
-                                                </c:when>
-                                                <c:when test="${req.responseStatus eq 'processing'}">
-                                                    <button class="btn-action process" onclick="editOrder('${req.movementID}', '${req.movementType}')">Tiếp tục nhập</button>
-                                                </c:when>
-                                                <c:when test="${req.responseStatus eq 'completed'}">
-                                                    <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
-                                                </c:when>
-                                                <c:when test="${req.responseStatus eq 'cancelled'}">
-                                                    <button class="btn-action cancelled" disabled>Đã huỷ</button>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </div>
-                                    </td>
+                                    <td>${req.formattedTotalAmount}</td>                              
                                 </tr>
                             </c:forEach>
                         </tbody>
@@ -314,9 +310,10 @@
                 window.location.href = 'view-import.jsp?id=' + orderId;
             }
 
-            function editOrder(orderId, movementType) {
-                console.log('Chỉnh sửa đơn hàng: ' + orderId + ' - ' + movementType);
-                window.location.href = 'serial-check?id=' + orderId + '&movementType=' + movementType;
+            function editOrder(orderId) {
+                console.log('Chỉnh sửa đơn hàng: ' + orderId);
+                // Redirect to edit page or open modal
+                window.location.href = 'serial-check?id=' + orderId;
             }
 
 
