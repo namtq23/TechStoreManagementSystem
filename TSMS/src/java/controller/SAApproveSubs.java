@@ -25,23 +25,42 @@ public class SAApproveSubs extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String ownerIdStr = request.getParameter("id");
+        String action = request.getParameter("action");
 
         if (ownerIdStr != null) {
-            try {
-                int ownerId = Integer.parseInt(ownerIdStr);
-                int methodId = Integer.parseInt(request.getParameter("methodId"));
-                int subsMonth = Integer.parseInt(request.getParameter("subsMonth"));
-                
-                ShopOwner so = UserDAO.getShopOwnerById(ownerId);
-                ShopOwnerDAO dao = new ShopOwnerDAO();
-                dao.activateShopOwnerIfInactive(ownerId);
-                UserDAO.activateUsersIfInactive(so.getDatabaseName());
-                dao.markSubscriptionLogAsDone(ownerId, methodId);
-                dao.updateUserServiceMethod(ownerId, methodId, subsMonth);
+            switch (action) {
+                case "accept":
+                    try {
+                    int ownerId = Integer.parseInt(ownerIdStr);
+                    int methodId = Integer.parseInt(request.getParameter("methodId"));
+                    int subsMonth = Integer.parseInt(request.getParameter("subsMonth"));
 
-                response.sendRedirect("sa-subscriptions?&update=success");
-            } catch (NumberFormatException | SQLException e) {
-                response.sendRedirect("sa-subscriptions?update=error");
+                    ShopOwner so = UserDAO.getShopOwnerById(ownerId);
+                    ShopOwnerDAO dao = new ShopOwnerDAO();
+                    dao.activateShopOwnerIfInactive(ownerId);
+                    UserDAO.activateUsersIfInactive(so.getDatabaseName());
+                    dao.markSubscriptionLogAsDone(ownerId, methodId);
+                    dao.updateUserServiceMethod(ownerId, methodId, subsMonth);
+
+                    response.sendRedirect("sa-subscriptions?&update=success");
+                } catch (NumberFormatException | SQLException e) {
+                    response.sendRedirect("sa-subscriptions?update=error");
+                }
+                break;
+
+                case "refuse":
+                    try {
+                    int ownerId = Integer.parseInt(ownerIdStr);
+                    int methodId = Integer.parseInt(request.getParameter("methodId"));
+
+                    ShopOwnerDAO dao = new ShopOwnerDAO();
+                    dao.markSubscriptionLogAsRefuse(ownerId, methodId);
+
+                    response.sendRedirect("sa-subscriptions?&update=success-refuse");
+                } catch (NumberFormatException | SQLException e) {
+                    response.sendRedirect("sa-subscriptions?update=error");
+                }
+                break;
             }
         } else {
             response.sendRedirect("sa-subscriptions?update=error");

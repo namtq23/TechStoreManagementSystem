@@ -108,18 +108,19 @@ public class ShopOwnerDAO {
             int offset, int limit) throws SQLException {
         List<ShopOwnerSubsDTO> list = new ArrayList<>();
 
-        StringBuilder sql = new StringBuilder("SELECT \n"
-                + "    s.*, \n"
-                + "    l.MethodID, \n"
-                + "    l.SubscriptionMonths, \n"
-                + "    l.Status AS LogStatus, \n"
-                + "    l.CreatedAt AS LogCreatedAt \n"
-                + "FROM \n"
-                + "    SubscriptionLogs l \n"
-                + "JOIN \n"
-                + "    ShopOwner s ON l.OwnerID = s.OwnerID \n"
-                + "WHERE \n"
-                + "    l.Status = 'Pending' ");
+        StringBuilder sql = new StringBuilder("""
+                                              SELECT 
+                                                  s.*, 
+                                                  l.MethodID, 
+                                                  l.SubscriptionMonths, 
+                                                  l.Status AS LogStatus, 
+                                                  l.CreatedAt AS LogCreatedAt 
+                                              FROM 
+                                                  SubscriptionLogs l 
+                                              JOIN 
+                                                  ShopOwner s ON l.OwnerID = s.OwnerID 
+                                              WHERE 
+                                                  l.Status = 'Pending' """);
 
         List<Object> params = new ArrayList<>();
 
@@ -350,7 +351,7 @@ public class ShopOwnerDAO {
             stmt.executeUpdate();
         }
     }
-    
+
     public void updateShopOwnerInfoInTheirDTB(String fullName,
             String email, String identificationId, String phone,
             String address, int gender, String taxNumber,
@@ -529,6 +530,16 @@ public class ShopOwnerDAO {
     //Phuong
     public void markSubscriptionLogAsDone(int ownerId, int methodId) throws SQLException {
         String sql = "UPDATE SubscriptionLogs SET Status = 'Done' WHERE OwnerID = ? AND MethodID = ? AND Status = 'Pending'";
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, ownerId);
+            ps.setInt(2, methodId);
+            ps.executeUpdate();
+        }
+    }
+    
+    public void markSubscriptionLogAsRefuse(int ownerId, int methodId) throws SQLException {
+        String sql = "UPDATE SubscriptionLogs SET Status = 'Refuse' WHERE OwnerID = ? AND MethodID = ? AND Status = 'Pending'";
 
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, ownerId);
