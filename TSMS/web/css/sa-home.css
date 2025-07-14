@@ -473,6 +473,16 @@ table tr:last-child td {
     color: white;
 }
 
+.btn-ref{
+    color: red;
+    background-color: white;
+}
+
+.btn-ref:hover{
+    background: red;
+    color: white;
+}
+
 .btn-danger {
     background: #ef4444;
     color: white;

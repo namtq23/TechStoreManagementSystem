@@ -17,13 +17,13 @@ public class AnnouncementDAO {
     public List<AnnouncementDTO> getRecentAnnouncementsForShopOwner(String dbName) throws SQLException {
         List<AnnouncementDTO> list = new ArrayList<>();
         String sql = """
-        SELECT TOP 6 a.AnnouncementID, a.Title, a.Description, a.Status, a.CreatedAt,
-               ISNULL(u.FullName, N'Hệ thống') AS SenderName,
-               ISNULL(b.BranchName, N'Toàn hệ thống') AS LocationName
-        FROM Announcements a
-        LEFT JOIN Users u ON a.CreatedBy = u.UserID
-        LEFT JOIN Branches b ON a.BranchID = b.BranchID
-        ORDER BY a.CreatedAt DESC
+        SELECT TOP 6 a.AnnouncementID, a.Title, a.Description, a.CreatedAt,
+                       ISNULL(u.FullName, N'Hệ thống') AS SenderName,
+                       ISNULL(b.BranchName, N'Toàn hệ thống') AS LocationName
+                FROM Announcements a
+                LEFT JOIN Users u ON a.FromUserID = u.UserID
+                LEFT JOIN Branches b ON a.ToBranchID = b.BranchID
+                ORDER BY a.CreatedAt DESC
     """;
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -33,7 +33,6 @@ public class AnnouncementDAO {
                 dto.setAnnouncementID(rs.getInt("AnnouncementID"));
                 dto.setTitle(rs.getString("Title"));
                 dto.setDescription(rs.getString("Description"));
-                dto.setStatus(rs.getString("Status"));
                 dto.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 dto.setSenderName(rs.getString("SenderName"));
                 dto.setLocationName(rs.getString("LocationName"));
@@ -161,7 +160,6 @@ public class AnnouncementDAO {
                     dto.setAnnouncementID(rs.getInt("AnnouncementID"));
                     dto.setTitle(rs.getString("Title"));
                     dto.setDescription(rs.getString("Description"));
-                    dto.setStatus(rs.getString("Status"));
                     dto.setCreatedAt(rs.getTimestamp("CreatedAt"));
                     dto.setSenderName(rs.getString("SenderName"));
                     dto.setLocationName(rs.getString("LocationName"));
@@ -289,10 +287,34 @@ public class AnnouncementDAO {
     public static List<Announcement> getReceivedAnnouncements(String dbName, int branchId, int exceptUserId) throws SQLException {
         List<Announcement> list = new ArrayList<>();
 
-        String query = "SELECT a.AnnouncementID, u.FullName AS FromUser, a.Title, a.Description, a.CreatedAt FROM dbo.Announcements a JOIN dbo.Users u ON a.FromUserID = u.UserID WHERE (a.ToBranchID = ? OR a.ToBranchID IS NULL) AND u.UserID != ? ORDER BY a.CreatedAt DESC";
+        String query = "SELECT a.AnnouncementID, u.FullName AS FromUser, a.Title, a.Description, a.CreatedAt FROM dbo.Announcements a JOIN dbo.Users u ON a.FromUserID = u.UserID WHERE (a.ToBranchID = ?) AND u.UserID != ? ORDER BY a.CreatedAt DESC";
 
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, branchId);
+            ps.setInt(2, exceptUserId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Announcement a = new Announcement();
+                    a.setAnnouncementID(rs.getInt("AnnouncementID"));
+                    a.setFromUser(rs.getString("FromUser"));
+                    a.setTitle(rs.getString("Title"));
+                    a.setDescription(rs.getString("Description"));
+                    a.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                    list.add(a);
+                }
+            }
+        }
+
+        return list;
+    }
+    
+    public static List<Announcement> getReceivedAnnouncementsOfWarehouse(String dbName, int whId, int exceptUserId) throws SQLException {
+        List<Announcement> list = new ArrayList<>();
+
+        String query = "SELECT a.AnnouncementID, u.FullName AS FromUser, a.Title, a.Description, a.CreatedAt FROM dbo.Announcements a JOIN dbo.Users u ON a.FromUserID = u.UserID WHERE (a.ToWarehouseID = ?) AND u.UserID != ? ORDER BY a.CreatedAt DESC";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, whId);
             ps.setInt(2, exceptUserId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -331,13 +353,13 @@ public class AnnouncementDAO {
 
         return list;
     }
-     public static void insertImportRequestAnnouncement(String dbName, int fromUserID, int toWarehouseID, String note) throws SQLException {
-        String query = "INSERT INTO Announcements " +
-                       "(FromUserID, FromBranchID, FromWarehouseID, ToWarehouseID, Title, Description, CreatedAt) " +
-                       "VALUES (?, (SELECT BranchID FROM Users WHERE UserID = ?), NULL, ?, ?, ?, GETDATE())";
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName);
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+    public static void insertImportRequestAnnouncement(String dbName, int fromUserID, int toWarehouseID, String note) throws SQLException {
+        String query = "INSERT INTO Announcements "
+                + "(FromUserID, FromBranchID, FromWarehouseID, ToWarehouseID, Title, Description, CreatedAt) "
+                + "VALUES (?, (SELECT BranchID FROM Users WHERE UserID = ?), NULL, ?, ?, ?, GETDATE())";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, fromUserID); // FromUserID
             stmt.setInt(2, fromUserID); // for subquery: get BranchID
@@ -353,9 +375,22 @@ public class AnnouncementDAO {
             String title, String description) throws SQLException {
         String sql = "INSERT INTO dbo.Announcements (FromUserID, ToBranchID, Title, Description, CreatedAt) VALUES( ?,  ?,  ?,  ?, GETDATE())";
 
-    try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, fromUserId);
             ps.setInt(2, toBranchId);
+            ps.setString(3, title);
+            ps.setString(4, description);
+            ps.executeUpdate();
+        }
+    }
+    
+    public static void insertAnnouncementOfWH(String dbName, int fromUserId, int fromWarehouseId,
+            String title, String description) throws SQLException {
+        String sql = "INSERT INTO dbo.Announcements (FromUserID, FromWarehouseID, Title, Description, CreatedAt) VALUES( ?,  ?,  ?,  ?, GETDATE())";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, fromUserId);
+            ps.setInt(2, fromWarehouseId);
             ps.setString(3, title);
             ps.setString(4, description);
             ps.executeUpdate();
@@ -365,7 +400,5 @@ public class AnnouncementDAO {
     public static void main(String[] args) throws SQLException {
         System.out.println(AnnouncementDAO.getSentAnnouncements("DTB_TechStore", 1));
     }
-    
-    
 
 }

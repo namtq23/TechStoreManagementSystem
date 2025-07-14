@@ -125,12 +125,13 @@ public class UserDAO {
     public static ShopOwnerDTO getShopOwnerByEmail(String email) throws SQLException {
         ShopOwnerDTO shopOwner = null;
 
-        String sql = "SELECT * \n"
-                + "FROM ShopOwner \n"
-                + "JOIN UserServiceMethod \n"
-                + "ON ShopOwner.OwnerID = UserServiceMethod.OwnerID\n"
-                + "WHERE ShopOwner.Email = ?;\n"
-                + "";
+        String sql = """
+                     SELECT * 
+                     FROM ShopOwner 
+                     JOIN UserServiceMethod 
+                     ON ShopOwner.OwnerID = UserServiceMethod.OwnerID
+                     WHERE ShopOwner.Email = ?;
+                     """;
 
         try (Connection conn = DBUtil.getConnectionTo("SuperAdminDB"); PreparedStatement stmt = conn.prepareStatement(sql)) {
 

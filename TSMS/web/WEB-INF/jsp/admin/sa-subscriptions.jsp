@@ -104,7 +104,13 @@
                     Cập nhật thất bại. Vui lòng thử lại.
                 </div>
                 <%
-                    }
+                    } else if ("success-refuse".equals(updateStatus)) {
+                %>
+                <div id="flash-message" class="flash-message success">
+                    Từ chối thành công!
+                </div>
+                <%
+                    } 
                 %>
 
                 <div class="content-grid">
@@ -212,7 +218,10 @@
                                                     </td>
                                                     <td>${owner.subscriptionMonth} tháng</td>
                                                     <td><fmt:formatDate value="${owner.logCreatedAt}" pattern="dd/MM/yyyy" /></td>
-                                                    <td><a href="sa-approved-subs?id=${owner.ownerId}&methodId=1&subsMonth=${owner.subscriptionMonth}"><button class="btn btn-primary">Chấp nhận</button></a></td>
+                                                    <td style="width: 250px;">
+                                                        <a href="sa-approved-subs?id=${owner.ownerId}&action=accept&methodId=1&subsMonth=${owner.subscriptionMonth}"><button class="btn btn-primary">Chấp nhận</button></a> 
+                                                        <a href="sa-approved-subs?id=${owner.ownerId}&action=refuse&methodId=1&subsMonth=${owner.subscriptionMonth}"><button class="btn btn-ref">Từ chối</button></a>
+                                                    </td>
                                                 </tr>
                                             </c:forEach>
                                         </c:otherwise>
