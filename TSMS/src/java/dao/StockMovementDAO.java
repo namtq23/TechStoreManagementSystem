@@ -82,62 +82,7 @@ public class StockMovementDAO {
         return result;
     }
 
-    public void createStockRequest(StockMovement movement, String dbName) throws SQLException {
-        String insertRequestSQL = """
-        INSERT INTO StockMovementsRequest 
-        (FromSupplierID, FromBranchID, FromWarehouseID, ToBranchID, ToWarehouseID, MovementType, CreatedBy, CreatedAt, Note)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """;
-
-        String insertDetailSQL = """
-        INSERT INTO StockMovementDetail (MovementID, ProductDetailID, Quantity)
-        VALUES (?, ?, ?)
-    """;
-
-        try (Connection conn = DBUtil.getConnectionTo(dbName)) {
-            conn.setAutoCommit(false);
-
-            try (PreparedStatement ps = conn.prepareStatement(insertRequestSQL, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setObject(1, movement.getFromSupplierID());
-                ps.setObject(2, movement.getFromBranchID());
-                ps.setObject(3, movement.getFromWarehouseID());
-                ps.setObject(4, movement.getToBranchID());
-                ps.setObject(5, movement.getToWarehouseID());
-                ps.setString(6, movement.getMovementType());
-                ps.setInt(7, movement.getCreatedBy());
-                ps.setTimestamp(8, movement.getCreatedAt());
-                ps.setString(9, movement.getNote());
-
-                ps.executeUpdate();
-
-                try (ResultSet rs = ps.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        int movementID = rs.getInt(1);
-
-                        try (PreparedStatement psDetail = conn.prepareStatement(insertDetailSQL)) {
-                            for (StockMovement.StockMovementDetail detail : movement.getDetails()) {
-                                psDetail.setInt(1, movementID);
-                                psDetail.setInt(2, detail.getProductDetailID());
-                                psDetail.setInt(3, detail.getQuantity());
-                                psDetail.addBatch();
-                            }
-                            psDetail.executeBatch();
-                        }
-                    } else {
-                        conn.rollback();
-                        throw new SQLException("Không lấy được MovementID mới.");
-                    }
-                }
-
-                conn.commit();
-            } catch (SQLException ex) {
-                conn.rollback();
-                throw ex;
-            } finally {
-                conn.setAutoCommit(true);
-            }
-        }
-    }
+ 
 
     public List<StockMovement> getRequestsByBranch(int branchId, String dbName) throws SQLException {
         List<StockMovement> result = new ArrayList<>();

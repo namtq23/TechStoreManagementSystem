@@ -6,10 +6,7 @@ package model;
 
 import java.sql.Timestamp;
 
-/**
- *
- * @author phungpdhe189026
- */
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,34 +126,5 @@ public class StockMovement {
         details.add(detail);
     }
 
-    // Inner class đại diện chi tiết yêu cầu nhập
-    public static class StockMovementDetail {
-
-        private int productDetailID;
-        private int quantity;
-
-        public StockMovementDetail() {
-        }
-
-        public StockMovementDetail(int productDetailID, int quantity) {
-            this.productDetailID = productDetailID;
-            this.quantity = quantity;
-        }
-
-        public int getProductDetailID() {
-            return productDetailID;
-        }
-
-        public void setProductDetailID(int productDetailID) {
-            this.productDetailID = productDetailID;
-        }
-
-        public int getQuantity() {
-            return quantity;
-        }
-
-        public void setQuantity(int quantity) {
-            this.quantity = quantity;
-        }
-    }
+  
 }

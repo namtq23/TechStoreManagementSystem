@@ -1,8 +1,12 @@
 package controller;
 
+import dao.AnnouncementDAO;
 import dao.StockMovementDAO;
+import dao.StockMovementDetailDAO;
+import dao.StockMovementsRequestDAO;
 import model.ProductDetails;
 import model.StockMovement;
+import model.StockMovementDetail;
 import util.Validate;
 
 import jakarta.servlet.ServletException;
@@ -18,7 +22,8 @@ import model.Warehouse;
 
 @WebServlet("/request-stock")
 public class BMStockMovementController extends HttpServlet {
-
+    private final StockMovementDetailDAO StockMovementDetailDAO = new StockMovementDetailDAO();
+    private final StockMovementsRequestDAO StockMovementsRequestDAO = new StockMovementsRequestDAO();
     private final StockMovementDAO dao = new StockMovementDAO();
 
     @Override
@@ -61,8 +66,6 @@ public class BMStockMovementController extends HttpServlet {
             }
 
             List<ProductDetails> products;
-
-            //Lấy danh sách kho 
             List<Warehouse> warehouses = dao.getAllWarehouses(dbName);
             req.setAttribute("warehouses", warehouses);
 
@@ -73,30 +76,25 @@ public class BMStockMovementController extends HttpServlet {
                 products = dao.getAvailableProductsByBranch(branchId, dbName);
             }
 
-            List<StockMovement.StockMovementDetail> draft
-                      = (List<StockMovement.StockMovementDetail>) session.getAttribute("requestDraft");
-
+            List<StockMovementDetail> draft = (List<StockMovementDetail>) session.getAttribute("requestDraft");
             List<ProductDetails> draftProductDetails = new ArrayList<>();
             if (draft != null && !draft.isEmpty()) {
-                for (StockMovement.StockMovementDetail detail : draft) {
-                    try {
-                        // Tìm sản phẩm trong danh sách tất cả sản phẩm (không bị filter)
-                        List<ProductDetails> allProducts = dao.getAvailableProductsByBranch(branchId, dbName);
-                        for (ProductDetails p : allProducts) {
-                            if (p.getProductDetailID() == detail.getProductDetailID()) {
-                                draftProductDetails.add(p);
-                                break;
-                            }
+                List<ProductDetails> allProducts = dao.getAvailableProductsByBranch(branchId, dbName);
+                for (StockMovementDetail detail : draft) {
+                    for (ProductDetails p : allProducts) {
+                        if (p.getProductDetailID() == detail.getProductID()) {
+                            draftProductDetails.add(p);
+                            break;
                         }
-                    } catch (SQLException e) {
                     }
                 }
             }
+
             int totalQuantity = 0;
             if (draft != null) {
-                totalQuantity = draft.stream().mapToInt(StockMovement.StockMovementDetail::getQuantity).sum();
+                totalQuantity = draft.stream().mapToInt(StockMovementDetail::getQuantity).sum();
             }
-            
+
             req.setAttribute("totalQuantity", totalQuantity);
             req.setAttribute("products", products);
             req.setAttribute("draftDetails", draft);
@@ -127,18 +125,15 @@ public class BMStockMovementController extends HttpServlet {
 
         String action = req.getParameter("action");
 
-        // === REMOVE PRODUCT ===
         if ("remove".equals(action)) {
             String idStr = req.getParameter("productDetailID");
             String toWarehouseID = req.getParameter("toWarehouseID");
 
             if (idStr != null) {
                 int productDetailID = Integer.parseInt(idStr);
-                List<StockMovement.StockMovementDetail> draft
-                          = (List<StockMovement.StockMovementDetail>) session.getAttribute("requestDraft");
-
+                List<StockMovementDetail> draft = (List<StockMovementDetail>) session.getAttribute("requestDraft");
                 if (draft != null) {
-                    draft.removeIf(d -> d.getProductDetailID() == productDetailID);
+                    draft.removeIf(d -> d.getProductID() == productDetailID);
                     session.setAttribute("requestDraft", draft);
                 }
                 session.setAttribute("successMessage", "Đã xoá sản phẩm.");
@@ -150,36 +145,34 @@ public class BMStockMovementController extends HttpServlet {
                 session.setAttribute("selectedToWarehouseID", toWarehouseID);
             }
 
-            // 🔁 Chuyển hướng về GET
             resp.sendRedirect("request-stock");
             return;
         }
 
-// === ADD PRODUCT ===
         if ("add".equals(action)) {
             String idStr = req.getParameter("productDetailID");
             if (idStr != null) {
                 int productDetailID = Integer.parseInt(idStr);
-                List<StockMovement.StockMovementDetail> draft
-                          = (List<StockMovement.StockMovementDetail>) session.getAttribute("requestDraft");
+                List<StockMovementDetail> draft = (List<StockMovementDetail>) session.getAttribute("requestDraft");
 
                 if (draft == null) {
                     draft = new ArrayList<>();
                 }
 
-                // Tìm sản phẩm đã có
                 boolean found = false;
-                for (StockMovement.StockMovementDetail detail : draft) {
-                    if (detail.getProductDetailID() == productDetailID) {
+                for (StockMovementDetail detail : draft) {
+                    if (detail.getProductID() == productDetailID) {
                         detail.setQuantity(detail.getQuantity() + 1);
                         found = true;
                         break;
                     }
                 }
 
-                // Nếu chưa có, thêm mới
                 if (!found) {
-                    draft.add(new StockMovement.StockMovementDetail(productDetailID, 1));
+                    StockMovementDetail newDetail = new StockMovementDetail();
+                    newDetail.setProductID(productDetailID);
+                    newDetail.setQuantity(1);
+                    draft.add(newDetail);
                 }
 
                 session.setAttribute("requestDraft", draft);
@@ -190,7 +183,6 @@ public class BMStockMovementController extends HttpServlet {
                 session.setAttribute("selectedToWarehouseID", selectedWarehouse);
             }
 
-            // Giữ keyword
             String keyword = req.getParameter("keyword");
             String redirectURL = "request-stock";
             if (keyword != null && !keyword.trim().isEmpty()) {
@@ -200,12 +192,10 @@ public class BMStockMovementController extends HttpServlet {
             return;
         }
 
-        // === RESET ALL PRODUCTS ===
         if ("reset".equals(action)) {
             session.removeAttribute("requestDraft");
             session.setAttribute("successMessage", "Đã xóa tất cả sản phẩm khỏi phiếu yêu cầu.");
 
-            // Giữ lại keyword nếu có
             String keyword = req.getParameter("keyword");
             String redirectURL = "request-stock";
             if (keyword != null && !keyword.trim().isEmpty()) {
@@ -215,14 +205,12 @@ public class BMStockMovementController extends HttpServlet {
             return;
         }
 
-        // === SUBMIT REQUEST ===
         String toWarehouseStr = req.getParameter("toWarehouseID");
         String overallNote = req.getParameter("overallNote");
 
         try {
             int toWarehouseID = Integer.parseInt(toWarehouseStr);
-            List<StockMovement.StockMovementDetail> draft
-                      = (List<StockMovement.StockMovementDetail>) session.getAttribute("requestDraft");
+            List<StockMovementDetail> draft = (List<StockMovementDetail>) session.getAttribute("requestDraft");
 
             if (draft == null || draft.isEmpty()) {
                 session.setAttribute("errorMessage", "Không có sản phẩm nào trong phiếu yêu cầu.");
@@ -230,23 +218,42 @@ public class BMStockMovementController extends HttpServlet {
                 return;
             }
 
-            StockMovement movement = new StockMovement();
-            movement.setCreatedBy(userId);
-            movement.setFromBranchID(branchId);
-            movement.setToWarehouseID(toWarehouseID);
-            movement.setMovementType("Import");
-            movement.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-            movement.setNote(overallNote);
-            movement.setDetails(draft);
+            for (StockMovementDetail detail : draft) {
+                String paramName = "quantity_" + detail.getProductID();
+                String quantityStr = req.getParameter(paramName);
+                if (quantityStr != null && !quantityStr.isBlank()) {
+                    try {
+                        int quantity = Integer.parseInt(quantityStr);
+                        if (quantity > 0) {
+                            detail.setQuantity(quantity);
+                        }
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
 
-            dao.createStockRequest(movement, dbName);
+            int movementId = StockMovementsRequestDAO.insertExportMovementRequest(
+                dbName,
+                branchId,
+                toWarehouseID,
+                "export",
+                (overallNote != null ? overallNote : ""),
+                userId
+            );
+
+            for (StockMovementDetail item : draft) {
+                StockMovementDetailDAO.insertMovementDetail(dbName, movementId, item.getProductID(), item.getQuantity());
+            }
+
+            StockMovementsRequestDAO.insertMovementResponse(dbName, movementId, userId, "pending", null);
+
             session.removeAttribute("requestDraft");
-
-            session.setAttribute("successMessage", "Yêu cầu nhập hàng đã được gửi thành công.");
+            session.setAttribute("successMessage", "Yêu cầu xuất hàng đã được gửi thành công.");
             resp.sendRedirect("request-stock");
 
         } catch (Exception e) {
-            session.setAttribute("errorMessage", "Lỗi khi gửi yêu cầu nhập hàng.");
+            e.printStackTrace();
+            session.setAttribute("errorMessage", "Lỗi khi gửi yêu cầu xuất hàng: " + e.getMessage());
             resp.sendRedirect("request-stock");
         }
     }

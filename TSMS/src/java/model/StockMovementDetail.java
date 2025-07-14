@@ -24,6 +24,15 @@ public class StockMovementDetail {
     private String note;
     private int scanned;         // ✅ Subquery đếm tạm thời
 
+private int productDetailID;
+
+public int getProductDetailID() {
+    return productDetailID;
+}
+
+public void setProductDetailID(int productDetailID) {
+    this.productDetailID = productDetailID;
+}
 
     private int quantityScanned; // ✅ Dữ liệu từ bảng
 
@@ -32,6 +41,10 @@ public class StockMovementDetail {
 
     public StockMovementDetail() {
     }
+public StockMovementDetail(int productDetailID, int quantity) {
+    this.detailID = productDetailID; // nếu bạn dùng detailID là ProductDetailID
+    this.quantity = quantity;
+}
 
     public StockMovementDetail(int detailID, int requestID, int productID, String productName, String productCode,
             int quantity, String unit, String note) {

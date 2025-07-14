@@ -22,7 +22,7 @@
             <div class="header-container">
                 <div class="logo">
                     <a href="so-overview" class="logo">
-                        <div class="logo-icon">T</div>
+                        <div class="logo-icon">T</div>e
                         <span class="logo-text">TSMS</span>
                     </a>
                 </div>

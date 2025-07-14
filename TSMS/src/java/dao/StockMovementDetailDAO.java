@@ -134,5 +134,35 @@ public class StockMovementDetailDAO {
         ps.executeUpdate();
     }
 }
+public List<StockMovementDetail> getRawDetailsByMovementID(String dbName, int movementID) throws SQLException {
+    List<StockMovementDetail> list = new ArrayList<>();
+    String sql = "SELECT d.MovementDetailID, d.MovementID, d.ProductDetailID, d.Quantity, d.QuantityScanned, " +
+                 "pd.ProductCode, p.ProductName " +
+                 "FROM StockMovementDetail d " +
+                 "JOIN ProductDetails pd ON d.ProductDetailID = pd.ProductDetailID " +
+                 "JOIN Products p ON pd.ProductID = p.ProductID " +
+                 "WHERE d.MovementID = ?";
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, movementID);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            StockMovementDetail detail = new StockMovementDetail();
+            detail.setDetailID(rs.getInt("MovementDetailID"));
+            detail.setRequestID(rs.getInt("MovementID"));
+            detail.setProductID(rs.getInt("ProductDetailID"));
+            detail.setQuantity(rs.getInt("Quantity"));
+            detail.setQuantityScanned(rs.getInt("QuantityScanned"));
+            detail.setProductCode(rs.getString("ProductCode"));
+            detail.setProductName(rs.getString("ProductName"));
+            list.add(detail);
+        }
+    }
+    return list;
+}
+
+
+
 
 }

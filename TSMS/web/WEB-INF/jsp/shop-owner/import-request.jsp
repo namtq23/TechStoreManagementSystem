@@ -274,11 +274,12 @@
                                 <c:if test="${not empty sessionScope.cartSupplierId}">disabled</c:if>>
                                     <option value="">-- Chọn nhà cung cấp --</option>
                                 <c:forEach var="supplier" items="${listSuppliers}">
-                                    <option value="${supplier.supplierID}" 
-                                            <c:if test="${supplier.supplierID eq selectedSupplierID}">selected</c:if>>
+                                    <option value="${supplier.supplierID}"
+                                            <c:if test="${supplier.supplierID eq sessionScope.cartSupplierId}">selected</c:if>>
                                         ${supplier.supplierName}
                                     </option>
                                 </c:forEach>
+
                         </select>
                     </form>
 
@@ -524,17 +525,17 @@
             });
         </script>
         <script>
-function beforeSubmit() {
-    // Ghi chú
-    const note = document.getElementById("overallNote").value;
-    document.getElementById("hiddenOverallNote").value = note;
+            function beforeSubmit() {
+                // Ghi chú
+                const note = document.getElementById("overallNote").value;
+                document.getElementById("hiddenOverallNote").value = note;
 
-    // Kho đích
-    const warehouseSelect = document.getElementById("toWarehouseID");
-    const selectedWarehouseId = warehouseSelect.value;
-    document.getElementById("hiddenToWarehouseID").value = selectedWarehouseId;
-}
-</script>
+                // Kho đích
+                const warehouseSelect = document.getElementById("toWarehouseID");
+                const selectedWarehouseId = warehouseSelect.value;
+                document.getElementById("hiddenToWarehouseID").value = selectedWarehouseId;
+            }
+        </script>
 
 
 

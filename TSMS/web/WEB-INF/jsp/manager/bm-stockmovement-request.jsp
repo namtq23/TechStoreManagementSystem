@@ -1,14 +1,12 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="model.ProductDetails" %>
-<%@ page import="java.util.List" %>
-<%@ page import="model.StockMovement.StockMovementDetail" %>
 
-<%
-    List<ProductDetails> products = (List<ProductDetails>) request.getAttribute("products");
-    List<model.Warehouse> warehouses = (List<model.Warehouse>) request.getAttribute("warehouses");
-    String selectedID = (String) request.getAttribute("selectedToWarehouseID");
-    List<StockMovementDetail> draft = (List<StockMovementDetail>) request.getAttribute("draftDetails");
-%>
+<c:set var="products" value="${requestScope.products}" />
+<c:set var="warehouses" value="${requestScope.warehouses}" />
+<c:set var="selectedID" value="${requestScope.selectedToWarehouseID}" />
+<c:set var="draft" value="${requestScope.draftDetails}" />
+<c:set var="draftProductDetails" value="${requestScope.draftProductDetails}" />
 
 <!DOCTYPE html>
 <html>
@@ -20,7 +18,6 @@
         <link rel="stylesheet" href="css/header.css" />
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     </head>
-
     <body>
 
         <!-- Header -->
@@ -119,18 +116,19 @@
         </header>
 
         <div class="main-container">
-            <!-- Phiếu yêu cầu nhập -->
             <div class="invoice-panel">
-                <div class="panel-header">Phiếu yêu cầu nhập hàng
-                    <% if (draft != null && !draft.isEmpty()) { %>
-                    <form method="post" action="request-stock" style="display: inline;">
-                        <input type="hidden" name="action" value="reset" />
-                        <input type="hidden" name="keyword" value="<%= request.getParameter("keyword") != null ? request.getParameter("keyword") : "" %>" />
-                        <button type="submit" class="btn-secondary" onclick="return confirm('Bạn có chắc muốn xóa tất cả sản phẩm?')">
-                            <i class="fa fa-trash"></i> Xóa tất cả
-                        </button>
-                    </form>
-                    <% } %></div>
+                <div class="panel-header">
+                    Phiếu yêu cầu nhập hàng
+                    <c:if test="${not empty draft}">
+                        <form method="post" action="request-stock" style="display: inline;">
+                            <input type="hidden" name="action" value="reset" />
+                            <input type="hidden" name="keyword" value="${param.keyword}" />
+                            <button type="submit" class="btn-secondary" onclick="return confirm('Bạn có chắc muốn xóa tất cả sản phẩm?')">
+                                <i class="fa fa-trash"></i> Xóa tất cả
+                            </button>
+                        </form>
+                    </c:if>
+                </div>
 
                 <form action="request-stock" method="post" id="requestForm">
                     <div class="invoice-table-body">
@@ -145,33 +143,35 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% 
-                                List<ProductDetails> draftProductDetails = (List<ProductDetails>) request.getAttribute("draftProductDetails");
-                                if (draft != null && !draft.isEmpty() && draftProductDetails != null) {
-                                    int stt = 1;
-                                    for (int i = 0; i < draft.size(); i++) {
-                                        StockMovementDetail d = draft.get(i);
-                                        ProductDetails product = i < draftProductDetails.size() ? draftProductDetails.get(i) : null;
-                                        String productName = product != null ? product.getDescription() : "Không tìm thấy";
-                                %>
-                                <tr>
-                                    <td><%= stt++ %></td>
-                                    <td><%= d.getProductDetailID() %></td>
-                                    <td><%= productName %></td>
-                                    <td>
-                                        <input type="number" name="quantity" value="<%= d.getQuantity() %>" min="1" required />
-                                    </td>
-                                    <td>
-                                        <button type="button" onclick="removeItem(<%= d.getProductDetailID() %>)">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <% } } else { %>
-                                <tr>
-                                    <td colspan="5" style="font-size: 15px"><strong>Chưa có sản phẩm được chọn</strong></td>
-                                </tr>
-                                <% } %>
+                                <c:choose>
+                                    <c:when test="${not empty draft and not empty draftProductDetails}">
+                                        <c:forEach var="d" items="${draft}" varStatus="loop">
+                                            <tr>
+                                                <td>${loop.index + 1}</td>
+                                                <td>${d.productDetailID}</td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${loop.index lt fn:length(draftProductDetails)}">
+                                                            ${draftProductDetails[loop.index].description}
+                                                        </c:when>
+                                                        <c:otherwise>Không tìm thấy</c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td> <input type="hidden" name="productDetailID" value="${d.productDetailID}" />
+                                                    <input type="number" name="quantity_${d.productDetailID}" value="${d.quantity}" min="1" required="" />
+                                                </td>
+                                                <td>
+                                                    <button type="button" onclick="removeItem(${d.productDetailID})">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <tr><td colspan="5" style="font-size: 15px"><strong>Chưa có sản phẩm được chọn</strong></td></tr>
+                                    </c:otherwise>
+                                </c:choose>
                             </tbody>
                         </table>
                     </div>
@@ -182,23 +182,21 @@
                         </div>
                         <div class="total-products-display">
                             <span class="label">Tổng sản phẩm</span>
-                            <span class="value"><%= draft != null ? draft.size() : 0 %></span>
+                            <span class="value">${fn:length(draft)}</span>
                         </div>
                         <div class="total-products-display">
                             <span class="label">Tổng số lượng sản phẩm yêu cầu</span>
-                            <span class="value"><%= request.getAttribute("totalQuantity") != null ? request.getAttribute("totalQuantity") : 0 %></span>
+                            <span class="value">${requestScope.totalQuantity}</span>
                         </div>
                         <div class="form-row">
                             <label for="toWarehouseID">Chọn kho đích</label>
                             <select name="toWarehouseID" id="toWarehouseID" required>
                                 <option value="">-- Chọn kho --</option>
-                                <% for (model.Warehouse w : warehouses) {
-                                    String selected = (selectedID != null && selectedID.equals(String.valueOf(w.getWareHouseId()))) ? "selected" : "";
-                                %>
-                                <option value="<%= w.getWareHouseId() %>" <%= selected %>>
-                                    <%= w.getWareHouseName() %> - <%= w.getWareHouseAddress() %>
-                                </option>
-                                <% } %>
+                                <c:forEach var="w" items="${warehouses}">
+                                    <option value="${w.wareHouseId}" ${w.wareHouseId == selectedID ? 'selected' : ''}>
+                                        ${w.wareHouseName} - ${w.wareHouseAddress}
+                                    </option>
+                                </c:forEach>
                             </select>
                         </div>
                     </div>
@@ -206,6 +204,7 @@
                         <button type="submit" class="btn-primary">Gửi yêu cầu nhập</button>
                     </div>
                 </form>
+
                 <form id="removeForm" method="post" action="request-stock" class="hidden">
                     <input type="hidden" name="action" value="remove" />
                     <input type="hidden" name="productDetailID" id="removeProductDetailID" />
@@ -213,115 +212,73 @@
                 </form>
             </div>
 
-
-            <!-- Danh sách sản phẩm -->
             <div class="product-panel">
-                <div class="panel-header">
-                    <h2>Danh sách sản phẩm tại chi nhánh</h2>
-                </div>
-
+                <div class="panel-header"><h2>Danh sách sản phẩm tại chi nhánh</h2></div>
                 <div class="search-section">
                     <form method="get" action="request-stock" id="searchForm" class="search-form">
                         <div class="search-container">
                             <i class="fa fa-search"></i>
-                            <input
-                                type="text"
-                                class="search-input"
-                                name="keyword"
-                                placeholder="Tìm kiếm sản phẩm..."
-                                value="<%= request.getParameter("keyword") != null ? request.getParameter("keyword") : "" %>"
-                                />
+                            <input type="text" class="search-input" name="keyword" placeholder="Tìm kiếm sản phẩm..." value="${param.keyword}" />
                             <button type="submit" class="btn-primary">Tìm kiếm</button>
                         </div>
                     </form>
                 </div>
 
-
-
                 <div class="product-grid">
-                    <% for (ProductDetails p : products) { %>
-                    <div class="product-card">
-                        <div class="product-info">
-                            <h4><%= p.getDescription() %></h4>
-                            <div class="product-stock">Serial: <%= p.getProductCode() %> – Tồn kho: <strong><%= p.getQuantity() %></strong></div>
+                    <c:forEach var="p" items="${products}">
+                        <div class="product-card">
+                            <div class="product-info">
+                                <h4>${p.description}</h4>
+                                <div class="product-stock">Serial: ${p.productCode} – Tồn kho: <strong>${p.quantity}</strong></div>
+                            </div>
+                            <form action="request-stock" method="post">
+                                <input type="hidden" name="action" value="add" />
+                                <input type="hidden" name="productDetailID" value="${p.productDetailID}" />
+                                <button type="submit" class="add-to-cart"><i class="fa fa-plus"></i></button>
+                            </form>
                         </div>
-                        <form action="request-stock" method="post">
-                            <input type="hidden" name="action" value="add" />
-                            <input type="hidden" name="productDetailID" value="<%= p.getProductDetailID() %>" />
-                            <button type="submit" class="add-to-cart"><i class="fa fa-plus"></i></button>
-                        </form>
-                    </div>
-                    <% } %>
+                    </c:forEach>
                 </div>
             </div>
         </div>
 
         <!-- Modal -->
         <div id="modalBackdrop" class="modal-backdrop"></div>
-
         <div id="feedbackModal" class="modal">
             <div class="modal-header">
                 <h5>Thông báo</h5>
                 <button onclick="closeModal()">×</button>
             </div>
             <div class="modal-body">
-                <% if (request.getAttribute("successMessage") != null) { %>
-                <div class="alert alert-success"><%= request.getAttribute("successMessage") %> </div>
-                <% } else if (request.getAttribute("errorMessage") != null) { %>
-                <div class="alert alert-danger"><%= request.getAttribute("errorMessage") %></div>
-                <% } %>
+                <c:if test="${not empty successMessage}">
+                    <div class="alert alert-success">${successMessage}</div>
+                </c:if>
+                <c:if test="${not empty errorMessage}">
+                    <div class="alert alert-danger">${errorMessage}</div>
+                </c:if>
             </div>
         </div>
 
-
-        <!-- Script -->
         <script>
             function showModal() {
                 document.getElementById("modalBackdrop").classList.add("show");
                 document.getElementById("feedbackModal").classList.add("show");
             }
-
             function closeModal() {
                 document.getElementById("modalBackdrop").classList.remove("show");
                 document.getElementById("feedbackModal").classList.remove("show");
             }
-
             window.addEventListener("DOMContentLoaded", function () {
-                const hasMessage = <%= (request.getAttribute("successMessage") != null || request.getAttribute("errorMessage") != null) %>;
-                if (hasMessage) {
+                const hasMessage = ${not empty successMessage or not empty errorMessage};
+                if (hasMessage)
                     showModal();
-                }
             });
-
-
             function removeItem(productId) {
                 document.getElementById("removeProductDetailID").value = productId;
-                const selectedWarehouse = document.querySelector("select[name='toWarehouseID']").value;
-                document.getElementById("removeToWarehouseID").value = selectedWarehouse;
+                document.getElementById("removeToWarehouseID").value = document.querySelector("select[name='toWarehouseID']").value;
                 document.getElementById("removeForm").submit();
             }
-            document.querySelectorAll('.nav-item.dropdown > .dropdown-toggle').forEach(toggle => {
-                toggle.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    this.parentElement.classList.toggle('active');
-                });
-            });
-            const toggle = document.getElementById("dropdownToggle");
-            const menu = document.getElementById("dropdownMenu");
-
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                menu.classList.toggle("show");
-            });
-
-            document.addEventListener("click", function (e) {
-                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-                    menu.classList.remove("show");
-                }
-            });
         </script>
-
-
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

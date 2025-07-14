@@ -95,6 +95,25 @@ public boolean addScannedSerial(String dbName, int movementDetailID, String seri
     }
 }
 
+public void updateWarehouseForSerials(String dbName, int movementDetailID, int warehouseID) throws SQLException {
+    String sql = """
+        UPDATE ProductDetailSerialNumber
+        SET WarehouseID = ?
+        WHERE MovementDetailID = ?
+          AND OrderID IS NULL 
+          AND BranchID IS NULL
+          AND WarehouseID IS NULL;
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, warehouseID);
+        ps.setInt(2, movementDetailID);
+        ps.executeUpdate();
+    }
+}
+
+
 
 
 }

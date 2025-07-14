@@ -39,7 +39,7 @@
                         Nhập hàng
                     </a>
 
-                    <a href="" class="nav-item">
+                    <a href="wh-export" class="nav-item">
                         <i class="fa-solid fa-upload"></i>
                         Xuất hàng
                     </a>
@@ -54,10 +54,6 @@
                         Yêu cầu nhập hàng
                     </a>
 
-                    <a href="" class="nav-item">
-                        <i class="fas fa-chart-bar"></i>
-                        Báo cáo
-                    </a>
                 </nav>
 
                 <div class="header-right">
