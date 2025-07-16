@@ -6,6 +6,7 @@ package controller;
 
 import dao.BranchDAO;
 import dao.RoleDAO;
+import dao.ShiftDAO;
 import dao.UserDAO;
 import dao.WareHouseDAO;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import model.Role;
+import model.Shift;
 
 /**
  *
@@ -41,6 +43,9 @@ public class SOStaffController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             HttpSession session = req.getSession(false);
+            if (session == null) {
+                resp.sendRedirect("login");
+            }
             Object userIdObj = session.getAttribute("userId");
             Object roleIdObj = session.getAttribute("roleId");
             Object dbNameObj = session.getAttribute("dbName");
@@ -68,10 +73,14 @@ public class SOStaffController extends HttpServlet {
             if ("view".equals(action)) {
                 String userID = req.getParameter("userID");
                 UserDTO user = userDAO.getStaffById(dbName, Integer.parseInt(userID));
+                List<Shift> shifts = ShiftDAO.getAllShifts(1, 10, dbName);
+                Shift shiftOfUser = ShiftDAO.getShiftOfUserId(Integer.parseInt(userID), dbName);
                 req.setAttribute("staff", user);
                 req.setAttribute("roles", roles);
                 req.setAttribute("branchesList", branchesList);
                 req.setAttribute("warehousesList", warehousesList);
+                req.setAttribute("shifts", shifts);
+                req.setAttribute("shiftOfUser", shiftOfUser);
                 req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/edit-staff.jsp").forward(req, resp);
                 return;
             } else if ("delete".equals(action)) {
@@ -105,6 +114,7 @@ public class SOStaffController extends HttpServlet {
                 String branchIDStr = req.getParameter("branchID");
                 String warehouseIDStr = req.getParameter("warehouseID");
                 int isActive = Integer.parseInt(req.getParameter("isActive"));
+                int shiftID = Integer.parseInt(req.getParameter("shiftId"));
 
                 Integer branchID = branchIDStr.isEmpty() ? null : Integer.parseInt(branchIDStr);
                 Integer warehouseID = warehouseIDStr.isEmpty() ? null : Integer.parseInt(warehouseIDStr);
@@ -113,16 +123,22 @@ public class SOStaffController extends HttpServlet {
                     try {
                         DOB = new SimpleDateFormat("yyyy-MM-dd").parse(dobStr);
                     } catch (ParseException e) {
-                        e.printStackTrace();
+                        System.out.println(e);
                     }
                 }
 
                 String updateResult = userDAO.updateStaff(dbName, Integer.parseInt(userID), fullName, DOB, gender, address, phone, email, roleID, branchID, warehouseID, isActive);
                 UserDTO user = userDAO.getStaffById(dbName, Integer.parseInt(userID));
+                ShiftDAO.updateUserShift(Integer.parseInt(userID), shiftID, dbName);
+                List<Shift> shifts = ShiftDAO.getAllShifts(1, 10, dbName);
+                Shift shiftOfUser = ShiftDAO.getShiftOfUserId(Integer.parseInt(userID), dbName);
+
                 req.setAttribute("staff", user);
                 req.setAttribute("roles", roles);
                 req.setAttribute("branchesList", branchesList);
                 req.setAttribute("warehousesList", warehousesList);
+                req.setAttribute("shifts", shifts);
+                req.setAttribute("shiftOfUser", shiftOfUser);
 
                 if ("success".equals(updateResult)) {
                     session.setAttribute("success", "Cập nhật nhân viên thành công!");

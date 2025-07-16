@@ -226,6 +226,13 @@
                                 Thêm mới
                             </button>
                         </div>
+                        <div>
+                            <a href="so-shift" style="text-decoration: none">
+                                <button type="button" class="btn btn-success">
+                                    Ca làm
+                                </button>
+                            </a>
+                        </div>
                     </div>
                 </div>
 

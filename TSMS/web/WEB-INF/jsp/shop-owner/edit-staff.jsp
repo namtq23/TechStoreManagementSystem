@@ -406,6 +406,17 @@
                                     <option value="0" ${staff.isActive == 0 ? 'selected' : ''}>Nghỉ việc</option>
                                 </select>
                             </div>
+                            <div class="form-group half">
+                                <label>Ca làm</label>
+                                <select name="shiftId" class="form-control">
+                                    <option value="${shiftOfUser.shiftID}" selected>${shiftOfUser.shiftName}</option>
+                                    <c:forEach var="shift" items="${shifts}">
+                                        <c:if test="${shift.shiftID != shiftOfUser.shiftID}">
+                                            <option value="${shift.shiftID}">${shift.shiftName}</option>
+                                        </c:if>
+                                    </c:forEach>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -525,6 +536,169 @@
                     e.preventDefault();
                 }
             });
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const roleSelect = document.getElementById('roleID');
+                const branchGroup = document.querySelector('.form-group:has(#branchID)');
+                const warehouseGroup = document.querySelector('.form-group:has(#warehouseID)');
+                const statusGroup = document.querySelector('.form-group:has(#isActive)');
+                const shiftGroup = document.querySelector('.form-group:has(#shift)');
+
+                // Fallback nếu querySelector không hỗ trợ :has()
+                if (!branchGroup) {
+                    const branchSelect = document.getElementById('branchID');
+                    const warehouseSelect = document.getElementById('warehouseID');
+                    const statusSelect = document.getElementById('isActive');
+                    const shiftSelect = document.getElementById('shift');
+
+                    branchGroup = branchSelect.closest('.form-group');
+                    warehouseGroup = warehouseSelect.closest('.form-group');
+                    statusGroup = statusSelect.closest('.form-group');
+                    shiftGroup = shiftSelect.closest('.form-group');
+                }
+
+                function toggleFormFields() {
+                    const selectedRoleId = roleSelect.value;
+
+                    // Ẩn tất cả các field trước
+                    if (branchGroup)
+                        branchGroup.style.display = 'none';
+                    if (warehouseGroup)
+                        warehouseGroup.style.display = 'none';
+                    if (statusGroup)
+                        statusGroup.style.display = 'none';
+                    if (shiftGroup)
+                        shiftGroup.style.display = 'none';
+
+                    // Hiển thị field dựa trên roleId
+                    switch (selectedRoleId) {
+                        case '1': // Quản lý chi nhánh
+                            if (branchGroup)
+                                branchGroup.style.display = 'block';
+                            if (statusGroup)
+                                statusGroup.style.display = 'block';
+                            if (shiftGroup)
+                                shiftGroup.style.display = 'block';
+                            break;
+
+                        case '2': // Nhân viên bán hàng
+                            if (branchGroup)
+                                branchGroup.style.display = 'block';
+                            if (statusGroup)
+                                statusGroup.style.display = 'block';
+                            if (shiftGroup)
+                                shiftGroup.style.display = 'block';
+                            break;
+
+                        case '3': // Nhân viên kho (hoặc chức danh khác cần chọn kho)
+                            if (warehouseGroup)
+                                warehouseGroup.style.display = 'block';
+                            if (statusGroup)
+                                statusGroup.style.display = 'block';
+                            if (shiftGroup)
+                                shiftGroup.style.display = 'block';
+                            break;
+
+                        default:
+                            // Hiển thị tất cả nếu không có rule cụ thể
+                            if (branchGroup)
+                                branchGroup.style.display = 'block';
+                            if (warehouseGroup)
+                                warehouseGroup.style.display = 'block';
+                            if (statusGroup)
+                                statusGroup.style.display = 'block';
+                            if (shiftGroup)
+                                shiftGroup.style.display = 'block';
+                            break;
+                    }
+                }
+
+                // Thực hiện khi trang load
+                toggleFormFields();
+
+                // Thực hiện khi thay đổi chức danh
+                roleSelect.addEventListener('change', toggleFormFields);
+            });
+
+            // CSS bổ sung để đảm bảo animation mượt và reset form khi ẩn
+            const style = document.createElement('style');
+            style.textContent = `
+                    .form-group {
+                        transition: opacity 0.3s ease, transform 0.3s ease;
+                    }
+
+                    .form-group.hidden {
+                        display: none !important;
+                    }
+
+                    .form-row {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 15px;
+                    }
+
+                    .form-group.half {
+                        flex: 1;
+                        min-width: 200px;
+                    }
+                `;
+            document.head.appendChild(style);
+
+            // Cải thiện function để sử dụng class thay vì style trực tiếp
+            function toggleFormFields() {
+                const selectedRoleId = roleSelect.value;
+
+                // Ẩn tất cả các field trước và clear giá trị
+                [branchGroup, warehouseGroup, statusGroup, shiftGroup].forEach(group => {
+                    if (group) {
+                        group.classList.add('hidden');
+                        // Clear giá trị khi ẩn (tùy chọn)
+                        const select = group.querySelector('select');
+                        if (select && select.id !== 'isActive' && select.id !== 'shift') {
+                            select.value = '';
+                        }
+                    }
+                });
+
+                // Hiển thị field dựa trên roleId
+                switch (selectedRoleId) {
+                    case '1': // Quản lý chi nhánh
+                        if (branchGroup)
+                            branchGroup.classList.remove('hidden');
+                        if (statusGroup)
+                            statusGroup.classList.remove('hidden');
+                        if (shiftGroup)
+                            shiftGroup.classList.remove('hidden');
+                        break;
+
+                    case '2': // Nhân viên bán hàng
+                        if (branchGroup)
+                            branchGroup.classList.remove('hidden');
+                        if (statusGroup)
+                            statusGroup.classList.remove('hidden');
+                        if (shiftGroup)
+                            shiftGroup.classList.remove('hidden');
+                        break;
+
+                    case '3': // Nhân viên kho
+                        if (warehouseGroup)
+                            warehouseGroup.classList.remove('hidden');
+                        if (statusGroup)
+                            statusGroup.classList.remove('hidden');
+                        if (shiftGroup)
+                            shiftGroup.classList.remove('hidden');
+                        break;
+
+                    default:
+                        // Hiển thị tất cả nếu không có rule cụ thể
+                        [branchGroup, warehouseGroup, statusGroup, shiftGroup].forEach(group => {
+                            if (group)
+                                group.classList.remove('hidden');
+                        });
+                        break;
+                }
+            }
         </script>
     </body>
 </html>

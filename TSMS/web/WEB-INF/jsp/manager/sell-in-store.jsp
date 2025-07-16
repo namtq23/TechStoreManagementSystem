@@ -390,7 +390,7 @@ Author     : admin
                     <div class="form-row discount-wrapper">
                         <label>Giảm giá (%):</label>
                         <div class="input-percent">
-                            <input type="text" id="discountPercent" placeholder="Phần trăm giảm giá...">
+                            <input type="text" name="billDiscount" id="discountPercent" placeholder="Phần trăm giảm giá...">
                         </div>
                     </div>
                     <div class="form-row vat-wrapper">
