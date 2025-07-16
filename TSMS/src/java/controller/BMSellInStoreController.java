@@ -6,12 +6,14 @@ package controller;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import dao.BranchDAO;
 import dao.CashFlowDAO;
 import dao.CustomerDAO;
 import dao.OrderDAO;
 import dao.ProductDAO;
 import dao.SalesDAO;
 import dao.UserDAO;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -23,13 +25,16 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.Branch;
 import model.Customer;
 import model.Order;
 import model.ProductDTO;
 import model.User;
 import model.UserDTO;
+import util.EmailUtil;
 import util.Validate;
 
 /**
@@ -50,7 +55,7 @@ public class BMSellInStoreController extends HttpServlet {
             String successMessage = (String) session.getAttribute("successMessage");
             if (successMessage != null) {
                 req.setAttribute("successMessage", successMessage);
-                session.removeAttribute("successMessage"); 
+                session.removeAttribute("successMessage");
             }
 
             if (userIdObj == null || roleIdObj == null || dbNameObj == null) {
@@ -123,6 +128,7 @@ public class BMSellInStoreController extends HttpServlet {
             String customerMail = req.getParameter("email");
             String dobStr = req.getParameter("dob");
             int createdBy = Integer.parseInt(req.getParameter("sale"));
+            String billDiscountStr = req.getParameter("billDiscount");
             boolean gender = true;
             switch (customerGender) {
                 case "1":
@@ -183,6 +189,67 @@ public class BMSellInStoreController extends HttpServlet {
             User user = UserDAO.getUserById(createdBy, dbName);
 
             CashFlowDAO.insertCashFlow(dbName, "income", amountDue, "Tiền hoá đơn", "Tiền hoá đơn của chi nhánh" + branchId, paymentMethod, latestOrderId, branchId, user.getFullName());
+
+            Branch branch = BranchDAO.getBranchById(branchIdObj.toString(), dbName);
+            String creatorName = user.getFullName();
+            String branchName = branch.getBranchName();
+            double billDiscount = Double.parseDouble(billDiscountStr);
+
+            if (customerMail != null && !customerMail.trim().isEmpty()) {
+                try {
+                    StringBuilder emailContent = new StringBuilder();
+
+                    emailContent.append("<h2 style='color: #1976d2;'>Thông tin đơn hàng #" + order.getOrderId() + "</h2>");
+                    emailContent.append("<p><strong>Người tạo:</strong> ").append(creatorName).append("</p>");
+                    emailContent.append("<p><strong>Chi nhánh:</strong> ").append(branchName).append("</p>");
+                    emailContent.append("<p><strong>Phương thức thanh toán:</strong> ").append(order.getPaymentMethod()).append("</p>");
+                    emailContent.append("<br>");
+
+                    emailContent.append("<table border='1' cellpadding='10' cellspacing='0' style='border-collapse:collapse; width:100%; font-family:Arial, sans-serif;'>");
+                    emailContent.append("<thead><tr style='background-color:#f0f0f0;'>");
+                    emailContent.append("<th>Tên sản phẩm</th><th>Số lượng</th><th>Giá sau giảm</th><th>Giảm giá (%)</th><th>Thành tiền</th>");
+                    emailContent.append("</tr></thead>");
+                    emailContent.append("<tbody>");
+
+                    for (ProductDTO product : cartItems) {
+                        try {
+                            double retailPrice = Double.parseDouble(product.getRetailPrice());
+                            double discount = product.getDiscountPercent();
+                            double discountedPrice = retailPrice * (1 - discount);
+                            double lineTotal = discountedPrice * product.getQuantity();
+
+                            emailContent.append("<tr>");
+                            emailContent.append("<td>").append(product.getProductName()).append("</td>");
+                            emailContent.append("<td align='center'>").append(product.getQuantity()).append("</td>");
+                            emailContent.append("<td align='right'>").append(String.format("%,.0f", discountedPrice)).append("đ</td>");
+                            emailContent.append("<td align='right'>").append((int) (discount)).append("%</td>");
+                            emailContent.append("<td align='right'>").append(String.format("%,.0f", lineTotal)).append("đ</td>");
+                            emailContent.append("</tr>");
+                        } catch (NumberFormatException e) {
+                            emailContent.append("<tr><td colspan='5' style='color:red;'>Lỗi giá sản phẩm: ").append(product.getProductName()).append("</td></tr>");
+                        }
+                    }
+                    emailContent.append("</tbody></table><br>");
+
+                    emailContent.append("<table style='margin-top: 20px; font-size: 16px;'>");
+                    if (billDiscount > 0) {
+                        emailContent.append("<tr><td><strong>Giảm giá hoá đơn:</strong></td><td align='right'>").append(String.format("%,.0f", billDiscount)).append("%</td></tr>");
+                    }
+                    emailContent.append("<tr><td><strong>Tổng cộng:</strong></td><td align='right'>").append(String.format("%,.0f", order.getGrandTotal())).append("đ</td></tr>");
+                    emailContent.append("<tr><td><strong>Khách thanh toán:</strong></td><td align='right'>").append(String.format("%,.0f", order.getCustomerPay())).append("đ</td></tr>");
+                    emailContent.append("<tr><td><strong>Tiền thừa trả lại:</strong></td><td align='right'>").append(String.format("%,.0f", order.getChange())).append("đ</td></tr>");
+                    emailContent.append("</table>");
+
+                    emailContent.append("<p>Chúc bạn một ngày tốt lành! Nếu có thắc mắc vui lòng liên hệ lại với chúng tôi.</p>");
+                    emailContent.append("</body></html>");
+
+                    // Gửi mail
+                    EmailUtil.sendEmail(customerMail, "Thông tin hóa đơn #" + latestOrderId, emailContent.toString());
+
+                } catch (MessagingException e) {
+                    System.out.println(e);
+                }
+            }
 
             session.setAttribute("successMessage", "Tạo đơn hàng thành công!");
             resp.sendRedirect(req.getContextPath() + "/bm-cart");
