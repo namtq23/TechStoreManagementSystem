@@ -36,7 +36,7 @@ public class EmailUtil {
         message.setRecipients(
                 Message.RecipientType.TO, InternetAddress.parse(toEmail));
         message.setSubject(subject);
-        message.setText(messageContent);
+        message.setContent(messageContent, "text/html; charset=utf-8");
 
         Transport.send(message);
     }

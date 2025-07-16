@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -101,7 +100,7 @@ public class Validate {
         if (date == null) {
             return "";
         }
-        return new java.text.SimpleDateFormat("yyyy-MM-dd").format(date);
+        return new java.text.SimpleDateFormat("dd/MM/yyyy").format(date);
     }
 
     public static String formatCostPriceToVND(String costPriceStr) {
@@ -253,7 +252,7 @@ public class Validate {
 
         System.out.println(standardizeName("       an       d     "));
 
-        System.out.println(formatCostPriceToVND(10000000.00));
+        System.out.println(formatCostPriceToVND(6900000.0));
     }
 
 }
