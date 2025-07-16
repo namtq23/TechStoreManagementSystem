@@ -209,9 +209,29 @@ public class SubscriptionsDAO {
         return 0;
     }
 
+    public static double getTotalSpentByOwner(int ownerId) throws SQLException {
+        String sql = """
+        SELECT SUM(p.Price) AS TotalSpent
+        FROM SubscriptionLogs l
+        JOIN ServiceMethodPrice p 
+            ON l.MethodID = p.MethodID AND l.SubscriptionMonths = p.SubscriptionMonths
+        WHERE l.OwnerID = ? AND l.Status = 'Done'
+    """;
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, ownerId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("TotalSpent");
+                }
+            }
+        }
+
+        return 0.0;
+    }
+
     public static void main(String[] args) throws SQLException {
-        System.out.println(SubscriptionsDAO.getAllSubscriptionSummaryByMethodId(1));
+        System.out.println(SubscriptionsDAO.getTotalSpentByOwner(1));
     }
 
 }
-

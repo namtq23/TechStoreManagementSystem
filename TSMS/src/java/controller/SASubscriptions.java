@@ -127,10 +127,10 @@ public class SASubscriptions extends HttpServlet {
             
             if(success){
                 req.setAttribute("success", "Cảm ơn quý khách đã tin tưởng và sử dụng dịch vụ. Thông báo về trạng thái đăng ký gói dịch vụ sẽ được thông báo qua email, mong quý khách kiên nhẫn!");
-                req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/subscribe.jsp").forward(req, resp);
+                req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/subscription-logs.jsp").forward(req, resp);
             } else {
                 req.setAttribute("error", "Xác nhận thanh toán không thành công!");
-                req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/subscribe.jsp").forward(req, resp);
+                req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/subscription-logs.jsp").forward(req, resp);
             }
         } catch (SQLException ex) {
             Logger.getLogger(SASubscriptions.class.getName()).log(Level.SEVERE, null, ex);

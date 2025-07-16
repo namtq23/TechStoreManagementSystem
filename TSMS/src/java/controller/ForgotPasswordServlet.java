@@ -49,10 +49,26 @@ public class ForgotPasswordServlet extends HttpServlet {
 
                 PasswordResetTokenDAO.saveToken(user.getOwnerId(), token, expiry);
 
-                String resetLink = request.getRequestURL().toString().replace("forgot-password", "reset-password") + "?token=" + token + "&email=" + email;
-                String message = "Click vào đường dẫn sau để đặt lại mật khẩu:\n" + resetLink;
+                String resetLink = request.getRequestURL().toString()
+                        .replace("forgot-password", "reset-password")
+                        + "?token=" + token + "&email=" + email;
 
-                EmailUtil.sendEmail(email, "Đặt lại mật khẩu", message);
+                String message = """
+        <div style="font-family: Arial, sans-serif; font-size: 16px; color: #333;">
+            <h2 style="color: #1976d2;">Yêu cầu đặt lại mật khẩu</h2>
+            <p>Xin chào,</p>
+            <p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>
+            <p>Vui lòng nhấp vào nút bên dưới để thiết lập mật khẩu mới:</p>
+            <p style="text-align: center; margin: 24px 0;">
+                <a href="%s" style="background-color: #1976d2; color: #fff; text-decoration: none; padding: 12px 20px; border-radius: 6px;">Đặt lại mật khẩu</a>
+            </p>
+            <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này. Mật khẩu của bạn sẽ không bị thay đổi.</p>
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+            <p style="font-size: 14px; color: #777;">TSMS - Hệ thống quản lý cửa hàng</p>
+        </div>
+        """.formatted(resetLink);
+
+                EmailUtil.sendEmail(email, "Đặt lại mật khẩu - TSMS", message);
 
                 request.setAttribute("message", "Hãy kiểm tra email của bạn để đặt lại mật khẩu.");
                 request.getRequestDispatcher("/WEB-INF/jsp/common/forgot-password.jsp").forward(request, response);
