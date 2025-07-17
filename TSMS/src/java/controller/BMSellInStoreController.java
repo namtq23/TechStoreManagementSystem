@@ -158,13 +158,14 @@ public class BMSellInStoreController extends HttpServlet {
             List<ProductDTO> cartItems = gson.fromJson(cartJson, productListType);
 
             Order order;
-            Customer customer = new Customer();
+            Customer customer;
 
             if (CustomerDAO.checkCustomerExist(dbName, customerPhone)) {
                 System.out.println("Khách hàng cũ");
                 int customerId = CustomerDAO.getCustomerId(dbName, customerPhone);
                 order = new Order(0, branchId, createdBy, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven,
                         changeDue);
+                System.out.println("Khach hang cu: " + order);
                 ProductDAO.updateProductQuantityOfInventory(dbName, cartItems, branchId);
             } else {
                 System.out.println("Khách hàng mới");
@@ -174,6 +175,7 @@ public class BMSellInStoreController extends HttpServlet {
                 int customerId = CustomerDAO.getCustomerId(dbName, customerPhone);
                 order = new Order(0, branchId, createdBy, "Hoàn thành", customerId, paymentMethod, null, amountDue, cashGiven,
                         changeDue);
+                System.out.println("Khach hang moi: " + order);
                 ProductDAO.updateProductQuantityOfInventory(dbName, cartItems, branchId);
             }
 
@@ -193,13 +195,18 @@ public class BMSellInStoreController extends HttpServlet {
             Branch branch = BranchDAO.getBranchById(branchIdObj.toString(), dbName);
             String creatorName = user.getFullName();
             String branchName = branch.getBranchName();
-            double billDiscount = Double.parseDouble(billDiscountStr);
+            double billDiscount;
+            if (billDiscountStr == null || billDiscountStr.trim().isEmpty()) {
+                billDiscount = 0.0;
+            } else {
+                billDiscount = Double.parseDouble(billDiscountStr);
+            }
 
             if (customerMail != null && !customerMail.trim().isEmpty()) {
                 try {
                     StringBuilder emailContent = new StringBuilder();
 
-                    emailContent.append("<h2 style='color: #1976d2;'>Thông tin đơn hàng #" + order.getOrderId() + "</h2>");
+                    emailContent.append("<h2 style='color: #1976d2;'>Thông tin đơn hàng #" + latestOrderId + "</h2>");
                     emailContent.append("<p><strong>Người tạo:</strong> ").append(creatorName).append("</p>");
                     emailContent.append("<p><strong>Chi nhánh:</strong> ").append(branchName).append("</p>");
                     emailContent.append("<p><strong>Phương thức thanh toán:</strong> ").append(order.getPaymentMethod()).append("</p>");
