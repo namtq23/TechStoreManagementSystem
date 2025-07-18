@@ -11,6 +11,29 @@
     <link rel="stylesheet" href="css/import.css">
     <link rel="stylesheet" href="css/header.css"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Styling cho button trạng thái hoàn thành và hủy */
+ 
+        .btn-action.completed {
+            background-color: #28a745;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        
+        .btn-action.cancelled {
+            background-color: #dc3545;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        
+        .btn-action.completed:hover,
+        .btn-action.cancelled:hover {
+            opacity: 0.8;
+            transform: none;
+        }
+    </style>
 </head>
 <body>
 <header class="header">
@@ -22,7 +45,7 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="bm-overview" class="nav-item active">
+                    <a href="bm-overview" class="nav-item ">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
@@ -32,7 +55,7 @@
                         Hàng hóa
                     </a>
 
-                    <div class="nav-item dropdown">
+                    <div class="nav-item active dropdown">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
                             Giao dịch
@@ -49,7 +72,7 @@
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-handshake"></i>
                             Đối tác
-                            <i class="fas fa-caret-down"></i>
+<i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
                             <a href="bm-customer" class="dropdown-item">Khách hàng</a>
@@ -114,7 +137,7 @@
                     <legend>Bộ lọc</legend>
 
                     <div class="filter-item">
-                        <label for="fromDate">Từ ngày:</label>
+<label for="fromDate">Từ ngày:</label>
                         <input type="date" id="fromDate" name="fromDate" class="form-input">
                     </div>
 
@@ -183,7 +206,7 @@
             
             <c:if test="${not empty sessionScope.errorMessage}">
                 <div class="alert alert-error">
-                    <i class="fas fa-exclamation-circle"></i>
+<i class="fas fa-exclamation-circle"></i>
                     ${sessionScope.errorMessage}
                 </div>
                 <c:remove var="errorMessage" scope="session" />
@@ -197,7 +220,7 @@
                             <th>STT</th>
                             <th>Mã đơn xuất</th>
                             <th>Nguồn</th>
-                            <th>Đích</th>
+
                             <th>Trạng thái</th>
                             <th>Giá trị</th>
                             <th>Ngày tạo</th>
@@ -211,10 +234,7 @@
                                 <td>${loop.index + 1}</td>
                                 <td><strong>#${req.movementID}</strong></td>
                                 <td>${req.fromBranchName}</td>
-                                <td>
-                                    <c:set var="noteAndTo" value="${fn:split(req.note, '|TO:')}" />
-                                    ${noteAndTo[1]}
-                                </td>
+                              
                                 <td>
                                     <c:choose>
                                         <c:when test="${req.responseStatus eq 'pending'}">
@@ -235,7 +255,7 @@
                                         <c:otherwise>
                                             <span class="status-badge unknown">Không rõ</span>
                                         </c:otherwise>
-                                    </c:choose>
+</c:choose>
                                 </td>
                                 <td><strong>${req.formattedTotalAmount}</strong></td>
                                 <td>${req.formattedDate}</td>
@@ -248,6 +268,20 @@
                                                         title="Xác nhận đã nhận hàng">
                                                     <i class="fas fa-check"></i>
                                                     Nhận hàng
+                                                </button>
+                                            </c:when>
+                                            <c:when test="${req.responseStatus eq 'completed'}">
+                                                <button class="btn-action completed" disabled
+                                                        title="Đơn hàng đã hoàn thành">
+                                                    <i class="fas fa-check-circle"></i>
+                                                    Hoàn thành
+                                                </button>
+                                            </c:when>
+                                            <c:when test="${req.responseStatus eq 'cancelled'}">
+                                                <button class="btn-action cancelled" disabled
+                                                        title="Đơn hàng đã bị hủy">
+                                                    <i class="fas fa-times-circle"></i>
+                                                    Đã hủy
                                                 </button>
                                             </c:when>
                                             <c:otherwise>
@@ -265,7 +299,7 @@
                         
                         <c:if test="${empty exportRequests}">
                             <tr>
-                                <td colspan="9" class="no-data">
+<td colspan="9" class="no-data">
                                     <i class="fas fa-box-open"></i>
                                     <p>Không có đơn hàng nào cho chi nhánh này</p>
                                 </td>
@@ -341,7 +375,7 @@
 
         // Dropdown toggle
         const toggle = document.getElementById("dropdownToggle");
-        const menu = document.getElementById("dropdownMenu");
+const menu = document.getElementById("dropdownMenu");
 
         toggle.addEventListener("click", function (e) {
             e.preventDefault();

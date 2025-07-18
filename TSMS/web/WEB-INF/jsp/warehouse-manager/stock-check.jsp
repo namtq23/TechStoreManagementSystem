@@ -27,11 +27,17 @@
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
-                    <a href="wh-import" class="nav-item active">
+                    <a href="wh-import" class="nav-item <c:choose>
+                           <c:when test="${movementType == 'export'}"></c:when>
+                           <c:otherwise>active</c:otherwise>
+                       </c:choose>">
                         <i class="fa-solid fa-download"></i>
                         Nhập hàng
                     </a>
-                    <a href="" class="nav-item">
+                    <a href="" class="nav-item  <c:choose>
+                           <c:when test="${movementType == 'export'}">active</c:when>
+                           <c:otherwise></c:otherwise>
+                       </c:choose>">
                         <i class="fa-solid fa-upload"></i>
                         Xuất hàng
                     </a>
@@ -202,9 +208,9 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td><td>${item.productDetailID}</td> <!-- kiểm tra thử -->
-                                        
 
-                                      
+
+
                                     </tr>
                                 </c:forEach>
                             </tbody>

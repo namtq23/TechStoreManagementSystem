@@ -175,7 +175,7 @@
 
                                                 </td>
                                                 <td>
-                                                    <button type="button" onclick="removeItem(${d.productID})">
+                                                    <button type="button" onclick="removeItem(${d.productDetailID})">
                                                         <i class="fa fa-trash"></i>
                                                     </button>
                                                 </td>

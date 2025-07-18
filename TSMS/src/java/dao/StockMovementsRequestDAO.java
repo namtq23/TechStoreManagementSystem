@@ -345,7 +345,8 @@ public List<StockMovementsRequest> getExportRequestsByToBranch(String dbName, St
             END AS ToName,
             u.FullName AS CreatedByName,
             ISNULL(SUM(smd.Quantity * p.CostPrice), 0) AS TotalAmount,
-            MAX(smrsp.ResponseStatus) AS ResponseStatus
+            -- Lấy status mới nhất hoặc 'pending' nếu chưa có response
+            COALESCE(smrsp.ResponseStatus, 'pending') AS ResponseStatus
         FROM StockMovementsRequest smr
         LEFT JOIN Branches b1 ON smr.FromBranchID = b1.BranchID
         LEFT JOIN Branches b2 ON smr.ToBranchID = b2.BranchID
@@ -355,19 +356,36 @@ public List<StockMovementsRequest> getExportRequestsByToBranch(String dbName, St
         LEFT JOIN StockMovementDetail smd ON smr.MovementID = smd.MovementID
         LEFT JOIN ProductDetails pd ON smd.ProductDetailID = pd.ProductDetailID
         LEFT JOIN Products p ON pd.ProductID = p.ProductID
-        LEFT JOIN StockMovementResponses smrsp ON smr.MovementID = smrsp.MovementID
+        -- Lấy response mới nhất cho mỗi MovementID
+        LEFT JOIN (
+            SELECT MovementID, ResponseStatus,
+                   ROW_NUMBER() OVER (PARTITION BY MovementID ORDER BY ResponseAt DESC) as rn
+            FROM StockMovementResponses
+        ) smrsp ON smr.MovementID = smrsp.MovementID AND smrsp.rn = 1
         WHERE smr.MovementType = 'export'
-          AND smr.ToBranchID = ?
+          AND (
+              (smr.FromBranchID = ? AND smr.ToBranchID IS NULL) OR  -- Chi nhánh là nguồn, đích là warehouse
+              (smr.FromBranchID IS NULL AND smr.ToBranchID = ?) OR  -- Kho là nguồn, chi nhánh là đích
+              (smr.FromBranchID = ? AND smr.ToBranchID IS NOT NULL) OR  -- Chi nhánh gửi đến chi nhánh khác
+              (smr.FromBranchID IS NOT NULL AND smr.ToBranchID = ?)     -- Chi nhánh khác gửi đến chi nhánh này
+          )
         GROUP BY 
             smr.MovementID, smr.FromBranchID, smr.FromWarehouseID, smr.ToBranchID, smr.ToWarehouseID,
             smr.MovementType, smr.CreatedAt, smr.CreatedBy, smr.Note,
-            b1.BranchName, b2.BranchName, w1.WarehouseName, w2.WarehouseName, u.FullName
+            b1.BranchName, b2.BranchName, w1.WarehouseName, w2.WarehouseName, u.FullName,
+            smrsp.ResponseStatus
         ORDER BY smr.CreatedAt DESC
     """);
 
+    System.out.println("DEBUG SQL: " + sql.toString());
+
     try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
-        ps.setString(1, branchId);
+        // Set tất cả 4 parameter với cùng branchId
+        ps.setString(1, branchId); // FromBranchID = ? AND ToBranchID IS NULL
+        ps.setString(2, branchId); // FromBranchID IS NULL AND ToBranchID = ?
+        ps.setString(3, branchId); // FromBranchID = ? AND ToBranchID IS NOT NULL
+        ps.setString(4, branchId); // FromBranchID IS NOT NULL AND ToBranchID = ?
 
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -382,16 +400,19 @@ public List<StockMovementsRequest> getExportRequestsByToBranch(String dbName, St
                 smr.setCreatedBy(rs.getInt("CreatedBy"));
                 smr.setNote(rs.getString("Note"));
                 
-                // Sử dụng lại field có sẵn để lưu tên hiển thị
-                smr.setFromBranchName(rs.getString("FromName"));     // Tên nguồn
-                smr.setCreatedByName(rs.getString("CreatedByName")); // Tên người tạo
+                smr.setFromBranchName(rs.getString("FromName"));
+                smr.setCreatedByName(rs.getString("CreatedByName"));
                 smr.setTotalAmount(rs.getBigDecimal("TotalAmount"));
                 smr.setResponseStatus(rs.getString("ResponseStatus"));
                 
-                // Lưu tên đích vào note tạm thời
                 String toName = rs.getString("ToName");
                 String originalNote = smr.getNote();
                 smr.setNote(originalNote + "|TO:" + toName);
+                
+                System.out.println("DEBUG: Found MovementID " + smr.getMovementID() + 
+                                 " - From: " + smr.getFromBranchID() + "/" + smr.getFromWarehouseID() + 
+                                 " - To: " + smr.getToBranchID() + "/" + smr.getToWarehouseID() + 
+                                 " - Status: " + smr.getResponseStatus());
                 
                 list.add(smr);
             }
@@ -402,8 +423,11 @@ public List<StockMovementsRequest> getExportRequestsByToBranch(String dbName, St
         e.printStackTrace();
     }
 
+    System.out.println("DEBUG: Total records found: " + list.size());
     return list;
 }
+
+
 
 
 

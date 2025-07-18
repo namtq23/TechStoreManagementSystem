@@ -169,7 +169,7 @@ public class BMReceiveOrderController extends HttpServlet {
             }
             
             // 4. Cập nhật trạng thái response thành "completed"
-            boolean responseUpdated = responseDAO.insertCompletedResponse(dbName, movementID, userId);
+            boolean responseUpdated = responseDAO.updateResponseStatus(dbName, movementID, "completed");
             
             if (!responseUpdated) {
                 System.err.println("❌ Lỗi cập nhật response status");
