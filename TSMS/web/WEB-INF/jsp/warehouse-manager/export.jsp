@@ -185,6 +185,9 @@
                                             <c:when test="${req.responseStatus eq 'processing'}">
                                                 <span class="status-badge processing">Đang xử lý</span>
                                             </c:when>
+                                            <c:when test="${req.responseStatus eq 'transfer'}">
+                                                <span class="status-badge transfer">Đang vận chuyển</span>
+                                            </c:when>
                                             <c:when test="${req.responseStatus eq 'completed'}">
                                                 <span class="status-badge completed">Hoàn thành</span>
                                             </c:when>
@@ -202,10 +205,13 @@
                                         <div class="action-buttons">
                                             <c:choose>
                                                 <c:when test="${req.responseStatus eq 'pending'}">
-                                                    <button class="btn-action edit"  onclick="editOrder('${req.movementID}', '${req.movementType}')">Xử lý</button>
+                                                    <button class="btn-action edit" onclick="editOrder('${req.movementID}', '${req.movementType}')">Xử lý</button>
                                                 </c:when>
                                                 <c:when test="${req.responseStatus eq 'processing'}">
                                                     <button class="btn-action process" onclick="editOrder('${req.movementID}', '${req.movementType}')">Tiếp tục xuất</button>
+                                                </c:when>
+                                                <c:when test="${req.responseStatus eq 'transfer'}">
+                                                    <button class="btn-action transfer" disabled>Đang vận chuyển</button>
                                                 </c:when>
                                                 <c:when test="${req.responseStatus eq 'completed'}">
                                                     <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
@@ -222,6 +228,7 @@
                                 </tr>
                             </c:forEach>
                         </tbody>
+
                     </table>
                 </div>
 

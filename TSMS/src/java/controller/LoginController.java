@@ -148,6 +148,7 @@ public class LoginController extends HttpServlet {
                             session.setAttribute("isActive", user.getIsActive());
                             System.out.println("Session created: " + session.getId());
                             System.out.println("userId set: " + session.getAttribute("userId"));
+                            System.out.println("branchId set: " + session.getAttribute("branchId"));
                             System.out.println("roleId set: " + session.getAttribute("roleId"));
                             System.out.println("dbName set: " + session.getAttribute("dbName"));
                             System.out.println("warehouseId set: " + session.getAttribute("warehouseId"));

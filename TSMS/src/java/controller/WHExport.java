@@ -42,6 +42,9 @@ public class WHExport extends HttpServlet {
         StockMovementsRequestDAO reqDAO = new StockMovementsRequestDAO();
         
         List<StockMovementsRequest> exportRequests = reqDAO.getExportRequests(dbName, warehouseId);
+        for (StockMovementsRequest exportRequest : exportRequests) {
+            System.out.println(exportRequest);
+        }
        
         for (StockMovementsRequest importRequest : exportRequests) {
             System.out.println(importRequest);

@@ -9,11 +9,11 @@ package model;
  *
  * @author phungpdhe189026
  */
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 public class ProductDetails {
     private int productDetailID;
+    private int productID;
     private String description;
     private String productCode;
     private String warrantyPeriod;
@@ -21,6 +21,14 @@ public class ProductDetails {
     private Timestamp updatedAt;
     private String productNameUnsigned;  
     private int quantity;  
+
+    public int getProductID() {
+        return productID;
+    }
+
+    public void setProductID(int productID) {
+        this.productID = productID;
+    }
 
  
     // Constructor

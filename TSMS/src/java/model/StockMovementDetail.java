@@ -143,10 +143,15 @@ public StockMovementDetail(int productDetailID, int quantity) {
     public void setQuantityScanned(int quantityScanned) {
         this.quantityScanned = quantityScanned;
     }
-    
+
     @Override
     public String toString() {
-        return "StockMovementDetail{" + "detailID=" + detailID + ", requestID=" + requestID + ", productID=" + productID + ", productName=" + productName + ", productCode=" + productCode + ", quantity=" + quantity + ", unit=" + unit + ", note=" + note + '}';
+        return "StockMovementDetail{" + "detailID=" + detailID + ", requestID=" + requestID + ", productID=" + productID + ", productName=" + productName + ", productCode=" + productCode + ", quantity=" + quantity + ", unit=" + unit + ", note=" + note + ", scanned=" + scanned + ", productDetailID=" + productDetailID + ", quantityScanned=" + quantityScanned + ", serials=" + serials + '}';
     }
+
+   
+   
+    
+    
 
 }

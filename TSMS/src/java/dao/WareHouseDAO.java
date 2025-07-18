@@ -147,28 +147,38 @@ public class WareHouseDAO {
         }
         return null;
     }
-public void insertWarehouseProduct(String dbName, int warehouseID, int productDetailID, int quantity) throws SQLException {
-    String sql = "MERGE INTO " + dbName + ".dbo.WarehouseProducts AS target " +
-                 "USING (SELECT ? AS WarehouseID, ? AS ProductDetailID) AS source " +
-                 "ON target.WarehouseID = source.WarehouseID AND target.ProductDetailID = source.ProductDetailID " +
-                 "WHEN MATCHED THEN UPDATE SET Quantity = target.Quantity + ? " +
-                 "WHEN NOT MATCHED THEN INSERT (WarehouseID, ProductDetailID, Quantity) VALUES (?, ?, ?);";
 
-    try (Connection conn = DBUtil.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-        stmt.setInt(1, warehouseID);
-        stmt.setInt(2, productDetailID);
-        stmt.setInt(3, quantity);
-        stmt.setInt(4, warehouseID);
-        stmt.setInt(5, productDetailID);
-        stmt.setInt(6, quantity);
-        stmt.executeUpdate();
+    public void insertWarehouseProduct(String dbName, int warehouseID, int productDetailID, int quantity) throws SQLException {
+        String sql = "MERGE INTO " + dbName + ".dbo.WarehouseProducts AS target "
+                + "USING (SELECT ? AS WarehouseID, ? AS ProductDetailID) AS source "
+                + "ON target.WarehouseID = source.WarehouseID AND target.ProductDetailID = source.ProductDetailID "
+                + "WHEN MATCHED THEN UPDATE SET Quantity = target.Quantity + ? "
+                + "WHEN NOT MATCHED THEN INSERT (WarehouseID, ProductDetailID, Quantity) VALUES (?, ?, ?);";
+
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, warehouseID);
+            stmt.setInt(2, productDetailID);
+            stmt.setInt(3, quantity);
+            stmt.setInt(4, warehouseID);
+            stmt.setInt(5, productDetailID);
+            stmt.setInt(6, quantity);
+            stmt.executeUpdate();
+        }
     }
-}
 
-
-
-     
+    public void subtractWarehouseProduct(String dbName, int warehouseID, int productDetailID, int quantity) throws SQLException {
+        String sql = """
+        UPDATE WarehouseProducts
+        SET Quantity = Quantity - ?
+        WHERE WarehouseID = ? AND ProductDetailID = ?
+    """;
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, quantity);
+            ps.setInt(2, warehouseID);
+            ps.setInt(3, productDetailID);
+            ps.executeUpdate();
+        }
+    }
 
     public static void main(String[] args) throws SQLException {
         List<Warehouse> warehouses = WareHouseDAO.getWarehouseList("DTB_Bm");

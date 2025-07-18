@@ -42,7 +42,34 @@ public class StockMovementResponseDAO {
         ps.executeUpdate();
     }
 }
-
+public void markAsTransferring(String dbName, int movementID) throws SQLException {
+    String sql = """
+        UPDATE StockMovementResponses
+        SET ResponseStatus = 'transfer'
+        WHERE MovementID = ?
+          AND (ResponseStatus = 'pending' OR ResponseStatus = 'processing')
+    """;
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, movementID);
+        ps.executeUpdate();
+    }
+    }
+public boolean insertCompletedResponse(String dbName, int movementId, int userId) throws SQLException {
+    String sql = """
+        INSERT INTO StockMovementResponses (MovementID, ResponsedBy, ResponseStatus, Note)
+        VALUES (?, ?, 'completed', N'Đã nhận hàng tại chi nhánh')
+    """;
+    
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, movementId);
+        ps.setInt(2, userId);
+        
+        int rowsInserted = ps.executeUpdate();
+        return rowsInserted > 0;
+    }
+}
 
 
 }
