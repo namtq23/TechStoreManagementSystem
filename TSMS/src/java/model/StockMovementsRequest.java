@@ -197,19 +197,10 @@ public void setResponseStatus(String responseStatus) {
 
     @Override
     public String toString() {
-        return "StockMovementsRequest{" +
-                "movementID=" + movementID +
-                ", fromSupplierID=" + fromSupplierID +
-                ", fromBranchID=" + fromBranchID +
-                ", fromWarehouseID=" + fromWarehouseID +
-                ", toBranchID=" + toBranchID +
-                ", toWarehouseID=" + toWarehouseID +
-                ", movementType='" + movementType + '\'' +
-                ", createdBy=" + createdBy +
-                ", createdAt=" + createdAt +
-                ", note='" + note + '\'' +
-                '}';
+        return "StockMovementsRequest{" + "movementID=" + movementID + ", fromSupplierID=" + fromSupplierID + ", fromBranchID=" + fromBranchID + ", fromWarehouseID=" + fromWarehouseID + ", toBranchID=" + toBranchID + ", toWarehouseID=" + toWarehouseID + ", movementType=" + movementType + ", createdBy=" + createdBy + ", createdAt=" + createdAt + ", note=" + note + ", fromSupplierName=" + fromSupplierName + ", createdByName=" + createdByName + ", totalAmount=" + totalAmount + ", responseStatus=" + responseStatus + ", fromBranchName=" + fromBranchName + ", formattedDate=" + formattedDate + ", formattedTotalAmount=" + formattedTotalAmount + '}';
     }
+
+  
 
     public String getFromBranchName() {
         return fromBranchName;

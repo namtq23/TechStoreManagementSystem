@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.StockMovementDetail;
 import util.Validate;
 
-@WebServlet(name = "WHStockSerialCheckController", urlPatterns = {"/serial-check"})
+@WebServlet(name = "WHStockSerialCheckController", urlPatterns = {"/serial-check", "/serial-check-export"})
 public class WHStockSerialCheckController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -20,13 +20,12 @@ public class WHStockSerialCheckController extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
 
         String dbName = (String) request.getSession().getAttribute("dbName");
-        
 
-            if (dbName == null || dbName.isEmpty()) {
-               response.sendRedirect("login");
-                return;
-            }
-        
+        if (dbName == null || dbName.isEmpty()) {
+            response.sendRedirect("login");
+            return;
+        }
+
         String idParam = request.getParameter("id");
         if (idParam == null && request.getAttribute("id") != null) {
             idParam = request.getAttribute("id").toString();
@@ -47,13 +46,17 @@ public class WHStockSerialCheckController extends HttpServlet {
 
         StockMovementDetailDAO dao = new StockMovementDetailDAO();
         List<StockMovementDetail> details = dao.getDetailsByMovementID(dbName, movementID);
+        for (StockMovementDetail detail : details) {
+            System.out.println("✔️ DetailID: " + detail.getDetailID() + ", ProductDetailID: " + detail.getProductDetailID());
+
+        }
 
         request.setAttribute("movementID", movementID);
         request.setAttribute("movementDetails", details);
         request.setAttribute("movementType", movementType);
 
         System.out.println("📦 Đơn " + (movementType != null ? movementType : "") + " #" + movementID + " có " + details.size() + " dòng sản phẩm.");
-        
+
         //Kiểm tra tất cả các sản phẩm trong đã hoàn thành chưa. 10 sản phẩm 2/2 => đã hoàn thành
         boolean allCompleted = true;
         for (StockMovementDetail item : details) {
@@ -82,10 +85,17 @@ public class WHStockSerialCheckController extends HttpServlet {
         String detailIDStr = request.getParameter("detailID");
         String movementIDStr = request.getParameter("movementID");
         String movementType = request.getParameter("movementType");
+      
+      
+      
+        String productDetailIDStr = request.getParameter("productDetailID"); // dùng cho export
+          System.out.println("movement type nhận đc " + movementType);
+  System.out.println("detail ID nhận đc " + productDetailIDStr );
+        System.out.println("🔍 Serial nhận được: [" + serial + "]");
 
-        System.out.println("Serial nhận được: [" + serial + "]");
-
-        if (serial == null || detailIDStr == null || serial.trim().isEmpty() || !Validate.validateSerialFormat(serial)) {
+        // Kiểm tra dữ liệu đầu vào
+        if (serial == null || serial.trim().isEmpty() || detailIDStr == null || movementIDStr == null
+                || !Validate.validateSerialFormat(serial)) {
             request.setAttribute("error", "Vui lòng nhập Serial hợp lệ.");
             request.setAttribute("movementType", movementType);
             processRequest(request, response);
@@ -94,28 +104,46 @@ public class WHStockSerialCheckController extends HttpServlet {
 
         int detailID = Integer.parseInt(detailIDStr);
         int movementID = Integer.parseInt(movementIDStr);
-
         SerialNumberDAO serialDAO = new SerialNumberDAO();
 
-        // Kiểm tra trùng serial
-        if (serialDAO.checkIfSerialExists(dbName, serial)) {
-            System.err.println("❌ Serial đã tồn tại trong hệ thống: " + serial);
-            request.setAttribute("error", "Serial đã tồn tại trong hệ thống.");
-            request.setAttribute("movementID", movementID);
-            request.setAttribute("movementType", movementType);
-            processRequest(request, response);
-            return;
-        }
+        if ("import".equalsIgnoreCase(movementType)) {
+            // ✅ Xử lý nhập kho (Import): chỉ kiểm tra serial chưa tồn tại
+            if (serialDAO.checkIfSerialExists(dbName, serial)) {
+                request.setAttribute("error", "❌ Serial đã tồn tại trong hệ thống.");
+            } else if (serialDAO.addScannedSerial(dbName, detailID, serial)) {
+                request.setAttribute("success", "✅ Đã thêm Serial thành công.");
+            } else {
+                request.setAttribute("error", "❌ Có lỗi xảy ra khi thêm Serial.");
+            }
 
-        // Thêm serial vào chi tiết
-        boolean inserted = serialDAO.addScannedSerial(dbName, detailID, serial);
+        } else if ("export".equalsIgnoreCase(movementType)) {
+            // ✅ Xử lý xuất kho (Export): kiểm tra serial trong kho & không bị xuất trước đó
+            if (productDetailIDStr == null) {
+                request.setAttribute("error", "Thiếu thông tin mã sản phẩm.");
+                processRequest(request, response);
+                return;
+            }
 
-        if (inserted) {
-            System.out.println("✅ Serial được thêm thành công: " + serial);
-            request.setAttribute("success", "Đã thêm Serial thành công.");
+            int productDetailID = Integer.parseInt(productDetailIDStr);
+System.out.println("🧪 Gửi vào DAO: ProductDetailID = " + productDetailID + ", Serial = " + serial + ", DetailID = " + detailID);
+
+
+            boolean valid = serialDAO.checkIfSerialAvailableForExport(dbName, productDetailID, serial, detailID);
+            if (!valid) {
+                
+                request.setAttribute("error", "❌ Serial không hợp lệ: không nằm trong kho hoặc đã được xuất.");
+            } else if (serialDAO.markSerialAsExported(dbName, detailID, serial)) {
+                System.out.println("➡️ Đang xuất serial: " + serial);
+                System.out.println("➡️ MovementDetailID = " + movementID);
+                System.out.println("➡️ ProductDetailID = " + productDetailID);
+                request.setAttribute("success", "✅ Serial đã được xác nhận xuất kho.");
+            } else {
+                request.setAttribute("error", "❌ Có lỗi khi xử lý serial xuất kho.");
+            }
+
         } else {
-            System.err.println("❌ Lỗi khi thêm serial: " + serial);
-            request.setAttribute("error", "Có lỗi xảy ra khi thêm Serial.");
+            // ❌ Trường hợp không rõ loại đơn
+            request.setAttribute("error", "Loại yêu cầu không hợp lệ.");
         }
 
         request.setAttribute("movementID", movementID);

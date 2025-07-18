@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<c:set var="movementType" value="${movementType}" />
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -15,7 +17,7 @@
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="so-overview" class="logo">
+                    <a href="wh-products?page=1" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
@@ -119,21 +121,30 @@
                         <div class="alert alert-success">${success}</div>
                     </c:if>
                     <div class="page-header">
-                        <h2>Chi tiết đơn nhập hàng #${movementID}</h2>
+                        <h2>
+                            Chi tiết đơn 
+                            <c:choose>
+                                <c:when test="${movementType == 'export'}">xuất</c:when>
+                                <c:otherwise>nhập</c:otherwise>
+                            </c:choose>
+                            hàng #${movementID}
+                        </h2>
+
                         <div class="header-actions">
                             <c:if test="${allCompleted}">
-                                <form id="completeForm" method="post" action="${pageContext.request.contextPath}/complete-stock">
-                                    <input type="hidden" name="movementID" value="${movementID}">
-                                    <input type="hidden" name="warehouseID" value="${warehouseID}">
-                                    <input type="hidden" name="backURL" value="${pageContext.request.requestURI}?id=${movementID}">
-                                    <button type="submit" class="btn btn-success" onclick="saveCheck('${movementID}')">
-                                        Hoàn thành
-                                    </button>
+                                <form method="post" action="${movementType == 'export' ? 'complete-stock-export' : 'complete-stock'}">
+                                    <input type="hidden" name="movementID" value="${movementID}" />
+                                    <input type="hidden" name="movementType" value="${movementType}" />
+                                    <input type="hidden" name="detailID" id="formDetailID">
+                                    <input type="hidden" name="warehouseID" value="${sessionScope.warehouseId}" />
+                                    <button class="btn btn-success" type="submit">Hoàn tất đơn nhập</button>
                                 </form>
 
 
+
                             </c:if>
-                            <button class="btn btn-secondary" onclick="cancelCheck('${movementID}')">
+                            <button class="btn btn-secondary" onclick="cancelCheck('${movementID}', '${movementType}')">
+
                                 Hủy đơn nhập
                             </button>
                         </div>
@@ -184,13 +195,16 @@
                                         <td>
                                             <c:choose>
                                                 <c:when test="${item.quantity > item.scanned}">
-                                                    <button class="btn-scan" onclick="scanSerial('${item.detailID}')">Quét</button>
+                                                    <button class="btn-scan" onclick="scanSerial('${item.detailID}', '${item.productDetailID}')">Quét</button>
                                                 </c:when>
                                                 <c:otherwise>
                                                     <span class="badge badge-success">Đã đủ</span>
                                                 </c:otherwise>
                                             </c:choose>
-                                        </td>
+                                        </td><td>${item.productDetailID}</td> <!-- kiểm tra thử -->
+                                        
+
+                                      
                                     </tr>
                                 </c:forEach>
                             </tbody>
@@ -229,10 +243,13 @@
         </div>
         <!-- QR Scanner Modal -->
         <div id="qrScannerModal" class="modal">
-            <form id="serialForm" method="post" action="serial-check?id=${movementID}" onsubmit="return handleSerialFormSubmit(event)">
+            <form id="serialForm" method="post" 
+                  action="${movementType == 'export' ? 'serial-check-export' : 'serial-check'}?id=${movementID}"onsubmit="return handleSerialFormSubmit(event)">
                 <input type="hidden" name="scannedSerial" id="formSerial">
                 <input type="hidden" name="detailID" id="formDetailID">
+                <input type="hidden" name="productDetailID" id="formProductDetailID">
                 <input type="hidden" name="movementID" value="${movementID}" />
+                <input type="hidden" name="movementType" value="${movementType}" />
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3>Nhập Serial Sản phẩm</h3>
@@ -288,7 +305,9 @@
             // QR Scanner variables
             let html5QrCode = null;
             let currentDetailID = null;
+            let currentProductDetailID = null; // ✅ Thêm dòng này
             let isScanning = false;
+
 
             // ===== BIẾN THEO DÕI TRẠNG THÁI FORM =====
             let hasUnsavedChanges = false;
@@ -407,10 +426,11 @@
                 }
             });
 
-            // Mở modal nhập serial
-            function scanSerial(detailID) {
+
+            function scanSerial(detailID, productDetailID) {
                 currentDetailID = detailID;
-                console.log('📱 Mở modal nhập serial cho detail ID:', detailID);
+                currentProductDetailID = productDetailID;
+                console.log('📱 Mở modal nhập serial cho detail ID:', detailID, 'productDetailID:', productDetailID);
 
                 // ĐÁNH DẤU CÓ THAY ĐỔI NGAY KHI MỞ MODAL
                 markFormAsChanged();
@@ -418,14 +438,19 @@
                 // Hiển thị modal
                 document.getElementById("qrScannerModal").style.display = "block";
 
-                // Clear input và focus
+                // Đặt giá trị cho 2 input hidden
+                document.getElementById("formDetailID").value = detailID;
+                document.getElementById("formProductDetailID").value = productDetailID;
+
+                // Focus input nhập
                 const input = document.getElementById("scannedSerial");
                 input.value = "";
                 input.focus();
 
-                // Ẩn QR reader container
+                // Ẩn QR reader
                 document.getElementById("qrReaderContainer").style.display = "none";
             }
+
 
             // Bắt đầu quét QR (tùy chọn)
             function startQRScanner() {
@@ -538,6 +563,8 @@
                 // Đặt giá trị vào các input hidden của form
                 document.getElementById("formSerial").value = serial;
                 document.getElementById("formDetailID").value = currentDetailID;
+                document.getElementById("formProductDetailID").value = currentProductDetailID; // ✅ dòng mới thêm
+
 
                 markFormAsSubmitted(); // Đánh dấu đã submit trước khi form gửi đi
                 showNotification('Đã thêm serial: ' + serial + '. Đang xử lý...', 'info');
@@ -561,73 +588,71 @@
             }
 
             // Main action functions
-            function saveCheck(movementID) {
+            function saveCheck() {
                 if (confirm("Bạn có chắc chắn muốn lưu và hoàn thành đơn nhập này?")) {
-                    console.log('💾 Lưu và hoàn thành:', movementID);
-                    markFormAsSubmitted(); // Đánh dấu đã submit
-                    showNotification('Đang xử lý...', 'info');
-                    // TODO: Implement API call
-                    // Sau khi API call thành công, có thể redirect hoặc reload trang
-                    window.location.href = '${pageContext.request.contextPath}/inventory-list';
+                    showNotification("Đang xử lý...", "info");
+                    document.getElementById("completeForm").submit();
                 }
             }
 
-            function cancelCheck(movementID) {
-                if (confirm("Bạn có chắc chắn muốn hủy đơn nhập này?")) {
-                    console.log('❌ Hủy đơn nhập:', movementID);
+
+            function cancelCheck(movementID, movementType) {
+                if (confirm("Bạn có chắc chắn muốn hủy đơn này?")) {
+                    console.log('❌ Hủy đơn:', movementID, movementType);
                     markFormAsSubmitted(); // Đánh dấu đã submit
                     showNotification('Đang xử lý...', 'info');
-                    // TODO: Implement API call
-                    // Sau khi API call thành công, có thể redirect hoặc reload trang
-                    // window.location.href = '${pageContext.request.contextPath}/inventory-list';
-                }
-            }
 
-            // Đóng modal khi click ngoài vùng
-            window.onclick = function (event) {
-                const modal = document.getElementById("qrScannerModal");
-                if (event.target === modal) {
-                    closeQRScanner();
-                }
-            };
+                    const actionUrl = movementType === 'export' ? 'cancel-stock-export' : 'cancel-stock';
+                    window.location.href = `${actionUrl}?id=${movementID}`;
+                            }
+                        }
 
-            // Sự kiện DOM loaded
-            document.addEventListener('DOMContentLoaded', function () {
-                console.log('📋 Trang chi tiết đơn nhập hàng đã được tải');
-                console.log('🎯 Đơn hàng ID:', '${movementID}');
-                console.log('🌐 Current page base:', currentPageBase);
-                console.log('⏰ Thời gian:', new Date().toLocaleString());
 
-                // Enter key để submit serial
-                document.getElementById("scannedSerial").addEventListener('keypress', function (e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault(); // Ngăn Enter tạo dòng mới hoặc submit form mặc định
-                        document.getElementById("serialForm").submit(); // Kích hoạt submit form
-                    }
-                });
+                        // Đóng modal khi click ngoài vùng
+                        window.onclick = function (event) {
+                            const modal = document.getElementById("qrScannerModal");
+                            if (event.target === modal) {
+                                closeQRScanner();
+                            }
+                        };
 
-                // Theo dõi input changes để đánh dấu có thay đổi
-                document.getElementById("scannedSerial").addEventListener('input', function () {
-                    if (this.value.trim()) {
-                        console.log('✏️ Đang nhập serial:', this.value);
-                        markFormAsChanged();
-                    }
-                });
+                        // Sự kiện DOM loaded
+                        document.addEventListener('DOMContentLoaded', function () {
+                            console.log('📋 Trang chi tiết đơn nhập hàng đã được tải');
+                            console.log('🎯 Đơn hàng ID:', '${movementID}');
+                            console.log('🌐 Current page base:', currentPageBase);
+                            console.log('⏰ Thời gian:', new Date().toLocaleString());
 
-                // Nhắc nhở định kỳ nếu có thay đổi chưa lưu
-                setInterval(function () {
-                    if (hasUnsavedChanges && !isFormSubmitting) {
-                        console.log('⏳ Nhắc nhở: Bạn đang có thay đổi chưa được lưu. Vui lòng hoàn thành biểu mẫu.');
-                    }
-                }, 30000); // Mỗi 30 giây
-            });
+                            // Enter key để submit serial
+                            document.getElementById("scannedSerial").addEventListener('keypress', function (e) {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault(); // Ngăn Enter tạo dòng mới hoặc submit form mặc định
+                                    document.getElementById("serialForm").submit(); // Kích hoạt submit form
+                                }
+                            });
 
-            // Cleanup on page unload
-            window.addEventListener("beforeunload", () => {
-                if (html5QrCode && isScanning) {
-                    html5QrCode.stop();
-                }
-            });
+                            // Theo dõi input changes để đánh dấu có thay đổi
+                            document.getElementById("scannedSerial").addEventListener('input', function () {
+                                if (this.value.trim()) {
+                                    console.log('✏️ Đang nhập serial:', this.value);
+                                    markFormAsChanged();
+                                }
+                            });
+
+                            // Nhắc nhở định kỳ nếu có thay đổi chưa lưu
+                            setInterval(function () {
+                                if (hasUnsavedChanges && !isFormSubmitting) {
+                                    console.log('⏳ Nhắc nhở: Bạn đang có thay đổi chưa được lưu. Vui lòng hoàn thành biểu mẫu.');
+                                }
+                            }, 30000); // Mỗi 30 giây
+                        });
+
+                        // Cleanup on page unload
+                        window.addEventListener("beforeunload", () => {
+                            if (html5QrCode && isScanning) {
+                                html5QrCode.stop();
+                            }
+                        });
         </script>
     </body>
 </html>

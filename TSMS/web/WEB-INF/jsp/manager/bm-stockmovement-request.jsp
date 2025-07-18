@@ -21,7 +21,7 @@
     <body>
 
         <!-- Header -->
-        <header class="header">
+     <header class="header">
             <div class="header-container">
                 <div class="logo">
                     <a href="bm-overview" class="logo">
@@ -30,7 +30,7 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="bm-overview" class="nav-item">
+                    <a href="bm-overview" class="nav-item active">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
@@ -48,8 +48,8 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="bm-stockmovement?type=import" class="dropdown-item">Nhập hàng</a>
-                            <a href="request-stock" class="dropdown-item">Yêu cầu nhập hàng</a>
+                            <a href="request-stock" class="dropdown-item">Nhập hàng</a>
+                            <a href="bm-incoming-orders" class="dropdown-item">Theo dõi đơn nhập hàng</a>
                         </div>
                     </div>
 
@@ -76,7 +76,6 @@
                             <a href="#" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
-
                     <a href="bm-promotions" class="nav-item">
                         <i class="fas fa-ticket"></i>
                         Khuyến mãi
@@ -118,7 +117,7 @@
         <div class="main-container">
             <div class="invoice-panel">
                 <div class="panel-header">
-                    Phiếu yêu cầu nhập hàng
+                    Phiếu yêu cầu xuất hàng
                     <c:if test="${not empty draft}">
                         <form method="post" action="request-stock" style="display: inline;">
                             <input type="hidden" name="action" value="reset" />
@@ -148,7 +147,14 @@
                                         <c:forEach var="d" items="${draft}" varStatus="loop">
                                             <tr>
                                                 <td>${loop.index + 1}</td>
-                                                <td>${d.productDetailID}</td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${loop.index lt fn:length(draftProductDetails)}">
+                                                            ${draftProductDetails[loop.index].productCode}
+                                                        </c:when>
+                                                        <c:otherwise>Không tìm thấy</c:otherwise>
+                                                    </c:choose>
+                                                </td>
                                                 <td>
                                                     <c:choose>
                                                         <c:when test="${loop.index lt fn:length(draftProductDetails)}">
@@ -157,11 +163,19 @@
                                                         <c:otherwise>Không tìm thấy</c:otherwise>
                                                     </c:choose>
                                                 </td>
-                                                <td> <input type="hidden" name="productDetailID" value="${d.productDetailID}" />
-                                                    <input type="number" name="quantity_${d.productDetailID}" value="${d.quantity}" min="1" required="" />
+                                                <td>
+                                                    <input 
+                                                        type="number" 
+                                                        name="quantity_${d.productDetailID}" 
+                                                        id="quantity_${d.productDetailID}" 
+                                                        value="${d.quantity}" 
+                                                        min="1" 
+                                                        required 
+                                                        onchange="autoUpdateQuantity(${d.productDetailID})" />
+
                                                 </td>
                                                 <td>
-                                                    <button type="button" onclick="removeItem(${d.productDetailID})">
+                                                    <button type="button" onclick="removeItem(${d.productID})">
                                                         <i class="fa fa-trash"></i>
                                                     </button>
                                                 </td>
@@ -169,12 +183,13 @@
                                         </c:forEach>
                                     </c:when>
                                     <c:otherwise>
-                                        <tr><td colspan="5" style="font-size: 15px"><strong>Chưa có sản phẩm được chọn</strong></td></tr>
+                                        <tr><td colspan="5"><strong>Chưa có sản phẩm được chọn</strong></td></tr>
                                     </c:otherwise>
                                 </c:choose>
                             </tbody>
                         </table>
                     </div>
+
                     <div class="invoice-summary">
                         <div class="form-row">
                             <label for="overallNote">Ghi chú chung</label>
@@ -186,26 +201,27 @@
                         </div>
                         <div class="total-products-display">
                             <span class="label">Tổng số lượng sản phẩm yêu cầu</span>
-                            <span class="value">${requestScope.totalQuantity}</span>
+                            <span class="value">${totalQuantity}</span>
                         </div>
                         <div class="form-row">
                             <label for="toWarehouseID">Chọn kho đích</label>
                             <select name="toWarehouseID" id="toWarehouseID" required>
                                 <option value="">-- Chọn kho --</option>
                                 <c:forEach var="w" items="${warehouses}">
-                                    <option value="${w.wareHouseId}" ${w.wareHouseId == selectedID ? 'selected' : ''}>
+                                    <option value="${w.wareHouseId}" <c:if test="${w.wareHouseId == selectedID}">selected</c:if>>
                                         ${w.wareHouseName} - ${w.wareHouseAddress}
                                     </option>
                                 </c:forEach>
                             </select>
                         </div>
                     </div>
+
                     <div class="payment-section">
-                        <button type="submit" class="btn-primary">Gửi yêu cầu nhập</button>
+                        <button type="submit" class="btn-primary">Gửi yêu cầu xuất</button>
                     </div>
                 </form>
 
-                <form id="removeForm" method="post" action="request-stock" class="hidden">
+                <form id="removeForm" method="post" action="request-stock" style="display:none;">
                     <input type="hidden" name="action" value="remove" />
                     <input type="hidden" name="productDetailID" id="removeProductDetailID" />
                     <input type="hidden" name="toWarehouseID" id="removeToWarehouseID" />
@@ -215,7 +231,7 @@
             <div class="product-panel">
                 <div class="panel-header"><h2>Danh sách sản phẩm tại chi nhánh</h2></div>
                 <div class="search-section">
-                    <form method="get" action="request-stock" id="searchForm" class="search-form">
+                    <form method="get" action="request-stock" class="search-form">
                         <div class="search-container">
                             <i class="fa fa-search"></i>
                             <input type="text" class="search-input" name="keyword" placeholder="Tìm kiếm sản phẩm..." value="${param.keyword}" />
@@ -242,7 +258,7 @@
             </div>
         </div>
 
-        <!-- Modal -->
+        <!-- Modal Thông báo -->
         <div id="modalBackdrop" class="modal-backdrop"></div>
         <div id="feedbackModal" class="modal">
             <div class="modal-header">
@@ -273,12 +289,57 @@
                 if (hasMessage)
                     showModal();
             });
+
             function removeItem(productId) {
                 document.getElementById("removeProductDetailID").value = productId;
                 document.getElementById("removeToWarehouseID").value = document.querySelector("select[name='toWarehouseID']").value;
                 document.getElementById("removeForm").submit();
             }
+
+            function autoUpdateQuantity(productDetailID) {
+                const quantityInput = document.getElementById("quantity_" + productDetailID);
+                let quantity = "1";
+
+                if (quantityInput) {
+                    quantity = quantityInput.value.trim();
+                    if (!quantity || isNaN(quantity) || parseInt(quantity) < 1) {
+                        quantity = "1";
+                    }
+                }
+
+                console.log("Submitting productDetailID =", productDetailID);
+                console.log("Quantity =", quantity);
+
+                const form = document.createElement("form");
+                form.method = "POST";
+                form.action = "request-stock";
+
+                const actionInput = document.createElement("input");
+                actionInput.type = "hidden";
+                actionInput.name = "action";
+                actionInput.value = "updateQuantity";
+                form.appendChild(actionInput);
+
+                const idInput = document.createElement("input");
+                idInput.type = "hidden";
+                idInput.name = "productDetailID";
+                idInput.value = productDetailID;
+                form.appendChild(idInput);
+
+                const quantityInputHidden = document.createElement("input");
+                quantityInputHidden.type = "hidden";
+                quantityInputHidden.name = "quantity";
+                quantityInputHidden.value = quantity;
+                form.appendChild(quantityInputHidden);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+
+
+
+
         </script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     </body>
 </html>

@@ -27,37 +27,48 @@ public class WHCompleteRequestController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         String dbName = (String) request.getSession().getAttribute("dbName");
-        int movementID = Integer.parseInt(request.getParameter("movementID"));
-        int warehouseID = Integer.parseInt(request.getParameter("warehouseID"));
-        String redirectURL = request.getParameter("backURL");
+        String movementIDStr = request.getParameter("movementID");
+        String warehouseIDStr = request.getParameter("warehouseID");
+        System.out.println("MovementID"+movementIDStr);
+        System.out.println("WarehouseID"+warehouseIDStr);
+         
+
+        if (movementIDStr == null || warehouseIDStr == null ||
+            movementIDStr.isBlank() || warehouseIDStr.isBlank()) {
+            request.getSession().setAttribute("error", "Thiếu thông tin đơn hàng hoặc kho.");
+            response.sendRedirect("serial-check?id="+movementIDStr); // ➤ Chuyển về trang wh-import
+            return;
+        }
 
         try {
-            // Khởi tạo DAO
+            int movementID = Integer.parseInt(movementIDStr);
+            int warehouseID = Integer.parseInt(warehouseIDStr);
+
+            // DAO xử lý
             StockMovementDetailDAO detailDAO = new StockMovementDetailDAO();
             WareHouseDAO warehouseDAO = new WareHouseDAO();
             SerialNumberDAO serialDAO = new SerialNumberDAO();
             StockMovementResponseDAO responseDAO = new StockMovementResponseDAO();
 
-            // Lấy danh sách chi tiết phiếu nhập
             List<StockMovementDetail> details = detailDAO.getRawDetailsByMovementID(dbName, movementID);
 
-            // Cập nhật tồn kho & serial
             for (StockMovementDetail detail : details) {
                 warehouseDAO.insertWarehouseProduct(dbName, warehouseID, detail.getProductID(), detail.getQuantity());
                 serialDAO.updateWarehouseForSerials(dbName, detail.getDetailID(), warehouseID);
             }
 
-            // Đánh dấu phản hồi là hoàn tất
             responseDAO.markAsCompleted(dbName, movementID);
-
             request.getSession().setAttribute("success", "Hoàn thành đơn nhập thành công!");
+
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("error", "Mã đơn hàng hoặc mã kho không hợp lệ.");
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
             request.getSession().setAttribute("error", "Đã xảy ra lỗi khi hoàn tất đơn nhập.");
         }
 
-        // Chuyển hướng về trang ban đầu
-        response.sendRedirect(redirectURL != null ? redirectURL : "serial-check?id=" + movementID);
+        response.sendRedirect("wh-import"); // ➤ Luôn quay về wh-import
     }
 
     @Override
