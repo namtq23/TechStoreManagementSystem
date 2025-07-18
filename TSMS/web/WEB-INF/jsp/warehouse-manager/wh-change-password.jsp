@@ -491,18 +491,8 @@
                     </a>
 
                     <a href="" class="nav-item">
-                        <i class="fa-solid fa-bell"></i>
-                        Thông báo
-                    </a>
-
-                    <a href="" class="nav-item">
                         <i class="fas fa-exchange-alt"></i>
                         Yêu cầu nhập hàng
-                    </a>
-
-                    <a href="" class="nav-item">
-                        <i class="fas fa-chart-bar"></i>
-                        Báo cáo
                     </a>
                 </nav>
 

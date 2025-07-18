@@ -74,6 +74,7 @@ public class SOCreateNewBranchController extends HttpServlet {
             }
 
             boolean rs = BranchDAO.insertBranch(dbName, branchName, branchAddress, branchPhone);
+            BranchDAO.insertInventoryOfEachBranch(dbName);
             if (rs) {
                 req.setAttribute("success", "Tạo chi nhánh mới thành công!");
                 req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/so-create-branch.jsp").forward(req, resp);

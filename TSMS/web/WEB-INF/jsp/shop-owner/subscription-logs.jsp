@@ -561,12 +561,12 @@
                                             <td>
                                                 <span class="status-badge
                                                       ${log.status == 'Done' ? 'status-active' : 
-                                                        log.status == 'Expired' ? 'status-expired' :
+                                                        log.status == 'Refuse' ? 'status-expired' :
                                                         log.status == 'Pending' ? 'status-pending' : 
                                                         'status-cancelled'}">
                                                     <i class="fas
                                                        ${log.status == 'Done' ? 'fa-check-circle' : 
-                                                         log.status == 'Expired' ? 'fa-times-circle' : 
+                                                         log.status == 'Refuse' ? 'fa-times-circle' : 
                                                          log.status == 'Pending' ? 'fa-clock' : 
                                                          'fa-ban'}"></i>
                                                        ${log.status}

@@ -44,12 +44,7 @@
                         Xuất hàng
                     </a>
 
-                    <a href="" class="nav-item">
-                        <i class="fa-solid fa-bell"></i>
-                        Thông báo
-                    </a>
-
-                    <a href="" class="nav-item">
+                    <a href="wh-import-request" class="nav-item">
                         <i class="fas fa-exchange-alt"></i>
                         Yêu cầu nhập hàng
                     </a>
@@ -105,21 +100,18 @@
                                 <input type="radio" name="inventory" value="all"
                                        <c:if test="${param.inventory == 'all' || param.inventory == null}">checked</c:if>>
                                        <span class="radio-mark"></span>
-                                       <span class="status-indicator all"></span>
                                        Tất cả
                                 </label>
                                 <label class="radio-item">
                                     <input type="radio" name="inventory" value="in-stock"
                                     <c:if test="${param.inventory == 'in-stock'}">checked</c:if>>
                                     <span class="radio-mark"></span>
-                                    <span class="status-indicator in-stock"></span>
                                     Còn hàng trong kho
                                 </label>
                                 <label class="radio-item">
                                     <input type="radio" name="inventory" value="out-stock"
                                     <c:if test="${param.inventory == 'out-stock'}">checked</c:if>>
                                     <span class="radio-mark"></span>
-                                    <span class="status-indicator out-stock"></span>
                                     Hết hàng trong kho
                                 </label>
                             </div>
@@ -192,7 +184,6 @@
                             <input type="hidden" name="maxPrice" value="${param.maxPrice}" />
                             <input type="hidden" name="status" value="${param.status}" />
                             <input type="hidden" name="recordsPerPage" value="${recordsPerPage}" />
-                            <button type="submit" class="btn btn-success" style="padding: 10px 18px;">Tìm Kiếm</button>
                         </form>
                     </div>
                 </div>

@@ -81,10 +81,10 @@
             <div class="hero-content">
                 <div class="hero-grid">
                     <div class="hero-text">
-                        <div class="hero-badge">
+<!--                        <div class="hero-badge">
                             <i class="fas fa-star"></i>
                             <span>Được tin tưởng bởi 500,000+ doanh nghiệp</span>
-                        </div>
+                        </div>-->
 
                         <h1 class="hero-title">
                             Hệ thống quản lý <span class="gradient-text">cửa hàng thông minh</span> cho thời đại số
@@ -103,13 +103,13 @@
                                 </button>
                             </a>
 
-                            <button class="btn-hero-secondary" onclick="watchDemo()">
+<!--                            <button class="btn-hero-secondary" onclick="watchDemo()">
                                 <i class="fas fa-play"></i>
                                 Xem demo trực tiếp
-                            </button>
+                            </button>-->
                         </div>
 
-                        <div class="hero-stats">
+<!--                        <div class="hero-stats">
                             <div class="stat-item">
                                 <span class="stat-number" data-target="500000">0</span>
                                 <span class="stat-label">Doanh nghiệp</span>
@@ -122,7 +122,7 @@
                                 <span class="stat-number" data-target="24">0</span>
                                 <span class="stat-label">Hỗ trợ 24/7</span>
                             </div>
-                        </div>
+                        </div>-->
                     </div>
 
                     <div class="hero-visual">
@@ -137,7 +137,7 @@
                             </div>
 
                             <div class="dashboard-content">
-                                <div class="dashboard-card">
+<!--                                <div class="dashboard-card">
                                     <div class="card-header">
                                         <div class="card-icon blue">
                                             <i class="fas fa-chart-line"></i>
@@ -150,7 +150,7 @@
                                         +12.5% so với hôm qua
                                     </div>
                                     <div class="chart-placeholder"></div>
-                                </div>
+                                </div>-->
 
                                 <div class="dashboard-card">
                                     <div class="card-header">
@@ -164,7 +164,6 @@
                                         <i class="fas fa-arrow-up"></i>
                                         +8.3% so với tuần trước
                                     </div>
-                                    <div class="chart-placeholder"></div>
                                 </div>
 
                                 <div class="dashboard-card">
@@ -179,10 +178,9 @@
                                         <i class="fas fa-arrow-up"></i>
                                         +15.7% so với tháng trước
                                     </div>
-                                    <div class="chart-placeholder"></div>
                                 </div>
 
-                                <div class="dashboard-card">
+<!--                                <div class="dashboard-card">
                                     <div class="card-header">
                                         <div class="card-icon purple">
                                             <i class="fas fa-boxes"></i>
@@ -195,7 +193,7 @@
                                         +22.1% so với tuần trước
                                     </div>
                                     <div class="chart-placeholder"></div>
-                                </div>
+                                </div>-->
                             </div>
                         </div>
 
@@ -218,7 +216,7 @@
             </div>
         </section>
 
-        <!-- Footer -->
+<!--         Footer 
         <footer class="footer">
             <div class="footer-content">
                 <div class="footer-grid">
@@ -310,7 +308,7 @@
                     </div>
                 </div>
             </div>
-        </footer>
+        </footer>-->
 
         <script>
             // Login Modal Functions

@@ -138,6 +138,32 @@ public class BranchDAO {
         }
     }
 
+    public static int getLatestBranchId(String dbName) {
+        int latestId = -1;
+        String sql = "SELECT TOP 1 BranchID FROM Branches ORDER BY BranchID DESC";
+
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                latestId = rs.getInt("BranchID");
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+
+        return latestId;
+    }
+
+    public static boolean insertInventoryOfEachBranch(String dbName) throws SQLException {
+        String sql = "INSERT INTO Inventory (BranchID) VALUES (?)";
+        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, getLatestBranchId(dbName));
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
     public static void updateBranch(int branchId, String name, String address, String phone, boolean isActive, String dbName) throws SQLException {
         String sql = "UPDATE Branches SET BranchName = ?, Address = ?, Phone = ?, IsActive = ? WHERE BranchID = ?";
         try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
