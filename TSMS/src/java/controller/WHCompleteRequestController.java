@@ -53,7 +53,7 @@ public class WHCompleteRequestController extends HttpServlet {
             List<StockMovementDetail> details = detailDAO.getRawDetailsByMovementID(dbName, movementID);
 
             for (StockMovementDetail detail : details) {
-                warehouseDAO.insertWarehouseProduct(dbName, warehouseID, detail.getProductID(), detail.getQuantity());
+                warehouseDAO.insertWarehouseProduct(dbName, warehouseID, detail.getProductDetailID(), detail.getQuantity());
                 serialDAO.updateWarehouseForSerials(dbName, detail.getDetailID(), warehouseID);
             }
 
