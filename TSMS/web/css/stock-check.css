@@ -16,20 +16,24 @@ body {
   padding: 20px;
 }
 
+/* Main content layout - Fixed width cho sidebar */
 .main-content {
   display: flex;
   gap: 20px;
   min-height: calc(100vh - 40px);
 }
 
-/* Filter Sidebar */
+/* Filter Sidebar - Fixed width và responsive */
 .filter-sidebar {
-  width: 300px;
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
   background: white;
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   height: fit-content;
+  flex-shrink: 0; /* Ngăn sidebar bị co */
 }
 
 .filter-sidebar h3 {
@@ -37,25 +41,28 @@ body {
   color: #2c3e50;
   border-bottom: 2px solid #3498db;
   padding-bottom: 10px;
+  font-size: 16px;
 }
 
 .filter-group {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .filter-group label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-weight: 500;
   color: #555;
+  font-size: 13px;
 }
 
 .form-control {
   width: 100%;
-  padding: 10px;
+  padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 13px;
+  transition: border-color 0.3s ease;
 }
 
 .form-control:focus {
@@ -67,15 +74,16 @@ body {
 .radio-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .radio-group label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-weight: normal;
   cursor: pointer;
+  font-size: 13px;
 }
 
 .radio-group input[type="radio"] {
@@ -84,51 +92,59 @@ body {
 
 .filter-actions {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   margin-top: 20px;
 }
 
-/* Content Area */
+/* Content Area - Controlled width */
 .content-area {
   flex: 1;
+  min-width: 0; /* Cho phép shrink */
   background: white;
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-x: auto; /* Xử lý overflow */
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 .page-header h2 {
   color: #2c3e50;
-  font-size: 24px;
+  font-size: 22px;
+  margin: 0;
 }
 
 .header-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-/* Buttons */
+/* Buttons - Improved sizing */
 .btn {
-  padding: 10px 16px;
+  padding: 8px 14px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -166,29 +182,34 @@ body {
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .btn-scan:hover {
   background-color: #e67e22;
 }
 
-/* Table */
+/* Table - Improved responsive */
 .table-container {
   overflow-x: auto;
   margin-bottom: 20px;
+  border-radius: 6px;
+  border: 1px solid #eee;
 }
 
 .stock-check-table {
   width: 100%;
+  min-width: 800px; /* Minimum width để tránh bị nén quá */
   border-collapse: collapse;
   background: white;
 }
 
 .stock-check-table th,
 .stock-check-table td {
-  padding: 12px;
+  padding: 10px 8px;
   text-align: left;
   border-bottom: 1px solid #eee;
+  font-size: 13px;
 }
 
 .stock-check-table th {
@@ -197,6 +218,44 @@ body {
   color: #555;
   position: sticky;
   top: 0;
+  z-index: 10;
+}
+
+/* Column widths */
+.stock-check-table th:nth-child(1), /* STT */
+.stock-check-table td:nth-child(1) {
+  width: 60px;
+  text-align: center;
+}
+
+.stock-check-table th:nth-child(2), /* Tên sản phẩm */
+.stock-check-table td:nth-child(2) {
+  width: 200px;
+  min-width: 180px;
+}
+
+.stock-check-table th:nth-child(3), /* Serial number */
+.stock-check-table td:nth-child(3) {
+  width: 200px;
+  min-width: 180px;
+}
+
+.stock-check-table th:nth-child(4), /* Số lượng cần nhập */
+.stock-check-table td:nth-child(4) {
+  width: 120px;
+  text-align: center;
+}
+
+.stock-check-table th:nth-child(5), /* Đã nhập */
+.stock-check-table td:nth-child(5) {
+  width: 100px;
+  text-align: center;
+}
+
+.stock-check-table th:nth-child(6), /* Thao tác */
+.stock-check-table td:nth-child(6) {
+  width: 100px;
+  text-align: center;
 }
 
 .stock-check-table tr:hover {
@@ -213,16 +272,19 @@ body {
 
 .text-muted {
   color: #6c757d;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .serial-item {
-  padding: 2px 6px;
+  padding: 3px 6px;
   background-color: #e9ecef;
   border-radius: 3px;
   margin: 2px 0;
   font-family: monospace;
   font-size: 11px;
+  display: inline-block;
+  max-width: 100%;
+  word-break: break-all;
 }
 
 .serial-item.error {
@@ -240,6 +302,7 @@ body {
   border-radius: 12px;
   font-size: 11px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .badge-success {
@@ -247,52 +310,58 @@ body {
   color: #155724;
 }
 
-/* Pagination */
+/* Pagination - Improved layout */
 .pagination-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 15px 0;
   border-top: 1px solid #eee;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 .pagination-info {
   display: flex;
   align-items: center;
-  gap: 20px;
-  font-size: 14px;
+  gap: 15px;
+  font-size: 13px;
   color: #666;
+  flex-wrap: wrap;
 }
 
 .items-per-page {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .items-per-page select {
   padding: 4px 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 13px;
 }
 
 .pagination-controls {
   display: flex;
-  gap: 5px;
+  gap: 4px;
 }
 
 .btn-page {
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: 1px solid #ddd;
   background: white;
   cursor: pointer;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 13px;
   text-decoration: none;
   color: #333;
+  min-width: 32px;
+  text-align: center;
 }
 
-.btn-page:hover {
+.btn-page:hover:not(.disabled) {
   background-color: #f8f9fa;
 }
 
@@ -302,7 +371,12 @@ body {
   border-color: #3498db;
 }
 
-/* QR Scanner Modal */
+.btn-page.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* QR Scanner Modal - Improved */
 .modal {
   display: none;
   position: fixed;
@@ -312,17 +386,19 @@ body {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
 }
 
 .modal-content {
   background-color: white;
-  margin: 5% auto;
+  margin: 3% auto;
   padding: 0;
   border-radius: 8px;
   width: 90%;
   max-width: 500px;
-  max-height: 80vh;
+  max-height: 85vh;
   overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .modal-header {
@@ -331,11 +407,13 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background-color: #f8f9fa;
 }
 
 .modal-header h3 {
   margin: 0;
   color: #2c3e50;
+  font-size: 18px;
 }
 
 .close-btn {
@@ -344,10 +422,17 @@ body {
   font-size: 24px;
   cursor: pointer;
   color: #999;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
 }
 
 .close-btn:hover {
   color: #333;
+  background-color: #f0f0f0;
 }
 
 .modal-body {
@@ -364,21 +449,26 @@ body {
 
 #qr-reader {
   width: 100%;
-  min-height: 300px;
+  min-height: 250px;
 }
 
 .scan-result {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.scan-result label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
 }
 
 .scan-result input {
-  flex: 1;
+  width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 14px;
 }
 
 .scan-controls {
@@ -388,17 +478,44 @@ body {
   justify-content: center;
 }
 
+/* Alert styles */
+.alert {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.alert-danger {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+
+.alert-success {
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}
+
 /* Notification styles */
 .notification {
   position: fixed;
-  top: 20px;
+  top: 80px;
   right: 20px;
-  padding: 12px 20px;
+  padding: 12px 16px;
   border-radius: 4px;
   color: white;
   z-index: 9999;
   max-width: 300px;
   word-wrap: break-word;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .notification-success {
@@ -417,65 +534,84 @@ body {
   background-color: #3498db;
 }
 
-/* Alert styles for JSP messages */
-.alert {
-  padding: 15px 20px;
-  margin-bottom: 20px;
-  border: 1px solid transparent;
-  border-radius: 8px; /* Slightly more rounded corners */
-  font-size: 16px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Subtle shadow */
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .main-content {
+    gap: 15px;
+  }
+  
+  .filter-sidebar {
+    width: 260px;
+    min-width: 260px;
+  }
 }
 
-.alert-danger {
-  color: #721c24;
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
-}
-
-.alert-success {
-  color: #155724;
-  background-color: #d4edda;
-  border-color: #c3e6cb;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
   .main-content {
     flex-direction: column;
+    gap: 15px;
   }
 
   .filter-sidebar {
     width: 100%;
+    min-width: auto;
+    max-width: none;
   }
 
   .page-header {
     flex-direction: column;
-    gap: 15px;
     align-items: flex-start;
+    gap: 10px;
   }
 
   .header-actions {
     width: 100%;
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
 
   .pagination-container {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
   }
 
   .pagination-info {
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    text-align: center;
   }
 
-  .alert {
-    font-size: 14px; /* Smaller font on mobile */
-    padding: 12px 15px;
+  .stock-check-table {
+    min-width: 600px;
+    font-size: 12px;
+  }
+
+  .stock-check-table th,
+  .stock-check-table td {
+    padding: 8px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .content-area,
+  .filter-sidebar {
+    padding: 15px;
+  }
+  
+  .btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: 5% auto;
   }
 }

@@ -2,18 +2,19 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-
 package model;
 
- import java.lang.*;
- import java.util.*;
- import java.io.*;
+import java.lang.*;
+import java.util.*;
+import java.io.*;
+
 /**
  *
  * @author Trieu Quang Nam
  */
 public class ProductDetailSerialNumber {
- private int productDetailID;
+
+    private int productDetailID;
     private String serialNumber;
     private String status;
     private Integer orderID;       // có thể null
@@ -21,8 +22,16 @@ public class ProductDetailSerialNumber {
     private Integer warehouseID;   // có thể null
     private String error;// dùng để hiển thị lỗi nếu có
     private int movementDetailID;
+    private String movementHistory;
 
-   
+    // Getter và Setter
+    public String getMovementHistory() {
+        return movementHistory;
+    }
+
+    public void setMovementHistory(String movementHistory) {
+        this.movementHistory = movementHistory;
+    }
 
     public ProductDetailSerialNumber() {
     }
@@ -91,7 +100,8 @@ public class ProductDetailSerialNumber {
     public void setError(String error) {
         this.error = error;
     }
-     public int getMovementDetailID() {
+
+    public int getMovementDetailID() {
         return movementDetailID;
     }
 
@@ -101,14 +111,14 @@ public class ProductDetailSerialNumber {
 
     @Override
     public String toString() {
-        return "ProductDetailSerialNumber{" +
-                "productDetailID=" + productDetailID +
-                ", serialNumber='" + serialNumber + '\'' +
-                ", status='" + status + '\'' +
-                ", orderID=" + orderID +
-                ", branchID=" + branchID +
-                ", warehouseID=" + warehouseID +
-                ", error='" + error + '\'' +
-                '}';
+        return "ProductDetailSerialNumber{"
+                + "productDetailID=" + productDetailID
+                + ", serialNumber='" + serialNumber + '\''
+                + ", status='" + status + '\''
+                + ", orderID=" + orderID
+                + ", branchID=" + branchID
+                + ", warehouseID=" + warehouseID
+                + ", error='" + error + '\''
+                + '}';
     }
 }

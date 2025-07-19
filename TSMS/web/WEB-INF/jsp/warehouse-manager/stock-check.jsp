@@ -2,58 +2,57 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <c:set var="movementType" value="${movementType}" />
+<!-- Set default values để tránh null -->
+<c:if test="${empty currentPage}"><c:set var="currentPage" value="1"/></c:if>
+<c:if test="${empty totalPages}"><c:set var="totalPages" value="1"/></c:if>
+<c:if test="${empty itemsPerPage}"><c:set var="itemsPerPage" value="10"/></c:if>
+<c:if test="${empty totalItems}"><c:set var="totalItems" value="0"/></c:if>
+<c:if test="${empty startItem}"><c:set var="startItem" value="0"/></c:if>
+<c:if test="${empty endItem}"><c:set var="endItem" value="0"/></c:if>
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Kiểm hàng - Đơn nhập kho</title>
-        <link rel="stylesheet" href="css/stock-check.css">
-        <link rel="stylesheet" href="css/header.css"/>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-        <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    </head>
-    <body>
-        <!-- Header giống như trang import.jsp -->
-        <header class="header">
-            <div class="header-container">
-                <div class="logo">
-                    <a href="wh-products?page=1" class="logo">
-                        <div class="logo-icon">T</div>
-                        <span class="logo-text">TSMS</span>
-                    </a>
-                </div>
-                <nav class="main-nav">
-                    <a href="wh-products?page=1" class="nav-item">
-                        <i class="fas fa-box"></i>
-                        Hàng hóa
-                    </a>
-                    <a href="wh-import" class="nav-item <c:choose>
-                           <c:when test="${movementType == 'export'}"></c:when>
-                           <c:otherwise>active</c:otherwise>
-                       </c:choose>">
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <title>Kiểm hàng - Đơn nhập kho</title>
+            <link rel="stylesheet" href="css/stock-check.css">
+            <link rel="stylesheet" href="css/header.css"/>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+            <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+        </head>
+        <body>
+            <!-- Header giống như trang import.jsp -->
+            <header class="header">
+                <div class="header-container">
+                    <div class="logo">
+                        <a href="wh-products?page=1" class="logo">
+                            <div class="logo-icon">T</div>
+                            <span class="logo-text">TSMS</span>
+                        </a>
+                    </div>
+                    <nav class="main-nav">
+                        <a href="wh-products?page=1" class="nav-item ">
+                            <i class="fas fa-box"></i>
+                            Hàng hóa
+                        </a>
+
+                        <a href="wh-import" class="nav-item ${movementType eq 'export' ? '' : 'active'}">
                         <i class="fa-solid fa-download"></i>
                         Nhập hàng
                     </a>
-                    <a href="" class="nav-item  <c:choose>
-                           <c:when test="${movementType == 'export'}">active</c:when>
-                           <c:otherwise></c:otherwise>
-                       </c:choose>">
+
+                    <a href="wh-export" class="nav-item ${movementType eq 'export' ? 'active' : ''}">
                         <i class="fa-solid fa-upload"></i>
                         Xuất hàng
                     </a>
-                    <a href="" class="nav-item">
-                        <i class="fa-solid fa-bell"></i>
-                        Thông báo
-                    </a>
-                    <a href="" class="nav-item">
+
+
+                    <a href="wh-import-request" class="nav-item">
                         <i class="fas fa-exchange-alt"></i>
                         Yêu cầu nhập hàng
                     </a>
-                    <a href="" class="nav-item">
-                        <i class="fas fa-chart-bar"></i>
-                        Báo cáo
-                    </a>
+
                 </nav>
+
                 <div class="header-right">
                     <div class="user-dropdown">
                         <a href="" class="user-icon gradient" id="dropdownToggle">
@@ -71,26 +70,31 @@
         <div class="container">
             <div class="main-content">
                 <!-- Sidebar Filter -->
+                <!-- Sidebar Filter -->
                 <div class="filter-sidebar">
-                    <form method="GET" action="">
+                    <form method="GET" action="serial-check">
+                        <input type="hidden" name="id" value="${movementID}">
+                        <input type="hidden" name="movementType" value="${movementType}">
+                        <input type="hidden" name="page" value="1">
+
                         <h3>Bộ lọc</h3>
 
                         <div class="filter-group">
                             <label>Từ ngày:</label>
-                            <input type="date" name="fromDate" class="form-control" value="${param.fromDate}">
+                            <input type="date" name="fromDate" class="form-control" value="${fromDate}">
                         </div>
 
                         <div class="filter-group">
                             <label>Đến ngày:</label>
-                            <input type="date" name="toDate" class="form-control" value="${param.toDate}">
+                            <input type="date" name="toDate" class="form-control" value="${toDate}">
                         </div>
 
                         <div class="filter-group">
                             <label>Sản phẩm:</label>
                             <select name="productFilter" class="form-control">
-                                <option value="">--Tất cả--</option>
+                                <option value="">--Tất cả sản phẩm--</option>
                                 <c:forEach var="product" items="${productList}">
-                                    <option value="${product.id}" ${param.productFilter == product.id ? 'selected' : ''}>${product.name}</option>
+                                    <option value="${product}" ${productFilter eq product ? 'selected' : ''}>${product}</option>
                                 </c:forEach>
                             </select>
                         </div>
@@ -98,11 +102,10 @@
                         <div class="filter-group">
                             <label>Trạng thái:</label>
                             <div class="radio-group">
-                                <label><input type="radio" name="status" value="" ${empty param.status ? 'checked' : ''}> Tất cả</label>
-                                <label><input type="radio" name="status" value="completed" ${param.status == 'completed' ? 'checked' : ''}> Hoàn thành</label>
-                                <label><input type="radio" name="status" value="pending" ${param.status == 'pending' ? 'checked' : ''}> Chờ xử lý</label>
-                                <label><input type="radio" name="status" value="processing" ${param.status == 'processing' ? 'checked' : ''}> Đang xử lý</label>
-                                <label><input type="radio" name="status" value="cancelled" ${param.status == 'cancelled' ? 'checked' : ''}> Đã hủy</label>
+                                <label><input type="radio" name="status" value="" ${empty status ? 'checked' : ''}> Tất cả</label>
+                                <label><input type="radio" name="status" value="completed" ${status eq 'completed' ? 'checked' : ''}> Hoàn thành</label>
+                                <label><input type="radio" name="status" value="pending" ${status eq 'pending' ? 'checked' : ''}> Chờ xử lý</label>
+                                <label><input type="radio" name="status" value="processing" ${status eq 'processing' ? 'checked' : ''}> Đang xử lý</label>
                             </div>
                         </div>
 
@@ -110,7 +113,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-filter"></i> Áp dụng lọc
                             </button>
-                            <button type="button" class="btn btn-secondary" onclick="window.location.href = window.location.pathname">
+                            <button type="button" class="btn btn-secondary" onclick="resetFilters()">
                                 <i class="fas fa-undo"></i> Reset
                             </button>
                         </div>
@@ -149,10 +152,22 @@
 
 
                             </c:if>
-                            <button class="btn btn-secondary" onclick="cancelCheck('${movementID}', '${movementType}')">
-
-                                Hủy đơn nhập
-                            </button>
+                            <c:choose>
+                                <c:when test="${movementType eq 'export' or movementType eq 'Export'}">
+                                    <a href="cancel-stock?id=${movementID}&movementType=export" 
+                                       class="btn btn-secondary"
+                                       onclick="return confirm('Bạn có chắc chắn muốn hủy đơn xuất này?')">
+                                        Hủy đơn xuất
+                                    </a>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="cancel-stock?id=${movementID}&movementType=import" 
+                                       class="btn btn-secondary"
+                                       onclick="return confirm('Bạn có chắc chắn muốn hủy đơn nhập này?')">
+                                        Hủy đơn nhập
+                                    </a>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </div>
                     <!-- Stock Check Table -->
@@ -160,6 +175,7 @@
                         <table class="stock-check-table">
                             <thead>
                                 <tr>
+                                    <th>STT</th>
                                     <th>Tên sản phẩm</th>
                                     <th>Serial number</th>
                                     <th>Số lượng cần nhập</th>
@@ -168,13 +184,26 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <c:forEach var="item" items="${movementDetails}">
+                                <c:forEach var="item" items="${movementDetails}" varStatus="loop">
                                     <tr class="${item.quantity == item.scanned ? 'row-completed' : ''}">
+                                        <!-- STT -->
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${not empty currentPage and not empty itemsPerPage}">
+                                                    ${(currentPage - 1) * itemsPerPage + loop.index + 1}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    ${loop.index + 1}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+
                                         <!-- Tên sản phẩm + mã -->
                                         <td>
-                                            <div><strong>${item.productName}</strong></div>
-                                            <div class="text-muted">(${item.productCode})</div>
+                                            <div><strong>${not empty item.productName ? item.productName : 'N/A'}</strong></div>
+                                            <div class="text-muted">(${not empty item.productCode ? item.productCode : 'N/A'})</div>
                                         </td>
+
                                         <!-- Serial number -->
                                         <td>
                                             <c:choose>
@@ -183,9 +212,9 @@
                                                 </c:when>
                                                 <c:otherwise>
                                                     <c:forEach var="serial" items="${item.serials}">
-                                                        <div class="serial-item ${serial.error != null ? 'error' : ''}">
-                                                            ${serial.serialNumber}
-                                                            <c:if test="${serial.error != null}">
+                                                        <div class="serial-item ${not empty serial.error ? 'error' : ''}">
+                                                            ${not empty serial.serialNumber ? serial.serialNumber : 'N/A'}
+                                                            <c:if test="${not empty serial.error}">
                                                                 <span class="error-msg">(${serial.error})</span>
                                                             </c:if>
                                                         </div>
@@ -193,57 +222,114 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
+
                                         <!-- Số lượng cần nhập -->
-                                        <td>${item.quantity}</td>
+                                        <td>${not empty item.quantity ? item.quantity : 0}</td>
+
                                         <!-- Số đã nhập -->
-                                        <td>${item.scanned}/${item.quantity}</td>
+                                        <td>
+                                            ${not empty item.scanned ? item.scanned : 0}/${not empty item.quantity ? item.quantity : 0}
+                                        </td>
+
                                         <!-- Thao tác -->
                                         <td>
                                             <c:choose>
-                                                <c:when test="${item.quantity > item.scanned}">
+                                                <c:when test="${(not empty item.quantity ? item.quantity : 0) > (not empty item.scanned ? item.scanned : 0)}">
                                                     <button class="btn-scan" onclick="scanSerial('${item.detailID}', '${item.productDetailID}')">Quét</button>
                                                 </c:when>
                                                 <c:otherwise>
                                                     <span class="badge badge-success">Đã đủ</span>
                                                 </c:otherwise>
                                             </c:choose>
-                                        </td><td>${item.productDetailID}</td> <!-- kiểm tra thử -->
+                                        </td>
 
-
+                                        <!-- Test column - remove in production -->
 
                                     </tr>
                                 </c:forEach>
+
+                                <!-- Empty state -->
+                                <c:if test="${empty movementDetails}">
+                                    <tr>
+                                        <td colspan="7" class="no-data">
+                                            <i class="fas fa-box-open"></i>
+                                            <p>Không có sản phẩm nào trong đơn hàng này</p>
+                                        </td>
+                                    </tr>
+                                </c:if>
                             </tbody>
+
                         </table>
                     </div>
                     <!-- Pagination đơn giản -->
+                    <!-- Pagination đầy đủ -->
                     <div class="pagination-container">
                         <div class="pagination-info">
-                            <span>Hiển thị ${startItem} - ${endItem} / Tổng số ${totalItems} sản phẩm</span>
+                            <span>
+                                Hiển thị 
+                                ${not empty startItem ? startItem : 1} - ${not empty endItem ? endItem : 0} / 
+                                Tổng số ${not empty totalItems ? totalItems : 0} sản phẩm 
+                                (Trang ${not empty currentPage ? currentPage : 1}/${not empty totalPages ? totalPages : 1})
+                            </span>
                             <div class="items-per-page">
                                 <label>Hiển thị:</label>
-                                <form method="GET" style="display: inline;" onsubmit="return checkBeforeSubmit(event)">
+                                <form method="GET" style="display: inline;">
+                                    <input type="hidden" name="id" value="${movementID}">
+                                    <input type="hidden" name="movementType" value="${movementType}">
+                                    <input type="hidden" name="fromDate" value="${fromDate}">
+                                    <input type="hidden" name="toDate" value="${toDate}">
+                                    <input type="hidden" name="productFilter" value="${productFilter}">
+                                    <input type="hidden" name="status" value="${status}">
                                     <select name="itemsPerPage" onchange="this.form.submit()">
-                                        <option value="10" ${param.itemsPerPage == '10' ? 'selected' : ''}>10</option>
-                                        <option value="25" ${param.itemsPerPage == '25' ? 'selected' : ''}>25</option>
-                                        <option value="50" ${param.itemsPerPage == '50' ? 'selected' : ''}>50</option>
+                                        <option value="10" ${itemsPerPage == 10 ? 'selected' : ''}>10</option>
+                                        <option value="25" ${itemsPerPage == 25 ? 'selected' : ''}>25</option>
+                                        <option value="50" ${itemsPerPage == 50 ? 'selected' : ''}>50</option>
                                     </select>
                                 </form>
                                 <span>bản ghi/trang</span>
                             </div>
                         </div>
-                        <div class="pagination-controls">
-                            <c:if test="${currentPage > 1}">
-                                <a href="?page=1" class="btn-page" onclick="return checkBeforeLeave(event)">⏮</a>
-                                <a href="?page=${currentPage - 1}" class="btn-page" onclick="return checkBeforeLeave(event)">◀</a>
-                            </c:if>
-                            <span class="btn-page active">${currentPage}</span>
-                            <c:if test="${currentPage < totalPages}">
-                                <a href="?page=${currentPage + 1}" class="btn-page" onclick="return checkBeforeLeave(event)">▶</a>
-                                <a href="?page=${totalPages}" class="btn-page" onclick="return checkBeforeLeave(event)">⏭</a>
-                            </c:if>
-                        </div>
+
+                        <c:if test="${totalPages > 1}">
+                            <div class="pagination-controls">
+                                <c:choose>
+                                    <c:when test="${currentPage > 1}">
+                                        <a href="serial-check?id=${movementID}&movementType=${movementType}&fromDate=${fromDate}&toDate=${toDate}&productFilter=${productFilter}&status=${status}&itemsPerPage=${itemsPerPage}&page=1" class="btn-page">⏮</a>
+                                        <a href="serial-check?id=${movementID}&movementType=${movementType}&fromDate=${fromDate}&toDate=${toDate}&productFilter=${productFilter}&status=${status}&itemsPerPage=${itemsPerPage}&page=${currentPage - 1}" class="btn-page">◀</a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="btn-page disabled">⏮</span>
+                                        <span class="btn-page disabled">◀</span>
+                                    </c:otherwise>
+                                </c:choose>
+
+                                <!-- Page numbers -->
+                                <c:forEach var="i" begin="${currentPage - 2 > 0 ? currentPage - 2 : 1}" 
+                                           end="${currentPage + 2 < totalPages ? currentPage + 2 : totalPages}">
+                                    <c:choose>
+                                        <c:when test="${i == currentPage}">
+                                            <span class="btn-page active">${i}</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="serial-check?id=${movementID}&movementType=${movementType}&fromDate=${fromDate}&toDate=${toDate}&productFilter=${productFilter}&status=${status}&itemsPerPage=${itemsPerPage}&page=${i}" class="btn-page">${i}</a>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
+
+                                <c:choose>
+                                    <c:when test="${currentPage < totalPages}">
+                                        <a href="serial-check?id=${movementID}&movementType=${movementType}&fromDate=${fromDate}&toDate=${toDate}&productFilter=${productFilter}&status=${status}&itemsPerPage=${itemsPerPage}&page=${currentPage + 1}" class="btn-page">▶</a>
+                                        <a href="serial-check?id=${movementID}&movementType=${movementType}&fromDate=${fromDate}&toDate=${toDate}&productFilter=${productFilter}&status=${status}&itemsPerPage=${itemsPerPage}&page=${totalPages}" class="btn-page">⏭</a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="btn-page disabled">▶</span>
+                                        <span class="btn-page disabled">⏭</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </c:if>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -408,8 +494,7 @@
             }
 
             function resetFilters() {
-                // Reset filter không cần cảnh báo vì cùng trang
-                window.location.href = window.location.pathname;
+                window.location.href = 'serial-check?id=${movementID}&movementType=${movementType}';
             }
 
             // ===== BEFOREUNLOAD EVENT - CHỈ CHO BROWSER ACTIONS (F5, đóng tab, nhập URL mới) =====
@@ -434,28 +519,47 @@
 
 
             function scanSerial(detailID, productDetailID) {
+                // Kiểm tra null/undefined
+                if (!detailID || detailID === 'null' || detailID === 'undefined') {
+                    console.error('❌ DetailID không hợp lệ:', detailID);
+                    showNotification('Lỗi: Không tìm thấy ID chi tiết sản phẩm', 'error');
+                    return;
+                }
+
+                if (!productDetailID || productDetailID === 'null' || productDetailID === 'undefined') {
+                    console.error('❌ ProductDetailID không hợp lệ:', productDetailID);
+                    showNotification('Lỗi: Không tìm thấy ID sản phẩm', 'error');
+                    return;
+                }
+
                 currentDetailID = detailID;
                 currentProductDetailID = productDetailID;
                 console.log('📱 Mở modal nhập serial cho detail ID:', detailID, 'productDetailID:', productDetailID);
 
-                // ĐÁNH DẤU CÓ THAY ĐỔI NGAY KHI MỞ MODAL
+                // Đánh dấu có thay đổi
                 markFormAsChanged();
 
                 // Hiển thị modal
                 document.getElementById("qrScannerModal").style.display = "block";
 
-                // Đặt giá trị cho 2 input hidden
+                // Đặt giá trị cho input hidden
                 document.getElementById("formDetailID").value = detailID;
                 document.getElementById("formProductDetailID").value = productDetailID;
 
                 // Focus input nhập
                 const input = document.getElementById("scannedSerial");
-                input.value = "";
-                input.focus();
+                if (input) {
+                    input.value = "";
+                    input.focus();
+                }
 
                 // Ẩn QR reader
-                document.getElementById("qrReaderContainer").style.display = "none";
+                const qrContainer = document.getElementById("qrReaderContainer");
+                if (qrContainer) {
+                    qrContainer.style.display = "none";
+                }
             }
+
 
 
             // Bắt đầu quét QR (tùy chọn)
@@ -605,13 +709,20 @@
             function cancelCheck(movementID, movementType) {
                 if (confirm("Bạn có chắc chắn muốn hủy đơn này?")) {
                     console.log('❌ Hủy đơn:', movementID, movementType);
-                    markFormAsSubmitted(); // Đánh dấu đã submit
+                    markFormAsSubmitted();
                     showNotification('Đang xử lý...', 'info');
 
-                    const actionUrl = movementType === 'export' ? 'cancel-stock-export' : 'cancel-stock';
-                    window.location.href = `${actionUrl}?id=${movementID}`;
+                    // SỬA: Chỉ gọi 1 controller duy nhất
+                    const actionUrl = 'cancel-stock';
+                    const fullUrl = `${actionUrl}?id=${movementID}&movementType=${movementType}`;
+
+                                console.log('[DEBUG] Redirecting to:', fullUrl);
+                                window.location.href = fullUrl;
                             }
                         }
+
+
+
 
 
                         // Đóng modal khi click ngoài vùng
@@ -661,4 +772,7 @@
                         });
         </script>
     </body>
+    <style>
+
+    </style>
 </html>
