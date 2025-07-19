@@ -18,10 +18,10 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     </head>
     <body>
-        <header class="header">
+         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="so-overview" class="logo">
+                    <a href="wh-products?page=1" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
@@ -42,16 +42,10 @@
                         Xuất hàng
                     </a>
 
-                    <a href="" class="nav-item">
-                        <i class="fa-solid fa-bell"></i>
-                        Thông báo
-                    </a>
-
-                    <a href="" class="nav-item">
+                    <a href="wh-import-request" class="nav-item">
                         <i class="fas fa-exchange-alt"></i>
                         Yêu cầu nhập hàng
                     </a>
-
 
                 </nav>
 
@@ -68,71 +62,57 @@
                 </div>
             </div>
         </header>
+        
+
 
         <div class="main-container">
+
             <!-- Sidebar -->
             <aside class="sidebar">
-                <form action="import.jsp" method="get" class="filter-form">
+                <form action="wh-import" method="get" class="filter-form">
+                    <input type="hidden" name="page" value="1">
                     <fieldset>
                         <legend>Bộ lọc</legend>
 
                         <div class="filter-item">
                             <label for="fromDate">Từ ngày:</label>
-                            <input type="date" id="fromDate" name="fromDate" class="form-input">
+                            <input type="date" id="fromDate" name="fromDate" class="form-input" value="${fromDate}">
                         </div>
 
                         <div class="filter-item">
                             <label for="toDate">Đến ngày:</label>
-                            <input type="date" id="toDate" name="toDate" class="form-input">
+                            <input type="date" id="toDate" name="toDate" class="form-input" value="${toDate}">
                         </div>
 
-                        <div class="filter-item">
-                            <label for="branchId">Cửa hàng:</label>
-                            <select id="branchId" name="branchId" class="form-select" onchange="this.form.submit()">
-                                <option value="">--Tất cả--</option>
-                                <option value="1">Chi nhánh Hà Nội</option>
-                                <option value="2">Chi nhánh TP.HCM</option>
-                                <option value="3">Chi nhánh Đà Nẵng</option>
-                            </select>
-                        </div>
+                       
 
-                        <div class="filter-item">
-                            <label for="supplierId">Nhà cung cấp:</label>
-                            <select id="supplierId" name="supplierId" class="form-select">
-                                <option value="">--Tất cả nhà cung cấp--</option>
-                                <option value="1">Công ty TNHH ABC</option>
-                                <option value="2">Công ty XYZ</option>
-                                <option value="3">Nhà cung cấp DEF</option>
-                                <option value="4">Công ty GHI</option>
-                            </select>
-                        </div>
+                        
 
                         <div class="filter-item">
                             <label>Trạng thái:</label>
                             <div class="form-radio-group">
                                 <label>
-                                    <input type="radio" name="status" value="" checked>
+                                    <input type="radio" name="status" value="" ${empty status ? 'checked' : ''}>
                                     Tất cả
                                 </label>
                                 <label>
-                                    <input type="radio" name="status" value="completed">
+                                    <input type="radio" name="status" value="completed" ${status eq 'completed' ? 'checked' : ''}>
                                     Hoàn thành
                                 </label>
                                 <label>
-                                    <input type="radio" name="status" value="pending">
+                                    <input type="radio" name="status" value="pending" ${status eq 'pending' ? 'checked' : ''}>
                                     Chờ xử lý
                                 </label>
                                 <label>
-                                    <input type="radio" name="status" value="processing">
+                                    <input type="radio" name="status" value="processing" ${status eq 'processing' ? 'checked' : ''}>
                                     Đang xử lý
                                 </label>
                                 <label>
-                                    <input type="radio" name="status" value="cancelled">
+                                    <input type="radio" name="status" value="cancelled" ${status eq 'cancelled' ? 'checked' : ''}>
                                     Đã hủy
                                 </label>
                             </div>
                         </div>
-
                     </fieldset>
 
                     <!-- Action Buttons -->
@@ -147,6 +127,7 @@
                         </button>
                     </div>
                 </form>
+
             </aside>
 
             <!-- Main Content -->
@@ -174,7 +155,7 @@
                         <tbody>
                             <c:forEach var="req" items="${importRequests}" varStatus="loop">
                                 <tr>
-                                    <td>${loop.index + 1}</td>
+                                    <td>${(currentPage - 1) * itemsPerPage + loop.index + 1}</td>
                                     <td>${req.movementID}</td>
                                     <td>${req.fromSupplierName}</td>
                                     <td>
@@ -225,59 +206,95 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="pagination-container">
+                    <div class="pagination-left">
+                        <div class="pagination-info">
+                            Hiển thị ${startItem} - ${endItem} trong tổng số ${totalItems} đơn nhập hàng
+                            (Trang ${currentPage} / ${totalPages})
+                        </div>
 
+                        <div class="records-per-page">
+                            <label>Hiển thị:</label>
+                            <form method="GET" class="records-per-page-form">
+                                <input type="hidden" name="fromDate" value="${fromDate}">
+                                <input type="hidden" name="toDate" value="${toDate}">
+                                <input type="hidden" name="branchId" value="${branchId}">
+                                <input type="hidden" name="supplierId" value="${supplierId}">
+                                <input type="hidden" name="status" value="${status}">
+                                <select name="recordsPerPage" class="records-select" onchange="this.form.submit()">
+                                    <option value="5" ${itemsPerPage == 5 ? 'selected' : ''}>5</option>
+                                    <option value="10" ${itemsPerPage == 10 ? 'selected' : ''}>10</option>
+                                    <option value="20" ${itemsPerPage == 20 ? 'selected' : ''}>20</option>
+                                    <option value="50" ${itemsPerPage == 50 ? 'selected' : ''}>50</option>
+                                </select>
+                            </form>
+                            <span>bản ghi/trang</span>
+                        </div>
+                    </div>
+
+                    <c:if test="${totalPages > 1}">
+                        <div class="pagination">
+                            <!-- First page -->
+                            <c:choose>
+                                <c:when test="${currentPage > 1}">
+                                    <a href="wh-import?fromDate=${fromDate}&toDate=${toDate}&branchId=${branchId}&supplierId=${supplierId}&status=${status}&recordsPerPage=${itemsPerPage}&page=1" class="page-btn">⏮</a>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="page-btn disabled">⏮</span>
+                                </c:otherwise>
+                            </c:choose>
+
+                            <!-- Previous page -->
+                            <c:choose>
+                                <c:when test="${currentPage > 1}">
+                                    <a href="wh-import?fromDate=${fromDate}&toDate=${toDate}&branchId=${branchId}&supplierId=${supplierId}&status=${status}&recordsPerPage=${itemsPerPage}&page=${currentPage - 1}" class="page-btn">◀</a>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="page-btn disabled">◀</span>
+                                </c:otherwise>
+                            </c:choose>
+
+                            <!-- Page numbers -->
+                            <c:forEach var="i" begin="${currentPage - 2 > 0 ? currentPage - 2 : 1}" 
+                                       end="${currentPage + 2 < totalPages ? currentPage + 2 : totalPages}">
+                                <c:choose>
+                                    <c:when test="${i == currentPage}">
+                                        <span class="page-btn active">${i}</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="wh-import?fromDate=${fromDate}&toDate=${toDate}&branchId=${branchId}&supplierId=${supplierId}&status=${status}&recordsPerPage=${itemsPerPage}&page=${i}" class="page-btn">${i}</a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+
+                            <!-- Next page -->
+                            <c:choose>
+                                <c:when test="${currentPage < totalPages}">
+                                    <a href="wh-import?fromDate=${fromDate}&toDate=${toDate}&branchId=${branchId}&supplierId=${supplierId}&status=${status}&recordsPerPage=${itemsPerPage}&page=${currentPage + 1}" class="page-btn">▶</a>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="page-btn disabled">▶</span>
+                                </c:otherwise>
+                            </c:choose>
+
+                            <!-- Last page -->
+                            <c:choose>
+                                <c:when test="${currentPage < totalPages}">
+                                    <a href="wh-import?fromDate=${fromDate}&toDate=${toDate}&branchId=${branchId}&supplierId=${supplierId}&status=${status}&recordsPerPage=${itemsPerPage}&page=${totalPages}" class="page-btn">⏭</a>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="page-btn disabled">⏭</span>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </c:if>
+
+                </div>
 
 
 
                 <!-- Pagination -->
-                <form method="GET" action="import.jsp">
-                    <input type="hidden" name="branchId" value="">
-                    <input type="hidden" name="supplierId" value="">
-                    <input type="hidden" name="fromDate" value="">
-                    <input type="hidden" name="toDate" value="">
-                    <input type="hidden" name="status" value="">
-                    <div class="pagination-container">
-                        <div class="pagination-info">
-                            Hiển thị 1 - 5 / Tổng số 5 đơn nhập hàng
-                        </div>
 
-                        <div class="records-per-page">
-                            <label for="recordsPerPage">Hiển thị:</label>
-                            <select id="recordsPerPage" name="recordsPerPage" class="records-select" onchange="this.form.submit()">
-                                <option value="5">5</option>
-                                <option value="10" selected>10</option>
-                                <option value="20">20</option>
-                                <option value="50">50</option>
-                            </select>
-                            <span>bản ghi/trang</span>
-                        </div>
-
-                        <div class="pagination">
-                            <!-- Trang đầu -->
-                            <span class="page-btn disabled">
-                                <i class="fas fa-angle-double-left"></i>
-                            </span>
-
-                            <!-- Trang trước -->
-                            <span class="page-btn disabled">
-                                <i class="fas fa-angle-left"></i>
-                            </span>
-
-                            <!-- Trang hiện tại -->
-                            <span class="page-btn active">1</span>
-
-                            <!-- Trang sau -->
-                            <span class="page-btn disabled">
-                                <i class="fas fa-angle-right"></i>
-                            </span>
-
-                            <!-- Trang cuối -->
-                            <span class="page-btn disabled">
-                                <i class="fas fa-angle-double-right"></i>
-                            </span>
-                        </div>
-                    </div>
-                </form>
 
             </main>
         </div>
@@ -311,7 +328,7 @@
             function viewOrder(orderId) {
                 console.log('Xem chi tiết đơn hàng: ' + orderId);
                 // Redirect to view page or open modal
-                window.location.href = 'view-import.jsp?id=' + orderId;
+                window.location.href = 'wh-import-export-detail?id=' + orderId;
             }
 
             function editOrder(orderId, movementType) {

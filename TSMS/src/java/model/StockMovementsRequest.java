@@ -26,6 +26,82 @@ public class StockMovementsRequest {
     // Tự động format
     private String formattedDate;
     private String formattedTotalAmount;
+    
+    
+    // Thêm các trường này vào Model StockMovementsRequest
+private String fromWarehouseName;
+private String toBranchName;
+private String toWarehouseName;
+
+// Getters and Setters cho các trường mới
+public String getFromWarehouseName() {
+    return fromWarehouseName;
+}
+
+public void setFromWarehouseName(String fromWarehouseName) {
+    this.fromWarehouseName = fromWarehouseName;
+}
+
+public String getToBranchName() {
+    return toBranchName;
+}
+
+public void setToBranchName(String toBranchName) {
+    this.toBranchName = toBranchName;
+}
+
+public String getToWarehouseName() {
+    return toWarehouseName;
+}
+
+public void setToWarehouseName(String toWarehouseName) {
+    this.toWarehouseName = toWarehouseName;
+}
+
+// Phương thức helper để lấy tên nguồn đầy đủ
+public String getFullFromName() {
+    if (fromSupplierName != null && !fromSupplierName.trim().isEmpty()) {
+        return fromSupplierName;
+    } else if (fromBranchName != null && !fromBranchName.trim().isEmpty()) {
+        return fromBranchName;
+    } else if (fromWarehouseName != null && !fromWarehouseName.trim().isEmpty()) {
+        return fromWarehouseName;
+    }
+    return "Không xác định";
+}
+
+// Phương thức helper để lấy tên đích đầy đủ
+public String getFullToName() {
+    if (toBranchName != null && !toBranchName.trim().isEmpty()) {
+        return toBranchName;
+    } else if (toWarehouseName != null && !toWarehouseName.trim().isEmpty()) {
+        return toWarehouseName;
+    }
+    return "Không xác định";
+}
+
+// Phương thức helper để lấy icon nguồn
+public String getFromIcon() {
+    if (fromSupplierID != null) {
+        return "fas fa-truck"; // Supplier icon
+    } else if (fromBranchID != null) {
+        return "fas fa-store"; // Branch icon
+    } else if (fromWarehouseID != null) {
+        return "fas fa-warehouse"; // Warehouse icon
+    }
+    return "fas fa-question-circle"; // Unknown icon
+}
+
+// Phương thức helper để lấy icon đích
+public String getToIcon() {
+    if (toBranchID != null) {
+        return "fas fa-store"; // Branch icon
+    } else if (toWarehouseID != null) {
+        return "fas fa-warehouse"; // Warehouse icon
+    }
+    return "fas fa-question-circle"; // Unknown icon
+}
+
 
     // Constructors
     public StockMovementsRequest() {}

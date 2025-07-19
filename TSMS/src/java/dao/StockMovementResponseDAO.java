@@ -3,6 +3,7 @@ package dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import model.StockMovementResponse;
 import util.DBUtil;
 
 public class StockMovementResponseDAO {
@@ -71,5 +72,32 @@ public boolean insertCompletedResponse(String dbName, int movementId, int userId
     }
 }
 
+
+public void markAsCancelled(String dbName, int movementID, int userId) throws SQLException {
+    System.out.println("[DAO DEBUG] markAsCancelled called with dbName: " + dbName + ", movementID: " + movementID + ", userId: " + userId);
+    
+    String sql = """
+        UPDATE StockMovementResponses
+        SET ResponseStatus = 'cancelled', 
+            ResponseAt = GETDATE(),
+            ResponsedBy = ?,
+            Note = N'Đơn hàng đã được hủy bởi quản lý kho'
+        WHERE MovementID = ?
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        
+        ps.setInt(1, userId);      // ResponsedBy
+        ps.setInt(2, movementID);  // WHERE MovementID
+        
+        int rowsAffected = ps.executeUpdate();
+        System.out.println("[DAO DEBUG] Rows affected: " + rowsAffected);
+        
+        if (rowsAffected == 0) {
+            System.out.println("[DAO DEBUG] WARNING: No rows were updated!");
+        }
+    }
+}
 
 }

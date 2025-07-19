@@ -71,7 +71,7 @@ public class WHCompleteExportController extends HttpServlet {
                                   ", Quantity=" + detail.getQuantity());
                 
                 // Trừ kho
-                warehouseDAO.subtractWarehouseProduct(dbName, warehouseID, detail.getProductID(), detail.getQuantity());
+                warehouseDAO.subtractWarehouseProduct(dbName, warehouseID, detail.getProductDetailID(), detail.getQuantity());
                 System.out.println("✅ Đã trừ kho thành công");
 
                 // Cập nhật serial

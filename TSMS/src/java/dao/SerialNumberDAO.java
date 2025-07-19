@@ -96,22 +96,31 @@ public class SerialNumberDAO {
         }
     }
 
-    public void updateWarehouseForSerials(String dbName, int movementDetailID, int warehouseID) throws SQLException {
-        String sql = """
+  public void updateWarehouseForSerials(String dbName, int movementDetailID, int warehouseID) throws SQLException {
+    String sql = """
         UPDATE ProductDetailSerialNumber
-        SET WarehouseID = ?, MovementDetailID = NULL
+        SET WarehouseID = ?, 
+            MovementDetailID = NULL,
+            MovementHistory = CASE 
+                WHEN MovementHistory IS NULL THEN CAST(? AS NVARCHAR(MAX))
+                ELSE MovementHistory + ',' + CAST(? AS NVARCHAR(MAX))
+            END
         WHERE MovementDetailID = ?
           AND OrderID IS NULL 
           AND BranchID IS NULL
           AND WarehouseID IS NULL;
     """;
 
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, warehouseID);
-            ps.setInt(2, movementDetailID);
-            ps.executeUpdate();
-        }
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, warehouseID);
+        ps.setInt(2, movementDetailID); // Lưu vào history
+        ps.setInt(3, movementDetailID); // Lưu vào history (case ELSE)
+        ps.setInt(4, movementDetailID); // WHERE condition
+        ps.executeUpdate();
     }
+}
+
 
     public boolean checkIfSerialAvailableForExport(String dbName, int productDetailID, String serial, int currentMovementDetailID) {
     boolean isInWarehouse = false;
@@ -239,32 +248,44 @@ public class SerialNumberDAO {
         }
     }
 
-    public void markSerialsAsTransferring(String dbName, int movementDetailID, int warehouseID) throws SQLException {
-        String sql = """
+public void markSerialsAsTransferring(String dbName, int movementDetailID, int warehouseID) throws SQLException {
+    // Chỉ cập nhật serial numbers đã được scan trước đó cho movement này
+    String sql = """
         UPDATE ProductDetailSerialNumber
         SET WarehouseID = NULL,
             MovementDetailID = ?
-        WHERE MovementDetailID IS NULL
+        WHERE MovementHistory = ?
           AND WarehouseID = ?
-          AND ProductDetailID IN (
-              SELECT ProductDetailID
-              FROM StockMovementDetail
-              WHERE MovementDetailID = ?
-          )
-    """;
-        try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, movementDetailID);
-            ps.setInt(2, warehouseID);
-            ps.setInt(3, movementDetailID);
-            ps.executeUpdate();
-        }
+          AND MovementDetailID IS NULL
+        """;
+    
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, movementDetailID);
+        ps.setString(2, String.valueOf(movementDetailID));
+        ps.setInt(3, warehouseID);
+        
+        int updatedRows = ps.executeUpdate();
+        System.out.println("Updated " + updatedRows + " serial records for export transfer");
     }
+}
+
+
 public boolean markSerialsAsReceivedByBranch(String dbName, int movementDetailId, int branchId) throws SQLException {
     String sql = """
         UPDATE ProductDetailSerialNumber
         SET BranchID = ?,
             WarehouseID = NULL,
             MovementDetailID = NULL,
+            MovementHistory = CASE 
+                WHEN MovementHistory IS NULL THEN CAST(? AS NVARCHAR(MAX))
+                WHEN MovementHistory NOT LIKE '%,' + CAST(? AS NVARCHAR(MAX)) + ',%' 
+                     AND MovementHistory NOT LIKE CAST(? AS NVARCHAR(MAX)) + ',%'
+                     AND MovementHistory NOT LIKE '%,' + CAST(? AS NVARCHAR(MAX))
+                     AND MovementHistory != CAST(? AS NVARCHAR(MAX))
+                THEN MovementHistory + ',' + CAST(? AS NVARCHAR(MAX))
+                ELSE MovementHistory
+            END,
             Status = 1
         WHERE MovementDetailID = ?
     """;
@@ -272,12 +293,20 @@ public boolean markSerialsAsReceivedByBranch(String dbName, int movementDetailId
     try (Connection conn = DBUtil.getConnectionTo(dbName);
          PreparedStatement ps = conn.prepareStatement(sql)) {
         ps.setInt(1, branchId);
-        ps.setInt(2, movementDetailId);
+        ps.setInt(2, movementDetailId); // New history if NULL
+        ps.setInt(3, movementDetailId); // Check middle
+        ps.setInt(4, movementDetailId); // Check start  
+        ps.setInt(5, movementDetailId); // Check end
+        ps.setInt(6, movementDetailId); // Check exact match
+        ps.setInt(7, movementDetailId); // Append if not exists
+        ps.setInt(8, movementDetailId); // WHERE condition
         
         int rowsUpdated = ps.executeUpdate();
         System.out.println("🔄 Đã cập nhật " + rowsUpdated + " serial records cho MovementDetailID=" + movementDetailId);
         return rowsUpdated > 0;
     }
 }
+
+
 
 }

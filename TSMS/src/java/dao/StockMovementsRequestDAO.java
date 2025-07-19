@@ -13,7 +13,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -22,8 +24,13 @@ import java.util.List;
 public class StockMovementsRequestDAO {
 
     //Nam: Lấy yêu cầu nhập hàng từ chủ shop với từng kho tương ứng
-public List<StockMovementsRequest> getImportRequests(String dbName, String warehouseId) {
+// Method với filter và pagination
+public List<StockMovementsRequest> getImportRequestsWithFilter(String dbName, String warehouseId, 
+                                                               String fromDate, String toDate, String branchId, 
+                                                               String supplierId, String status, 
+                                                               int page, int pageSize) {
     List<StockMovementsRequest> list = new ArrayList<>();
+    int offset = (page - 1) * pageSize;
 
     StringBuilder sql = new StringBuilder();
     sql.append("""
@@ -40,26 +47,72 @@ public List<StockMovementsRequest> getImportRequests(String dbName, String wareh
             u.FullName AS CreatedByName,
             smr.Note,
             ISNULL(SUM(smd.Quantity * p.CostPrice), 0) AS TotalAmount,
-            MAX(smrsp.ResponseStatus) AS ResponseStatus
+            COALESCE(smrsp.ResponseStatus, 'pending') AS ResponseStatus
         FROM StockMovementsRequest smr
         LEFT JOIN Suppliers s ON smr.FromSupplierID = s.SupplierID
         LEFT JOIN Users u ON smr.CreatedBy = u.UserID
         LEFT JOIN StockMovementDetail smd ON smr.MovementID = smd.MovementID
         LEFT JOIN ProductDetails pd ON smd.ProductDetailID = pd.ProductDetailID
         LEFT JOIN Products p ON pd.ProductID = p.ProductID
-        LEFT JOIN StockMovementResponses smrsp ON smr.MovementID = smrsp.MovementID
+        LEFT JOIN (
+            SELECT MovementID, ResponseStatus,
+                   ROW_NUMBER() OVER (PARTITION BY MovementID ORDER BY ResponseAt DESC) as rn
+            FROM StockMovementResponses
+        ) smrsp ON smr.MovementID = smrsp.MovementID AND smrsp.rn = 1
         WHERE smr.ToWarehouseID = ?
           AND smr.MovementType = 'import'
+    """);
+
+    List<Object> params = new ArrayList<>();
+    params.add(warehouseId);
+
+    // Add date filters
+    if (fromDate != null && !fromDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) >= ?");
+        params.add(fromDate);
+    }
+
+    if (toDate != null && !toDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) <= ?");
+        params.add(toDate);
+    }
+
+    // Add branch filter
+    if (branchId != null && !branchId.trim().isEmpty()) {
+        sql.append(" AND smr.ToBranchID = ?");
+        params.add(branchId);
+    }
+
+    // Add supplier filter
+    if (supplierId != null && !supplierId.trim().isEmpty()) {
+        sql.append(" AND smr.FromSupplierID = ?");
+        params.add(supplierId);
+    }
+
+    sql.append("""
         GROUP BY 
             smr.MovementID, smr.FromSupplierID, s.SupplierName,
             smr.FromWarehouseID, smr.ToBranchID, smr.ToWarehouseID,
-            smr.MovementType, smr.CreatedAt, smr.CreatedBy, u.FullName, smr.Note
-        ORDER BY smr.CreatedAt DESC
+            smr.MovementType, smr.CreatedAt, smr.CreatedBy, u.FullName, smr.Note,
+            smrsp.ResponseStatus
     """);
 
-    try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+    // Add status filter after GROUP BY
+    if (status != null && !status.trim().isEmpty()) {
+        sql.append(" HAVING COALESCE(smrsp.ResponseStatus, 'pending') = ?");
+        params.add(status);
+    }
 
-        ps.setString(1, warehouseId);
+    sql.append(" ORDER BY smr.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+    params.add(offset);
+    params.add(pageSize);
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
 
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -83,12 +136,83 @@ public List<StockMovementsRequest> getImportRequests(String dbName, String wareh
         }
 
     } catch (SQLException e) {
-        System.err.println("Error in getImportRequests(): " + e.getMessage());
+        System.err.println("Error in getImportRequestsWithFilter(): " + e.getMessage());
         e.printStackTrace();
     }
 
     return list;
 }
+
+// Method count cho pagination
+public int getImportRequestsCount(String dbName, String warehouseId, 
+                                 String fromDate, String toDate, String branchId, 
+                                 String supplierId, String status) {
+    StringBuilder sql = new StringBuilder();
+    sql.append("""
+        SELECT COUNT(DISTINCT smr.MovementID)
+        FROM StockMovementsRequest smr
+        LEFT JOIN (
+            SELECT MovementID, ResponseStatus,
+                   ROW_NUMBER() OVER (PARTITION BY MovementID ORDER BY ResponseAt DESC) as rn
+            FROM StockMovementResponses
+        ) smrsp ON smr.MovementID = smrsp.MovementID AND smrsp.rn = 1
+        WHERE smr.ToWarehouseID = ?
+          AND smr.MovementType = 'import'
+    """);
+
+    List<Object> params = new ArrayList<>();
+    params.add(warehouseId);
+
+    // Add date filters
+    if (fromDate != null && !fromDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) >= ?");
+        params.add(fromDate);
+    }
+
+    if (toDate != null && !toDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) <= ?");
+        params.add(toDate);
+    }
+
+    // Add branch filter
+    if (branchId != null && !branchId.trim().isEmpty()) {
+        sql.append(" AND smr.ToBranchID = ?");
+        params.add(branchId);
+    }
+
+    // Add supplier filter
+    if (supplierId != null && !supplierId.trim().isEmpty()) {
+        sql.append(" AND smr.FromSupplierID = ?");
+        params.add(supplierId);
+    }
+
+    // Add status filter
+    if (status != null && !status.trim().isEmpty()) {
+        sql.append(" AND COALESCE(smrsp.ResponseStatus, 'pending') = ?");
+        params.add(status);
+    }
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+
+    } catch (SQLException e) {
+        System.err.println("Error in getImportRequestsCount(): " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    return 0;
+}
+
 
 
 public int insertMovementRequest(
@@ -195,8 +319,12 @@ public  void insertMovementResponse(
         ps.executeUpdate();
     }
 }
-public List<StockMovementsRequest> getExportRequests(String dbName, String warehouseId) {
+// Method với filter và pagination cho export
+public List<StockMovementsRequest> getExportRequestsWithFilter(String dbName, String warehouseId, 
+                                                               String fromDate, String toDate, String branchId, 
+                                                               String status, int page, int pageSize) {
     List<StockMovementsRequest> list = new ArrayList<>();
+    int offset = (page - 1) * pageSize;
 
     StringBuilder sql = new StringBuilder();
     sql.append("""
@@ -210,7 +338,6 @@ public List<StockMovementsRequest> getExportRequests(String dbName, String wareh
             smr.CreatedAt,
             smr.CreatedBy,
             smr.Note,
-            -- Lấy tên hiển thị
             CASE 
                 WHEN smr.FromBranchID IS NOT NULL THEN b1.BranchName
                 WHEN smr.FromWarehouseID IS NOT NULL THEN w1.WarehouseName
@@ -223,7 +350,7 @@ public List<StockMovementsRequest> getExportRequests(String dbName, String wareh
             END AS ToName,
             u.FullName AS CreatedByName,
             ISNULL(SUM(smd.Quantity * p.CostPrice), 0) AS TotalAmount,
-            MAX(smrsp.ResponseStatus) AS ResponseStatus
+            COALESCE(smrsp.ResponseStatus, 'pending') AS ResponseStatus
         FROM StockMovementsRequest smr
         LEFT JOIN Branches b1 ON smr.FromBranchID = b1.BranchID
         LEFT JOIN Branches b2 ON smr.ToBranchID = b2.BranchID
@@ -233,25 +360,64 @@ public List<StockMovementsRequest> getExportRequests(String dbName, String wareh
         LEFT JOIN StockMovementDetail smd ON smr.MovementID = smd.MovementID
         LEFT JOIN ProductDetails pd ON smd.ProductDetailID = pd.ProductDetailID
         LEFT JOIN Products p ON pd.ProductID = p.ProductID
-        LEFT JOIN StockMovementResponses smrsp ON smr.MovementID = smrsp.MovementID
+        LEFT JOIN (
+            SELECT MovementID, ResponseStatus,
+                   ROW_NUMBER() OVER (PARTITION BY MovementID ORDER BY ResponseAt DESC) as rn
+            FROM StockMovementResponses
+        ) smrsp ON smr.MovementID = smrsp.MovementID AND smrsp.rn = 1
         WHERE smr.MovementType = 'export'
           AND (
-              -- Đơn chờ xử lý (chưa xuất)
               (smr.ToWarehouseID = ? AND smr.FromWarehouseID IS NULL) OR  
-              -- Đơn đã xuất (đang transfer)
               (smr.FromWarehouseID = ? AND smrsp.ResponseStatus = 'transfer')
           )
+    """);
+
+    List<Object> params = new ArrayList<>();
+    params.add(warehouseId);
+    params.add(warehouseId);
+
+    // Add date filters
+    if (fromDate != null && !fromDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) >= ?");
+        params.add(fromDate);
+    }
+
+    if (toDate != null && !toDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) <= ?");
+        params.add(toDate);
+    }
+
+    // Add branch filter
+    if (branchId != null && !branchId.trim().isEmpty()) {
+        sql.append(" AND (smr.FromBranchID = ? OR smr.ToBranchID = ?)");
+        params.add(branchId);
+        params.add(branchId);
+    }
+
+    sql.append("""
         GROUP BY 
             smr.MovementID, smr.FromBranchID, smr.FromWarehouseID, smr.ToBranchID, smr.ToWarehouseID,
             smr.MovementType, smr.CreatedAt, smr.CreatedBy, smr.Note,
-            b1.BranchName, b2.BranchName, w1.WarehouseName, w2.WarehouseName, u.FullName
-        ORDER BY smr.CreatedAt DESC
+            b1.BranchName, b2.BranchName, w1.WarehouseName, w2.WarehouseName, u.FullName,
+            smrsp.ResponseStatus
     """);
 
-    try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+    // Add status filter after GROUP BY
+    if (status != null && !status.trim().isEmpty()) {
+        sql.append(" HAVING COALESCE(smrsp.ResponseStatus, 'pending') = ?");
+        params.add(status);
+    }
 
-        ps.setString(1, warehouseId);
-        ps.setString(2, warehouseId);
+    sql.append(" ORDER BY smr.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+    params.add(offset);
+    params.add(pageSize);
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
 
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -265,29 +431,95 @@ public List<StockMovementsRequest> getExportRequests(String dbName, String wareh
                 smr.setCreatedAt(rs.getTimestamp("CreatedAt").toLocalDateTime());
                 smr.setCreatedBy(rs.getInt("CreatedBy"));
                 smr.setNote(rs.getString("Note"));
-                
-                // Sử dụng lại field có sẵn để lưu tên hiển thị
-                smr.setFromBranchName(rs.getString("FromName"));     // Dùng fromBranchName để lưu tên nguồn
-                smr.setCreatedByName(rs.getString("CreatedByName")); // Tên người tạo
+                smr.setFromBranchName(rs.getString("FromName"));
+                smr.setCreatedByName(rs.getString("CreatedByName"));
                 smr.setTotalAmount(rs.getBigDecimal("TotalAmount"));
                 smr.setResponseStatus(rs.getString("ResponseStatus"));
-                
-                // Lưu tên đích vào note tạm thời (hoặc có thể extend model)
+
                 String toName = rs.getString("ToName");
                 String originalNote = smr.getNote();
-                smr.setNote(originalNote + "|TO:" + toName); // Trick: ghép tên đích vào note
-                
+                smr.setNote(originalNote + "|TO:" + toName);
+
                 list.add(smr);
             }
         }
 
     } catch (SQLException e) {
-        System.err.println("Error in getExportRequests(): " + e.getMessage());
+        System.err.println("Error in getExportRequestsWithFilter(): " + e.getMessage());
         e.printStackTrace();
     }
 
     return list;
 }
+
+// Method count cho pagination export
+public int getExportRequestsCount(String dbName, String warehouseId, 
+                                 String fromDate, String toDate, String branchId, String status) {
+    StringBuilder sql = new StringBuilder();
+    sql.append("""
+        SELECT COUNT(DISTINCT smr.MovementID)
+        FROM StockMovementsRequest smr
+        LEFT JOIN (
+            SELECT MovementID, ResponseStatus,
+                   ROW_NUMBER() OVER (PARTITION BY MovementID ORDER BY ResponseAt DESC) as rn
+            FROM StockMovementResponses
+        ) smrsp ON smr.MovementID = smrsp.MovementID AND smrsp.rn = 1
+        WHERE smr.MovementType = 'export'
+          AND (
+              (smr.ToWarehouseID = ? AND smr.FromWarehouseID IS NULL) OR  
+              (smr.FromWarehouseID = ? AND smrsp.ResponseStatus = 'transfer')
+          )
+    """);
+
+    List<Object> params = new ArrayList<>();
+    params.add(warehouseId);
+    params.add(warehouseId);
+
+    // Add date filters
+    if (fromDate != null && !fromDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) >= ?");
+        params.add(fromDate);
+    }
+
+    if (toDate != null && !toDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) <= ?");
+        params.add(toDate);
+    }
+
+    // Add branch filter
+    if (branchId != null && !branchId.trim().isEmpty()) {
+        sql.append(" AND (smr.FromBranchID = ? OR smr.ToBranchID = ?)");
+        params.add(branchId);
+        params.add(branchId);
+    }
+
+    // Add status filter
+    if (status != null && !status.trim().isEmpty()) {
+        sql.append(" AND COALESCE(smrsp.ResponseStatus, 'pending') = ?");
+        params.add(status);
+    }
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+
+    } catch (SQLException e) {
+        System.err.println("Error in getExportRequestsCount(): " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    return 0;
+}
+
 
 
 
@@ -317,8 +549,12 @@ public void updateExportRequestTransferInfo(String dbName, int movementID, int f
     }
 }
 
-public List<StockMovementsRequest> getExportRequestsByToBranch(String dbName, String branchId) {
+// Method với filter và pagination
+public List<StockMovementsRequest> getExportRequestsByToBranchWithFilter(String dbName, String branchId, 
+                                                                         String fromDate, String toDate, String status, 
+                                                                         int page, int pageSize) {
     List<StockMovementsRequest> list = new ArrayList<>();
+    int offset = (page - 1) * pageSize;
 
     StringBuilder sql = new StringBuilder();
     sql.append("""
@@ -332,7 +568,6 @@ public List<StockMovementsRequest> getExportRequestsByToBranch(String dbName, St
             smr.CreatedAt,
             smr.CreatedBy,
             smr.Note,
-            -- Lấy tên hiển thị
             CASE 
                 WHEN smr.FromBranchID IS NOT NULL THEN b1.BranchName
                 WHEN smr.FromWarehouseID IS NOT NULL THEN w1.WarehouseName
@@ -345,7 +580,6 @@ public List<StockMovementsRequest> getExportRequestsByToBranch(String dbName, St
             END AS ToName,
             u.FullName AS CreatedByName,
             ISNULL(SUM(smd.Quantity * p.CostPrice), 0) AS TotalAmount,
-            -- Lấy status mới nhất hoặc 'pending' nếu chưa có response
             COALESCE(smrsp.ResponseStatus, 'pending') AS ResponseStatus
         FROM StockMovementsRequest smr
         LEFT JOIN Branches b1 ON smr.FromBranchID = b1.BranchID
@@ -356,7 +590,6 @@ public List<StockMovementsRequest> getExportRequestsByToBranch(String dbName, St
         LEFT JOIN StockMovementDetail smd ON smr.MovementID = smd.MovementID
         LEFT JOIN ProductDetails pd ON smd.ProductDetailID = pd.ProductDetailID
         LEFT JOIN Products p ON pd.ProductID = p.ProductID
-        -- Lấy response mới nhất cho mỗi MovementID
         LEFT JOIN (
             SELECT MovementID, ResponseStatus,
                    ROW_NUMBER() OVER (PARTITION BY MovementID ORDER BY ResponseAt DESC) as rn
@@ -364,28 +597,54 @@ public List<StockMovementsRequest> getExportRequestsByToBranch(String dbName, St
         ) smrsp ON smr.MovementID = smrsp.MovementID AND smrsp.rn = 1
         WHERE smr.MovementType = 'export'
           AND (
-              (smr.FromBranchID = ? AND smr.ToBranchID IS NULL) OR  -- Chi nhánh là nguồn, đích là warehouse
-              (smr.FromBranchID IS NULL AND smr.ToBranchID = ?) OR  -- Kho là nguồn, chi nhánh là đích
-              (smr.FromBranchID = ? AND smr.ToBranchID IS NOT NULL) OR  -- Chi nhánh gửi đến chi nhánh khác
-              (smr.FromBranchID IS NOT NULL AND smr.ToBranchID = ?)     -- Chi nhánh khác gửi đến chi nhánh này
+              (smr.FromBranchID = ? AND smr.ToBranchID IS NULL) OR
+              (smr.FromBranchID IS NULL AND smr.ToBranchID = ?) OR
+              (smr.FromBranchID = ? AND smr.ToBranchID IS NOT NULL) OR
+              (smr.FromBranchID IS NOT NULL AND smr.ToBranchID = ?)
           )
+    """);
+
+    List<Object> params = new ArrayList<>();
+    params.add(branchId);
+    params.add(branchId);
+    params.add(branchId);
+    params.add(branchId);
+
+    // Add date filters
+    if (fromDate != null && !fromDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) >= ?");
+        params.add(fromDate);
+    }
+
+    if (toDate != null && !toDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) <= ?");
+        params.add(toDate);
+    }
+
+    sql.append("""
         GROUP BY 
             smr.MovementID, smr.FromBranchID, smr.FromWarehouseID, smr.ToBranchID, smr.ToWarehouseID,
             smr.MovementType, smr.CreatedAt, smr.CreatedBy, smr.Note,
             b1.BranchName, b2.BranchName, w1.WarehouseName, w2.WarehouseName, u.FullName,
             smrsp.ResponseStatus
-        ORDER BY smr.CreatedAt DESC
     """);
 
-    System.out.println("DEBUG SQL: " + sql.toString());
+    // Add status filter after GROUP BY
+    if (status != null && !status.trim().isEmpty()) {
+        sql.append(" HAVING COALESCE(smrsp.ResponseStatus, 'pending') = ?");
+        params.add(status);
+    }
 
-    try (Connection conn = DBUtil.getConnectionTo(dbName); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+    sql.append(" ORDER BY smr.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+    params.add(offset);
+    params.add(pageSize);
 
-        // Set tất cả 4 parameter với cùng branchId
-        ps.setString(1, branchId); // FromBranchID = ? AND ToBranchID IS NULL
-        ps.setString(2, branchId); // FromBranchID IS NULL AND ToBranchID = ?
-        ps.setString(3, branchId); // FromBranchID = ? AND ToBranchID IS NOT NULL
-        ps.setString(4, branchId); // FromBranchID IS NOT NULL AND ToBranchID = ?
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
 
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -399,35 +658,341 @@ public List<StockMovementsRequest> getExportRequestsByToBranch(String dbName, St
                 smr.setCreatedAt(rs.getTimestamp("CreatedAt").toLocalDateTime());
                 smr.setCreatedBy(rs.getInt("CreatedBy"));
                 smr.setNote(rs.getString("Note"));
-                
                 smr.setFromBranchName(rs.getString("FromName"));
                 smr.setCreatedByName(rs.getString("CreatedByName"));
                 smr.setTotalAmount(rs.getBigDecimal("TotalAmount"));
                 smr.setResponseStatus(rs.getString("ResponseStatus"));
-                
+
                 String toName = rs.getString("ToName");
                 String originalNote = smr.getNote();
                 smr.setNote(originalNote + "|TO:" + toName);
-                
-                System.out.println("DEBUG: Found MovementID " + smr.getMovementID() + 
-                                 " - From: " + smr.getFromBranchID() + "/" + smr.getFromWarehouseID() + 
-                                 " - To: " + smr.getToBranchID() + "/" + smr.getToWarehouseID() + 
-                                 " - Status: " + smr.getResponseStatus());
-                
+
                 list.add(smr);
             }
         }
 
     } catch (SQLException e) {
-        System.err.println("Error in getExportRequestsByToBranch(): " + e.getMessage());
+        System.err.println("Error in getExportRequestsByToBranchWithFilter(): " + e.getMessage());
         e.printStackTrace();
     }
 
-    System.out.println("DEBUG: Total records found: " + list.size());
     return list;
 }
 
+// Method count cho pagination
+public int getExportRequestsByToBranchCount(String dbName, String branchId, 
+                                           String fromDate, String toDate, String status) {
+    StringBuilder sql = new StringBuilder();
+    sql.append("""
+        SELECT COUNT(DISTINCT smr.MovementID)
+        FROM StockMovementsRequest smr
+        LEFT JOIN (
+            SELECT MovementID, ResponseStatus,
+                   ROW_NUMBER() OVER (PARTITION BY MovementID ORDER BY ResponseAt DESC) as rn
+            FROM StockMovementResponses
+        ) smrsp ON smr.MovementID = smrsp.MovementID AND smrsp.rn = 1
+        WHERE smr.MovementType = 'export'
+          AND (
+              (smr.FromBranchID = ? AND smr.ToBranchID IS NULL) OR
+              (smr.FromBranchID IS NULL AND smr.ToBranchID = ?) OR
+              (smr.FromBranchID = ? AND smr.ToBranchID IS NOT NULL) OR
+              (smr.FromBranchID IS NOT NULL AND smr.ToBranchID = ?)
+          )
+    """);
 
+    List<Object> params = new ArrayList<>();
+    params.add(branchId);
+    params.add(branchId);
+    params.add(branchId);
+    params.add(branchId);
+
+    // Add date filters
+    if (fromDate != null && !fromDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) >= ?");
+        params.add(fromDate);
+    }
+
+    if (toDate != null && !toDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) <= ?");
+        params.add(toDate);
+    }
+
+    // Add status filter
+    if (status != null && !status.trim().isEmpty()) {
+        sql.append(" AND COALESCE(smrsp.ResponseStatus, 'pending') = ?");
+        params.add(status);
+    }
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+
+    } catch (SQLException e) {
+        System.err.println("Error in getExportRequestsByToBranchCount(): " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    return 0;
+}
+
+
+
+public List<StockMovementsRequest> getMovementsWithFilters(String dbName, String fromDate, String toDate, 
+                                                          String status, String movementType, 
+                                                          int page, int pageSize) {
+    List<StockMovementsRequest> movements = new ArrayList<>();
+    int offset = (page - 1) * pageSize;
+
+    StringBuilder sql = new StringBuilder();
+    sql.append("""
+        WITH FilteredMovements AS (
+            SELECT 
+                smr.MovementID,
+                smr.FromSupplierID,
+                smr.FromBranchID,
+                smr.FromWarehouseID,
+                smr.ToBranchID,
+                smr.ToWarehouseID,
+                smr.MovementType,
+                smr.CreatedAt,
+                smr.CreatedBy,
+                smr.Note,
+                s.SupplierName AS FromSupplierName,
+                b1.BranchName AS FromBranchName,
+                w1.WarehouseName AS FromWarehouseName,
+                b2.BranchName AS ToBranchName,
+                w2.WarehouseName AS ToWarehouseName,
+                u.FullName AS CreatedByName,
+                COALESCE((SELECT TOP 1 ResponseStatus FROM StockMovementResponses smr_resp 
+                         WHERE smr_resp.MovementID = smr.MovementID ORDER BY ResponseAt DESC), 'pending') AS ResponseStatus,
+                ISNULL((SELECT SUM(smd.Quantity * p.CostPrice) 
+                       FROM StockMovementDetail smd 
+                       INNER JOIN ProductDetails pd ON smd.ProductDetailID = pd.ProductDetailID
+                       INNER JOIN Products p ON pd.ProductID = p.ProductID
+                       WHERE smd.MovementID = smr.MovementID), 0) AS TotalAmount
+            FROM StockMovementsRequest smr
+            LEFT JOIN Suppliers s ON smr.FromSupplierID = s.SupplierID
+            LEFT JOIN Branches b1 ON smr.FromBranchID = b1.BranchID
+            LEFT JOIN Branches b2 ON smr.ToBranchID = b2.BranchID
+            LEFT JOIN Warehouses w1 ON smr.FromWarehouseID = w1.WarehouseID
+            LEFT JOIN Warehouses w2 ON smr.ToWarehouseID = w2.WarehouseID
+            LEFT JOIN Users u ON smr.CreatedBy = u.UserID
+            WHERE 1=1
+    """);
+
+    List<Object> params = new ArrayList<>();
+    
+    // Add filters với StringBuilder
+    if (fromDate != null && !fromDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) >= ?");
+        params.add(fromDate);
+    }
+    
+    if (toDate != null && !toDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) <= ?");
+        params.add(toDate);
+    }
+    
+    if (movementType != null && !movementType.trim().isEmpty()) {
+        sql.append(" AND smr.MovementType = ?");
+        params.add(movementType);
+    }
+    
+    if (status != null && !status.trim().isEmpty()) {
+        sql.append(" AND COALESCE((SELECT TOP 1 ResponseStatus FROM StockMovementResponses smr_resp WHERE smr_resp.MovementID = smr.MovementID ORDER BY ResponseAt DESC), 'pending') = ?");
+        params.add(status);
+    }
+
+    sql.append("""
+        )
+        SELECT * FROM FilteredMovements
+        ORDER BY CreatedAt DESC
+        OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+    """);
+
+    params.add(offset);
+    params.add(pageSize);
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
+
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                StockMovementsRequest smr = new StockMovementsRequest();
+                
+                smr.setMovementID(rs.getInt("MovementID"));
+                smr.setMovementType(rs.getString("MovementType"));
+                smr.setCreatedAt(rs.getTimestamp("CreatedAt").toLocalDateTime());
+                smr.setCreatedBy(rs.getInt("CreatedBy"));
+                smr.setNote(rs.getString("Note"));
+                
+                // Handle nullable foreign keys
+                smr.setFromSupplierID(rs.getObject("FromSupplierID") != null ? rs.getInt("FromSupplierID") : null);
+                smr.setFromBranchID(rs.getObject("FromBranchID") != null ? rs.getInt("FromBranchID") : null);
+                smr.setFromWarehouseID(rs.getObject("FromWarehouseID") != null ? rs.getInt("FromWarehouseID") : null);
+                smr.setToBranchID(rs.getObject("ToBranchID") != null ? rs.getInt("ToBranchID") : null);
+                smr.setToWarehouseID(rs.getObject("ToWarehouseID") != null ? rs.getInt("ToWarehouseID") : null);
+                
+                // Set names
+                smr.setFromSupplierName(rs.getString("FromSupplierName"));
+                smr.setFromBranchName(rs.getString("FromBranchName"));
+                smr.setFromWarehouseName(rs.getString("FromWarehouseName"));
+                smr.setToBranchName(rs.getString("ToBranchName"));
+                smr.setToWarehouseName(rs.getString("ToWarehouseName"));
+                smr.setCreatedByName(rs.getString("CreatedByName"));
+                
+                smr.setTotalAmount(rs.getBigDecimal("TotalAmount"));
+                smr.setResponseStatus(rs.getString("ResponseStatus"));
+                
+                movements.add(smr);
+            }
+        }
+
+    } catch (SQLException e) {
+        System.err.println("Error in getMovementsWithFilters(): " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    return movements;
+}
+
+
+public int getMovementsCount(String dbName, String fromDate, String toDate, 
+                            String status, String movementType) {
+    StringBuilder sql = new StringBuilder();
+    sql.append("SELECT COUNT(DISTINCT smr.MovementID) FROM StockMovementsRequest smr WHERE 1=1");
+    
+    List<Object> params = new ArrayList<>();
+    
+    // Add filters với StringBuilder (giống như method trên)
+    if (fromDate != null && !fromDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) >= ?");
+        params.add(fromDate);
+    }
+    
+    if (toDate != null && !toDate.trim().isEmpty()) {
+        sql.append(" AND CAST(smr.CreatedAt AS DATE) <= ?");
+        params.add(toDate);
+    }
+    
+    if (movementType != null && !movementType.trim().isEmpty()) {
+        sql.append(" AND smr.MovementType = ?");
+        params.add(movementType);
+    }
+    
+    if (status != null && !status.trim().isEmpty()) {
+        sql.append(" AND COALESCE((SELECT TOP 1 ResponseStatus FROM StockMovementResponses smr_resp WHERE smr_resp.MovementID = smr.MovementID ORDER BY ResponseAt DESC), 'pending') = ?");
+        params.add(status);
+    }
+    
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
+        
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+    } catch (SQLException e) {
+        System.err.println("Error in getMovementsCount(): " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return 0;
+}
+
+
+public StockMovementsRequest getMovementById(String dbName, int movementID) {
+    String sql = """
+        SELECT 
+            smr.MovementID, smr.MovementType, smr.CreatedAt, smr.CreatedBy, smr.Note,
+            smr.FromSupplierID, smr.FromBranchID, smr.FromWarehouseID,
+            smr.ToBranchID, smr.ToWarehouseID,
+            s.SupplierName AS FromSupplierName,
+            b1.BranchName AS FromBranchName,
+            w1.WarehouseName AS FromWarehouseName,
+            b2.BranchName AS ToBranchName,
+            w2.WarehouseName AS ToWarehouseName,
+            u.FullName AS CreatedByName,
+            COALESCE((SELECT TOP 1 ResponseStatus FROM StockMovementResponses smr_resp 
+                     WHERE smr_resp.MovementID = smr.MovementID ORDER BY ResponseAt DESC), 'pending') AS ResponseStatus
+        FROM StockMovementsRequest smr
+        LEFT JOIN Suppliers s ON smr.FromSupplierID = s.SupplierID
+        LEFT JOIN Branches b1 ON smr.FromBranchID = b1.BranchID
+        LEFT JOIN Branches b2 ON smr.ToBranchID = b2.BranchID
+        LEFT JOIN Warehouses w1 ON smr.FromWarehouseID = w1.WarehouseID
+        LEFT JOIN Warehouses w2 ON smr.ToWarehouseID = w2.WarehouseID
+        LEFT JOIN Users u ON smr.CreatedBy = u.UserID
+        WHERE smr.MovementID = ?
+    """;
+    
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        
+        ps.setInt(1, movementID);
+        
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                StockMovementsRequest movement = new StockMovementsRequest();
+                
+                movement.setMovementID(rs.getInt("MovementID"));
+                movement.setMovementType(rs.getString("MovementType"));
+                movement.setCreatedAt(rs.getTimestamp("CreatedAt").toLocalDateTime());
+                movement.setCreatedBy(rs.getInt("CreatedBy"));
+                movement.setNote(rs.getString("Note"));
+                
+                // Handle nullable foreign keys
+                Object fromSupplierId = rs.getObject("FromSupplierID");
+                movement.setFromSupplierID(fromSupplierId != null ? rs.getInt("FromSupplierID") : null);
+                
+                Object fromBranchId = rs.getObject("FromBranchID");
+                movement.setFromBranchID(fromBranchId != null ? rs.getInt("FromBranchID") : null);
+                
+                Object fromWarehouseId = rs.getObject("FromWarehouseID");
+                movement.setFromWarehouseID(fromWarehouseId != null ? rs.getInt("FromWarehouseID") : null);
+                
+                Object toBranchId = rs.getObject("ToBranchID");
+                movement.setToBranchID(toBranchId != null ? rs.getInt("ToBranchID") : null);
+                
+                Object toWarehouseId = rs.getObject("ToWarehouseID");
+                movement.setToWarehouseID(toWarehouseId != null ? rs.getInt("ToWarehouseID") : null);
+                
+                // Set names
+                movement.setFromSupplierName(rs.getString("FromSupplierName"));
+                movement.setFromBranchName(rs.getString("FromBranchName"));
+                movement.setFromWarehouseName(rs.getString("FromWarehouseName"));
+                movement.setToBranchName(rs.getString("ToBranchName"));
+                movement.setToWarehouseName(rs.getString("ToWarehouseName"));
+                movement.setCreatedByName(rs.getString("CreatedByName"));
+                movement.setResponseStatus(rs.getString("ResponseStatus"));
+                
+                return movement;
+            }
+        }
+    } catch (SQLException e) {
+        System.err.println("Error in getMovementById: " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return null;
+}
 
 
 

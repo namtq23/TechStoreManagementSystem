@@ -263,7 +263,7 @@
     </head>
     <body>
         <!-- Header -->
-        <header class="header">
+          <header class="header">
             <div class="header-container">
                 <div class="logo">
                     <a href="wh-products?page=1" class="logo">
@@ -272,25 +272,26 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="wh-products?page=1" class="nav-item">
+                    <a href="wh-products?page=1" class="nav-item ">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
 
-                    <a href="wh-import" class="nav-item">
+                    <a href="wh-import" class="nav-item ">
                         <i class="fa-solid fa-download"></i>
                         Nhập hàng
                     </a>
 
-                    <a href="" class="nav-item">
+                    <a href="wh-export" class="nav-item">
                         <i class="fa-solid fa-upload"></i>
                         Xuất hàng
                     </a>
 
-                    <a href="" class="nav-item active">
+                    <a href="wh-import-request" class="nav-item active">
                         <i class="fas fa-exchange-alt"></i>
                         Yêu cầu nhập hàng
                     </a>
+
                 </nav>
 
                 <div class="header-right">

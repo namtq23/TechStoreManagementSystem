@@ -22,7 +22,7 @@
             <div class="header-container">
                 <div class="logo">
                     <a href="so-overview" class="logo">
-                        <div class="logo-icon">T</div>e
+                        <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
                 </div>
@@ -46,7 +46,7 @@
                         <div class="dropdown-menu">
                             <a href="so-orders" class="dropdown-item">Đơn hàng</a>
                             <a href="import-request" class="dropdown-item">Tạo đơn nhập hàng</a>
-                            <a href="so-ienoti" class="dropdown-item">Thông báo nhập/xuất</a>
+                            <a href="so-track-movements" class="dropdown-item">Theo dõi nhập/xuất</a>
                         </div>
                     </div>
 

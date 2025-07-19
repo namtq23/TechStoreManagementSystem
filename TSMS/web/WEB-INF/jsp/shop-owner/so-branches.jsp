@@ -509,7 +509,7 @@
     </head>
     <body>
         <!-- Header -->
-        <header class="header">
+             <header class="header">
             <div class="header-container">
                 <div class="logo">
                     <a href="so-overview" class="logo">
@@ -518,7 +518,7 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="so-overview" class="nav-item">
+                    <a href="so-overview" class="nav-item ">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
@@ -536,8 +536,8 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="so-createimport" class="dropdown-item">Tạo đơn nhập hàng</a>
-                            <a href="so-ienoti" class="dropdown-item">Thông báo nhập/xuất</a>
+                            <a href="import-request" class="dropdown-item">Tạo đơn nhập hàng</a>
+                            <a href="so-track-movements" class="dropdown-item">Theo dõi nhập/xuất</a>
                         </div>
                     </div>
 
@@ -581,6 +581,7 @@
                             <a href="so-outcome" class="dropdown-item">Khoảng chi</a>
                         </div>
                     </div>
+
                 </nav>
 
                 <div class="header-right">

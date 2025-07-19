@@ -15,10 +15,27 @@
         <link rel="stylesheet" href="css/import-request.css" />
         <link rel="stylesheet" href="css/header.css" />
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <style>
+            /* Bỏ hiển thị dropdown khi có class active */
+.nav-item.dropdown.active .dropdown-menu {
+    display: none;
+}
+
+/* Chỉ hiển thị khi hover */
+.nav-item.dropdown:hover .dropdown-menu {
+    display: block !important;
+}
+
+/* Hoặc chỉ hiển thị khi click */
+.nav-item.dropdown.show .dropdown-menu {
+    display: block;
+}
+        </style>
     </head>
     <body>
+        
         <!-- Header -->
-        <header class="header">
+              <header class="header">
             <div class="header-container">
                 <div class="logo">
                     <a href="so-overview" class="logo">
@@ -37,16 +54,16 @@
                         Hàng hóa
                     </a>
 
-                    <div class="nav-item dropdown ">
+                    <div class="nav-item active dropdown ">
                         <a href="#" class="dropdown-toggle">
-                            <i class="fas fa-exchange-alt active"></i>
+                            <i class="fas fa-exchange-alt"></i>
                             Giao dịch
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-orders" class="dropdown-item">Đơn hàng</a>
                             <a href="import-request" class="dropdown-item">Tạo đơn nhập hàng</a>
-                            <a href="so-ienoti" class="dropdown-item">Thông báo nhập/xuất</a>
+                            <a href="so-track-movements" class="dropdown-item">Theo dõi nhập/xuất</a>
                         </div>
                     </div>
 

@@ -18,6 +18,11 @@ private Timestamp responseAt;
         this.note = note;
     }
 
+    public StockMovementResponse() {
+    }
+
+  
+
 
 
     public String getResponseStatus() {

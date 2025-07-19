@@ -44,7 +44,7 @@
                         <div class="dropdown-menu">
                             <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
                             <a href="request-stock" class="dropdown-item">Nhập hàng</a>
-                            <a href="bm-incoming-orders" class="dropdown-item">Theo dõi đơn nhập hàng</a>
+                            <a href="bm-incoming-orders" class="dropdown-item">Theo dõi nhập hàng</a>
                         </div>
                     </div>
 
