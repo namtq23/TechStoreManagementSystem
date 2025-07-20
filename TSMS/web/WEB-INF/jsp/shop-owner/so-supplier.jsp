@@ -110,42 +110,7 @@
         </header>
 
 
-        <div class="main-container">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <form action="so-customer" method="get">
-                    <!-- Thêm dòng này để kích hoạt lọc theo khoảng giá -->
-                    <input type="hidden" name="showTop" value="true" />
-
-
-
-                    <!-- Price Range Filter -->
-                    <div class="filter-section">
-                        <div class="filter-header">
-                            <h3>Khoảng chi tiêu</h3>
-                        </div>
-                        <div class="filter-content">
-                            <div class="price-range">
-                                <input type="number" name="minGrandTotal" placeholder="Số tiền nhập từ"
-                                       value="${minGrandTotal}" class="GrandTotal-input">
-                                <input type="number" name="maxGrandTotal" placeholder="Số tiền nhập đến"
-                                       value="${maxGrandTotal}" class="GrandTotal-input">
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <!-- Action Buttons -->
-                    <div class="filter-actions">
-                        <a href="so-customer?page=1" class="btn-clear">
-                            <i class="fas fa-eraser"></i> Xóa bộ lọc
-                        </a>
-                        <button type="submit" class="btn-apply">
-                            <i class="fas fa-filter"></i> Áp dụng lọc
-                        </button>
-                    </div>
-                </form>
-            </aside>
+        <div class="main-container">            
 
             <!-- Main Content -->
             <main class="main-content">
@@ -163,11 +128,11 @@
                             </button>
                         </form>
 
-                        <button class="btn btn-success">
+<!--                        <button class="btn btn-success">
                             <i class="fas fa-plus"></i>
                             Thêm mới
                             <i class="fas fa-chevron-down"></i>
-                        </button>
+                        </button>-->
                     </div>
                 </div>
                 <c:if test="${not empty sessionScope.successMessage}">

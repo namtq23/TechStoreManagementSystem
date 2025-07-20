@@ -115,67 +115,6 @@
         </header>
 
         <div class="main-container">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <!--Product Type Filter--> 
-                <div class="filter-section">
-                    <div class="filter-header">
-                        <h3>Trạng thái nhà cung cấp</h3>
-                        <i class="fas fa-chevron-up"></i>
-                    </div>
-
-                    <div class="filter-content">
-
-                        <form action="bm-supplier" method="get">
-                            <label class="checkbox-item">
-                                <input type="radio" name="top" value="" 
-                                       <%= request.getParameter("top") == null ? "checked" : "" %>>
-                                <span>Tổng hợp</span><br>
-                            </label>
-                            <label class="checkbox-item">
-                                <input type="radio" name="top" value="true" 
-                                       <%= "true".equals(request.getParameter("top")) ? "checked" : "" %>>
-                                <span>Tiềm năng</span><br>
-                            </label>
-
-                            <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
-                        </form>
-
-                    </div>
-
-                </div>
-                <div class="filter-section">
-                    <div class="filter-header">
-                        <h3>Giới tính khách hàng</h3>
-                        <i class="fas fa-chevron-up"></i>
-                    </div>
-                    <div class="filter-content">
-                        <form action="bm-supplier" method="get">
-                            <label class="checkbox-item">
-                                <input type="radio" id="gender-all" name="gender" value="all"
-                                       <%= request.getParameter("gender") == null || "all".equals(request.getParameter("gender")) ? "checked" : "" %>>
-                                <span for="gender-all">Tổng hợp</span><br>
-                            </label>
-
-                            <label class="checkbox-item">
-                                <input type="radio" id="gender-male" name="gender" value="male"
-                                       <%= "male".equals(request.getParameter("gender")) ? "checked" : "" %>>
-                                <span for="gender-male">Nam</span><br>
-                            </label>
-
-                            <label class="checkbox-item">
-                                <input type="radio" id="gender-female" name="gender" value="female"
-                                       <%= "female".equals(request.getParameter("gender")) ? "checked" : "" %>>
-                                <span for="gender-female">Nữ</span><br>
-                            </label>
-
-                            <button type="submit" class="btn btn-primary btn-sm mt-2">Lọc</button>
-                        </form>
-                    </div>
-
-                </div>
-            </aside>
-
             <!-- Main Content -->
             <main class="main-content">
                 <div class="page-header">
