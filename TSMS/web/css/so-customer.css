@@ -416,9 +416,9 @@ body {
 }
 
 .page-btn.active {
-    background: #4caf50;
+    background: #2196F3;
     color: white;
-    border-color: #4caf50;
+    border-color: #2196F3;
 }
 
 .page-btn:disabled {

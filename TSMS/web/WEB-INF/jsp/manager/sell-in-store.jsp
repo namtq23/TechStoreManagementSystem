@@ -64,17 +64,10 @@ Author     : admin
                         </div>
                     </div>
 
-                    <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
-                            <i class="fas fa-users"></i>
-                            Nhân viên
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="bm-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="#" class="dropdown-item">Hoa hồng</a>
-                        </div>
-                    </div>
+                    <a href="bm-staff" class="nav-item">
+                        <i class="fas fa-users"></i>
+                        Nhân viên
+                    </a>
 
                     <a href="bm-promotions" class="nav-item">
                         <i class="fas fa-ticket"></i>

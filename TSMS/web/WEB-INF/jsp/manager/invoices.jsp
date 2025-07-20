@@ -17,7 +17,7 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     </head>
     <body>
-         <header class="header">
+        <header class="header">
             <div class="header-container">
                 <div class="logo">
                     <a href="bm-overview" class="logo">
@@ -61,17 +61,10 @@
                         </div>
                     </div>
 
-                    <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
-                            <i class="fas fa-users"></i>
-                            Nhân viên
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="bm-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="#" class="dropdown-item">Hoa hồng</a>
-                        </div>
-                    </div>
+                    <a href="bm-staff" class="nav-item">
+                        <i class="fas fa-users"></i>
+                        Nhân viên
+                    </a>
 
                     <a href="bm-promotions" class="nav-item">
                         <i class="fas fa-ticket"></i>
@@ -135,7 +128,7 @@
                             <div class="current-branch-info">
                                 <i class="fas fa-store"></i>
                                 <span>${currentBranchName}</span>
-                             
+
                             </div>
                         </div>
 

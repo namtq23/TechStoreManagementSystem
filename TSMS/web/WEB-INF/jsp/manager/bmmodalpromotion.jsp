@@ -77,7 +77,7 @@
         </style>
     </head>
     <body>
-          <header class="header">
+        <header class="header">
             <div class="header-container">
                 <div class="logo">
                     <a href="bm-overview" class="logo">
@@ -100,7 +100,6 @@
                         <a href="#" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
                             Giao dịch
-                            <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
                             <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
@@ -113,7 +112,6 @@
                         <a href="#" class="dropdown-toggle">
                             <i class="fas fa-handshake"></i>
                             Đối tác
-                            <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
                             <a href="bm-customer" class="dropdown-item">Khách hàng</a>
@@ -121,17 +119,10 @@
                         </div>
                     </div>
 
-                    <div class="nav-item dropdown">
-                        <a href="#" class="dropdown-toggle">
-                            <i class="fas fa-users"></i>
-                            Nhân viên
-                            <i class="fas fa-caret-down"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="bm-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="#" class="dropdown-item">Hoa hồng</a>
-                        </div>
-                    </div>
+                    <a href="bm-staff" class="nav-item">
+                        <i class="fas fa-users"></i>
+                        Nhân viên
+                    </a>
 
                     <a href="bm-promotions" class="nav-item active">
                         <i class="fas fa-ticket"></i>
@@ -142,7 +133,6 @@
                         <a href="#" class="dropdown-toggle">
                             <i class="fas fa-chart-bar"></i>
                             Báo cáo
-                            <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
                             <a href="bm-invoices" class="dropdown-item">Báo cáo thu thuần</a>
@@ -172,9 +162,6 @@
 
         <div class="container mt-5">
             <div class="card position-relative">
-                <div class="readonly-badge">
-                    <i class="fas fa-eye"></i> Chỉ xem
-                </div>
 
                 <div class="card-header">
                     <h5 class="card-title">

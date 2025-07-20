@@ -295,7 +295,7 @@
                         Khách hàng của tôi
                     </a>
 
-                    <div class="nav-item dropdown" id="reportDropdown">
+<!--                    <div class="nav-item dropdown" id="reportDropdown">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-chart-bar"></i>
                             Báo cáo
@@ -304,7 +304,7 @@
                         <div class="dropdown-menu">
                             <a href="sale-mycommissions" class="dropdown-item">Hoa hồng</a>
                         </div>
-                    </div>
+                    </div>-->
 
                 </nav>
 
