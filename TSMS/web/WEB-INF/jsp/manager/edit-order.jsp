@@ -503,7 +503,7 @@
         </style>
     </head>
     <body>
-        <header class="header">
+         <header class="header">
             <div class="header-container">
                 <div class="logo">
                     <a href="bm-overview" class="logo">
@@ -512,7 +512,7 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="bm-overview" class="nav-item">
+                    <a href="bm-dashboard" class="nav-item active">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
@@ -522,21 +522,21 @@
                         Hàng hóa
                     </a>
 
-                    <div class="nav-item dropdown active">
-                        <a href="" class="dropdown-toggle">
+                    <div class="nav-item dropdown">
+                        <a href="#" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
                             Giao dịch
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
                             <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="bm-stockmovement?type=import" class="dropdown-item">Nhập hàng</a>
-                            <a href="request-stock" class="dropdown-item">Yêu cầu nhập hàng</a>
+                            <a href="request-stock" class="dropdown-item">Nhập hàng</a>
+                            <a href="bm-incoming-orders" class="dropdown-item">Theo dõi nhập hàng</a>
                         </div>
                     </div>
 
                     <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
+                        <a href="#" class="dropdown-toggle">
                             <i class="fas fa-handshake"></i>
                             Đối tác
                             <i class="fas fa-caret-down"></i>
@@ -548,7 +548,7 @@
                     </div>
 
                     <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
+                        <a href="#" class="dropdown-toggle">
                             <i class="fas fa-users"></i>
                             Nhân viên
                             <i class="fas fa-caret-down"></i>
@@ -558,20 +558,21 @@
                             <a href="#" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
+
                     <a href="bm-promotions" class="nav-item">
                         <i class="fas fa-ticket"></i>
                         Khuyến mãi
                     </a>
 
                     <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
+                        <a href="#" class="dropdown-toggle">
                             <i class="fas fa-chart-bar"></i>
                             Báo cáo
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
                             <a href="#" class="dropdown-item">Tài chính</a>
-                            <a href="#" class="dropdown-item">Đật hàng</a>
+                            <a href="#" class="dropdown-item">Đặt hàng</a>
                             <a href="#" class="dropdown-item">Hàng hoá</a>
                             <a href="#" class="dropdown-item">Khách hàng</a>
                         </div>
@@ -585,7 +586,7 @@
 
                 <div class="header-right">
                     <div class="user-dropdown">
-                        <a href="" class="user-icon gradient" id="dropdownToggle">
+                        <a href="#" class="user-icon gradient" id="dropdownToggle">
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
@@ -594,6 +595,7 @@
                         </div>
                     </div>      
                 </div>
+            </div>
         </header>
 
         <!-- Main Content -->

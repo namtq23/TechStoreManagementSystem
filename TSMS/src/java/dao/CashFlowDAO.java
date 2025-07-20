@@ -1345,5 +1345,588 @@ public class CashFlowDAO {
     return methods;
 }
 
+// ====== METHODS CHO BRANCH MANAGER (có filter branchId) ======
+
+// Lấy doanh thu hôm nay theo chi nhánh
+public BigDecimal getTodayIncomeByBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT ISNULL(SUM(Amount), 0) AS TotalIncome
+        FROM CashFlows
+        WHERE FlowType = 'income'
+        AND BranchID = ?
+        AND CONVERT(DATE, CreatedAt) = CONVERT(DATE, GETDATE());
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+        
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getBigDecimal("TotalIncome");
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Lỗi khi lấy tổng thu nhập hôm nay theo chi nhánh: " + e.getMessage());
+    }
+    return BigDecimal.ZERO;
+}
+
+// Đếm số hóa đơn hôm nay theo chi nhánh
+public int getTodayInvoiceCountByBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT COUNT(*) AS InvoiceCount
+        FROM CashFlows
+        WHERE BranchID = ?
+        AND CONVERT(DATE, CreatedAt) = CONVERT(DATE, GETDATE());
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+        
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("InvoiceCount");
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Lỗi khi đếm số hóa đơn hôm nay theo chi nhánh: " + e.getMessage());
+    }
+    return 0;
+}
+
+// Lấy doanh thu hôm qua theo chi nhánh
+public BigDecimal getYesterdayIncomeByBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT ISNULL(SUM(Amount), 0) AS TotalIncome
+        FROM CashFlows
+        WHERE FlowType = 'income'
+        AND BranchID = ?
+        AND CAST(CreatedAt AS DATE) = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE);
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+        
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getBigDecimal("TotalIncome");
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Lỗi khi lấy tổng thu nhập hôm qua theo chi nhánh: " + e.getMessage());
+    }
+    return BigDecimal.ZERO;
+}
+
+// Lấy doanh thu cùng ngày tháng trước theo chi nhánh
+public BigDecimal getSameDayLastMonthIncomeByBranch(String dbName, int branchId, LocalDate sameDayLastMonth) throws SQLException {
+    String sql = """
+        SELECT ISNULL(SUM(Amount), 0) AS TotalIncome
+        FROM CashFlows
+        WHERE FlowType = 'income'
+        AND BranchID = ?
+        AND CONVERT(DATE, CreatedAt) = ?;
+    """;
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+        stmt.setDate(2, java.sql.Date.valueOf(sameDayLastMonth));
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getBigDecimal("TotalIncome");
+            }
+        }
+    } catch (SQLException e) {
+        System.err.println("Lỗi khi truy vấn tổng thu nhập ngày cùng kỳ tháng trước theo chi nhánh: " + e.getMessage());
+        throw e;
+    }
+    return BigDecimal.ZERO;
+}
+
+// Lấy doanh thu tháng này theo ngày và chi nhánh
+public Map<String, Object> getMonthlyRevenueByDayAndBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT 
+            DAY(CreatedAt) as Day,
+            ISNULL(SUM(Amount), 0) as Revenue
+        FROM CashFlows
+        WHERE FlowType = 'income'
+        AND BranchID = ?
+        AND YEAR(CreatedAt) = YEAR(GETDATE())
+        AND MONTH(CreatedAt) = MONTH(GETDATE())
+        GROUP BY DAY(CreatedAt)
+        ORDER BY DAY(CreatedAt)
+    """;
+
+    Map<String, Object> result = new HashMap<>();
+    List<String> daylist = new ArrayList<>();
+    List<BigDecimal> dailyRevenueList = new ArrayList<>();
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            Map<Integer, BigDecimal> dailyRevenue = new HashMap<>();
+
+            while (rs.next()) {
+                int day = rs.getInt("Day");
+                BigDecimal revenue = rs.getBigDecimal("Revenue");
+                dailyRevenue.put(day, revenue);
+            }
+
+            LocalDate now = LocalDate.now();
+            int daysInMonth = now.lengthOfMonth();
+
+            for (int day = 1; day <= daysInMonth; day++) {
+                daylist.add(String.valueOf(day));
+                BigDecimal dayRevenue = dailyRevenue.getOrDefault(day, BigDecimal.ZERO);
+                dailyRevenueList.add(dayRevenue);
+            }
+        }
+    } catch (SQLException e) {
+        System.err.println("Lỗi khi lấy doanh thu theo ngày và chi nhánh: " + e.getMessage());
+        throw e;
+    }
+
+    result.put("labels", daylist);
+    result.put("data", dailyRevenueList);
+    result.put("chartTitle", "Doanh thu theo ngày trong tháng (Chi nhánh)");
+    return result;
+}
+
+// Lấy doanh thu tháng trước theo ngày và chi nhánh
+public Map<String, Object> getPreviousMonthRevenueByDayAndBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT 
+            DAY(CreatedAt) as Day,
+            ISNULL(SUM(Amount), 0) as Revenue
+        FROM CashFlows
+        WHERE FlowType = 'income'
+        AND BranchID = ?
+        AND YEAR(CreatedAt) = YEAR(DATEADD(month, -1, GETDATE()))
+        AND MONTH(CreatedAt) = MONTH(DATEADD(month, -1, GETDATE()))
+        GROUP BY DAY(CreatedAt)
+        ORDER BY DAY(CreatedAt)
+    """;
+
+    Map<String, Object> result = new HashMap<>();
+    List<String> daylist = new ArrayList<>();
+    List<BigDecimal> dailyRevenueList = new ArrayList<>();
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            Map<Integer, BigDecimal> dailyRevenue = new HashMap<>();
+
+            while (rs.next()) {
+                int day = rs.getInt("Day");
+                BigDecimal revenue = rs.getBigDecimal("Revenue");
+                dailyRevenue.put(day, revenue);
+            }
+
+            LocalDate previousMonthDate = LocalDate.now().minusMonths(1);
+            int daysInPreviousMonth = previousMonthDate.lengthOfMonth();
+
+            for (int day = 1; day <= daysInPreviousMonth; day++) {
+                daylist.add(String.valueOf(day));
+                BigDecimal dayRevenue = dailyRevenue.getOrDefault(day, BigDecimal.ZERO);
+                dailyRevenueList.add(dayRevenue);
+            }
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("'Tháng' M/yyyy");
+            String chartTitle = "Doanh thu theo ngày - " + previousMonthDate.format(formatter) + " (Chi nhánh)";
+            result.put("chartTitle", chartTitle);
+        }
+    } catch (SQLException e) {
+        System.err.println("Lỗi khi lấy doanh thu tháng trước theo ngày và chi nhánh: " + e.getMessage());
+        throw e;
+    }
+
+    result.put("labels", daylist);
+    result.put("data", dailyRevenueList);
+    return result;
+}
+
+// Lấy doanh thu tháng này theo giờ và chi nhánh
+public Map<String, Object> getMonthlyRevenueByHourAndBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT 
+            DATEPART(HOUR, CreatedAt) as Hour,
+            ISNULL(SUM(Amount), 0) as Revenue
+        FROM CashFlows
+        WHERE FlowType = 'income'
+        AND BranchID = ?
+        AND YEAR(CreatedAt) = YEAR(GETDATE())
+        AND MONTH(CreatedAt) = MONTH(GETDATE())
+        GROUP BY DATEPART(HOUR, CreatedAt)
+        ORDER BY DATEPART(HOUR, CreatedAt)
+    """;
+
+    Map<String, Object> result = new HashMap<>();
+    List<String> labels = new ArrayList<>();
+    List<BigDecimal> data = new ArrayList<>();
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            Map<Integer, BigDecimal> hourlyRevenue = new HashMap<>();
+
+            while (rs.next()) {
+                int hour = rs.getInt("Hour");
+                BigDecimal revenue = rs.getBigDecimal("Revenue");
+                hourlyRevenue.put(hour, revenue);
+            }
+
+            for (int hour = 0; hour < 24; hour++) {
+                labels.add(String.format("%02d:00", hour));
+                BigDecimal hourRevenue = hourlyRevenue.getOrDefault(hour, BigDecimal.ZERO);
+                data.add(hourRevenue);
+            }
+        }
+    } catch (SQLException e) {
+        System.err.println("Lỗi khi lấy doanh thu theo giờ và chi nhánh: " + e.getMessage());
+        throw e;
+    }
+
+    result.put("labels", labels);
+    result.put("data", data);
+    result.put("chartTitle", "Doanh thu theo giờ trong tháng (Chi nhánh)");
+    return result;
+}
+
+// Lấy doanh thu tháng trước theo giờ và chi nhánh
+public Map<String, Object> getPreviousMonthRevenueByHourAndBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT 
+            DATEPART(HOUR, CreatedAt) as Hour,
+            ISNULL(SUM(Amount), 0) as Revenue
+        FROM CashFlows
+        WHERE FlowType = 'income'
+        AND BranchID = ?
+        AND YEAR(CreatedAt) = YEAR(DATEADD(month, -1, GETDATE()))
+        AND MONTH(CreatedAt) = MONTH(DATEADD(month, -1, GETDATE()))
+        GROUP BY DATEPART(HOUR, CreatedAt)
+        ORDER BY DATEPART(HOUR, CreatedAt)
+    """;
+
+    Map<String, Object> result = new HashMap<>();
+    List<String> labels = new ArrayList<>();
+    List<BigDecimal> data = new ArrayList<>();
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            Map<Integer, BigDecimal> hourlyRevenue = new HashMap<>();
+
+            while (rs.next()) {
+                int hour = rs.getInt("Hour");
+                BigDecimal revenue = rs.getBigDecimal("Revenue");
+                hourlyRevenue.put(hour, revenue);
+            }
+
+            for (int hour = 0; hour < 24; hour++) {
+                labels.add(String.format("%02d:00", hour));
+                BigDecimal hourRevenue = hourlyRevenue.getOrDefault(hour, BigDecimal.ZERO);
+                data.add(hourRevenue);
+            }
+        }
+    } catch (SQLException e) {
+        System.err.println("Lỗi khi lấy doanh thu tháng trước theo giờ và chi nhánh: " + e.getMessage());
+        throw e;
+    }
+
+    LocalDate previousMonthDate = LocalDate.now().minusMonths(1);
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("'Tháng' M/yyyy");
+    String chartTitle = "Doanh thu theo giờ - " + previousMonthDate.format(formatter) + " (Chi nhánh)";
+
+    result.put("labels", labels);
+    result.put("data", data);
+    result.put("chartTitle", chartTitle);
+    return result;
+}
+
+// Lấy doanh thu tháng này theo thứ và chi nhánh
+public Map<String, Object> getMonthlyRevenueByWeekdayAndBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT 
+            DATEPART(WEEKDAY, CreatedAt) as WeekDay,
+            ISNULL(SUM(Amount), 0) as Revenue
+        FROM CashFlows
+        WHERE FlowType = 'income'
+        AND BranchID = ?
+        AND YEAR(CreatedAt) = YEAR(GETDATE())
+        AND MONTH(CreatedAt) = MONTH(GETDATE())
+        GROUP BY DATEPART(WEEKDAY, CreatedAt)
+        ORDER BY DATEPART(WEEKDAY, CreatedAt)
+    """;
+
+    Map<String, Object> result = new HashMap<>();
+    List<String> labels = new ArrayList<>();
+    List<BigDecimal> data = new ArrayList<>();
+
+    String[] weekDayNames = {"Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"};
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            Map<Integer, BigDecimal> weekdayRevenue = new HashMap<>();
+
+            while (rs.next()) {
+                int weekday = rs.getInt("WeekDay");
+                BigDecimal revenue = rs.getBigDecimal("Revenue");
+                weekdayRevenue.put(weekday, revenue);
+            }
+
+            for (int i = 1; i <= 7; i++) {
+                labels.add(weekDayNames[i - 1]);
+                BigDecimal dayRevenue = weekdayRevenue.getOrDefault(i, BigDecimal.ZERO);
+                data.add(dayRevenue);
+            }
+        }
+    } catch (SQLException e) {
+        System.err.println("Lỗi khi lấy doanh thu theo thứ và chi nhánh: " + e.getMessage());
+        throw e;
+    }
+
+    result.put("labels", labels);
+    result.put("data", data);
+    result.put("chartTitle", "Doanh thu theo thứ trong tháng (Chi nhánh)");
+    return result;
+}
+
+// Lấy doanh thu tháng trước theo thứ và chi nhánh
+public Map<String, Object> getPreviousMonthRevenueByWeekdayAndBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT 
+            DATEPART(WEEKDAY, CreatedAt) as WeekDay,
+            ISNULL(SUM(Amount), 0) as Revenue
+        FROM CashFlows
+        WHERE FlowType = 'income'
+        AND BranchID = ?
+        AND YEAR(CreatedAt) = YEAR(DATEADD(month, -1, GETDATE()))
+        AND MONTH(CreatedAt) = MONTH(DATEADD(month, -1, GETDATE()))
+        GROUP BY DATEPART(WEEKDAY, CreatedAt)
+        ORDER BY DATEPART(WEEKDAY, CreatedAt)
+    """;
+
+    Map<String, Object> result = new HashMap<>();
+    List<String> labels = new ArrayList<>();
+    List<BigDecimal> data = new ArrayList<>();
+
+    String[] weekDayNames = {"Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"};
+
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            Map<Integer, BigDecimal> weekdayRevenue = new HashMap<>();
+
+            while (rs.next()) {
+                int weekday = rs.getInt("WeekDay");
+                BigDecimal revenue = rs.getBigDecimal("Revenue");
+                weekdayRevenue.put(weekday, revenue);
+            }
+
+            for (int i = 1; i <= 7; i++) {
+                labels.add(weekDayNames[i - 1]);
+                BigDecimal dayRevenue = weekdayRevenue.getOrDefault(i, BigDecimal.ZERO);
+                data.add(dayRevenue);
+            }
+        }
+    } catch (SQLException e) {
+        System.err.println("Lỗi khi lấy doanh thu tháng trước theo thứ và chi nhánh: " + e.getMessage());
+        throw e;
+    }
+
+    LocalDate previousMonthDate = LocalDate.now().minusMonths(1);
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("'Tháng' M/yyyy");
+    String chartTitle = "Doanh thu theo thứ - " + previousMonthDate.format(formatter) + " (Chi nhánh)";
+
+    result.put("labels", labels);
+    result.put("data", data);
+    result.put("chartTitle", chartTitle);
+    return result;
+}
+
+// Top 5 sản phẩm theo số lượng tháng này và chi nhánh
+public List<ProductSaleDTO> getTop5ProductSalesThisMonthByQuantityAndBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT TOP 5
+            p.ProductName,
+            p.ProductID,    
+            SUM(od.Quantity) AS TotalQuantity
+        FROM CashFlows cf
+        JOIN Orders o ON cf.RelatedOrderID = o.OrderID
+        JOIN OrderDetails od ON o.OrderID = od.OrderID
+        JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID 
+        JOIN Products p ON pd.ProductID = p.ProductID  
+        WHERE cf.FlowType = 'income'
+          AND cf.BranchID = ?
+          AND YEAR(cf.CreatedAt) = YEAR(GETDATE())
+          AND MONTH(cf.CreatedAt) = MONTH(GETDATE())
+        GROUP BY p.ProductName, p.ProductID  
+        ORDER BY TotalQuantity DESC
+    """;
+
+    List<ProductSaleDTO> result = new ArrayList<>();
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+        
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                String productName = rs.getString("ProductName");
+                int productId = rs.getInt("ProductID");
+                int totalQuantity = rs.getInt("TotalQuantity");
+                result.add(new ProductSaleDTO(productName, productId, totalQuantity));
+            }
+        }
+    }
+    return result;
+}
+
+// Top 5 sản phẩm theo số lượng tháng trước và chi nhánh
+public List<ProductSaleDTO> getTop5ProductSalesLastMonthByQuantityAndBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT TOP 5
+            p.ProductName,
+            p.ProductID,    
+            SUM(od.Quantity) AS TotalQuantity
+        FROM CashFlows cf
+        JOIN Orders o ON cf.RelatedOrderID = o.OrderID
+        JOIN OrderDetails od ON o.OrderID = od.OrderID
+        JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID  
+        JOIN Products p ON pd.ProductID = p.ProductID  
+        WHERE cf.FlowType = 'income'
+          AND cf.BranchID = ?
+          AND YEAR(cf.CreatedAt) = YEAR(DATEADD(MONTH, -1, GETDATE()))
+          AND MONTH(cf.CreatedAt) = MONTH(DATEADD(MONTH, -1, GETDATE()))
+        GROUP BY p.ProductName, p.ProductID  
+        ORDER BY TotalQuantity DESC
+    """;
+
+    List<ProductSaleDTO> result = new ArrayList<>();
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+        
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                String productName = rs.getString("ProductName");
+                int productId = rs.getInt("ProductID");
+                int totalQuantity = rs.getInt("TotalQuantity");
+                result.add(new ProductSaleDTO(productName, productId, totalQuantity));
+            }
+        }
+    }
+    return result;
+}
+
+// Top 5 sản phẩm theo doanh thu tháng này và chi nhánh
+public List<ProductSaleDTO> getTop5ProductSalesThisMonthByRevenueAndBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT TOP 5
+            p.ProductName,
+            p.ProductID,     
+            SUM(od.Quantity) AS TotalQuantity,
+            SUM(od.Quantity * p.RetailPrice) AS Revenue
+        FROM CashFlows cf
+        JOIN Orders o ON cf.RelatedOrderID = o.OrderID
+        JOIN OrderDetails od ON o.OrderID = od.OrderID
+        JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID 
+        JOIN Products p ON pd.ProductID = p.ProductID  
+        WHERE cf.FlowType = 'income'
+          AND cf.BranchID = ?
+          AND YEAR(cf.CreatedAt) = YEAR(GETDATE())
+          AND MONTH(cf.CreatedAt) = MONTH(GETDATE())
+        GROUP BY p.ProductName, p.ProductID  
+        ORDER BY Revenue DESC
+    """;
+
+    List<ProductSaleDTO> result = new ArrayList<>();
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+        
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                String productName = rs.getString("ProductName");
+                int productId = rs.getInt("ProductID");
+                int totalQuantity = rs.getInt("TotalQuantity");
+                BigDecimal revenue = rs.getBigDecimal("Revenue");
+                result.add(new ProductSaleDTO(productName, productId, totalQuantity, revenue));
+            }
+        }
+    }
+    return result;
+}
+
+// Top 5 sản phẩm theo doanh thu tháng trước và chi nhánh
+public List<ProductSaleDTO> getTop5ProductSalesLastMonthByRevenueAndBranch(String dbName, int branchId) throws SQLException {
+    String sql = """
+        SELECT TOP 5
+            p.ProductName,
+            p.ProductID,     
+            SUM(od.Quantity) AS TotalQuantity,
+            SUM(od.Quantity * p.RetailPrice) AS Revenue
+        FROM CashFlows cf
+        JOIN Orders o ON cf.RelatedOrderID = o.OrderID
+        JOIN OrderDetails od ON o.OrderID = od.OrderID
+        JOIN ProductDetails pd ON od.ProductDetailID = pd.ProductDetailID  
+        JOIN Products p ON pd.ProductID = p.ProductID  
+        WHERE cf.FlowType = 'income'
+          AND cf.BranchID = ?
+          AND YEAR(cf.CreatedAt) = YEAR(DATEADD(MONTH, -1, GETDATE()))
+          AND MONTH(cf.CreatedAt) = MONTH(DATEADD(MONTH, -1, GETDATE()))
+        GROUP BY p.ProductName, p.ProductID 
+        ORDER BY Revenue DESC
+    """;
+
+    List<ProductSaleDTO> result = new ArrayList<>();
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, branchId);
+        
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                String productName = rs.getString("ProductName");
+                int productId = rs.getInt("ProductID");
+                int totalQuantity = rs.getInt("TotalQuantity");
+                BigDecimal revenue = rs.getBigDecimal("Revenue");
+                result.add(new ProductSaleDTO(productName, productId, totalQuantity, revenue));
+            }
+        }
+    }
+    return result;
+}
 
 }

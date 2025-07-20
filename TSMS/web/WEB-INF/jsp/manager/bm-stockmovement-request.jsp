@@ -30,7 +30,7 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="bm-overview" class="nav-item active">
+                    <a href="bm-overview" class="nav-item ">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
@@ -40,7 +40,7 @@
                         Hàng hóa
                     </a>
 
-                    <div class="nav-item dropdown">
+                    <div class="nav-item dropdown active">
                         <a href="" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
                             Giao dịch

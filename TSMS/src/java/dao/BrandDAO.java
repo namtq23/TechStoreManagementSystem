@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import model.Branch;
 import model.Brand;
 import util.DBUtil;
 
@@ -55,4 +56,53 @@ public class BrandDAO {
             return rowsAffected > 0;
         }
     }
+   
+    
+     /**
+     * Lấy tên chi nhánh theo ID
+     */
+    public String getBranchNameById(String dbName, int branchId) throws SQLException {
+        String sql = "SELECT BranchName FROM Branches WHERE BranchID = ? AND IsActive = 1";
+        
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, branchId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("BranchName");
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Lấy thông tin chi nhánh đầy đủ theo ID
+     */
+    public Branch getBranchById(String dbName, int branchId) throws SQLException {
+        String sql = "SELECT BranchID, BranchName, Address, Phone, IsActive FROM Branches WHERE BranchID = ?";
+        
+        try (Connection conn = DBUtil.getConnectionTo(dbName);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, branchId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Branch branch = new Branch();
+                    branch.setBranchId(rs.getInt("BranchID"));
+                    branch.setBranchName(rs.getString("BranchName"));
+                    branch.setAddress(rs.getString("Address"));
+                    branch.setPhone(rs.getString("Phone"));
+                    // ✅ Giữ nguyên int
+                    branch.setIsActive(rs.getInt("IsActive"));
+                    return branch;
+                }
+            }
+        }
+        return null;
+    }
+    
 }

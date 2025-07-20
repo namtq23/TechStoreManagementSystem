@@ -18,6 +18,11 @@ public class CashFlowReportDTO {
     private String customerName;
     private String category;
 
+    
+    // Thêm các field formatted (tùy chọn)
+    private String formattedAmount;
+    private String formattedCreatedAt;
+    
     public String getCategory() {
         return category;
     }
@@ -25,11 +30,6 @@ public class CashFlowReportDTO {
     public void setCategory(String category) {
         this.category = category;
     }
-    
-    // Thêm các field formatted (tùy chọn)
-    private String formattedAmount;
-    private String formattedCreatedAt;
-    
     // Constructor
     public CashFlowReportDTO() {
     }
