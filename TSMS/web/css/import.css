@@ -778,9 +778,7 @@ legend {
 .status-badge.transfer {
     background-color: #3498db;
     color: white;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: bold;
+  
 }
 .btn-action.transfer {
     background-color: #3498db;

@@ -158,11 +158,11 @@
             </div>
         </header>
 
-       <div class="main-container">
+        <div class="main-container">
             <!-- Sidebar Filter -->
             <!-- Sidebar Filter -->
             <aside class="sidebar">
-                <form method="GET" action="so-detail-tracking" class="filter-form">
+                <form method="GET" action="wh-import-export-detail" class="filter-form">
                     <input type="hidden" name="id" value="${movementID}">
 
                     <fieldset>
@@ -258,9 +258,9 @@
 
                 <!-- Movement Info -->
                 <div class="movement-info-card">
-                    
-                       
-               
+
+
+
 
                     <div class="info-grid">
                         <div class="info-item">
@@ -289,22 +289,22 @@
                         </div>
                         <div class="info-item">
                             <label>Trạng thái xử lý:</label>
-                        <span class="status-badge ${movement.responseStatus}">
-                            <c:choose>
-                                <c:when test="${movement.responseStatus eq 'completed'}">
-                                    <i class="fas fa-check-circle"></i> Đã hoàn thành
-                                </c:when>
-                                <c:when test="${movement.responseStatus eq 'processing'}">
-                                    <i class="fas fa-clock"></i> Đang xử lý
-                                </c:when>
-                                <c:when test="${movement.responseStatus eq 'pending'}">
-                                    <i class="fas fa-hourglass-half"></i> Chờ xử lý
-                                </c:when>
-                                <c:otherwise>
-                                    ${movement.responseStatus}
-                                </c:otherwise>
-                            </c:choose>
-                        </span>
+                            <span class="status-badge ${movement.responseStatus}">
+                                <c:choose>
+                                    <c:when test="${movement.responseStatus eq 'completed'}">
+                                        <i class="fas fa-check-circle"></i> Đã hoàn thành
+                                    </c:when>
+                                    <c:when test="${movement.responseStatus eq 'processing'}">
+                                        <i class="fas fa-clock"></i> Đang xử lý
+                                    </c:when>
+                                    <c:when test="${movement.responseStatus eq 'pending'}">
+                                        <i class="fas fa-hourglass-half"></i> Chờ xử lý
+                                    </c:when>
+                                    <c:otherwise>
+                                        ${movement.responseStatus}
+                                    </c:otherwise>
+                                </c:choose>
+                            </span>
                         </div>
                     </div>
                     <c:if test="${not empty movement.note}">
@@ -392,22 +392,55 @@
                                                 </c:when>
                                                 <c:otherwise>
                                                     <div class="serials-list">
-                                                        <c:forEach var="serial" items="${detail.serials}" varStatus="serialLoop">
-                                                            <span class="serial-badge">
-                                                                ${serial.serialNumber}
-                                                                <c:if test="${movement.responseStatus eq 'completed'}">
-                                                                    <i class="fas fa-check-circle text-success ml-1"></i>
-                                                                </c:if>
-                                                            </span>
-                                                            <c:if test="${serialLoop.index == 2 && fn:length(detail.serials) > 3}">
-                                                                <span class="serial-more" onclick="showMoreSerials(this)">
-                                                                    +${fn:length(detail.serials) - 3} khác
+                                                        <c:choose>
+                                                            <c:when test="${empty detail.serials}">
+                                                                <span class="text-muted">
+                                                                    <c:choose>
+                                                                        <c:when test="${movement.responseStatus eq 'completed'}">
+                                                                            Đã hoàn thành
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            Chưa có serial
+                                                                        </c:otherwise>
+                                                                    </c:choose>
                                                                 </span>
-                                                            </c:if>
-                                                            <c:if test="${serialLoop.index > 2}">
-                                                                <span class="serial-badge hidden">${serial.serialNumber}</span>
-                                                            </c:if>
-                                                        </c:forEach>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <div class="serials-list">
+                                                                    <c:forEach var="serial" items="${detail.serials}" varStatus="serialLoop">
+                                                                        <c:choose>
+                                                                            <c:when test="${serialLoop.index < 3}">
+                                                                                <!-- Hiển thị 3 serial đầu tiên -->
+                                                                                <span class="serial-badge">
+                                                                                    ${serial.serialNumber}
+                                                                                    <c:if test="${movement.responseStatus eq 'completed'}">
+                                                                                        <i class="fas fa-check-circle text-success ml-1"></i>
+                                                                                    </c:if>
+                                                                                </span>
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <!-- Ẩn các serial từ thứ 4 trở đi -->
+                                                                                <span class="serial-badge hidden" style="display: none;">
+                                                                                    ${serial.serialNumber}
+                                                                                    <c:if test="${movement.responseStatus eq 'completed'}">
+                                                                                        <i class="fas fa-check-circle text-success ml-1"></i>
+                                                                                    </c:if>
+                                                                                </span>
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                    </c:forEach>
+
+                                                                    <!-- Hiển thị nút "xem thêm" nếu có nhiều hơn 3 serial -->
+                                                                    <c:if test="${fn:length(detail.serials) > 3}">
+                                                                        <span class="serial-more" onclick="showMoreSerials(this)">
+                                                                            +${fn:length(detail.serials) - 3} khác
+                                                                        </span>
+                                                                    </c:if>
+                                                                </div>
+
+                                                            </c:otherwise>
+                                                        </c:choose>
+
                                                     </div>
                                                 </c:otherwise>
                                             </c:choose>
@@ -435,523 +468,531 @@
                         <!-- First page -->
                         <c:choose>
                             <c:when test="${currentPage > 1}">
-                                <a href="so-detail-tracking?id=${movementID}&productFilter=${productFilter}&fromDate=${fromDate}&toDate=${toDate}&status=${status}&itemsPerPage=${itemsPerPage}&page=1" class="page-btn">
-                                    <i class="fas fa-angle-double-left"></i>
-                                </a>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="page-btn disabled">
-                                    <i class="fas fa-angle-double-left"></i>
-                                </span>
-                            </c:otherwise>
-                        </c:choose>
-
-                        <!-- Previous page -->
-                        <c:choose>
-                            <c:when test="${currentPage > 1}">
-                                <a href="so-detail-tracking?id=${movementID}&productFilter=${productFilter}&fromDate=${fromDate}&toDate=${toDate}&status=${status}&itemsPerPage=${itemsPerPage}&page=${currentPage - 1}" class="page-btn">
-                                    <i class="fas fa-angle-left"></i>
-                                </a>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="page-btn disabled">
-                                    <i class="fas fa-angle-left"></i>
-                                </span>
-                            </c:otherwise>
-                        </c:choose>
-
-                        <!-- Page numbers -->
-                        <c:forEach var="i" begin="${currentPage - 2 > 0 ? currentPage - 2 : 1}" 
-                                   end="${currentPage + 2 < totalPages ? currentPage + 2 : totalPages}">
-                            <c:choose>
-                                <c:when test="${i == currentPage}">
-                                    <span class="page-btn active">${i}</span>
+                                <a href="wh-import-export-detail?id=${movementID}&productFilter=${productFilter}&fromDate=${fromDate}&toDate=${toDate}&status=${status}&itemsPerPage=${itemsPerPage}&page=1" class="page-btn">
                                 </c:when>
                                 <c:otherwise>
-                                    <a href="so-detail-tracking?id=${movementID}&productFilter=${productFilter}&fromDate=${fromDate}&toDate=${toDate}&status=${status}&itemsPerPage=${itemsPerPage}&page=${i}" class="page-btn">${i}</a>
+                                    <span class="page-btn disabled">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </span>
                                 </c:otherwise>
                             </c:choose>
-                        </c:forEach>
 
-                        <!-- Next page -->
-                        <c:choose>
-                            <c:when test="${currentPage < totalPages}">
-                                <a href="so-detail-tracking?id=${movementID}&productFilter=${productFilter}&fromDate=${fromDate}&toDate=${toDate}&status=${status}&itemsPerPage=${itemsPerPage}&page=${currentPage + 1}" class="page-btn">
-                                    <i class="fas fa-angle-right"></i>
-                                </a>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="page-btn disabled">
-                                    <i class="fas fa-angle-right"></i>
-                                </span>
-                            </c:otherwise>
-                        </c:choose>
+                            <!-- Previous page -->
+                            <c:choose>
+                                <c:when test="${currentPage > 1}">
+                                    <a href="wh-import-export-detail?id=${movementID}&productFilter=${productFilter}&fromDate=${fromDate}&toDate=${toDate}&status=${status}&itemsPerPage=${itemsPerPage}&page=${currentPage - 1}" class="page-btn">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="page-btn disabled">
+                                            <i class="fas fa-angle-left"></i>
+                                        </span>
+                                    </c:otherwise>
+                                </c:choose>
 
-                        <!-- Last page -->
-                        <c:choose>
-                            <c:when test="${currentPage < totalPages}">
-                                <a href="so-detail-tracking?id=${movementID}&productFilter=${productFilter}&fromDate=${fromDate}&toDate=${toDate}&status=${status}&itemsPerPage=${itemsPerPage}&page=${totalPages}" class="page-btn">
-                                    <i class="fas fa-angle-double-right"></i>
-                                </a>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="page-btn disabled">
-                                    <i class="fas fa-angle-double-right"></i>
-                                </span>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                </c:if>
-            </main>
-        </div>
+                                <!-- Page numbers -->
+                                <c:forEach var="i" begin="${currentPage - 2 > 0 ? currentPage - 2 : 1}" 
+                                           end="${currentPage + 2 < totalPages ? currentPage + 2 : totalPages}">
+                                    <c:choose>
+                                        <c:when test="${i == currentPage}">
+                                            <span class="page-btn active">${i}</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="wh-import-export-detail?id=${movementID}&productFilter=${productFilter}&fromDate=${fromDate}&toDate=${toDate}&status=${status}&itemsPerPage=${itemsPerPage}&page=${i}" class="page-btn">${i}</a>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
 
-        <script>
-            function changeItemsPerPage() {
-            const select = document.getElementById('itemsPerPageSelect');
-            const newItemsPerPage = select.value;
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.set('itemsPerPage', newItemsPerPage);
-            urlParams.set('page', '1'); // Reset to page 1
+                                <!-- Next page -->
+                                <c:choose>
+                                    <c:when test="${currentPage < totalPages}">
+                                        <a href="wh-import-export-detail?id=${movementID}&productFilter=${productFilter}&fromDate=${fromDate}&toDate=${toDate}&status=${status}&itemsPerPage=${itemsPerPage}&page=${currentPage + 1}" class="page-btn">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="page-btn disabled">
+                                                <i class="fas fa-angle-right"></i>
+                                            </span>
+                                        </c:otherwise>
+                                    </c:choose>
 
-            window.location.href = 'so-detail-tracking?' + urlParams.toString();
-            }
+                                    <!-- Last page -->
+                                    <c:choose>
+                                        <c:when test="${currentPage < totalPages}">
+                                            <a href="wh-import-export-detail?id=${movementID}&productFilter=${productFilter}&fromDate=${fromDate}&toDate=${toDate}&status=${status}&itemsPerPage=${itemsPerPage}&page=${totalPages}" class="page-btn">
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="page-btn disabled">
+                                                    <i class="fas fa-angle-double-right"></i>
+                                                </span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                        </div>
+                                    </c:if>
+                                    </main>
+                                    </div>
 
-            function resetFilters() {
-            const urlParams = new URLSearchParams();
-            urlParams.set('id', '${movementID}');
-            window.location.href = 'so-detail-tracking?' + urlParams.toString();
-            }
+                                 <script>
+    function changeItemsPerPage() {
+        const select = document.getElementById('itemsPerPageSelect');
+        const itemsPerPage = select.value;
+        const url = new URL(window.location);
+        url.searchParams.set('itemsPerPage', itemsPerPage);
+        url.searchParams.set('page', '1'); // Reset về trang 1
 
-            // Dropdown toggle functionality
-            document.addEventListener('DOMContentLoaded', function () {
-            const toggle = document.getElementById("dropdownToggle");
-            const menu = document.getElementById("dropdownMenu");
-            if (toggle && menu) {
-            toggle.addEventListener("click", function (e) {
-            e.preventDefault();
-            menu.style.display = menu.style.display === "block" ? "none" : "block";
-            });
-            document.addEventListener("click", function (e) {
-            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-            menu.style.display = "none";
-            }
-            });
-            }
+        window.location.href = url.toString();
+    }
 
-            // Auto-hide alerts after 5 seconds
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function (alert) {
-            setTimeout(function () {
-            alert.style.display = 'none';
-            }, 5000);
-            });
-            // Show/hide more serials
-            document.querySelectorAll('.serial-more').forEach(function (element) {
-            element.addEventListener('click', function () {
-            const container = this.closest('.serials-list');
-            const hiddenSerials = container.querySelectorAll('.serial-badge.hidden');
-            hiddenSerials.forEach(function (serial) {
-            serial.classList.remove('hidden');
-            });
-            this.style.display = 'none';
-            });
-            });
-            });
-            <script>
-                        function showMoreSerials(element) {
-                    const container = element.closest('.serials-list');
-            const hiddenSerials = container.querySelectorAll('.serial-badge.hidden');
-            hiddenSerials.forEach(function(serial) {
+    function resetFilters() {
+        window.location.href = 'wh-import-export-detail?id=${movementID}';
+    }
+
+    function showMoreSerials(element) {
+        // Tìm container chứa các serial
+        const serialsList = element.parentElement;
+        
+        // Tìm tất cả serial bị ẩn (có class 'hidden')
+        const hiddenSerials = serialsList.querySelectorAll('.serial-badge.hidden');
+        
+        console.log('Tìm thấy', hiddenSerials.length, 'serial ẩn');
+        
+        if (hiddenSerials.length > 0) {
+            // Hiển thị tất cả serial ẩn
+            hiddenSerials.forEach(serial => {
+                serial.style.display = 'inline-block';
                 serial.classList.remove('hidden');
             });
+            
+            // Ẩn nút "xem thêm"
             element.style.display = 'none';
-                        }
-                            
-                            // Cập nhật dropdown toggle functionality
-                            document.addEventListener('DOMContentLoaded', function() {
-                const toggle = document.getElementById("dropdownToggle");
-            const menu = document.getElementB yId("dropdownMenu");
-            if (toggle && menu) {
+            
+            console.log('Đã hiển thị thêm', hiddenSerials.length, 'serial numbers');
+        } else {
+            console.log('Không tìm thấy serial ẩn nào');
+        }
+    }
+
+    // Chạy khi DOM đã load xong
+    document.addEventListener('DOMContentLoaded', function () {
+        // Dropdown toggle functionality
+        const toggle = document.getElementById("dropdownToggle");
+        const menu = document.getElementById("dropdownMenu");
+        if (toggle && menu) {
             toggle.addEventListener("click", function (e) {
-            e.preventDefault();
-            menu.style.display = menu.style.display === "block" ? "none" : "block";
+                e.preventDefault();
+                menu.style.display = menu.style.display === "block" ? "none" : "block";
             });
+            
             document.addEventListener("click", function (e) {
-            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-            menu.style.display = "none";
-            }
+                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                    menu.style.display = "none";
+                }
             });
-            }
+        }
 
-            // Auto-hide alerts after 5 seconds
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function(alert) {
-            setTimeout(function() {
-            alert.style.opacity = '0';
-            setTimeout(function() {
-            alert.style.display = 'none';
-            }, 300);
+        // Auto-hide alerts after 5 seconds
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function (alert) {
+            setTimeout(function () {
+                alert.style.opacity = '0';
+                setTimeout(function () {
+                    alert.style.display = 'none';
+                }, 300);
             }, 5000);
+        });
+
+        // Show/hide more serials (backup cho trường hợp onclick không hoạt động)
+        document.querySelectorAll('.serial-more').forEach(function (element) {
+            element.addEventListener('click', function () {
+                const container = this.closest('.serials-list');
+                const hiddenSerials = container.querySelectorAll('.serial-badge.hidden');
+                
+                hiddenSerials.forEach(function (serial) {
+                    serial.style.display = 'inline-block';
+                    serial.classList.remove('hidden');
+                });
+                
+                this.style.display = 'none';
             });
-                            });
-        </script>
+        });
+    });
+</script>
 
-    </script>
 
-    <!-- Additional CSS for this page -->
-    <style>
-        .movement-info-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #dee2e6;
-        }
+                                    
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 10px;
-        }
+                                    <!-- Additional CSS for this page -->
+                                    <style>
+                                        .movement-info-card {
+                                            background: #f8f9fa;
+                                            padding: 20px;
+                                            border-radius: 8px;
+                                            margin-bottom: 20px;
+                                            border: 1px solid #dee2e6;
+                                        }
 
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
+                                        .info-grid {
+                                            display: grid;
+                                            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                                            gap: 15px;
+                                            margin-bottom: 10px;
+                                        }
 
-        .info-item.full-width {
-            grid-column: 1 / -1;
-        }
+                                        .info-item {
+                                            display: flex;
+                                            flex-direction: column;
+                                            gap: 5px;
+                                        }
 
-        .info-item label {
-            font-weight: 600;
-            color: #6c757d;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
+                                        .info-item.full-width {
+                                            grid-column: 1 / -1;
+                                        }
 
-        .row-completed {
-            background-color: #f8fff8 !important;
-        }
+                                        .info-item label {
+                                            font-weight: 600;
+                                            color: #6c757d;
+                                            font-size: 12px;
+                                            text-transform: uppercase;
+                                        }
 
-        .text-success {
-            color: #28a745 !important;
-            font-weight: 600;
-        }
+                                        .row-completed {
+                                            background-color: #f8fff8 !important;
+                                        }
 
-        .text-warning {
-            color: #ffc107 !important;
-            font-weight: 600;
-        }
+                                        .text-success {
+                                            color: #28a745 !important;
+                                            font-weight: 600;
+                                        }
 
-        .text-muted {
-            color: #6c757d !important;
-            font-size: 12px;
-        }
+                                        .text-warning {
+                                            color: #ffc107 !important;
+                                            font-weight: 600;
+                                        }
 
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
+                                        .text-muted {
+                                            color: #6c757d !important;
+                                            font-size: 12px;
+                                        }
 
-        .badge-success {
-            background-color: #d4edda;
-            color: #155724;
-        }
+                                        .badge {
+                                            padding: 4px 8px;
+                                            border-radius: 4px;
+                                            font-size: 11px;
+                                            font-weight: 600;
+                                            text-transform: uppercase;
+                                        }
 
-        .badge-warning {
-            background-color: #fff3cd;
-            color: #856404;
-        }
+                                        .badge-success {
+                                            background-color: #d4edda;
+                                            color: #155724;
+                                        }
 
-        .badge-pending {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
+                                        .badge-warning {
+                                            background-color: #fff3cd;
+                                            color: #856404;
+                                        }
 
-        .serials-container {
-            max-width: 200px;
-        }
+                                        .badge-pending {
+                                            background-color: #f8d7da;
+                                            color: #721c24;
+                                        }
 
-        .serials-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
+                                        .serials-container {
+                                            max-width: 200px;
+                                        }
 
-        .serial-badge {
-            background-color: #e9ecef;
-            color: #495057;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-family: monospace;
-        }
+                                        .serials-list {
+                                            display: flex;
+                                            flex-wrap: wrap;
+                                            gap: 4px;
+                                        }
 
-        .serial-badge.hidden {
-            display: none;
-        }
+                                        .serial-badge {
+                                            background-color: #e9ecef;
+                                            color: #495057;
+                                            padding: 2px 6px;
+                                            border-radius: 3px;
+                                            font-size: 10px;
+                                            font-family: monospace;
+                                        }
 
-        .serial-more {
-            background-color: #007bff;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 10px;
-            cursor: pointer;
-        }
+                                        .serial-badge.hidden {
+                                            display: none;
+                                        }
 
-        .serial-more:hover {
-            background-color: #0056b3;
-        }
+                                        .serial-more {
+                                            background-color: #007bff;
+                                            color: white;
+                                            padding: 2px 6px;
+                                            border-radius: 3px;
+                                            font-size: 10px;
+                                            cursor: pointer;
+                                        }
 
-        @media (max-width: 768px) {
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
+                                        .serial-more:hover {
+                                            background-color: #0056b3;
+                                        }
 
-            .serials-container {
-                max-width: none;
-            }
-        }
-        /* Movement Info Card */
-        .movement-info-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #dee2e6;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
+                                        @media (max-width: 768px) {
+                                            .info-grid {
+                                                grid-template-columns: 1fr;
+                                            }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 10px;
-        }
+                                            .serials-container {
+                                                max-width: none;
+                                            }
+                                        }
+                                        /* Movement Info Card */
+                                        .movement-info-card {
+                                            background: #f8f9fa;
+                                            padding: 20px;
+                                            border-radius: 8px;
+                                            margin-bottom: 20px;
+                                            border: 1px solid #dee2e6;
+                                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                                        }
 
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
+                                        .info-grid {
+                                            display: grid;
+                                            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                                            gap: 15px;
+                                            margin-bottom: 10px;
+                                        }
 
-        .info-item.full-width {
-            grid-column: 1 / -1;
-        }
+                                        .info-item {
+                                            display: flex;
+                                            flex-direction: column;
+                                            gap: 5px;
+                                        }
 
-        .info-item label {
-            font-weight: 600;
-            color: #6c757d;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+                                        .info-item.full-width {
+                                            grid-column: 1 / -1;
+                                        }
 
-        .info-item span {
-            font-size: 14px;
-            color: #495057;
-            font-weight: 500;
-        }
+                                        .info-item label {
+                                            font-weight: 600;
+                                            color: #6c757d;
+                                            font-size: 12px;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.5px;
+                                        }
 
-        /* Table Row States */
-        .row-completed {
-            background-color: #f8fff8 !important;
-            border-left: 3px solid #28a745;
-        }
+                                        .info-item span {
+                                            font-size: 14px;
+                                            color: #495057;
+                                            font-weight: 500;
+                                        }
 
-        .row-completed:hover {
-            background-color: #f0f8f0 !important;
-        }
+                                        /* Table Row States */
+                                        .row-completed {
+                                            background-color: #f8fff8 !important;
+                                            border-left: 3px solid #28a745;
+                                        }
 
-        /* Text Colors */
-        .text-success {
-            color: #28a745 !important;
-            font-weight: 600;
-        }
+                                        .row-completed:hover {
+                                            background-color: #f0f8f0 !important;
+                                        }
 
-        .text-warning {
-            color: #ffc107 !important;
-            font-weight: 600;
-        }
+                                        /* Text Colors */
+                                        .text-success {
+                                            color: #28a745 !important;
+                                            font-weight: 600;
+                                        }
 
-        .text-muted {
-            color: #6c757d !important;
-            font-size: 12px;
-        }
+                                        .text-warning {
+                                            color: #ffc107 !important;
+                                            font-weight: 600;
+                                        }
 
-        /* Status Badges */
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            white-space: nowrap;
-            text-align: center;
-            min-width: 70px;
-        }
+                                        .text-muted {
+                                            color: #6c757d !important;
+                                            font-size: 12px;
+                                        }
 
-        .badge-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
+                                        /* Status Badges */
+                                        .badge {
+                                            display: inline-block;
+                                            padding: 4px 8px;
+                                            border-radius: 4px;
+                                            font-size: 11px;
+                                            font-weight: 600;
+                                            text-transform: uppercase;
+                                            white-space: nowrap;
+                                            text-align: center;
+                                            min-width: 70px;
+                                        }
 
-        .badge-warning {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
+                                        .badge-success {
+                                            background-color: #d4edda;
+                                            color: #155724;
+                                            border: 1px solid #c3e6cb;
+                                        }
 
-        .badge-pending {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+                                        .badge-warning {
+                                            background-color: #fff3cd;
+                                            color: #856404;
+                                            border: 1px solid #ffeaa7;
+                                        }
 
-        /* Serial Numbers Container */
-        .serials-container {
-            max-width: 200px;
-        }
+                                        .badge-pending {
+                                            background-color: #f8d7da;
+                                            color: #721c24;
+                                            border: 1px solid #f5c6cb;
+                                        }
 
-        .serials-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            align-items: center;
-        }
+                                        /* Serial Numbers Container */
+                                        .serials-container {
+                                            max-width: 200px;
+                                        }
 
-        .serial-badge {
-            background-color: #e9ecef;
-            color: #495057;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-family: 'Courier New', monospace;
-            border: 1px solid #dee2e6;
-            white-space: nowrap;
-        }
+                                        .serials-list {
+                                            display: flex;
+                                            flex-wrap: wrap;
+                                            gap: 4px;
+                                            align-items: center;
+                                        }
 
-        .serial-badge.hidden {
-            display: none;
-        }
+                                        .serial-badge {
+                                            background-color: #e9ecef;
+                                            color: #495057;
+                                            padding: 2px 6px;
+                                            border-radius: 3px;
+                                            font-size: 10px;
+                                            font-family: 'Courier New', monospace;
+                                            border: 1px solid #dee2e6;
+                                            white-space: nowrap;
+                                        }
 
-        .serial-more {
-            background-color: #007bff;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 10px;
-            cursor: pointer;
-            border: none;
-            transition: background-color 0.3s ease;
-        }
+                                        .serial-badge.hidden {
+                                            display: none;
+                                        }
 
-        .serial-more:hover {
-            background-color: #0056b3;
-        }
+                                        .serial-more {
+                                            background-color: #007bff;
+                                            color: white;
+                                            padding: 2px 6px;
+                                            border-radius: 3px;
+                                            font-size: 10px;
+                                            cursor: pointer;
+                                            border: none;
+                                            transition: background-color 0.3s ease;
+                                        }
 
-        /* Product Code Styling */
-        code {
-            background-color: #f8f9fa;
-            color: #e83e8c;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-size: 12px;
-            font-family: 'Courier New', monospace;
-        }
+                                        .serial-more:hover {
+                                            background-color: #0056b3;
+                                        }
 
-        /* Alert Messages */
-        .alert {
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            border: 1px solid transparent;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
+                                        /* Product Code Styling */
+                                        code {
+                                            background-color: #f8f9fa;
+                                            color: #e83e8c;
+                                            padding: 2px 4px;
+                                            border-radius: 3px;
+                                            font-size: 12px;
+                                            font-family: 'Courier New', monospace;
+                                        }
 
-        .alert-success {
-            color: #155724;
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-        }
+                                        /* Alert Messages */
+                                        .alert {
+                                            padding: 12px 16px;
+                                            margin-bottom: 20px;
+                                            border: 1px solid transparent;
+                                            border-radius: 6px;
+                                            display: flex;
+                                            align-items: center;
+                                            gap: 8px;
+                                            font-size: 14px;
+                                        }
 
-        .alert-error {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-        }
+                                        .alert-success {
+                                            color: #155724;
+                                            background-color: #d4edda;
+                                            border-color: #c3e6cb;
+                                        }
 
-        .alert i {
-            font-size: 16px;
-            flex-shrink: 0;
-        }
+                                        .alert-error {
+                                            color: #721c24;
+                                            background-color: #f8d7da;
+                                            border-color: #f5c6cb;
+                                        }
 
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .info-grid {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
+                                        .alert i {
+                                            font-size: 16px;
+                                            flex-shrink: 0;
+                                        }
 
-            .serials-container {
-                max-width: none;
-            }
+                                        /* Responsive Adjustments */
+                                        @media (max-width: 768px) {
+                                            .info-grid {
+                                                grid-template-columns: 1fr;
+                                                gap: 10px;
+                                            }
 
-            .serials-list {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 2px;
-            }
+                                            .serials-container {
+                                                max-width: none;
+                                            }
 
-            .movement-info-card {
-                padding: 15px;
-            }
+                                            .serials-list {
+                                                flex-direction: column;
+                                                align-items: flex-start;
+                                                gap: 2px;
+                                            }
 
-            .badge {
-                min-width: 60px;
-                font-size: 10px;
-            }
-        }
+                                            .movement-info-card {
+                                                padding: 15px;
+                                            }
 
-        /* Animation for expanding serials */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
+                                            .badge {
+                                                min-width: 60px;
+                                                font-size: 10px;
+                                            }
+                                        }
 
-        .serial-badge:not(.hidden) {
-            animation: fadeIn 0.3s ease-in-out;
-        }
+                                        /* Animation for expanding serials */
+                                        @keyframes fadeIn {
+                                            from {
+                                                opacity: 0;
+                                                transform: scale(0.9);
+                                            }
+                                            to {
+                                                opacity: 1;
+                                                transform: scale(1);
+                                            }
+                                        }
 
-        /* Hover effects */
-        .invoices-table tbody tr:hover .serial-badge {
-            background-color: #e2e6ea;
-            border-color: #adb5bd;
-        }
+                                        .serial-badge:not(.hidden) {
+                                            animation: fadeIn 0.3s ease-in-out;
+                                        }
 
-        .invoices-table tbody tr:hover .badge {
-            opacity: 0.9;
-            transform: scale(1.02);
-        }
+                                        /* Hover effects */
+                                        .invoices-table tbody tr:hover .serial-badge {
+                                            background-color: #e2e6ea;
+                                            border-color: #adb5bd;
+                                        }
 
-    </style>
-    </body>
-</html>
+                                        .invoices-table tbody tr:hover .badge {
+                                            opacity: 0.9;
+                                            transform: scale(1.02);
+                                        }
+                                        .serial-badge.hidden {
+                                            display: none !important;
+                                        }
+
+                                        .serial-more {
+                                            cursor: pointer;
+                                            color: #007bff;
+                                            font-weight: 500;
+                                            padding: 2px 6px;
+                                            border-radius: 3px;
+                                            background: #f8f9fa;
+                                            margin-left: 4px;
+                                        }
+
+                                        .serial-more:hover {
+                                            background: #e9ecef;
+                                            text-decoration: underline;
+                                        }
+
+
+
+                                    </style>
+                                    </body>
+                                    </html>
