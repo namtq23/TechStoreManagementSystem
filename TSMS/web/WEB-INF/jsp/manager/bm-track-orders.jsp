@@ -441,11 +441,13 @@
                                                     </button>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <button class="btn-action view" onclick="viewOrder('${req.movementID}')" 
+                                                    <button class="btn-action view" 
+                                                            onclick="window.location.href = 'view-order-details?id=${req.movementID}'" 
                                                             title="Xem chi tiết">
                                                         <i class="fas fa-eye"></i>
                                                         Xem
                                                     </button>
+
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
