@@ -1,6 +1,5 @@
 package controller;
 
-
 import dao.StockMovementDetailDAO;
 import dao.StockMovementsRequestDAO;
 import java.io.IOException;
@@ -13,9 +12,11 @@ import java.util.List;
 import model.StockMovementDetail;
 import model.StockMovementsRequest;
 
-
 /**
  * Controller để xem chi tiết đơn hàng cho Branch Manager (chế độ read-only)
+ * BM có thể xem:
+ * - Tất cả đơn export (bất kể status)
+ * - Đơn completed/cancelled (bất kỳ loại nào)
  * @author TRIEU NAM
  */
 @WebServlet("/view-order-details")
@@ -110,48 +111,69 @@ public class BMViewOrderDetailsController extends HttpServlet {
                 return;
             }
            
-            // Kiểm tra đơn hàng có phải dành cho chi nhánh này không
-            boolean isBranchOrder = false;
+            // *** KIỂM TRA QUYỀN TRUY CẬP ***
+            String responseStatus = orderInfo.getResponseStatus();
             String movementType = orderInfo.getMovementType();
-           
-            if ("import".equals(movementType)) {
-                // Đơn nhập: kiểm tra ToBranchID
-                if (orderInfo.getToBranchID() != null && orderInfo.getToBranchID().equals(branchId)) {
-                    isBranchOrder = true;
-                }
-            } else if ("export".equals(movementType)) {
-                // Đơn xuất: kiểm tra FromBranchID  
-                if (orderInfo.getFromBranchID() != null && orderInfo.getFromBranchID().equals(branchId)) {
-                    isBranchOrder = true;
-                }
+            boolean canView = false;
+            String accessReason = "";
+
+            // 1. Tất cả đơn export (bất kể status) - chỉ cần có FromBranchID và ToWarehouseID
+            if ("export".equals(movementType) && 
+                orderInfo.getFromBranchID() != null && 
+                orderInfo.getToWarehouseID() != null) {
+                canView = true;
+                accessReason = "Export order with FromBranchID and ToWarehouseID";
             }
-           
-            System.out.println("DEBUG: Movement type = " + movementType + ", isBranchOrder = " + isBranchOrder);
-           
-            if (!isBranchOrder) {
-                System.err.println("DEBUG: Branch check failed for movement type: " + movementType);
-                System.err.println("DEBUG: Expected branchId: " + branchId);
-                System.err.println("DEBUG: FromBranchID: " + orderInfo.getFromBranchID() + ", ToBranchID: " + orderInfo.getToBranchID());
-                request.getSession().setAttribute("errorMessage", "Đơn hàng không thuộc chi nhánh của bạn.");
+            // 2. Đơn completed/cancelled (bất kỳ loại nào)
+            else if ("completed".equals(responseStatus) || "cancelled".equals(responseStatus)) {
+                canView = true;
+                accessReason = "Order is " + responseStatus;
+            }
+
+            if (!canView) {
+                String errorMsg = "";
+                if ("export".equals(movementType)) {
+                    errorMsg = "Đơn export này chưa đủ điều kiện để xem (cần có FromBranchID và ToWarehouseID).";
+                } else {
+                    errorMsg = "Chỉ có thể xem chi tiết đơn xuất (export) hoặc đơn hàng đã hoàn thành/đã hủy.";
+                }
+                
+                System.err.println("DEBUG: Access denied - MovementType: " + movementType + 
+                                 ", Status: " + responseStatus + 
+                                 ", FromBranchID: " + orderInfo.getFromBranchID() +
+                                 ", ToWarehouseID: " + orderInfo.getToWarehouseID());
+                request.getSession().setAttribute("errorMessage", errorMsg);
                 response.sendRedirect("bm-incoming-orders");
                 return;
             }
+
+            System.out.println("DEBUG: Access granted (" + accessReason + "), proceeding to load details...");
            
-            System.out.println("DEBUG: Branch check passed, loading product details...");
+            // Debug serial data trước khi load
+            System.out.println("DEBUG: Debugging serial data for order...");
+            detailDAO.debugSerialDataForView(dbName, movementID);
            
             // Lấy chi tiết sản phẩm với pagination và filter
-            List<StockMovementDetail> orderDetails = detailDAO.getMovementDetailsWithFilters(
+            List<StockMovementDetail> orderDetails = detailDAO.getnewMovementDetailsWithFilters(
                 dbName, movementID, productFilter, status, currentPage, PAGE_SIZE
             );
            
             System.out.println("DEBUG: orderDetails loaded, count = " + (orderDetails != null ? orderDetails.size() : "NULL"));
            
-            // Update scanned count cho từng detail
-            for (StockMovementDetail detail : orderDetails) {
-                if (detail.getSerials() == null) {
-                    detail.setSerials(detailDAO.getSerialsByDetail(dbName, detail.getDetailID()));
+            // Update scanned count cho từng detail với method mới
+            if (orderDetails != null) {
+                for (StockMovementDetail detail : orderDetails) {
+                    if (detail.getSerials() == null) {
+                        // SỬ DỤNG METHOD MỚI cho view orders
+                        detail.setSerials(detailDAO.getSerialsByDetailForView(dbName, detail.getDetailID()));
+                    }
+                    detail.setScanned(detail.getSerials() != null ? detail.getSerials().size() : 0);
+                    
+                    // Debug log cho từng detail
+                    System.out.println("DEBUG: Detail " + detail.getDetailID() + 
+                                     " (" + detail.getProductName() + "): " + 
+                                     detail.getScanned() + " serials found");
                 }
-                detail.setScanned(detail.getSerials() != null ? detail.getSerials().size() : 0);
             }
            
             // Get total count for pagination
@@ -184,6 +206,17 @@ public class BMViewOrderDetailsController extends HttpServlet {
             request.setAttribute("startItem", startItem);
             request.setAttribute("endItem", endItem);
            
+            // Set additional info for JSP
+            request.setAttribute("responseStatus", responseStatus);
+            request.setAttribute("accessReason", accessReason);
+            
+            // Xác định read-only mode: export đang pending/processing có thể edit, còn lại read-only
+            boolean isReadOnly = !("export".equals(movementType) && 
+                                  ("pending".equals(responseStatus) || "processing".equals(responseStatus)));
+            request.setAttribute("isReadOnly", isReadOnly);
+           
+            System.out.println("DEBUG: All attributes set, isReadOnly=" + isReadOnly + ", forwarding to JSP...");
+           
             // Forward đến JSP
             request.getRequestDispatcher("/WEB-INF/jsp/manager/bm-view-order-details.jsp").forward(request, response);
            
@@ -202,7 +235,6 @@ public class BMViewOrderDetailsController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Chuyển hướng POST requests về GET
         doGet(request, response);
     }
    
@@ -211,7 +243,3 @@ public class BMViewOrderDetailsController extends HttpServlet {
         return "Controller xem chi tiết đơn hàng cho Branch Manager";
     }
 }
-
-
-
-

@@ -852,3 +852,25 @@ legend {
     border-radius: 4px;
     margin-top: 10px;
 }
+.btn-action.check {
+     border-radius: 15px;         
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.3s ease;
+
+
+}
+
+
+.btn-action.check:hover {
+    background-color: #e67e22;
+    transform: translateY(-1px);
+}
