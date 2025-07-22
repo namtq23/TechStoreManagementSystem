@@ -246,10 +246,7 @@
                                 </c:choose>
                             </span>
                         </div>
-                        <div class="info-item">
-                            <label>Nguồn:</label>
-                            <span>${orderInfo.fromBranchName}</span>
-                        </div>
+                       
                         <div class="info-item">
                             <label>Ngày tạo:</label>
                             <span>${orderInfo.formattedDate}</span>
@@ -283,10 +280,7 @@
                                 </c:choose>
                             </span>
                         </div>
-                        <div class="info-item">
-                            <label>Tổng giá trị:</label>
-                            <span style="font-weight: 600; color: #28a745;">${orderInfo.formattedTotalAmount}</span>
-                        </div>
+                      
                     </div>
                 </div>
 

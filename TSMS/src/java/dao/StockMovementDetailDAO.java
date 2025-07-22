@@ -419,7 +419,202 @@ public List<ProductDetailSerialNumber> getSerialsByDetail(String dbName, int det
     return serials;
 }
 
+// Method mới chuyên cho view-order-details
+public List<ProductDetailSerialNumber> getSerialsByDetailForView(String dbName, int detailID) {
+    List<ProductDetailSerialNumber> serials = new ArrayList<>();
+    
+    String sql = """
+        SELECT 
+            ProductDetailID,
+            MovementDetailID,
+            SerialNumber, 
+            Status, 
+            OrderID, 
+            BranchID, 
+            WarehouseID,
+            MovementHistory
+        FROM ProductDetailSerialNumber 
+        WHERE MovementDetailID = ? 
+           OR MovementHistory = CAST(? AS NVARCHAR)
+           OR MovementHistory LIKE '%,' + CAST(? AS NVARCHAR) + ',%'
+           OR MovementHistory LIKE CAST(? AS NVARCHAR) + ',%'
+           OR MovementHistory LIKE '%,' + CAST(? AS NVARCHAR)
+        ORDER BY SerialNumber
+    """;
+    
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        
+        ps.setInt(1, detailID);      // MovementDetailID exact match
+        ps.setInt(2, detailID);      // MovementHistory exact match
+        ps.setInt(3, detailID);      // Middle of comma-separated list
+        ps.setInt(4, detailID);      // Start of comma-separated list
+        ps.setInt(5, detailID);      // End of comma-separated list
+        
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                ProductDetailSerialNumber serial = new ProductDetailSerialNumber();
+                serial.setProductDetailID(rs.getInt("ProductDetailID"));
+                serial.setMovementDetailID(rs.getInt("MovementDetailID"));
+                serial.setSerialNumber(rs.getString("SerialNumber"));
+                serial.setStatus(rs.getString("Status"));
+                serial.setOrderID((Integer) rs.getObject("OrderID"));
+                serial.setBranchID((Integer) rs.getObject("BranchID"));
+                serial.setWarehouseID((Integer) rs.getObject("WarehouseID"));
+                serial.setMovementHistory(rs.getString("MovementHistory"));
+                serials.add(serial);
+            }
+        }
+        
+    } catch (SQLException e) {
+        System.err.println("Error in getSerialsByDetailForView for detailID=" + detailID + ": " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    // Debug log
+    System.out.println("DEBUG: getSerialsByDetailForView(" + detailID + ") returned " + serials.size() + " serials");
+    
+    return serials;
+}
 
+// Method debug để kiểm tra dữ liệu cho view
+public void debugSerialDataForView(String dbName, int movementID) {
+    String sql = """
+        SELECT 
+            smd.MovementDetailID,
+            smd.ProductDetailID,
+            pd.ProductCode,
+            p.ProductName,
+            smd.Quantity,
+            smd.QuantityScanned,
+            COUNT(psn.SerialNumber) as SerialCount,
+            STRING_AGG(psn.SerialNumber, ', ') as SerialList
+        FROM StockMovementDetail smd
+        INNER JOIN ProductDetails pd ON smd.ProductDetailID = pd.ProductDetailID  
+        INNER JOIN Products p ON pd.ProductID = p.ProductID
+        LEFT JOIN ProductDetailSerialNumber psn ON (
+            smd.MovementDetailID = psn.MovementDetailID 
+            OR psn.MovementHistory LIKE '%' + CAST(smd.MovementDetailID AS NVARCHAR) + '%'
+        )
+        WHERE smd.MovementID = ?
+        GROUP BY smd.MovementDetailID, smd.ProductDetailID, pd.ProductCode, p.ProductName, smd.Quantity, smd.QuantityScanned
+        ORDER BY smd.MovementDetailID
+    """;
+    
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        
+        ps.setInt(1, movementID);
+        
+        try (ResultSet rs = ps.executeQuery()) {
+            System.out.println("=== DEBUG SERIAL DATA FOR VIEW - MOVEMENT " + movementID + " ===");
+            while (rs.next()) {
+                System.out.println("MovementDetailID: " + rs.getInt("MovementDetailID"));
+                System.out.println("ProductCode: " + rs.getString("ProductCode"));
+                System.out.println("ProductName: " + rs.getString("ProductName"));
+                System.out.println("Quantity: " + rs.getInt("Quantity"));
+                System.out.println("QuantityScanned: " + rs.getInt("QuantityScanned"));
+                System.out.println("Serial Count Found: " + rs.getInt("SerialCount"));
+                System.out.println("Serials: " + rs.getString("SerialList"));
+                System.out.println("---");
+            }
+            System.out.println("=== END DEBUG ===");
+        }
+        
+    } catch (SQLException e) {
+        System.err.println("Error in debugSerialDataForView: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
+public List<StockMovementDetail> getnewMovementDetailsWithFilters(String dbName, int movementID, 
+                                                               String productFilter, String status, 
+                                                               int page, int pageSize) {
+    List<StockMovementDetail> details = new ArrayList<>();
+    int offset = (page - 1) * pageSize;
+    
+    StringBuilder sql = new StringBuilder();
+    sql.append("""
+        SELECT 
+            smd.MovementDetailID,
+            smd.MovementID,
+            smd.ProductDetailID,
+            smd.Quantity,
+            smd.QuantityScanned,
+            pd.ProductCode,
+            p.ProductID,
+            p.ProductName,
+            c.CategoryName
+        FROM StockMovementDetail smd
+        INNER JOIN ProductDetails pd ON smd.ProductDetailID = pd.ProductDetailID
+        INNER JOIN Products p ON pd.ProductID = p.ProductID
+        LEFT JOIN Categories c ON p.CategoryID = c.CategoryID
+        WHERE smd.MovementID = ?
+    """);
+
+    List<Object> params = new ArrayList<>();
+    params.add(movementID);
+    
+    // Filter by product name
+    if (productFilter != null && !productFilter.trim().isEmpty()) {
+        sql.append(" AND p.ProductName LIKE ?");
+        params.add("%" + productFilter + "%");
+    }
+    
+    // Filter by status (completion)
+    if (status != null && !status.trim().isEmpty()) {
+        switch (status) {
+            case "completed":
+                sql.append(" AND smd.QuantityScanned >= smd.Quantity");
+                break;
+            case "pending":
+                sql.append(" AND smd.QuantityScanned = 0");
+                break;
+            case "processing":
+                sql.append(" AND smd.QuantityScanned > 0 AND smd.QuantityScanned < smd.Quantity");
+                break;
+        }
+    }
+    
+    sql.append(" ORDER BY p.ProductName OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+    params.add(offset);
+    params.add(pageSize);
+    
+    try (Connection conn = DBUtil.getConnectionTo(dbName);
+         PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
+        
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                StockMovementDetail detail = new StockMovementDetail();
+                detail.setDetailID(rs.getInt("MovementDetailID"));
+                detail.setRequestID(rs.getInt("MovementID"));
+                detail.setProductDetailID(rs.getInt("ProductDetailID"));
+                detail.setProductID(rs.getInt("ProductID"));
+                detail.setProductCode(rs.getString("ProductCode"));
+                detail.setProductName(rs.getString("ProductName"));
+                detail.setQuantity(rs.getInt("Quantity"));
+                detail.setQuantityScanned(rs.getInt("QuantityScanned"));
+                
+                // SỬ DỤNG METHOD MỚI cho view-order-details
+                List<ProductDetailSerialNumber> serials = getSerialsByDetailForView(dbName, detail.getDetailID());
+                detail.setSerials(serials);
+                detail.setScanned(serials.size());
+                
+                details.add(detail);
+            }
+        }
+        
+    } catch (SQLException e) {
+        System.err.println("Error in getMovementDetailsWithFilters: " + e.getMessage());
+        e.printStackTrace();
+    }
+    
+    return details;
+}
 
 
 

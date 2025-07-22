@@ -89,24 +89,48 @@
             }
 
             .btn-action.completed {
-                background-color: #28a745;
-                color: white;
-                cursor: not-allowed;
-                opacity: 0.8;
+                background-color: #28a745 !important;
+                color: white !important;
+                cursor: pointer !important;
+                opacity: 1 !important;
+                border: 1px solid #28a745 !important;
+            }
+
+            .btn-action.completed:hover {
+                background-color: #218838 !important;
+                transform: translateY(-1px);
             }
 
             .btn-action.cancelled {
-                background-color: #dc3545;
-                color: white;
-                cursor: not-allowed;
-                opacity: 0.8;
+                background-color: #dc3545 !important;
+                color: white !important;
+                cursor: pointer !important;
+                opacity: 1 !important;
+                border: 1px solid #dc3545 !important;
             }
 
-            .btn-action.completed:hover,
             .btn-action.cancelled:hover {
-                opacity: 0.8;
-                transform: none;
+                background-color: #c82333 !important;
+                transform: translateY(-1px);
             }
+
+            .btn-action.check {
+
+                background-color: #3498db;
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 15px;
+                cursor: pointer;
+                font-size: 12px;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                transition: all 0.3s ease;
+
+
+            }
+
         </style>
     </head>
     <body>
@@ -420,22 +444,21 @@
                                         <div class="action-buttons">
                                             <c:choose>
                                                 <c:when test="${req.responseStatus eq 'transfer'}">
-                                                    <button class="btn-action receive" onclick="confirmReceive('${req.movementID}')" 
-                                                            title="Xác nhận đã nhận hàng">
-                                                        <i class="fas fa-check"></i>
-                                                        Nhận hàng
+                                                    <button class="btn-action check" onclick="window.location.href = 'bm-receive-check?id=${req.movementID}'"
+                                                            title="Kiểm tra và quét serial"> 
+                                                        Xác nhận
                                                     </button>
                                                 </c:when>
                                                 <c:when test="${req.responseStatus eq 'completed'}">
-                                                    <button class="btn-action completed" disabled
-                                                            title="Đơn hàng đã hoàn thành">
-                                                        <i class="fas fa-check-circle"></i>
+                                                    <button class="btn-action completed" 
+                                                            title="Đơn hàng đã hoàn thành" onclick="window.location.href = 'view-order-details?id=${req.movementID}'">
+                                                        <i class="fas fa-eye"></i>
                                                         Hoàn thành
                                                     </button>
                                                 </c:when>
                                                 <c:when test="${req.responseStatus eq 'cancelled'}">
-                                                    <button class="btn-action cancelled" disabled
-                                                            title="Đơn hàng đã bị hủy">
+                                                    <button class="btn-action cancelled" 
+                                                            title="Đơn hàng đã bị hủy" onclick="window.location.href = 'view-order-details?id=${req.movementID}'">
                                                         <i class="fas fa-times-circle"></i>
                                                         Đã hủy
                                                     </button>
