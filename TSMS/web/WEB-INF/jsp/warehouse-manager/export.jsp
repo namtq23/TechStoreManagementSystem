@@ -191,7 +191,7 @@
                                                     <button class="btn-action process" onclick="editOrder('${req.movementID}', '${req.movementType}')">Tiếp tục xuất</button>
                                                 </c:when>
                                                 <c:when test="${req.responseStatus eq 'transfer'}">
-                                                    <button class="btn-action transfer" disabled>Đang vận chuyển</button>
+                                                    <button class="btn-action transfer" onclick="viewOrder('${req.movementID}')" >Đang vận chuyển</button>
                                                 </c:when>
                                                 <c:when test="${req.responseStatus eq 'completed'}">
                                                     <button class="btn-action view" onclick="viewOrder('${req.movementID}')">Xem</button>
