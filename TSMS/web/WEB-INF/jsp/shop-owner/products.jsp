@@ -18,7 +18,7 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     </head>
     <body>
-             <header class="header">
+        <header class="header">
             <div class="header-container">
                 <div class="logo">
                     <a href="so-overview" class="logo">
@@ -134,76 +134,76 @@
                     </div>
 
                     <div class="filter-section">
-<!--                        <div class="filter-header">
-                            <h3>Tồn kho</h3>
-                        </div>
-                        <div class="filter-content">
-                            <label class="radio-item">
-                                <input type="radio" name="inventory" value="all"
-                                       <c:if test="${param.inventory == 'all' || param.inventory == null}">checked</c:if>>
-                                       <span class="radio-mark"></span>
-                                       Tất cả
-                                </label>
-                                <label class="radio-item">
-                                    <input type="radio" name="inventory" value="in-stock"
-                                    <c:if test="${param.inventory == 'in-stock'}">checked</c:if>>
-                                    <span class="radio-mark"></span>
-                                    Còn hàng trong kho
-                                </label>
-                                <label class="radio-item">
-                                    <input type="radio" name="inventory" value="out-stock"
-                                    <c:if test="${param.inventory == 'out-stock'}">checked</c:if>>
-                                    <span class="radio-mark"></span>
-                                    Hết hàng trong kho
-                                </label>
-                            </div>
-                        </div>-->
+                        <!--                        <div class="filter-header">
+                                                    <h3>Tồn kho</h3>
+                                                </div>
+                                                <div class="filter-content">
+                                                    <label class="radio-item">
+                                                        <input type="radio" name="inventory" value="all"
+                        <c:if test="${param.inventory == 'all' || param.inventory == null}">checked</c:if>>
+                        <span class="radio-mark"></span>
+                        Tất cả
+                 </label>
+                 <label class="radio-item">
+                     <input type="radio" name="inventory" value="in-stock"
+                        <c:if test="${param.inventory == 'in-stock'}">checked</c:if>>
+                        <span class="radio-mark"></span>
+                        Còn hàng trong kho
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="inventory" value="out-stock"
+                        <c:if test="${param.inventory == 'out-stock'}">checked</c:if>>
+                        <span class="radio-mark"></span>
+                        Hết hàng trong kho
+                    </label>
+                </div>
+            </div>-->
 
-                        <!-- Price Range Filter -->
+                            <!-- Price Range Filter -->
+                            <div class="filter-section">
+                                <div class="filter-header">
+                                    <h3>Khoảng giá</h3>
+                                </div>
+                                <div class="price-range">
+                                    <input type="number" name="minPrice" placeholder="Giá từ" min="0" class="price-input" value="${param.minPrice}">
+                                <input type="number" name="maxPrice" placeholder="Giá đến" min="0" class="price-input" value="${param.maxPrice}">
+                            </div>
+                        </div>
+
+                        <!-- Status Filter -->
                         <div class="filter-section">
                             <div class="filter-header">
-                                <h3>Khoảng giá</h3>
+                                <h3>Trạng thái</h3>
                             </div>
-                            <div class="price-range">
-                                <input type="number" name="minPrice" placeholder="Giá từ" min="0" class="price-input" value="${param.minPrice}">
-                            <input type="number" name="maxPrice" placeholder="Giá đến" min="0" class="price-input" value="${param.maxPrice}">
-                        </div>
-                    </div>
-
-                    <!-- Status Filter -->
-                    <div class="filter-section">
-                        <div class="filter-header">
-                            <h3>Trạng thái</h3>
-                        </div>
-                        <div class="filter-content">
-                            <label class="radio-item">
-                                <input type="radio" name="status" value="all" <c:if test="${param.status == 'all' || param.status == null}">checked</c:if>>
-                                    <span class="radio-mark"></span>
-                                    Tất cả
-                                </label>
+                            <div class="filter-content">
                                 <label class="radio-item">
-                                    <input type="radio" name="status" value="active" <c:if test="${param.status == 'active'}">checked</c:if>>
-                                    <span class="radio-mark"></span>
-                                    Đang bán
-                                </label>
-                                <label class="radio-item">
-                                    <input type="radio" name="status" value="inactive" <c:if test="${param.status == 'inactive'}">checked</c:if>>
-                                    <span class="radio-mark"></span>
-                                    Ngừng bán
-                                </label>
+                                    <input type="radio" name="status" value="all" <c:if test="${param.status == 'all' || param.status == null}">checked</c:if>>
+                                        <span class="radio-mark"></span>
+                                        Tất cả
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="status" value="active" <c:if test="${param.status == 'active'}">checked</c:if>>
+                                        <span class="radio-mark"></span>
+                                        Đang bán
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="status" value="inactive" <c:if test="${param.status == 'inactive'}">checked</c:if>>
+                                        <span class="radio-mark"></span>
+                                        Ngừng bán
+                                    </label>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="filter-actions">
-                            <a href="so-products?page=1" class="btn-clear">
-                                <i class="fas fa-eraser"></i>
-                                Xóa bộ lọc
-                            </a>
-                            <button type="submit" class="btn-apply">
-                                <i class="fas fa-filter"></i>
-                                Áp dụng lọc
-                            </button>
-                        </div>
+                            <div class="filter-actions">
+                                <a href="so-products?page=1" class="btn-clear">
+                                    <i class="fas fa-eraser"></i>
+                                    Xóa bộ lọc
+                                </a>
+                                <button type="submit" class="btn-apply">
+                                    <i class="fas fa-filter"></i>
+                                    Áp dụng lọc
+                                </button>
+                            </div>
                     </form>
                 </aside>
 

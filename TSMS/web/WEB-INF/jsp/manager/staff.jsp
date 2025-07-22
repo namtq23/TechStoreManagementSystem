@@ -199,7 +199,7 @@
                                 <th>Chi nhánh/Kho</th>
                                 <th>Số điện thoại</th>
                                 <th>Trạng thái</th>
-                                <th style="justify-content: center; text-align: center">Thao tác</th>
+                                <!--<th style="justify-content: center; text-align: center">Thao tác</th>-->
                             </tr>
                         </thead>
                         <tbody>
@@ -218,13 +218,6 @@
                                 <td><%=staff.getBranchName() != null ? staff.getBranchName() : (staff.getWarehouseName() != null ? staff.getWarehouseName() : "")%></td>
                                 <td><%=staff.getPhone() != null ? staff.getPhone() : ""%></td>
                                 <td><%=staff.getIsActive() == 1 ? "Đang làm việc" : "Nghỉ việc"%></td>
-                                <td class="actions-col" style="justify-content: center; display: flex; gap: 5px">
-                                    <form action="bm-staff" method="get" style="display:inline;">
-                                        <input type="hidden" name="action" value="view"/>
-                                        <input type="hidden" name="userID" value="<%=staff.getUserID()%>"/>
-                                        <button type="submit" class="btn btn-success" style="text-decoration: none; width: 79px; background:#2196F3">Chi tiết</button>
-                                    </form>
-                                </td>
                             </tr>
                             <%
                                     }

@@ -375,27 +375,31 @@
                     </a>
                 </div>
                 <nav class="main-nav">
-                    <a href="so-overview" class="nav-item">
+                    <a href="so-overview" class="nav-item ">
                         <i class="fas fa-chart-line"></i>
                         Tổng quan
                     </a>
+
                     <a href="so-products?page=1" class="nav-item active">
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
+
                     <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
+                        <a href="#" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
                             Giao dịch
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">Đơn hàng</a>
-                            <a href="#" class="dropdown-item">Yêu cầu nhập hàng</a>
+                            <a href="so-orders" class="dropdown-item">Đơn hàng</a>
+                            <a href="import-request" class="dropdown-item">Tạo đơn nhập hàng</a>
+                            <a href="so-track-movements" class="dropdown-item">Theo dõi nhập/xuất</a>
                         </div>
                     </div>
+
                     <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
+                        <a href="#" class="dropdown-toggle">
                             <i class="fas fa-handshake"></i>
                             Đối tác
                             <i class="fas fa-caret-down"></i>
@@ -405,31 +409,38 @@
                             <a href="so-supplier" class="dropdown-item">Nhà cung cấp</a>
                         </div>
                     </div>
+
                     <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
+                        <a href="#" class="dropdown-toggle">
                             <i class="fas fa-users"></i>
                             Nhân viên
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="#" class="dropdown-item">Hoa hồng</a>
+                            <a href="so-commission" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
+
+                    <a href="so-promotions" class="nav-item">
+                        <i class="fas fa-gift"></i>
+                        Khuyến mãi
+                    </a>
+
                     <div class="nav-item dropdown">
-                        <a href="" class="dropdown-toggle">
+                        <a href="#" class="dropdown-toggle">
                             <i class="fas fa-chart-bar"></i>
                             Báo cáo
                             <i class="fas fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">Tài chính</a>
-                            <a href="#" class="dropdown-item">Đật hàng</a>
-                            <a href="#" class="dropdown-item">Hàng hoá</a>
-                            <a href="#" class="dropdown-item">Khách hàng</a>
+                            <a href="so-invoices?reportType=income" class="dropdown-item">Doanh Thu thuần</a>
+                            <a href="so-outcome" class="dropdown-item">Khoảng chi</a>
                         </div>
                     </div>
+
                 </nav>
+
                 <div class="header-right">
                     <div class="user-dropdown">
                         <a href="#" class="user-icon gradient" id="dropdownToggle">
