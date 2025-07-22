@@ -610,14 +610,9 @@
                 <div class="summary-card">
                     <h3>Chi tiết hóa đơn</h3>
 
-                    <div class="summary-item">
-                        <span>Gói 6 tháng</span>
-                        <span>1,200,000đ</span>
-                    </div>
-
                     <div class="summary-item total">
                         <span>Tổng tiền thanh toán</span>
-                        <span>1,200,000đ</span>
+                        <span><fmt:formatNumber value="${amount}" type="number" groupingUsed="true"/>đ</span>
                     </div>
 
                     <div class="confirmation-link">

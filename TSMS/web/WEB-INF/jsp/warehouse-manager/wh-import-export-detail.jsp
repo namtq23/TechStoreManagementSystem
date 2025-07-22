@@ -116,7 +116,7 @@
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="wh-import" class="logo">
+                    <a href="wh-products?page=1" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
@@ -126,21 +126,20 @@
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
+
                     <a href="wh-import" class="nav-item active">
                         <i class="fa-solid fa-download"></i>
                         Nhập hàng
                     </a>
-                    <a href="wh-export" class="nav-item">
+
+                    <a href="" class="nav-item">
                         <i class="fa-solid fa-upload"></i>
                         Xuất hàng
                     </a>
-                    <a href="wh-notifications" class="nav-item">
-                        <i class="fa-solid fa-bell"></i>
-                        Thông báo
-                    </a>
-                    <a href="wh-reports" class="nav-item">
-                        <i class="fas fa-chart-bar"></i>
-                        Báo cáo
+
+                    <a href="" class="nav-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        Tạo thông báo
                     </a>
                 </nav>
 
@@ -150,7 +149,7 @@
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="wh-profile" class="dropdown-item">Thông tin cá nhân</a>
+                            <a href="staff-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      

@@ -542,7 +542,7 @@
 
                     <a href="" class="nav-item">
                         <i class="fas fa-exchange-alt"></i>
-                        Yêu cầu nhập hàng
+                        Tạo thông báo
                     </a>
                 </nav>
 
