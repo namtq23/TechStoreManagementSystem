@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.ShopOwner;
 import org.mindrot.jbcrypt.BCrypt;
+import util.Validate;
 
 /**
  *
@@ -82,6 +83,12 @@ public class SOChangePasswordController extends HttpServlet {
 
             if (newPassword.equals(curPassword)) {
                 req.setAttribute("error", "Mật khẩu mới không được trùng với mật khẩu hiện tại!");
+                req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/so-change-password.jsp").forward(req, resp);
+                return;
+            }
+
+            if (!Validate.isValidPassword(newPassword)) {
+                req.setAttribute("error", "Mật khẩu cần trên 8 chữ số và có ít nhất 1 chữ cái in hoa!");
                 req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/so-change-password.jsp").forward(req, resp);
                 return;
             }

@@ -54,10 +54,6 @@ public class Validate {
         return email != null && email.matches(emailRegex);
     }
 
-    public static boolean isValidPassword(String password) {
-        return password != null && password.length() >= 8;
-    }
-
     public static boolean isValidPhone(String phone) {
         return phone != null && phone.matches("0\\d{9}");
     }
@@ -235,12 +231,28 @@ public class Validate {
             return days + " ngày trước";
         }
     }
-    
+
     //Validate: Serinumber
     private static final String SERIAL_REGEX = "^[A-Z0-9\\-]{5,30}$";
-     public static boolean validateSerialFormat(String serial) {
-        if (serial == null) return false;
+    public static boolean validateSerialFormat(String serial) {
+        if (serial == null) {
+            return false;
+        }
         return serial.toUpperCase().matches(SERIAL_REGEX);
+    }
+
+    public static boolean isValidPassword(String password) {
+        if (password == null || password.length() <= 8) {
+            return false;
+        }
+
+        for (char c : password.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static void main(String[] args) {

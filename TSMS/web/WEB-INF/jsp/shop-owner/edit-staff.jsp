@@ -266,7 +266,6 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="so-commission" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
                     <a href="so-promotions" class="nav-item">

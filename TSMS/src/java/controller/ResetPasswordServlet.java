@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.ShopOwner;
 import org.mindrot.jbcrypt.BCrypt;
+import util.Validate;
 
 /**
  *
@@ -54,6 +55,12 @@ public class ResetPasswordServlet extends HttpServlet {
 
             if (BCrypt.checkpw(newPassword, so.getPassword())) {
                 request.setAttribute("error", "Mật khẩu mới trùng với mật khẩu cũ!");
+                request.getRequestDispatcher("/WEB-INF/jsp/common/reset-password.jsp").forward(request, response);
+                return;
+            }
+
+            if (!Validate.isValidPassword(newPassword)) {
+                request.setAttribute("error", "Mật khẩu cần trên 8 chữ số và có ít nhất 1 chữ cái in hoa!");
                 request.getRequestDispatcher("/WEB-INF/jsp/common/reset-password.jsp").forward(request, response);
                 return;
             }

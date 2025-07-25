@@ -86,7 +86,7 @@ public class BMSellInStoreController extends HttpServlet {
             int totalProducts = p.countProductsByBranchId(dbName, branchId);
             int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
 
-            List<UserDTO> sale = SalesDAO.getAllSalesStaff("DTB_TechStore");
+            List<UserDTO> sale = SalesDAO.getAllSalesStaff(dbName);
 
             req.setAttribute("currentPage", page);
             req.setAttribute("totalPages", totalPages);

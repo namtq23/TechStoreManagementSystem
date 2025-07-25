@@ -70,7 +70,6 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="so-commission" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
 
@@ -252,10 +251,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% 
+                            <%
                                 List<ProductDetailDTO> products = (List<ProductDetailDTO>) request.getAttribute("products");
-                                if (products != null) {
-                                for (ProductDetailDTO product : products) {
+                                if (products != null && !products.isEmpty()) {
+                                    for (ProductDetailDTO product : products) {
                             %>
                             <tr class="product-row">
                                 <td><img src="<%= product.getImageURL() %>" alt="product-img"/></td>
@@ -287,12 +286,14 @@
                                     </div>
                                 </td>
                             </tr>
-                            <% 
-                                    } 
-                                } else { 
+                            <%
+                                    }
+                                } else {
                             %>
                             <tr><td colspan="7">Không có dữ liệu sản phẩm.</td></tr>
-                            <% } %>
+                            <%
+                                }
+                            %>
                         </tbody>
                     </table>
                 </div>
