@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import model.ShopOwner;
 import model.User;
 import org.mindrot.jbcrypt.BCrypt;
+import util.Validate;
 
 /**
  *
@@ -94,6 +95,22 @@ public class StaffChangePasswordController extends HttpServlet {
             String newPassword = req.getParameter("newPassword");
             String confirm = req.getParameter("confirmPassword");
             User u = UserDAO.getUserById(userId, dbName);
+
+            if (!Validate.isValidPassword(newPassword)) {
+                req.setAttribute("error", "Mật khẩu cần trên 8 chữ số và có ít nhất 1 chữ cái in hoa!");
+                switch (roleId) {
+                    case 1:
+                        req.getRequestDispatcher("/WEB-INF/jsp/manager/bm-change-password.jsp").forward(req, resp);
+                        break;
+                    case 2:
+                        req.getRequestDispatcher("/WEB-INF/jsp/sale/sale-change-password.jsp").forward(req, resp);
+                        break;
+                    case 3:
+                        req.getRequestDispatcher("/WEB-INF/jsp/warehouse-manager/wh-change-password.jsp").forward(req, resp);
+                        break;
+                }
+                return;
+            }
 
             if (!BCrypt.checkpw(curPassword, u.getPassword())) {
                 req.setAttribute("error", "Mật khẩu hiện tại không chính xác!");
