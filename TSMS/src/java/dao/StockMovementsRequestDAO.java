@@ -332,6 +332,7 @@ public List<StockMovementsRequest> getExportRequestsWithFilter(String dbName, St
             smr.MovementID,
             smr.FromBranchID,
             smr.FromWarehouseID,
+            smr.FromSupplierID,
             smr.ToBranchID,
             smr.ToWarehouseID,
             smr.MovementType,
@@ -341,6 +342,7 @@ public List<StockMovementsRequest> getExportRequestsWithFilter(String dbName, St
             CASE 
                 WHEN smr.FromBranchID IS NOT NULL THEN b1.BranchName
                 WHEN smr.FromWarehouseID IS NOT NULL THEN w1.WarehouseName
+                WHEN smr.FromSupplierID IS NOT NULL THEN s.SupplierName
                 ELSE 'Không xác định'
             END AS FromName,
             CASE 
@@ -356,6 +358,7 @@ public List<StockMovementsRequest> getExportRequestsWithFilter(String dbName, St
         LEFT JOIN Branches b2 ON smr.ToBranchID = b2.BranchID
         LEFT JOIN Warehouses w1 ON smr.FromWarehouseID = w1.WarehouseID
         LEFT JOIN Warehouses w2 ON smr.ToWarehouseID = w2.WarehouseID
+        LEFT JOIN Suppliers s ON smr.FromSupplierID = s.SupplierID
         LEFT JOIN Users u ON smr.CreatedBy = u.UserID
         LEFT JOIN StockMovementDetail smd ON smr.MovementID = smd.MovementID
         LEFT JOIN ProductDetails pd ON smd.ProductDetailID = pd.ProductDetailID
@@ -367,8 +370,11 @@ public List<StockMovementsRequest> getExportRequestsWithFilter(String dbName, St
         ) smrsp ON smr.MovementID = smrsp.MovementID AND smrsp.rn = 1
         WHERE smr.MovementType = 'export'
           AND (
-              (smr.ToWarehouseID = ? AND smr.FromWarehouseID IS NULL) OR  
-              (smr.FromWarehouseID = ? AND smrsp.ResponseStatus = 'transfer')
+              -- Export orders TO this warehouse (from any source)
+              smr.ToWarehouseID = ? OR
+              
+              -- Export orders FROM this warehouse (all valid statuses except cancelled)
+              (smr.FromWarehouseID = ? AND COALESCE(smrsp.ResponseStatus, 'pending') IN ('pending', 'processing', 'transfer', 'completed'))
           )
     """);
 
@@ -396,9 +402,9 @@ public List<StockMovementsRequest> getExportRequestsWithFilter(String dbName, St
 
     sql.append("""
         GROUP BY 
-            smr.MovementID, smr.FromBranchID, smr.FromWarehouseID, smr.ToBranchID, smr.ToWarehouseID,
+            smr.MovementID, smr.FromBranchID, smr.FromWarehouseID, smr.FromSupplierID, smr.ToBranchID, smr.ToWarehouseID,
             smr.MovementType, smr.CreatedAt, smr.CreatedBy, smr.Note,
-            b1.BranchName, b2.BranchName, w1.WarehouseName, w2.WarehouseName, u.FullName,
+            b1.BranchName, b2.BranchName, w1.WarehouseName, w2.WarehouseName, s.SupplierName, u.FullName,
             smrsp.ResponseStatus
     """);
 
@@ -425,6 +431,7 @@ public List<StockMovementsRequest> getExportRequestsWithFilter(String dbName, St
                 smr.setMovementID(rs.getInt("MovementID"));
                 smr.setFromBranchID(rs.getObject("FromBranchID") != null ? rs.getInt("FromBranchID") : null);
                 smr.setFromWarehouseID(rs.getObject("FromWarehouseID") != null ? rs.getInt("FromWarehouseID") : null);
+                smr.setFromSupplierID(rs.getObject("FromSupplierID") != null ? rs.getInt("FromSupplierID") : null);
                 smr.setToBranchID(rs.getObject("ToBranchID") != null ? rs.getInt("ToBranchID") : null);
                 smr.setToWarehouseID(rs.getObject("ToWarehouseID") != null ? rs.getInt("ToWarehouseID") : null);
                 smr.setMovementType(rs.getString("MovementType"));
@@ -452,6 +459,7 @@ public List<StockMovementsRequest> getExportRequestsWithFilter(String dbName, St
     return list;
 }
 
+
 // Method count cho pagination export
 public int getExportRequestsCount(String dbName, String warehouseId, 
                                  String fromDate, String toDate, String branchId, String status) {
@@ -466,8 +474,11 @@ public int getExportRequestsCount(String dbName, String warehouseId,
         ) smrsp ON smr.MovementID = smrsp.MovementID AND smrsp.rn = 1
         WHERE smr.MovementType = 'export'
           AND (
-              (smr.ToWarehouseID = ? AND smr.FromWarehouseID IS NULL) OR  
-              (smr.FromWarehouseID = ? AND smrsp.ResponseStatus = 'transfer')
+              -- Export orders TO this warehouse
+              smr.ToWarehouseID = ? OR
+              
+              -- Export orders FROM this warehouse (all valid statuses except cancelled)
+              (smr.FromWarehouseID = ? AND COALESCE(smrsp.ResponseStatus, 'pending') IN ('pending', 'processing', 'transfer', 'completed'))
           )
     """);
 
@@ -519,6 +530,7 @@ public int getExportRequestsCount(String dbName, String warehouseId,
 
     return 0;
 }
+
 
 
 

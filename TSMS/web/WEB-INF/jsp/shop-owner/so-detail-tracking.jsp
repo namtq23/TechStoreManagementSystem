@@ -179,25 +179,49 @@
                 </c:if>
 
                 <!-- Page Header -->
-                <div class="page-header">
-                    <div>
-                        <h1>Chi tiết đơn 
-                            <c:choose>
-                                <c:when test="${movementType eq 'export'}">xuất</c:when>
-                                <c:otherwise>nhập</c:otherwise>
-                            </c:choose>
-                            hàng #${movementID}
-                        </h1>
-                        <p class="page-subtitle">Xem chi tiết các sản phẩm trong đơn hàng</p>
-                    </div>
+             <div class="page-header">
+    <div class="page-title-section">
+        <h1>Chi tiết đơn 
+            <c:choose>
+                <c:when test="${movementType eq 'export'}">xuất</c:when>
+                <c:otherwise>nhập</c:otherwise>
+            </c:choose>
+            hàng #${movementID}
+        </h1>
+        <p class="page-subtitle">Xem chi tiết các sản phẩm trong đơn hàng</p>
+    </div>
 
-                    <div class="header-actions">
-                        <button class="btn btn-secondary" onclick="window.location.href = 'so-track-movements'">
-                            <i class="fas fa-arrow-left"></i>
-                            Quay lại
-                        </button>
-                    </div>
-                </div>
+    <div class="header-actions">
+        <button class="btn btn-back" onclick="window.location.href = 'so-track-movements'">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại
+        </button>
+        
+        <c:if test="${movement.responseStatus eq 'pending' || movement.responseStatus eq 'processing' || movement.responseStatus eq 'transfer'}">
+            <div class="cancel-order-section">
+                <c:choose>
+                    <c:when test="${movementType eq 'export' or movementType eq 'Export'}">
+                        <a href="cancel-stock?id=${movementID}&movementType=export" 
+                           class="btn btn-cancel btn-cancel-export"
+                           onclick="return confirm('Bạn có chắc chắn muốn hủy đơn xuất này?')">
+                            <i class="fas fa-times"></i>
+                            Hủy đơn xuất
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="cancel-stock?id=${movementID}&movementType=import" 
+                           class="btn btn-cancel btn-cancel-import"
+                           onclick="return confirm('Bạn có chắc chắn muốn hủy đơn nhập này?')">
+                            <i class="fas fa-times"></i>
+                            Hủy đơn nhập
+                        </a>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </c:if>
+    </div>
+</div>
+
 
                 <!-- Movement Info -->
                 <div class="movement-info-card">
@@ -463,109 +487,109 @@
             </main>
         </div>
 
-       <script>
-    function changeItemsPerPage() {
-        const select = document.getElementById('itemsPerPageSelect');
-        const newItemsPerPage = select.value;
-        const urlParams = new URLSearchParams(window.location.search);
-        urlParams.set('itemsPerPage', newItemsPerPage);
-        urlParams.set('page', '1'); // Reset to page 1
+        <script>
+            function changeItemsPerPage() {
+                const select = document.getElementById('itemsPerPageSelect');
+                const newItemsPerPage = select.value;
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('itemsPerPage', newItemsPerPage);
+                urlParams.set('page', '1'); // Reset to page 1
 
-        window.location.href = 'so-detail-tracking?' + urlParams.toString();
-    }
+                window.location.href = 'so-detail-tracking?' + urlParams.toString();
+            }
 
-    function resetFilters() {
-        const urlParams = new URLSearchParams();
-        urlParams.set('id', '${movementID}');
-        window.location.href = 'so-detail-tracking?' + urlParams.toString();
-    }
+            function resetFilters() {
+                const urlParams = new URLSearchParams();
+                urlParams.set('id', '${movementID}');
+                window.location.href = 'so-detail-tracking?' + urlParams.toString();
+            }
 
-    function showMoreSerials(element) {
-        console.log('showMoreSerials được gọi');
-        console.log('Element clicked:', element);
+            function showMoreSerials(element) {
+                console.log('showMoreSerials được gọi');
+                console.log('Element clicked:', element);
 
-        // Tìm container chứa các serial
-        const serialsList = element.parentElement;
-        console.log('Container:', serialsList);
+                // Tìm container chứa các serial
+                const serialsList = element.parentElement;
+                console.log('Container:', serialsList);
 
-        // Debug: In ra tất cả elements trong container
-        const allElements = serialsList.children;
-        console.log('Tất cả elements trong container:', allElements.length);
-        for (let i = 0; i < allElements.length; i++) {
-            console.log('Element', i, ':', allElements[i].className, allElements[i].textContent.trim());
-        }
-
-        // Tìm tất cả serial bị ẩn (có class 'hidden')
-        const hiddenSerials = serialsList.querySelectorAll('.serial-badge.hidden');
-        console.log('Tìm thấy', hiddenSerials.length, 'serial ẩn');
-
-        // Debug: In ra từng hidden serial
-        hiddenSerials.forEach((serial, index) => {
-            console.log('Hidden serial', index, ':', serial.textContent.trim(), 'Display:', window.getComputedStyle(serial).display);
-        });
-
-        if (hiddenSerials.length > 0) {
-            // Hiển thị tất cả serial ẩn
-            hiddenSerials.forEach((serial, index) => {
-                console.log('Hiển thị serial', index);
-                serial.style.display = 'inline-block';
-                serial.classList.remove('hidden');
-            });
-
-            // Ẩn nút "xem thêm"
-            element.style.display = 'none';
-
-            console.log('Đã hiển thị thêm', hiddenSerials.length, 'serial numbers');
-
-            // Verify lại sau khi thay đổi
-            const stillHidden = serialsList.querySelectorAll('.serial-badge.hidden');
-            console.log('Còn lại', stillHidden.length, 'serial ẩn');
-        } else {
-            console.log('Không tìm thấy serial ẩn nào');
-
-            // Debug: kiểm tra xem có serial nào không
-            const allSerials = serialsList.querySelectorAll('.serial-badge');
-            console.log('Tổng số serial badges:', allSerials.length);
-            allSerials.forEach((serial, index) => {
-                console.log('Serial', index, '- Class:', serial.className, '- Display:', window.getComputedStyle(serial).display, '- Text:', serial.textContent.trim());
-            });
-        }
-    }
-
-    // DOM Content Loaded - chỉ một lần
-    document.addEventListener('DOMContentLoaded', function () {
-        // Dropdown toggle functionality
-        const toggle = document.getElementById("dropdownToggle");
-        const menu = document.getElementById("dropdownMenu"); // Sửa lỗi typo: getElementB yId -> getElementById
-        
-        if (toggle && menu) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                menu.style.display = menu.style.display === "block" ? "none" : "block";
-            });
-            
-            document.addEventListener("click", function (e) {
-                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-                    menu.style.display = "none";
+                // Debug: In ra tất cả elements trong container
+                const allElements = serialsList.children;
+                console.log('Tất cả elements trong container:', allElements.length);
+                for (let i = 0; i < allElements.length; i++) {
+                    console.log('Element', i, ':', allElements[i].className, allElements[i].textContent.trim());
                 }
+
+                // Tìm tất cả serial bị ẩn (có class 'hidden')
+                const hiddenSerials = serialsList.querySelectorAll('.serial-badge.hidden');
+                console.log('Tìm thấy', hiddenSerials.length, 'serial ẩn');
+
+                // Debug: In ra từng hidden serial
+                hiddenSerials.forEach((serial, index) => {
+                    console.log('Hidden serial', index, ':', serial.textContent.trim(), 'Display:', window.getComputedStyle(serial).display);
+                });
+
+                if (hiddenSerials.length > 0) {
+                    // Hiển thị tất cả serial ẩn
+                    hiddenSerials.forEach((serial, index) => {
+                        console.log('Hiển thị serial', index);
+                        serial.style.display = 'inline-block';
+                        serial.classList.remove('hidden');
+                    });
+
+                    // Ẩn nút "xem thêm"
+                    element.style.display = 'none';
+
+                    console.log('Đã hiển thị thêm', hiddenSerials.length, 'serial numbers');
+
+                    // Verify lại sau khi thay đổi
+                    const stillHidden = serialsList.querySelectorAll('.serial-badge.hidden');
+                    console.log('Còn lại', stillHidden.length, 'serial ẩn');
+                } else {
+                    console.log('Không tìm thấy serial ẩn nào');
+
+                    // Debug: kiểm tra xem có serial nào không
+                    const allSerials = serialsList.querySelectorAll('.serial-badge');
+                    console.log('Tổng số serial badges:', allSerials.length);
+                    allSerials.forEach((serial, index) => {
+                        console.log('Serial', index, '- Class:', serial.className, '- Display:', window.getComputedStyle(serial).display, '- Text:', serial.textContent.trim());
+                    });
+                }
+            }
+
+            // DOM Content Loaded - chỉ một lần
+            document.addEventListener('DOMContentLoaded', function () {
+                // Dropdown toggle functionality
+                const toggle = document.getElementById("dropdownToggle");
+                const menu = document.getElementById("dropdownMenu"); // Sửa lỗi typo: getElementB yId -> getElementById
+
+                if (toggle && menu) {
+                    toggle.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        menu.style.display = menu.style.display === "block" ? "none" : "block";
+                    });
+
+                    document.addEventListener("click", function (e) {
+                        if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                            menu.style.display = "none";
+                        }
+                    });
+                }
+
+                // Auto-hide alerts after 5 seconds
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function (alert) {
+                    setTimeout(function () {
+                        alert.style.opacity = '0';
+                        setTimeout(function () {
+                            alert.style.display = 'none';
+                        }, 300);
+                    }, 5000);
+                });
+
+                // XÓA phần event listener cho serial-more để tránh xung đột với onclick
+                // Chỉ sử dụng onclick="showMoreSerials(this)" trong HTML
             });
-        }
-
-        // Auto-hide alerts after 5 seconds
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(function (alert) {
-            setTimeout(function () {
-                alert.style.opacity = '0';
-                setTimeout(function () {
-                    alert.style.display = 'none';
-                }, 300);
-            }, 5000);
-        });
-
-        // XÓA phần event listener cho serial-more để tránh xung đột với onclick
-        // Chỉ sử dụng onclick="showMoreSerials(this)" trong HTML
-    });
-</script>
+        </script>
 
 
         <!-- Additional CSS for this page -->
@@ -921,6 +945,219 @@
                 opacity: 0.9;
                 transform: scale(1.02);
             }
+/* ==================== PAGE HEADER ==================== */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Page Title Section */
+.page-title-section h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+    line-height: 1.2;
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+    font-weight: 400;
+}
+
+/* ==================== HEADER ACTIONS ==================== */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+/* ==================== BUTTONS BASE STYLES ==================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.btn i {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* ==================== BACK BUTTON ==================== */
+.btn-back {
+    background-color: #6c757d;
+    color: white;
+    border: 1px solid #6c757d;
+}
+
+.btn-back:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+}
+
+.btn-back:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(108, 117, 125, 0.3);
+}
+
+/* ==================== CANCEL ORDER SECTION ==================== */
+.cancel-order-section {
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+}
+
+/* ==================== CANCEL BUTTONS ==================== */
+.btn-cancel {
+    background-color: #dc3545;
+    color: white;
+    border: 1px solid #dc3545;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-cancel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-cancel:hover::before {
+    left: 100%;
+}
+
+.btn-cancel:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+}
+
+.btn-cancel:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.4);
+}
+
+/* Specific Cancel Button Types */
+.btn-cancel-export {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+}
+
+.btn-cancel-export:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+}
+
+.btn-cancel-import {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.btn-cancel-import:hover {
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+}
+
+/* ==================== PULSE ANIMATION FOR CANCEL BUTTONS ==================== */
+@keyframes pulse-red {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(220, 53, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+.btn-cancel:focus {
+    animation: pulse-red 1.5s infinite;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .page-title-section {
+        text-align: center;
+    }
+    
+    .page-title-section h1 {
+        font-size: 20px;
+    }
+    
+    .header-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .cancel-order-section {
+        margin-left: 0;
+        flex: 1;
+    }
+    
+    .btn {
+        flex: 1;
+        justify-content: center;
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .page-header {
+        padding: 15px 0;
+    }
+}
+
+/* ==================== PRINT STYLES ==================== */
+@media print {
+    .header-actions {
+        display: none;
+    }
+}
+
 
         </style>
     </body>

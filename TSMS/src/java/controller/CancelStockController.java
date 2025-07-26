@@ -51,10 +51,10 @@ public class CancelStockController extends HttpServlet {
             
             System.out.println("[DEBUG] Parsed - userId: " + userId + ", roleId: " + roleId);
             
-            if (userId == null || roleId == null || roleId != 3) {
+            if (userId == null || roleId == null || roleId != 0) {
                 System.out.println("[DEBUG] Permission denied - userId: " + userId + ", roleId: " + roleId);
                 request.getSession().setAttribute("errorMessage", "Bạn không có quyền thực hiện hành động này");
-                response.sendRedirect("wh-import");
+                response.sendRedirect("so-track-movements");
                 return;
             }
             
@@ -74,7 +74,7 @@ public class CancelStockController extends HttpServlet {
         if (movementIdParam == null || movementIdParam.trim().isEmpty()) {
             System.out.println("[DEBUG] Movement ID is null or empty");
             request.getSession().setAttribute("errorMessage", "Không tìm thấy ID đơn hàng");
-            response.sendRedirect("wh-import");
+            response.sendRedirect("so-track-movements");
             return;
         }
         
@@ -85,18 +85,18 @@ public class CancelStockController extends HttpServlet {
         } catch (NumberFormatException e) {
             System.out.println("[DEBUG] Invalid movement ID format: " + movementIdParam);
             request.getSession().setAttribute("errorMessage", "ID đơn hàng không hợp lệ");
-            response.sendRedirect("wh-import");
+            response.sendRedirect("so-track-movements");
             return;
         }
         
         // Xác định redirect URL dựa trên movementType
-        String redirectUrl = "wh-import"; // default
+        String redirectUrl = "so-track-movements"; // default
         String successMessage = "Đã hủy đơn nhập hàng thành công";
         
         if (movementType != null) {
             String lowerMovementType = movementType.toLowerCase();
             if ("export".equals(lowerMovementType)) {
-                redirectUrl = "wh-export";
+                redirectUrl = "so-track-movements";
                 successMessage = "Đã hủy đơn xuất hàng thành công";
             }
             System.out.println("[DEBUG] Movement type: " + movementType + " -> Redirect to: " + redirectUrl);

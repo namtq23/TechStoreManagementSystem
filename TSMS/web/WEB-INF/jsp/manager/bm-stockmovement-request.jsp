@@ -49,7 +49,7 @@
                         <div class="dropdown-menu">
                             <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
                             <a href="request-stock" class="dropdown-item">Nhập hàng</a>
-                            <a href="bm-incoming-orders" class="dropdown-item">Theo dõi đơn nhập hàng</a>
+                            <a href="bm-incoming-orders" class="dropdown-item">Theo dõi nhập hàng</a>
                         </div>
                     </div>
 
@@ -185,10 +185,10 @@
                     </div>
 
                     <div class="invoice-summary">
-                        <div class="form-row">
+<!--                        <div class="form-row">
                             <label for="overallNote">Ghi chú chung</label>
                             <textarea name="overallNote" id="overallNote"></textarea>
-                        </div>
+                        </div>-->
                         <div class="total-products-display">
                             <span class="label">Tổng sản phẩm</span>
                             <span class="value">${fn:length(draft)}</span>

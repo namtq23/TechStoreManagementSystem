@@ -84,25 +84,25 @@ public class WHStockSerialCheckController extends HttpServlet {
 
         try {
             StockMovementDetailDAO dao = new StockMovementDetailDAO();
-            // **THÊM ĐOẠN CODE MỚI ĐỂ LẤY MOVEMENT TYPE TỪ DATABASE**
             StockMovementsRequestDAO movementDAO = new StockMovementsRequestDAO();
             StockMovementsRequest movement = movementDAO.getMovementById(dbName, movementID);
 
             if (movement != null) {
                 String movementTypeFromDB = movement.getMovementType();
                 if (movementType == null || movementType.isEmpty()) {
-                    movementType = movementTypeFromDB.toLowerCase(); // Thêm .toLowerCase()
+                    movementType = movementTypeFromDB.toLowerCase();
                     System.out.println("[DEBUG] Movement type set from DB: " + movementType + " for MovementID: " + movementID);
                 }
             } else {
                 System.out.println("[DEBUG] Movement not found for ID: " + movementID);
             }
-            // Sử dụng method có filter và pagination
+
+            // Lấy details theo filter để hiển thị
             List<StockMovementDetail> details = dao.getMovementDetailsWithFilters(
                     dbName, movementID, productFilter, status, currentPage, itemsPerPage
             );
 
-            // Update scanned count based on actual serial numbers
+            // Update scanned count cho details hiển thị
             for (StockMovementDetail detail : details) {
                 List<ProductDetailSerialNumber> serials = dao.getSerialsByDetail(dbName, detail.getDetailID());
                 detail.setSerials(serials);
@@ -112,6 +112,26 @@ public class WHStockSerialCheckController extends HttpServlet {
                         + ", ProductDetailID: " + detail.getProductDetailID()
                         + ", Scanned: " + detail.getScanned() + "/" + detail.getQuantity());
             }
+
+            // **KIỂM TRA allCompleted DỰA TRÊN TẤT CẢ ITEMS, KHÔNG PHỤ THUỘC FILTER**
+            boolean allCompleted = true;
+            List<StockMovementDetail> allDetailsForCheck = dao.getMovementDetailsWithFilters(
+                dbName, movementID, null, null, 1, Integer.MAX_VALUE // Lấy tất cả không filter
+            );
+            
+            for (StockMovementDetail detail : allDetailsForCheck) {
+                List<ProductDetailSerialNumber> serials = dao.getSerialsByDetail(dbName, detail.getDetailID());
+                int scannedCount = serials != null ? serials.size() : 0;
+                
+                if (scannedCount < detail.getQuantity()) {
+                    allCompleted = false;
+                    System.out.println("❌ Item chưa hoàn thành: DetailID=" + detail.getDetailID() 
+                        + ", Scanned=" + scannedCount + "/" + detail.getQuantity());
+                    break;
+                }
+            }
+            
+            System.out.println("🔍 AllCompleted check result: " + allCompleted + " (checked " + allDetailsForCheck.size() + " items)");
 
             // Get total count for pagination
             int totalItems = dao.getMovementDetailsCount(dbName, movementID, productFilter, status);
@@ -132,6 +152,12 @@ public class WHStockSerialCheckController extends HttpServlet {
                 if (status != null && !status.isEmpty()) {
                     redirectUrl.append("&status=").append(status);
                 }
+                if (fromDate != null && !fromDate.isEmpty()) {
+                    redirectUrl.append("&fromDate=").append(fromDate);
+                }
+                if (toDate != null && !toDate.isEmpty()) {
+                    redirectUrl.append("&toDate=").append(toDate);
+                }
                 redirectUrl.append("&itemsPerPage=").append(itemsPerPage);
                 response.sendRedirect(redirectUrl.toString());
                 return;
@@ -144,20 +170,11 @@ public class WHStockSerialCheckController extends HttpServlet {
             // Get product list for filter
             List<String> productList = dao.getProductListByMovement(dbName, movementID);
 
-            // Check if all completed
-            boolean allCompleted = true;
-            for (StockMovementDetail item : details) {
-                if (item.getScanned() < item.getQuantity()) {
-                    allCompleted = false;
-                    break;
-                }
-            }
-
             // Set attributes for JSP
             request.setAttribute("movementID", movementID);
             request.setAttribute("movementDetails", details);
             request.setAttribute("movementType", movementType);
-            request.setAttribute("allCompleted", allCompleted);
+            request.setAttribute("allCompleted", allCompleted); // Giá trị chính xác không phụ thuộc filter
             request.setAttribute("productList", productList);
 
             // Filter parameters
@@ -176,7 +193,8 @@ public class WHStockSerialCheckController extends HttpServlet {
 
             System.out.println("📦 Đơn " + (movementType != null ? movementType : "") + " #" + movementID
                     + " - Page: " + currentPage + "/" + totalPages
-                    + ", Items: " + details.size() + "/" + totalItems);
+                    + ", Items: " + details.size() + "/" + totalItems
+                    + ", AllCompleted: " + allCompleted);
 
             request.getRequestDispatcher("/WEB-INF/jsp/warehouse-manager/stock-check.jsp").forward(request, response);
 
@@ -197,7 +215,6 @@ public class WHStockSerialCheckController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // POST processing cho scan serial giữ nguyên như cũ
         response.setContentType("text/html;charset=UTF-8");
 
         String dbName = (String) request.getSession().getAttribute("dbName");
@@ -208,10 +225,10 @@ public class WHStockSerialCheckController extends HttpServlet {
         String productDetailIDStr = request.getParameter("productDetailID");
 
         System.out.println("🔍 Serial nhận được: [" + serial + "]");
-        System.out.println("movement type nhận đc " + movementType);
-        System.out.println("detail ID nhận đc " + productDetailIDStr);
+        System.out.println("🔍 Movement type nhận được: " + movementType);
+        System.out.println("🔍 Detail ID nhận được: " + productDetailIDStr);
 
-        // Existing POST processing logic...
+        // Validate input parameters
         if (serial == null || serial.trim().isEmpty() || detailIDStr == null || movementIDStr == null
                 || !Validate.validateSerialFormat(serial)) {
             request.setAttribute("error", "Vui lòng nhập Serial hợp lệ.");
@@ -224,39 +241,52 @@ public class WHStockSerialCheckController extends HttpServlet {
         int movementID = Integer.parseInt(movementIDStr);
         SerialNumberDAO serialDAO = new SerialNumberDAO();
 
-        if ("import".equalsIgnoreCase(movementType)) {
-            if (serialDAO.checkIfSerialExists(dbName, serial)) {
-                request.setAttribute("error", "❌ Serial đã tồn tại trong hệ thống.");
-            } else if (serialDAO.addScannedSerial(dbName, detailID, serial)) {
-                request.setAttribute("success", "✅ Đã thêm Serial thành công.");
+        try {
+            if ("import".equalsIgnoreCase(movementType)) {
+                // Xử lý import serial
+                if (serialDAO.checkIfSerialExists(dbName, serial)) {
+                    request.setAttribute("error", "❌ Serial đã tồn tại trong hệ thống.");
+                } else if (serialDAO.addScannedSerial(dbName, detailID, serial)) {
+                    request.setAttribute("success", "✅ Đã thêm Serial thành công.");
+                } else {
+                    request.setAttribute("error", "❌ Có lỗi xảy ra khi thêm Serial.");
+                }
+
+            } else if ("export".equalsIgnoreCase(movementType)) {
+                // Xử lý export serial
+                if (productDetailIDStr == null || productDetailIDStr.trim().isEmpty()) {
+                    request.setAttribute("error", "Thiếu thông tin mã sản phẩm.");
+                    processRequest(request, response);
+                    return;
+                }
+
+                int productDetailID = Integer.parseInt(productDetailIDStr);
+                System.out.println("🧪 Gửi vào DAO: ProductDetailID = " + productDetailID + ", Serial = " + serial + ", DetailID = " + detailID);
+
+                boolean valid = serialDAO.checkIfSerialAvailableForExport(dbName, productDetailID, serial, detailID);
+                if (!valid) {
+                    request.setAttribute("error", "❌ Serial không hợp lệ: không nằm trong kho hoặc đã được xuất.");
+                } else if (serialDAO.markSerialAsExported(dbName, detailID, serial)) {
+                    System.out.println("➡️ Đang xuất serial: " + serial);
+                    request.setAttribute("success", "✅ Serial đã được xác nhận xuất kho.");
+                } else {
+                    request.setAttribute("error", "❌ Có lỗi khi xử lý serial xuất kho.");
+                }
+
             } else {
-                request.setAttribute("error", "❌ Có lỗi xảy ra khi thêm Serial.");
+                request.setAttribute("error", "Loại yêu cầu không hợp lệ: " + movementType);
             }
 
-        } else if ("export".equalsIgnoreCase(movementType)) {
-            if (productDetailIDStr == null) {
-                request.setAttribute("error", "Thiếu thông tin mã sản phẩm.");
-                processRequest(request, response);
-                return;
-            }
-
-            int productDetailID = Integer.parseInt(productDetailIDStr);
-            System.out.println("🧪 Gửi vào DAO: ProductDetailID = " + productDetailID + ", Serial = " + serial + ", DetailID = " + detailID);
-
-            boolean valid = serialDAO.checkIfSerialAvailableForExport(dbName, productDetailID, serial, detailID);
-            if (!valid) {
-                request.setAttribute("error", "❌ Serial không hợp lệ: không nằm trong kho hoặc đã được xuất.");
-            } else if (serialDAO.markSerialAsExported(dbName, detailID, serial)) {
-                System.out.println("➡️ Đang xuất serial: " + serial);
-                request.setAttribute("success", "✅ Serial đã được xác nhận xuất kho.");
-            } else {
-                request.setAttribute("error", "❌ Có lỗi khi xử lý serial xuất kho.");
-            }
-
-        } else {
-            request.setAttribute("error", "Loại yêu cầu không hợp lệ.");
+        } catch (NumberFormatException e) {
+            System.err.println("Error parsing parameters: " + e.getMessage());
+            request.setAttribute("error", "Dữ liệu không hợp lệ.");
+        } catch (Exception e) {
+            System.err.println("Error processing serial: " + e.getMessage());
+            e.printStackTrace();
+            request.setAttribute("error", "Có lỗi xảy ra khi xử lý: " + e.getMessage());
         }
 
+        // Redirect back to the same page with current filters
         request.setAttribute("movementID", movementID);
         request.setAttribute("movementType", movementType);
         processRequest(request, response);

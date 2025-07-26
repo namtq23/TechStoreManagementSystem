@@ -17,25 +17,25 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <style>
             /* Bỏ hiển thị dropdown khi có class active */
-.nav-item.dropdown.active .dropdown-menu {
-    display: none;
-}
+            .nav-item.dropdown.active .dropdown-menu {
+                display: none;
+            }
 
-/* Chỉ hiển thị khi hover */
-.nav-item.dropdown:hover .dropdown-menu {
-    display: block !important;
-}
+            /* Chỉ hiển thị khi hover */
+            .nav-item.dropdown:hover .dropdown-menu {
+                display: block !important;
+            }
 
-/* Hoặc chỉ hiển thị khi click */
-.nav-item.dropdown.show .dropdown-menu {
-    display: block;
-}
+            /* Hoặc chỉ hiển thị khi click */
+            .nav-item.dropdown.show .dropdown-menu {
+                display: block;
+            }
         </style>
     </head>
     <body>
-        
+
         <!-- Header -->
-              <header class="header">
+        <header class="header">
             <div class="header-container">
                 <div class="logo">
                     <a href="so-overview" class="logo">
@@ -235,10 +235,10 @@
                     </table>
                 </div>
                 <div class="invoice-summary">
-                    <div class="form-row">
-                        <label for="overallNote">Ghi chú chung</label>
-                        <textarea name="overallNote" id="overallNote"></textarea>
-                    </div>
+                    <!--                    <div class="form-row">
+                                            <label for="overallNote">Ghi chú chung</label>
+                                            <textarea name="overallNote" id="overallNote"></textarea>
+                                        </div>-->
                     <div class="total-products-display">
                         <span class="label">Tổng sản phẩm</span>
                         <span class="value">${fn:length(cartItems)}</span>
@@ -285,9 +285,12 @@
                 <div class="supplier-selection-section">
                     <label for="supplierSelect">Chọn nhà cung cấp</label>
                     <form method="get" action="${pageContext.request.contextPath}/import-request">
-                        <select id="supplierSelect" name="supplierId" 
+                        <!-- Chỉ disabled khi giỏ hàng KHÔNG rỗng -->
+                        <select id="supplierSelect"
+                                name="supplierId"
                                 onchange="this.form.submit()"
-                                <c:if test="${not empty sessionScope.cartSupplierId}">disabled</c:if>>
+                                <c:if test="${not empty sessionScope.cartItems}">disabled</c:if>>
+
                                     <option value="">-- Chọn nhà cung cấp --</option>
                                 <c:forEach var="supplier" items="${listSuppliers}">
                                     <option value="${supplier.supplierID}"
@@ -295,8 +298,8 @@
                                         ${supplier.supplierName}
                                     </option>
                                 </c:forEach>
-
                         </select>
+
                     </form>
 
                 </div>
@@ -339,7 +342,7 @@
                                         <c:forEach var="product" items="${listProductDetails}">
                                             <div class="product-card">
                                                 <div class="product-info">
-                                                    <h4>${product.productNameUnsigned}</h4>
+                                                    <h4>${product.description}</h4>
                                                     <div class="product-code">Mã: ${product.productCode}</div>                                               
                                                 </div>
                                                 <form action="import-request" method="post">
@@ -543,8 +546,8 @@
         <script>
             function beforeSubmit() {
                 // Ghi chú
-                const note = document.getElementById("overallNote").value;
-                document.getElementById("hiddenOverallNote").value = note;
+//                const note = document.getElementById("overallNote").value;
+//                document.getElementById("hiddenOverallNote").value = note;
 
                 // Kho đích
                 const warehouseSelect = document.getElementById("toWarehouseID");
@@ -553,6 +556,32 @@
             }
         </script>
 
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const supplierSelect = document.getElementById('supplierSelect');
+                const hasItemsInCart = ${sessionScope.cartItems != null ? "true" : "false"};
+                const originalSupplierId = '${sessionScope.cartSupplierId != null ? sessionScope.cartSupplierId : ""}';
+
+                supplierSelect?.addEventListener('change', function () {
+                    if (!hasItemsInCart) {           // giỏ rỗng → cho đổi ngay
+                        this.form.submit();
+                        return;
+                    }
+
+                    // Giỏ có hàng → xác nhận trước khi reset
+                    if (originalSupplierId && this.value && this.value !== originalSupplierId) {
+                        if (confirm("Bạn đã chọn nhà cung cấp khác. Đơn nhập hàng chỉ được tạo từ một nhà cung cấp.\nBạn có muốn xóa giỏ hàng và chọn lại?")) {
+                            window.location.href = 'import-request?action=reset&supplierId=' + this.value;
+                        } else {
+                            this.value = originalSupplierId;   // hoàn nguyên
+                        }
+                    }
+                });
+            });
+
+
+        </script>
 
 
 

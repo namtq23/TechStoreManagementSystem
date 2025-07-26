@@ -79,15 +79,7 @@
 
                         <h3>Bộ lọc</h3>
 
-                        <div class="filter-group">
-                            <label>Từ ngày:</label>
-                            <input type="date" name="fromDate" class="form-control" value="${fromDate}">
-                        </div>
-
-                        <div class="filter-group">
-                            <label>Đến ngày:</label>
-                            <input type="date" name="toDate" class="form-control" value="${toDate}">
-                        </div>
+                      
 
                         <div class="filter-group">
                             <label>Sản phẩm:</label>
@@ -154,17 +146,15 @@
                             </c:if>
                             <c:choose>
                                 <c:when test="${movementType eq 'export' or movementType eq 'Export'}">
-                                    <a href="cancel-stock?id=${movementID}&movementType=export" 
-                                       class="btn btn-secondary"
-                                       onclick="return confirm('Bạn có chắc chắn muốn hủy đơn xuất này?')">
-                                        Hủy đơn xuất
+                                    <a href="wh-export" 
+                                       class="btn btn-secondary">
+                                        Quay lại
                                     </a>
                                 </c:when>
                                 <c:otherwise>
-                                    <a href="cancel-stock?id=${movementID}&movementType=import" 
-                                       class="btn btn-secondary"
-                                       onclick="return confirm('Bạn có chắc chắn muốn hủy đơn nhập này?')">
-                                        Hủy đơn nhập
+                                    <a href="wh-import" 
+                                       class="btn btn-secondary">
+                                           Quay lại
                                     </a>
                                 </c:otherwise>
                             </c:choose>

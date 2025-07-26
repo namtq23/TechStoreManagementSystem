@@ -1,6 +1,7 @@
 package controller;
 
 import dao.AnnouncementDAO;
+import dao.CashFlowDAO;
 import dao.ProductDAO;
 import dao.StockMovementDetailDAO;
 import dao.StockMovementsRequestDAO;
@@ -97,6 +98,11 @@ public class SOImportRequest extends HttpServlet {
                 int productDetailID = Integer.parseInt(request.getParameter("productDetailID"));
                 int quantity = Integer.parseInt(request.getParameter("quantity"));
                 String supplierIdRaw = request.getParameter("supplierId");
+                if(quantity < 0){
+                  session.setAttribute("errorMessage", "Vui lòng nhập số nhập  hợp lệ. " );
+                  response.sendRedirect("import-request?supplierId=" + supplierIdRaw);
+                  return;
+                }
 
                 List<ProductDetailDTO> cartItems = (List<ProductDetailDTO>) session.getAttribute("cartItems");
                 if (cartItems != null) {
@@ -184,58 +190,108 @@ public class SOImportRequest extends HttpServlet {
             return;
         }
 
-        if ("submitRequest".equals(action)) {
-            try {
-                Integer userId = (Integer) session.getAttribute("userId");
-                Integer supplierId = (Integer) session.getAttribute("cartSupplierId");
-                String toWarehouseIdRaw = request.getParameter("toWarehouseID");
-                String note = request.getParameter("overallNote");
-
-                if (userId == null || dbName == null || supplierId == null) {
-                    session.setAttribute("errorMessage", "Thiếu thông tin người dùng hoặc nhà cung cấp.");
-                    response.sendRedirect("import-request");
-                    return;
-                }
-
-                if (toWarehouseIdRaw == null || toWarehouseIdRaw.trim().isEmpty()) {
-                    session.setAttribute("errorMessage", "Vui lòng chọn kho đích trước khi gửi yêu cầu.");
-                    response.sendRedirect("import-request");
-                    return;
-                }
-
-                int toWarehouseId = Integer.parseInt(toWarehouseIdRaw);
-                List<ProductDetailDTO> cartItems = (List<ProductDetailDTO>) session.getAttribute("cartItems");
-                if (cartItems == null || cartItems.isEmpty()) {
-                    session.setAttribute("errorMessage", "Không có sản phẩm nào trong phiếu yêu cầu.");
-                    response.sendRedirect("import-request?supplierId=" + supplierId + "&toWarehouseID=" + toWarehouseId);
-                    return;
-                }
-
-                int movementId = StockMovementsRequestDAO.insertMovementRequest(
-                        dbName, supplierId, toWarehouseId, "import", (note != null ? note : ""), userId
-                );
-
-                for (ProductDetailDTO item : cartItems) {
-                    StockMovementDetailDAO.insertMovementDetail(dbName, movementId, item.getProductDetailID(), item.getQuantity());
-                }
-
-                StockMovementsRequestDAO.insertMovementResponse(dbName, movementId, userId, "pending", null);
-
-                announcementDAO.insertImportRequestAnnouncement(dbName, userId, toWarehouseId, note);
-
-                session.removeAttribute("cartItems");
-                session.removeAttribute("cartSupplierId");
-
-                session.setAttribute("successMessage", "Đã gửi yêu cầu nhập hàng thành công.");
-                response.sendRedirect("import-request");
-                return;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                session.setAttribute("errorMessage", "Lỗi khi gửi yêu cầu nhập hàng: " + e.getMessage());
-                response.sendRedirect("import-request");
-            }
+       if ("submitRequest".equals(action)) {
+    try {
+        Integer userId = (Integer) session.getAttribute("userId");
+        Integer supplierId = (Integer) session.getAttribute("cartSupplierId");
+        String toWarehouseIdRaw = request.getParameter("toWarehouseID");
+        String note = request.getParameter("overallNote");
+        
+        if (userId == null || dbName == null || supplierId == null) {
+            session.setAttribute("errorMessage", "Thiếu thông tin người dùng hoặc nhà cung cấp.");
+            response.sendRedirect("import-request");
+            return;
         }
+
+        if (toWarehouseIdRaw == null || toWarehouseIdRaw.trim().isEmpty()) {
+            session.setAttribute("errorMessage", "Vui lòng chọn kho đích trước khi gửi yêu cầu.");
+            response.sendRedirect("import-request");
+            return;
+        }
+
+        int toWarehouseId = Integer.parseInt(toWarehouseIdRaw);
+        List<ProductDetailDTO> cartItems = (List<ProductDetailDTO>) session.getAttribute("cartItems");
+        if (cartItems == null || cartItems.isEmpty()) {
+            session.setAttribute("errorMessage", "Không có sản phẩm nào trong phiếu yêu cầu.");
+            response.sendRedirect("import-request?supplierId=" + supplierId + "&toWarehouseID=" + toWarehouseId);
+            return;
+        }
+
+        // Tạo đơn nhập hàng
+        int movementId = StockMovementsRequestDAO.insertMovementRequest(
+                dbName, supplierId, toWarehouseId, "import", (note != null ? note : ""), userId
+        );
+
+        // Thêm chi tiết sản phẩm và tính tổng tiền
+        double totalAmount = 0.0;
+        for (ProductDetailDTO item : cartItems) {
+            StockMovementDetailDAO.insertMovementDetail(dbName, movementId, item.getProductDetailID(), item.getQuantity());
+            
+            // Tính tổng tiền cho CashFlow
+            totalAmount += (item.getCostPrice() * item.getQuantity());
+        }
+
+        StockMovementsRequestDAO.insertMovementResponse(dbName, movementId, userId, "pending", null);
+
+        // **TẠO CASHFLOW CHO ĐỎN NHẬP HÀNG**
+        try {
+            String createdBy = (String) session.getAttribute("fullName");
+            if (createdBy == null || createdBy.trim().isEmpty()) {
+                createdBy = "Chủ cửa hàng";
+            }
+            
+            // Tạo mô tả cho CashFlow
+            String cashFlowDescription = "Chi phí nhập hàng - Đơn #" + movementId;
+            if (note != null && !note.trim().isEmpty()) {
+                cashFlowDescription += " - " + note.trim();
+            }
+            
+          
+            CashFlowDAO cashDao = new CashFlowDAO();
+         
+            
+            // Insert vào CashFlow
+            boolean cashFlowSuccess = cashDao.insertImportCashFlow(
+                dbName,
+                totalAmount,
+                cashFlowDescription,
+                "Chuyển khoản", // Phương thức thanh toán mặc định
+                movementId,      // RelatedOrderID
+                null,           // BranchID - có thể lấy từ warehouse nếu cần
+                createdBy
+            );
+            
+            if (cashFlowSuccess) {
+                System.out.println("✅ Đã tạo CashFlow cho đơn nhập #" + movementId + 
+                                 " - Số tiền: " + String.format("%,.0f", totalAmount) + " VNĐ");
+            } else {
+                System.err.println("❌ Lỗi khi tạo CashFlow cho đơn nhập #" + movementId);
+            }
+            
+        } catch (Exception cashFlowError) {
+            // Log lỗi nhưng không làm fail toàn bộ quá trình
+            System.err.println("❌ Lỗi khi tạo CashFlow: " + cashFlowError.getMessage());
+            cashFlowError.printStackTrace();
+        }
+
+        announcementDAO.insertImportRequestAnnouncement(dbName, userId, toWarehouseId, note);
+
+        session.removeAttribute("cartItems");
+        session.removeAttribute("cartSupplierId");
+
+        session.setAttribute("successMessage", 
+            "Đã gửi yêu cầu nhập hàng thành công. Tổng giá trị: " + 
+            String.format("%,.0f", totalAmount) + " VNĐ");
+        response.sendRedirect("import-request");
+        return;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        session.setAttribute("errorMessage", "Lỗi khi gửi yêu cầu nhập hàng: " + e.getMessage());
+        response.sendRedirect("import-request");
+    }
+}
+
     }
 
     private void processDisplay(HttpServletRequest request, HttpServletResponse response)
