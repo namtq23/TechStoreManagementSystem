@@ -1240,6 +1240,40 @@ public class CashFlowDAO {
         }
         return BigDecimal.ZERO;
     }
+    
+    //Nam: Insert cashflow outcome
+    // Thêm method này vào đầu class SOImportRequest
+ public boolean insertImportCashFlow(
+        String dbName,
+        double amount,
+        String description,
+        String paymentMethod,
+        Integer relatedOrderID,
+        Integer branchID,
+        String createdBy) throws SQLException {
+
+    String sql = "INSERT INTO dbo.CashFlows (FlowType, Amount, Category, Description, PaymentMethod, RelatedOrderID, BranchID, CreatedBy) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    
+    try (Connection conn = DBUtil.getConnectionTo(dbName); 
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setString(1, "OUTCOME");  // Nhập hàng là khoản chi
+        stmt.setDouble(2, amount);
+        stmt.setString(3, "Chi phí nhập hàng");  // Category
+        stmt.setString(4, description != null ? description : "Chi phí nhập hàng");
+        stmt.setString(5, paymentMethod != null ? paymentMethod : "Chuyển khoản");
+        stmt.setObject(6, relatedOrderID, java.sql.Types.INTEGER);
+        stmt.setObject(7, branchID, java.sql.Types.INTEGER);
+        stmt.setString(8, createdBy != null ? createdBy : "");
+
+        int rowsAffected = stmt.executeUpdate();
+        return rowsAffected > 0;
+    } catch (SQLException e) {
+        throw new SQLException("Lỗi khi tạo CashFlow: " + e.getMessage(), e);
+    }
+}
+
 
     //Phuong: Add order detail to cashflow
     public static boolean insertCashFlow(

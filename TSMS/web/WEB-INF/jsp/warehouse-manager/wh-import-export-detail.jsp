@@ -126,22 +126,25 @@
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
-                    <a href="wh-import" class="nav-item active">
+                    <a href="wh-import" class="nav-item  <c:choose>
+                           <c:when test="${movementType eq 'export'}"></c:when>
+                           <c:otherwise> active </c:otherwise>
+                       </c:choose> ">
                         <i class="fa-solid fa-download"></i>
                         Nhập hàng
                     </a>
-                    <a href="wh-export" class="nav-item">
+                    <a href="wh-export" class="nav-item <c:choose>
+                           <c:when test="${movementType eq 'export'}"> active </c:when>
+                           <c:otherwise></c:otherwise>
+                       </c:choose> ">
                         <i class="fa-solid fa-upload"></i>
                         Xuất hàng
                     </a>
-                    <a href="wh-notifications" class="nav-item">
-                        <i class="fa-solid fa-bell"></i>
-                        Thông báo
+                   <a href="wh-import-request" class="nav-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        Yêu cầu nhập hàng
                     </a>
-                    <a href="wh-reports" class="nav-item">
-                        <i class="fas fa-chart-bar"></i>
-                        Báo cáo
-                    </a>
+                 
                 </nav>
 
                 <div class="header-right">
@@ -530,94 +533,94 @@
                                     </main>
                                     </div>
 
-                                 <script>
-    function changeItemsPerPage() {
-        const select = document.getElementById('itemsPerPageSelect');
-        const itemsPerPage = select.value;
-        const url = new URL(window.location);
-        url.searchParams.set('itemsPerPage', itemsPerPage);
-        url.searchParams.set('page', '1'); // Reset về trang 1
+                                    <script>
+                                        function changeItemsPerPage() {
+                                            const select = document.getElementById('itemsPerPageSelect');
+                                            const itemsPerPage = select.value;
+                                            const url = new URL(window.location);
+                                            url.searchParams.set('itemsPerPage', itemsPerPage);
+                                            url.searchParams.set('page', '1'); // Reset về trang 1
 
-        window.location.href = url.toString();
-    }
+                                            window.location.href = url.toString();
+                                        }
 
-    function resetFilters() {
-        window.location.href = 'wh-import-export-detail?id=${movementID}';
-    }
+                                        function resetFilters() {
+                                            window.location.href = 'wh-import-export-detail?id=${movementID}';
+                                        }
 
-    function showMoreSerials(element) {
-        // Tìm container chứa các serial
-        const serialsList = element.parentElement;
-        
-        // Tìm tất cả serial bị ẩn (có class 'hidden')
-        const hiddenSerials = serialsList.querySelectorAll('.serial-badge.hidden');
-        
-        console.log('Tìm thấy', hiddenSerials.length, 'serial ẩn');
-        
-        if (hiddenSerials.length > 0) {
-            // Hiển thị tất cả serial ẩn
-            hiddenSerials.forEach(serial => {
-                serial.style.display = 'inline-block';
-                serial.classList.remove('hidden');
-            });
-            
-            // Ẩn nút "xem thêm"
-            element.style.display = 'none';
-            
-            console.log('Đã hiển thị thêm', hiddenSerials.length, 'serial numbers');
-        } else {
-            console.log('Không tìm thấy serial ẩn nào');
-        }
-    }
+                                        function showMoreSerials(element) {
+                                            // Tìm container chứa các serial
+                                            const serialsList = element.parentElement;
 
-    // Chạy khi DOM đã load xong
-    document.addEventListener('DOMContentLoaded', function () {
-        // Dropdown toggle functionality
-        const toggle = document.getElementById("dropdownToggle");
-        const menu = document.getElementById("dropdownMenu");
-        if (toggle && menu) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                menu.style.display = menu.style.display === "block" ? "none" : "block";
-            });
-            
-            document.addEventListener("click", function (e) {
-                if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-                    menu.style.display = "none";
-                }
-            });
-        }
+                                            // Tìm tất cả serial bị ẩn (có class 'hidden')
+                                            const hiddenSerials = serialsList.querySelectorAll('.serial-badge.hidden');
 
-        // Auto-hide alerts after 5 seconds
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(function (alert) {
-            setTimeout(function () {
-                alert.style.opacity = '0';
-                setTimeout(function () {
-                    alert.style.display = 'none';
-                }, 300);
-            }, 5000);
-        });
+                                            console.log('Tìm thấy', hiddenSerials.length, 'serial ẩn');
 
-        // Show/hide more serials (backup cho trường hợp onclick không hoạt động)
-        document.querySelectorAll('.serial-more').forEach(function (element) {
-            element.addEventListener('click', function () {
-                const container = this.closest('.serials-list');
-                const hiddenSerials = container.querySelectorAll('.serial-badge.hidden');
-                
-                hiddenSerials.forEach(function (serial) {
-                    serial.style.display = 'inline-block';
-                    serial.classList.remove('hidden');
-                });
-                
-                this.style.display = 'none';
-            });
-        });
-    });
-</script>
+                                            if (hiddenSerials.length > 0) {
+                                                // Hiển thị tất cả serial ẩn
+                                                hiddenSerials.forEach(serial => {
+                                                    serial.style.display = 'inline-block';
+                                                    serial.classList.remove('hidden');
+                                                });
+
+                                                // Ẩn nút "xem thêm"
+                                                element.style.display = 'none';
+
+                                                console.log('Đã hiển thị thêm', hiddenSerials.length, 'serial numbers');
+                                            } else {
+                                                console.log('Không tìm thấy serial ẩn nào');
+                                            }
+                                        }
+
+                                        // Chạy khi DOM đã load xong
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            // Dropdown toggle functionality
+                                            const toggle = document.getElementById("dropdownToggle");
+                                            const menu = document.getElementById("dropdownMenu");
+                                            if (toggle && menu) {
+                                                toggle.addEventListener("click", function (e) {
+                                                    e.preventDefault();
+                                                    menu.style.display = menu.style.display === "block" ? "none" : "block";
+                                                });
+
+                                                document.addEventListener("click", function (e) {
+                                                    if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                                                        menu.style.display = "none";
+                                                    }
+                                                });
+                                            }
+
+                                            // Auto-hide alerts after 5 seconds
+                                            const alerts = document.querySelectorAll('.alert');
+                                            alerts.forEach(function (alert) {
+                                                setTimeout(function () {
+                                                    alert.style.opacity = '0';
+                                                    setTimeout(function () {
+                                                        alert.style.display = 'none';
+                                                    }, 300);
+                                                }, 5000);
+                                            });
+
+                                            // Show/hide more serials (backup cho trường hợp onclick không hoạt động)
+                                            document.querySelectorAll('.serial-more').forEach(function (element) {
+                                                element.addEventListener('click', function () {
+                                                    const container = this.closest('.serials-list');
+                                                    const hiddenSerials = container.querySelectorAll('.serial-badge.hidden');
+
+                                                    hiddenSerials.forEach(function (serial) {
+                                                        serial.style.display = 'inline-block';
+                                                        serial.classList.remove('hidden');
+                                                    });
+
+                                                    this.style.display = 'none';
+                                                });
+                                            });
+                                        });
+                                    </script>
 
 
-                                    
+
 
                                     <!-- Additional CSS for this page -->
                                     <style>

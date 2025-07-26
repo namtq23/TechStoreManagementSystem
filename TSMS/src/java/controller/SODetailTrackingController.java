@@ -20,7 +20,7 @@ import model.ProductDetailSerialNumber;
 @WebServlet("/so-detail-tracking")
 public class SODetailTrackingController extends HttpServlet {
     
-    private static final int PAGE_SIZE = 10;
+    private static final int PAGE_SIZE = 1;
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
