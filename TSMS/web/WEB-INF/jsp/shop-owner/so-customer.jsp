@@ -47,8 +47,8 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="so-createimport" class="dropdown-item">Tạo đơn nhập hàng</a>
-                            <a href="so-ienoti" class="dropdown-item">Thông báo nhập/xuất</a>
+                            <a href="import-request" class="dropdown-item">Tạo đơn nhập hàng</a>
+                            <a href="so-track-movements" class="dropdown-item">Theo dõi nhập/xuất</a>
                         </div>
                     </div>
 
@@ -72,7 +72,6 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="so-commission" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
 
@@ -166,8 +165,6 @@
                             <select name="branchID" class="branch-filter">
                                 <option value="">-- Tất cả chi nhánh --</option>
                                 <option value="1" ${branchID == 1 ? "selected" : ""}>Chi nhánh 1</option>
-                                <option value="2" ${branchID == 2 ? "selected" : ""}>Chi nhánh 2</option>
-                                <option value="3" ${branchID == 3 ? "selected" : ""}>Chi nhánh 3</option>
                             </select>
                         </div>
                     </div>

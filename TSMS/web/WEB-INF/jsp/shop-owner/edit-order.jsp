@@ -513,7 +513,7 @@
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
-                    <div class="nav-item dropdown active">
+                    <div class="nav-item dropdown">
                         <a href="#" class="dropdown-toggle">
                             <i class="fas fa-exchange-alt"></i>
                             Giao dịch
@@ -521,8 +521,8 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-orders" class="dropdown-item">Đơn hàng</a>
-                            <a href="so-createimport" class="dropdown-item">Tạo đơn nhập hàng</a>
-                            <a href="so-ienoti" class="dropdown-item">Thông báo nhập/xuất</a>
+                            <a href="import-request" class="dropdown-item">Tạo đơn nhập hàng</a>
+                            <a href="so-track-movements" class="dropdown-item">Theo dõi nhập/xuất</a>
                         </div>
                     </div>
                     <div class="nav-item dropdown">
@@ -544,7 +544,6 @@
                         </a>
                         <div class="dropdown-menu">
                             <a href="so-staff" class="dropdown-item">Danh sách nhân viên</a>
-                            <a href="so-commission" class="dropdown-item">Hoa hồng</a>
                         </div>
                     </div>
                     <a href="so-promotions" class="nav-item">

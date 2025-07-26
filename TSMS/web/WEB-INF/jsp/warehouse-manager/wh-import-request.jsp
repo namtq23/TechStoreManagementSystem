@@ -289,7 +289,7 @@
 
                     <a href="wh-import-request" class="nav-item active">
                         <i class="fas fa-exchange-alt"></i>
-                        Yêu cầu nhập hàng
+                        Tạo thông báo
                     </a>
 
                 </nav>

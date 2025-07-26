@@ -116,7 +116,7 @@
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <a href="wh-import" class="logo">
+                    <a href="wh-products?page=1" class="logo">
                         <div class="logo-icon">T</div>
                         <span class="logo-text">TSMS</span>
                     </a>
@@ -126,6 +126,7 @@
                         <i class="fas fa-box"></i>
                         Hàng hóa
                     </a>
+
                     <a href="wh-import" class="nav-item  <c:choose>
                            <c:when test="${movementType eq 'export'}"></c:when>
                            <c:otherwise> active </c:otherwise>
@@ -142,9 +143,7 @@
                     </a>
                    <a href="wh-import-request" class="nav-item">
                         <i class="fas fa-exchange-alt"></i>
-                        Yêu cầu nhập hàng
-                    </a>
-                 
+                        Yêu cầu nhập hàng                 
                 </nav>
 
                 <div class="header-right">
@@ -153,7 +152,7 @@
                             <i class="fas fa-user-circle fa-2x"></i>
                         </a>
                         <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="wh-profile" class="dropdown-item">Thông tin cá nhân</a>
+                            <a href="staff-information" class="dropdown-item">Thông tin chi tiết</a>
                             <a href="logout" class="dropdown-item">Đăng xuất</a>
                         </div>
                     </div>      

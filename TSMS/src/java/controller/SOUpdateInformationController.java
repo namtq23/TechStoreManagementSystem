@@ -34,7 +34,7 @@ public class SOUpdateInformationController extends HttpServlet {
             String dbName = request.getParameter("databaseName");
             String email = request.getParameter("email");
             String phone = request.getParameter("phone");
-            String gender = request.getParameter("gender");
+            int gender = Integer.parseInt(request.getParameter("gender"));
             String dobStr = request.getParameter("dob");
             java.sql.Date dob = null;
 
@@ -52,8 +52,8 @@ public class SOUpdateInformationController extends HttpServlet {
             String webURL = request.getParameter("webURL");
 
             ShopOwnerDAO soDao = new ShopOwnerDAO();
-            soDao.updateShopOwnerInfo(ownerId, fullName, shopName, newDbName, email, identificationID, phone, address, ownerId, taxNumber, webURL, dob);
-            soDao.updateShopOwnerInfoInTheirDTB(fullName, email, identificationID, phone, address, ownerId, taxNumber, webURL, dob, dbName);
+            soDao.updateShopOwnerInfo(ownerId, fullName, shopName, newDbName, email, identificationID, phone, address, gender, taxNumber, webURL, dob);
+            soDao.updateShopOwnerInfoInTheirDTB(fullName, email, identificationID, phone, address, gender, taxNumber, webURL, dob, dbName);
             soDao.voidUpdateDTBShopName(dbName, newDbName);
 
             response.sendRedirect("so-information?id=" + ownerId + "&update=success");

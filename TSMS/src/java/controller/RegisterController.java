@@ -89,6 +89,12 @@ public class RegisterController extends HttpServlet {
             req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
             return;
         }
+        
+        if (!Validate.isValidPassword(password)){
+            req.setAttribute("error", "Mật khẩu cần trên 8 chữ số và có ít nhất 1 chữ cái in hoa!");
+            req.getRequestDispatcher("/WEB-INF/jsp/common/register.jsp").forward(req, resp);
+            return;
+        }
 
         try {
 
