@@ -303,7 +303,6 @@
                 const startDateInput = document.getElementById('startDate');
                 const endDateInput = document.getElementById('endDate');
 
-                startDateInput.min = today;
                 startDateInput.addEventListener('change', function () {
                     endDateInput.min = this.value;
                 });

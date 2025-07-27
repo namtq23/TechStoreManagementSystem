@@ -124,13 +124,13 @@ public class SASubscriptions extends HttpServlet {
             int ownerId = ShopOwnerDAO.getOwnerIdByPhone(phone);
             boolean success = SubscriptionsDAO.insertSubscriptionLog(ownerId, 1, subsMonth, "Pending");
             System.out.println("Xac nhan thanh toan: " + success);
-            
-            if(success){
+
+            if (success) {
                 req.setAttribute("success", "Cảm ơn quý khách đã tin tưởng và sử dụng dịch vụ. Thông báo về trạng thái đăng ký gói dịch vụ sẽ được thông báo qua email, mong quý khách kiên nhẫn!");
-                req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/subscription-logs.jsp").forward(req, resp);
+                resp.sendRedirect("subscription-logs");
             } else {
                 req.setAttribute("error", "Xác nhận thanh toán không thành công!");
-                req.getRequestDispatcher("/WEB-INF/jsp/shop-owner/subscription-logs.jsp").forward(req, resp);
+                resp.sendRedirect("subscription-logs");
             }
         } catch (SQLException ex) {
             Logger.getLogger(SASubscriptions.class.getName()).log(Level.SEVERE, null, ex);

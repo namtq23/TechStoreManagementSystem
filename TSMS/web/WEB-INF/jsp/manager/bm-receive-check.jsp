@@ -11,74 +11,112 @@
 <c:if test="${empty endItem}"><c:set var="endItem" value="0"/></c:if>
 
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Kiểm tra đơn hàng - Chi nhánh</title>
-        <link rel="stylesheet" href="css/bm-receive-check.css">
-        <link rel="stylesheet" href="css/header.css"/>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-        <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    
-    </head>
-    
-    <body>
-        <!-- Header BM -->
-        <header class="header">
-            <div class="header-container">
-                <div class="logo">
-                    <a href="bm-overview" class="logo">
-                        <div class="logo-icon">T</div>
-                        <span class="logo-text">TSMS</span>
-                    </a>
-                </div>
-                <nav class="main-nav">
-                    <a href="bm-overview" class="nav-item">
-                        <i class="fas fa-chart-line"></i>
-                        Tổng quan
-                    </a>
-                    <a href="bm-products?page=1" class="nav-item">
-                        <i class="fas fa-box"></i>
-                        Hàng hóa
-                    </a>
-                    <a href="bm-orders?page=1" class="nav-item">
-                        <i class="fas fa-shopping-cart"></i>
-                        Đơn hàng
-                    </a>
-                    <a href="bm-incoming-orders" class="nav-item active">
-                        <i class="fas fa-truck"></i>
-                        Đơn hàng đến
-                    </a>
-                    <a href="bm-customers?page=1" class="nav-item">
-                        <i class="fas fa-users"></i>
-                        Khách hàng
-                    </a>
-                    <a href="bm-staff?page=1" class="nav-item">
-                        <i class="fas fa-user-tie"></i>
-                        Nhân viên
-                    </a>
-                </nav>
-                <div class="header-right">
-                    <div class="user-dropdown">
-                        <a href="" class="user-icon gradient" id="dropdownToggle">
-                            <i class="fas fa-user-circle fa-2x"></i>
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <title>Kiểm tra đơn hàng - Chi nhánh</title>
+            <link rel="stylesheet" href="css/bm-receive-check.css">
+            <link rel="stylesheet" href="css/header.css"/>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+            <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+        </head>
+
+        <body>
+            <!-- Header BM -->
+            <header class="header">
+                <div class="header-container">
+                    <div class="logo">
+                        <a href="bm-overview" class="logo">
+                            <div class="logo-icon">T</div>
+                            <span class="logo-text">TSMS</span>
                         </a>
-                        <div class="dropdown-menu" id="dropdownMenu">
-                            <a href="bm-information" class="dropdown-item">Thông tin chi tiết</a>
-                            <a href="logout" class="dropdown-item">Đăng xuất</a>
+                    </div>
+                    <nav class="main-nav">
+                        <a href="bm-overview" class="nav-item ">
+                            <i class="fas fa-chart-line"></i>
+                            Tổng quan
+                        </a>
+
+                        <a href="bm-products?page=1" class="nav-item ">
+                            <i class="fas fa-box"></i>
+                            Hàng hóa
+                        </a>
+
+                        <div class="nav-item dropdown active">
+                            <a href="#" class="dropdown-toggle">
+                                <i class="fas fa-exchange-alt"></i>
+                                Giao dịch
+                                <i class="fas fa-caret-down"></i>
+                            </a>
+                            <div class="dropdown-menu">
+                                <a href="bm-orders" class="dropdown-item">Đơn hàng</a>
+                                <a href="request-stock" class="dropdown-item">Nhập hàng</a>
+                                <a href="bm-incoming-orders" class="dropdown-item">Theo dõi nhập hàng</a>
+                            </div>
                         </div>
-                    </div>      
+
+                        <div class="nav-item dropdown">
+                            <a href="#" class="dropdown-toggle">
+                                <i class="fas fa-handshake"></i>
+                                Đối tác
+                                <i class="fas fa-caret-down"></i>
+                            </a>
+                            <div class="dropdown-menu">
+                                <a href="bm-customer" class="dropdown-item">Khách hàng</a>
+                                <a href="bm-supplier" class="dropdown-item">Nhà cung cấp</a>
+                            </div>
+                        </div>
+
+                        <a href="bm-staff" class="nav-item">
+                            <i class="fas fa-users"></i>
+                            Nhân viên
+                        </a>
+
+                        <a href="bm-promotions" class="nav-item">
+                            <i class="fas fa-ticket"></i>
+                            Khuyến mãi
+                        </a>
+
+                        <div class="nav-item dropdown ">
+                            <a href="#" class="dropdown-toggle">
+                                <i class="fas fa-chart-bar"></i>
+                                Báo cáo
+                                <i class="fas fa-caret-down"></i>
+                            </a>
+                            <div class="dropdown-menu">
+                                <a href="bm-invoices" class="dropdown-item">Báo cáo thu thuần</a>
+                                <a href="bm-outcome" class="dropdown-item">Báo cáo chi</a>
+                            </div>
+                        </div>
+
+                        <a href="bm-cart" class="nav-item">
+                            <i class="fas fa-cash-register"></i>
+                            Bán hàng
+                        </a>
+                    </nav>
+
+                    <div class="header-right">
+                        <div class="user-dropdown">
+                            <a href="#" class="user-icon gradient" id="dropdownToggle">
+                                <i class="fas fa-user-circle fa-2x"></i>
+                            </a>
+                            <div class="dropdown-menu" id="dropdownMenu">
+                                <a href="staff-information" class="dropdown-item">Thông tin chi tiết</a>
+                                <a href="logout" class="dropdown-item">Đăng xuất</a>
+                            </div>
+                        </div>      
+                    </div>
                 </div>
-            </div>
-        </header>
+            </header>   
 
 
-        <div class="container">
-            <div class="main-content">
-                <!-- Sidebar Filter -->
-                <div class="filter-sidebar">
-                    <form method="GET" action="bm-receive-check">
-                        <input type="hidden" name="id" value="${movementID}">
+            <div class="container">
+                <div class="main-content">
+                    <!-- Sidebar Filter -->
+                    <div class="filter-sidebar">
+                        <form method="GET" action="bm-receive-check">
+                            <input type="hidden" name="id" value="${movementID}">
                         <input type="hidden" name="page" value="1">
 
 
@@ -139,7 +177,7 @@
                     <c:if test="${not empty success}">
                         <div class="alert alert-success">${success}</div>
                     </c:if>
-                   
+
                     <div class="page-header">
                         <h2>Kiểm tra đơn hàng #${movementID}</h2>
                         <div class="order-info">
@@ -173,7 +211,7 @@
                                     </button>
                                 </form>
                             </c:if>
-                           
+
                             <a href="bm-incoming-orders" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Quay lại
                             </a>
@@ -433,9 +471,9 @@
                 notification.style.right = '20px';
                 notification.style.zIndex = '9999';
                 notification.style.maxWidth = '400px';
-               
+
                 document.body.appendChild(notification);
-               
+
                 setTimeout(() => {
                     document.body.removeChild(notification);
                 }, 3000);
@@ -489,7 +527,8 @@
 
             // Bắt đầu quét QR (tùy chọn)
             function startQRScanner() {
-                if (isScanning) return;
+                if (isScanning)
+                    return;
 
 
                 console.log('📷 Bắt đầu quét QR...');
