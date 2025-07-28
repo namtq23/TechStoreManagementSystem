@@ -1,0 +1,739 @@
+/* Invoice Summary - Compact Professional Design */
+.invoice-summary {
+    flex: none;
+    padding: 16px 20px;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    min-height: fit-content;
+}
+
+.invoice-summary .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.invoice-summary label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.invoice-summary textarea {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 13px;
+    background-color: #fff;
+    width: 100%;
+    box-sizing: border-box;
+    color: #1e293b;
+    transition: all 0.2s;
+    resize: vertical;
+    min-height: 50px;
+    font-family: inherit;
+}
+
+.invoice-summary select {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 13px;
+    background-color: #fff;
+    width: 100%;
+    box-sizing: border-box;
+    color: #1e293b;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.invoice-summary textarea:focus,
+.invoice-summary select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+/* Total Products Display */
+.total-products-display {
+    display: flex;
+    align-items: center;
+    gap:10px;
+}
+
+.total-products-display .label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.total-products-display .value {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1e293b;
+    background: #f1f5f9;
+    border-radius: 4px;
+    min-width: 24px;
+    text-align: center;
+    margin-bottom: 7px;
+}
+
+/* Reset và base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* Layout chính */
+.main-container {
+    display: flex;
+    min-height: calc(100vh - 160px);
+    gap: 24px;
+    padding: 24px;
+}
+
+.invoice-panel,
+.product-panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.product-panel {
+    flex: 1;
+    min-height: 60px;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.invoice-panel {
+    flex: 1.2;
+    min-height: 680px;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.panel-header {
+    flex: none;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+/* Search Section - Fixed Layout */
+.search-section {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #fff;
+}
+
+.search-form {
+    width: 100%;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.search-container {
+    position: relative;
+    flex: 1;
+    display: flex;
+    gap: 3px;
+}
+
+.search-container i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 14px;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+    background: #fff;
+    color: #1e293b;
+}
+
+.search-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-input::placeholder {
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+/* Search button specific styling */
+.search-form .btn-primary {
+    padding: 10px 20px;
+    white-space: nowrap;
+    min-width: auto;
+    flex-shrink: 0;
+}
+
+/* Responsive adjustments */
+
+/* Button Styles */
+.btn-primary,
+.btn-secondary {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+}
+
+/* Table phiếu yêu cầu */
+.invoice-table-body {
+    flex: 1; /* Don't grow or shrink */
+    min-height: 300px; /* Chiều cao tối thiểu */
+    max-height: 50vh;
+    overflow-y: auto;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* Custom scrollbar cho bảng sản phẩm đã chọn */
+.invoice-table-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.invoice-table-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.invoice-table-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.invoice-table-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.invoice-table-body table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.invoice-table-body thead th {
+    background: #f8fafc;
+    padding: 12px 16px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.invoice-table-body tbody td {
+    text-align: center;
+    padding: 12px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.invoice-table-body tbody tr:hover {
+    background: #f8fafc;
+}
+
+.invoice-table-body input[type="text"],
+.invoice-table-body input[type="number"] {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.invoice-table-body input[type="text"]:focus,
+.invoice-table-body input[type="number"]:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+.invoice-table-body button {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.invoice-table-body button:hover {
+    background: #fef2f2;
+    transform: scale(1.1);
+}
+
+/* Product Panel */
+.product-grid {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: 500px;
+}
+
+.product-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    background: white;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.product-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    transform: translateY(-2px);
+}
+
+.product-info h4 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    height: 40px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.product-stock {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.add-to-cart {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.2s;
+}
+
+.product-card:hover .add-to-cart {
+    opacity: 1;
+}
+
+.add-to-cart:hover {
+    background: #2563eb;
+    transform: scale(1.1);
+}
+
+/* Payment Section */
+.payment-section {
+    padding: 20px 40px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+}
+
+.payment-section .btn-primary {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    justify-content: center;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 999;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-backdrop.show {
+    display: block;
+}
+
+/* Modal container */
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    max-width: 90%;
+    padding: 24px;
+    z-index: 1000;
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.show {
+    display: block;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h5 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.modal-header button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.modal-header button:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.modal-body {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.alert-danger {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Hidden utility */
+.hidden {
+    display: none;
+}
+
+
+/* Form styling improvements */
+.search-form {
+    width: 100%;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.search-form .search-container {
+    flex: 1;
+}
+
+/* Additional improvements for better UX */
+.product-card form {
+    display: contents;
+}
+
+.invoice-table-body tbody tr {
+    transition: background-color 0.2s;
+}
+
+/* Improved focus states */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Better spacing for form elements */
+.form-row + .form-row {
+    margin-top: 0;
+}
+
+/* Improved table layout */
+.invoice-table-body th:nth-child(1) {
+    width: 8%;
+}
+.invoice-table-body th:nth-child(2) {
+    width: 15%;
+}
+.invoice-table-body th:nth-child(3) {
+    width: 40%;
+}
+.invoice-table-body th:nth-child(4) {
+    width: 20%;
+}
+.invoice-table-body th:nth-child(5) {
+    width: 17%;
+}
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.panel-header .btn-secondary {
+    padding: 8px 12px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+/* Fix responsive mobile - đảm bảo tất cả content hiển thị */
+
+/* 1. Mobile layout cơ bản */
+@media (max-width: 1200px) {
+  .main-container {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    height: auto; /* Quan trọng: không cố định height */
+    min-height: auto;
+  }
+
+  .invoice-panel,
+  .product-panel {
+    flex: none; /* Không co giãn */
+    height: auto; /* Tự động điều chỉnh */
+    min-height: auto;
+    max-height: none;
+  }
+}
+
+/* 2. Mobile layout chi tiết */
+@media (max-width: 768px) {
+  /* Container */
+  .main-container {
+    padding: 12px;
+    gap: 12px;
+    height: auto;
+  }
+
+  /* Invoice panel */
+  .invoice-panel {
+    height: auto;
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Table với chiều cao phù hợp mobile */
+  .invoice-table-body {
+    height: 250px; /* Cố định nhỏ hơn cho mobile */
+    min-height: 250px;
+    max-height: 250px;
+    flex: none;
+  }
+
+  /* Đảm bảo summary luôn hiển thị */
+  .invoice-summary {
+    flex: none !important;
+    display: flex !important;
+    flex-direction: column;
+    padding: 12px 16px;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    order: 2; /* Đảm bảo thứ tự hiển thị */
+  }
+  /* Product panel */
+  .product-panel {
+    height: auto;
+    min-height: 400px; /* Chiều cao tối thiểu */
+  }
+
+  .product-grid {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+}
+
+/* 3. Tablet layout */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .main-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .invoice-table-body {
+    height: 300px;
+    max-height: 300px;
+  }
+
+  .invoice-summary,
+  .payment-section {
+    flex: none;
+    display: flex;
+  }
+}
+
+/* 4. Đảm bảo form elements responsive */
+@media (max-width: 768px) {
+  .invoice-summary textarea,
+  .invoice-summary select,
+  .invoice-summary input {
+    font-size: 16px; /* Tránh zoom trên iOS */
+  }
+
+  .search-input {
+    font-size: 16px;
+  }
+
+  .btn-primary {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+/* 5. Fix cho màn hình rất nhỏ */
+@media (max-width: 480px) {
+  .main-container {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .panel-header {
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+
+  .invoice-table-body {
+    height: 200px;
+    max-height: 200px;
+  }
+
+  .invoice-summary {
+    padding: 8px 12px;
+  }
+
+  .payment-section {
+    padding: 8px 12px;
+  }
+}
